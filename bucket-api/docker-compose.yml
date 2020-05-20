@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+#   bucket-api:
+#     build: 
+#         context: ./bucket-api
+#     container_name: bucket-api
+
+#   bucket:
+#     build: 
+#         context: ./bucket
+#     container_name: bucket
+
+  bucket-data:
+    image: postgres:9.6
+    container_name: bucket-data
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_PORT=$POSTGRES_PORT
+      - POSTGRES_DB=$POSTGRES_DB
+    volumes:
+      - $HOST_DATA_FOLDER/postgresql:/var/lib/postgresql/data
+    ports:
+      - $POSTGRES_PORT:$POSTGRES_PORT
+
+# networks: 
+#     default:
+#         external:
+#           name: dcd-net
