@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { introspectToken } from "./middlewares/introspectToken";
 import { checkPolicy } from "./middlewares/checkPolicy";
+import { PropertyRouter } from './property/PropertyRouter';
 
 import ThingController from "./ThingController";
 
@@ -137,3 +138,5 @@ ThingRouter.delete(
      [introspectToken(['dcd:things']), checkPolicy('things', 'delete')],
      ThingController.deleteOneThing
 );
+
+ThingRouter.use("/:thingId/properties", PropertyRouter)

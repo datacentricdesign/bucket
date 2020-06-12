@@ -24,6 +24,44 @@ services:
     ports:
       - $POSTGRES_PORT:$POSTGRES_PORT
 
+  bucket-influxdb:
+    image: influxdb
+    container_name: bucket-influxdb
+    volumes:
+      - $HOST_DATA_FOLDER/influxdb:/var/lib/influxdb
+    ports:
+      - 8086:8086
+      - 8083:8083
+    environment:
+      - INFLUXDB_DB=$INFLUXDB_DB
+      - INFLUXDB_ADMIN_ENABLED=true
+
+  bucket-grafana:
+    image: grafana/grafana:7.0.0-beta3
+    container_name: bucket-grafana
+    environment:
+      - GF_SERVER_PROTOCOL=http
+#      - GF_SERVER_CERT_FILE=<path>\cert.pem
+#      - GF_SERVER_CERT_KEY=<path>\server.key
+      - GF_SERVER_DOMAIN=localhost
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:3000/
+
+      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=clients:grafana
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=test-grafana-secret
+      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid offline email profile dcd:public dcd:things dcd:persons
+      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=https://dwd.tudelft.nl:443/oauth2/auth
+      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://dwd.tudelft.nl:443/oauth2/token
+      - GF_AUTH_GENERIC_OAUTH_API_URL=https://dwd.tudelft.nl:443/userinfo
+#      - GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS=<list of allowed email domains>
+      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
+      - GF_AUTH_GENERIC_OAUTH_SEND_CLIENT_CREDENTIALS_VIA_POST=true
+
+    volumes:
+      - ~/Prog/grafana-plugins:/var/lib/grafana/plugins
+    ports:
+      - 3000:3000
+
 # networks: 
 #     default:
 #         external:

@@ -1,9 +1,10 @@
 import 'dotenv/config';
 
 import { cleanEnv, str, port, bool, url } from "envalid";
-import { ORMConfig } from "./ormConfig"
-import { httpConfig } from "./httpConfig"
+import { ORMConfig } from "./ormConfig";
+import { httpConfig } from "./httpConfig";
 import { authConfig } from './authConfig';
+import { influxdbConfig } from './influxdbConfig';
 
 function validateEnv() {
   cleanEnv(process.env, {
@@ -22,6 +23,9 @@ function validateEnv() {
     POSTGRES_PORT: port(),
     POSTGRES_DB: str(),
     POSTGRES_LOGGING: bool(),
+    // Influx Settings
+    INFLUXDB_HOST: str(),
+    INFLUXDB_DB: str(),
     // HTTP Settings
     HTTP_HOST: str(),
     HTTP_PORT: port(),
@@ -46,6 +50,7 @@ export default {
   orm: ORMConfig,
   http: httpConfig,
   oauth2: authConfig,
+  influxdb: influxdbConfig,
 };
 
 // Setup context of Request to pass user info once identified

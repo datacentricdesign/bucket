@@ -80,7 +80,7 @@ export class ThingService {
     getThingsOfAPerson(personId: string): Promise<Thing[]> {
         // Get things from the database
         const thingRepository = getRepository(Thing);
-        return thingRepository.find({ where: { personId: personId } });
+        return thingRepository.find({ where: { personId: personId }, relations: ["properties", "properties.type"] });
     }
 
     /**

@@ -19,6 +19,7 @@ export interface Thing {
     name: string;
     description: string;
     type: string;
+    personId: string;
     properties: Property[];
     pem: string;
     createdAt: Date;
@@ -31,8 +32,14 @@ export interface Property {
     description: string;
     type: PropertyType;
     thing: Thing;
-    dimensions: Dimension[];
+    values: Array<Array<number|string>>;
     createdAt: Date;
+}
+
+export interface DTOProperty {
+    name?: string;
+    description?: string;
+    typeId?: string;
 }
 
 export interface PropertyType {
@@ -43,11 +50,11 @@ export interface PropertyType {
 }
 
 export interface Dimension {
-    id: Number;
+    id: string;
     name: string;
     description: string;
     unit: string;
-    property: Property;
+    type: string;
 }
 
 export interface Role {
@@ -55,4 +62,12 @@ export interface Role {
     actorEntityId: string;
     subjectEntityId: string;
     role: string;
+}
+
+export interface ValueOptions {
+    from:number;
+    to:number;
+    timeInterval:string;
+    fctInterval:string;
+    fill:string;
 }

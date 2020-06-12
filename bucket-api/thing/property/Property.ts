@@ -3,7 +3,7 @@ import {
     Column,
     Unique,
     CreateDateColumn,
-    UpdateDateColumn, OneToOne, PrimaryColumn, OneToMany, ManyToOne
+    UpdateDateColumn, OneToOne, PrimaryColumn, OneToMany, ManyToOne, ManyToMany, JoinTable, JoinColumn
 } from "typeorm";
 import {Length, IsNotEmpty} from "class-validator";
 import { Thing } from "../Thing"
@@ -23,14 +23,16 @@ export class Property implements IProperty {
     @Column()
     description: string;
 
+    typeId?: string;
+
     @ManyToOne(type => PropertyType, propertyType => propertyType)
     type: PropertyType;
 
-    @OneToOne(type => Thing, thing => thing.properties)
+    @OneToOne(type => Thing, thing => thing.id)
+    @JoinColumn({name:"thingId"})
     thing: IThing;
 
-    @OneToMany(type => Dimension, dimension => dimension.property)
-    dimensions: IDimension[];
+    values: Array<Array<number|string>>;
 
     @Column()
     @CreateDateColumn()

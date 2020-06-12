@@ -1,8 +1,11 @@
-import {MigrationInterface, QueryRunner, getRepository} from "typeorm";
+import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
 import { Thing } from "../Thing";
 import { v4 as uuidv4 } from 'uuid';
+import { PropertyType } from "../property/propertyType/PropertyType";
+import { Dimension } from "../property/dimension/Dimension";
+import { Property } from "../../types";
 
-export class PropertyTypes1589877764520 implements MigrationInterface {
+export class TestThing1589877764520 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         let thing = new Thing()

@@ -1,19 +1,17 @@
 import {
     Entity,
-    Column,
-    Unique,
-    CreateDateColumn,
-    UpdateDateColumn, OneToOne, ManyToOne, PrimaryGeneratedColumn
+    Column, PrimaryColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable
 } from "typeorm";
 import {Length, IsNotEmpty} from "class-validator";
 
 import { Property } from "../Property"
 import {Property as IProperty, Dimension as IDimension} from "../../../types" 
+import { PropertyType } from "../propertyType/PropertyType";
 
 @Entity()
 export class Dimension implements IDimension {
-    @PrimaryGeneratedColumn()
-    id: Number;
+    @PrimaryColumn()
+    id: string;
 
     @Column()
     name: string;
@@ -24,6 +22,6 @@ export class Dimension implements IDimension {
     @Column()
     unit: string;
 
-    @ManyToOne(type => Property, property => property)
-    property: IProperty;
+    @Column()
+    type: string;
 }

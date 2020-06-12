@@ -4,7 +4,7 @@ import {
     Column,
     Unique,
     CreateDateColumn,
-    UpdateDateColumn, OneToMany, PrimaryColumn
+    UpdateDateColumn, OneToMany, PrimaryColumn, JoinColumn
 } from "typeorm";
 import {Length, IsNotEmpty, IsEmpty} from "class-validator";
 import { Property } from "./property/Property"
@@ -35,7 +35,8 @@ export class Thing implements IThing {
     @IsNotEmpty()
     personId: string;
 
-    @OneToMany(type => Property, property => property.thing)
+    @OneToMany(type => Property, property => property.thing, { cascade: true })
+    @JoinColumn()
     properties: IProperty[];
 
     @Column()

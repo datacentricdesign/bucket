@@ -1,11 +1,12 @@
 import {
     Entity,
     Column,
-    Unique,
-    CreateDateColumn,
-    UpdateDateColumn, OneToOne, PrimaryColumn, OneToMany
+    PrimaryColumn,
+    OneToMany,
+    JoinColumn,
+    ManyToMany,
+    JoinTable
 } from "typeorm";
-import {Length, IsNotEmpty} from "class-validator";
 import { Dimension } from "../dimension/Dimension";
 
 import {PropertyType as IPropertyType, Dimension as IDimension} from "../../../types"
@@ -22,6 +23,7 @@ export class PropertyType implements IPropertyType {
     @Column()
     description: string;
 
-    @OneToMany(type => Dimension, dimension => dimension.property)
-    dimensions: IDimension[];
+    @ManyToMany(type => Dimension, { cascade: true })
+    @JoinTable()
+    dimensions: Dimension[];
 }
