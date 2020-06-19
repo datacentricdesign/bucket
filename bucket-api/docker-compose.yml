@@ -11,18 +11,18 @@ services:
 #         context: ./bucket
 #     container_name: bucket
 
-  bucket-data:
-    image: postgres:9.6
-    container_name: bucket-data
-    environment:
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-      - POSTGRES_PORT=$POSTGRES_PORT
-      - POSTGRES_DB=$POSTGRES_DB
-    volumes:
-      - $HOST_DATA_FOLDER/postgresql:/var/lib/postgresql/data
-    ports:
-      - $POSTGRES_PORT:$POSTGRES_PORT
+  # bucket-data:
+  #   image: postgres:9.6
+  #   container_name: bucket-data
+  #   environment:
+  #     - POSTGRES_USER=$POSTGRES_USER
+  #     - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+  #     - POSTGRES_PORT=$POSTGRES_PORT
+  #     - POSTGRES_DB=$POSTGRES_DB
+  #   volumes:
+  #     - $HOST_DATA_FOLDER/postgresql:/var/lib/postgresql/data
+  #   ports:
+  #     - $POSTGRES_PORT:$POSTGRES_PORT
 
   bucket-influxdb:
     image: influxdb
@@ -44,18 +44,18 @@ services:
 #      - GF_SERVER_CERT_FILE=<path>\cert.pem
 #      - GF_SERVER_CERT_KEY=<path>\server.key
       - GF_SERVER_DOMAIN=localhost
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:3000/
+      - GF_SERVER_ROOT_URL=http://localhost:3000
 
       - GF_AUTH_GENERIC_OAUTH_ENABLED=true
       - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=clients:grafana
       - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=test-grafana-secret
       - GF_AUTH_GENERIC_OAUTH_SCOPES=openid offline email profile dcd:public dcd:things dcd:persons
-      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=https://dwd.tudelft.nl:443/oauth2/auth
-      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://dwd.tudelft.nl:443/oauth2/token
-      - GF_AUTH_GENERIC_OAUTH_API_URL=https://dwd.tudelft.nl:443/userinfo
+      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=http://localhost:8081/oauth2/auth
+      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=http://localhost:8081/oauth2/token
+      - GF_AUTH_GENERIC_OAUTH_API_URL=http://localhost:8081/userinfo
 #      - GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS=<list of allowed email domains>
       - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
-      - GF_AUTH_GENERIC_OAUTH_SEND_CLIENT_CREDENTIALS_VIA_POST=true
+      # - GF_AUTH_GENERIC_OAUTH_SEND_CLIENT_CREDENTIALS_VIA_POST=true
 
     volumes:
       - ~/Prog/grafana-plugins:/var/lib/grafana/plugins

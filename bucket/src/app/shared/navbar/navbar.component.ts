@@ -1,9 +1,8 @@
 import { Component, OnInit, Renderer2, ViewChild, ElementRef } from '@angular/core';
-import { ROUTES } from '../../sidebar/sidebar.component';
+import { ROUTES } from '../sidebar/sidebar.component';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { MatDialogConfig, MatDialog } from '@angular/material/dialog';
-import { SupportDialogComponent } from 'app/support-dialog/support-dialog.component';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 @Component({
   moduleId: module.id,
@@ -17,11 +16,12 @@ export class NavbarComponent implements OnInit {
   private nativeElement: Node;
   private toggleButton;
   private sidebarVisible: boolean;
+  private userProfile: object;
 
   public isCollapsed = true;
   @ViewChild("navbar-cmp", { static: false }) button;
 
-  constructor(location: Location, private renderer: Renderer2, private element: ElementRef, private router: Router, private dialog: MatDialog) {
+  constructor(location: Location, private renderer: Renderer2, private element: ElementRef, private router: Router/*,private oauthService: OAuthService*/) {
     this.location = location;
     this.nativeElement = element.nativeElement;
     this.sidebarVisible = false;
@@ -34,6 +34,9 @@ export class NavbarComponent implements OnInit {
     this.router.events.subscribe((event) => {
       this.sidebarClose();
     });
+    // if (this.oauthService.hasValidAccessToken() && this.oauthService.hasValidIdToken()) {
+    //   this.userProfile = this.oauthService.getIdentityClaims()
+    // }
   }
   getTitle() {
     var titlee = this.location.prepareExternalUrl(this.location.path());
@@ -93,26 +96,8 @@ export class NavbarComponent implements OnInit {
     }
 
   }
-
-  openDialog() {
-
-    const dialogConfig = new MatDialogConfig();
-
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-
-    // dialogConfig.data = {
-    //   id: 1,
-    //   title: 'Angular For Beginners'
-    // };
-
-    this.dialog.open(SupportDialogComponent, dialogConfig);
-
-    const dialogRef = this.dialog.open(SupportDialogComponent, dialogConfig);
-
-    dialogRef.afterClosed().subscribe(
-      data => console.log("Dialog output:", data)
-    );
-  }
-
+  // logout() {
+  //   // this.oauthService.logOut();
+  //   this.oauthService.revokeTokenAndLogout();
+  // }
 }

@@ -1,46 +1,59 @@
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { ToastrModule } from "ngx-toastr";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
+import { NgModule } from '@angular/core'
+import { RouterModule } from '@angular/router'
+import { ToastrModule } from "ngx-toastr"
 
-import { SidebarModule } from './sidebar/sidebar.module';
-import { FooterModule } from './shared/footer/footer.module';
-import { NavbarModule} from './shared/navbar/navbar.module';
-import { FixedPluginModule} from './shared/fixedplugin/fixedplugin.module';
+import { SidebarModule } from './shared/sidebar/sidebar.module'
+import { FooterModule } from './shared/footer/footer.module'
+import { NavbarModule} from './shared/navbar/navbar.module'
+import { FixedPluginModule} from './shared/fixedplugin/fixedplugin.module'
 
-import { AppComponent } from './app.component';
-import { AppRoutes } from './app.routing';
+import { AppComponent } from './app.component'
+import { AppRoutes } from './app.routes'
 
-import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
+import { ThingBucketComponent } from './thing-bucket/thing-bucket.component'
 
-import { HttpClientModule } from '@angular/common/http';
-import { MatDialogModule } from "@angular/material/dialog";
-import { ThingsComponent } from './things/things.component';
-import { SupportDialogComponent } from './support-dialog/support-dialog.component'
+import { HttpClientModule } from '@angular/common/http'
+
+import { FormsModule }   from '@angular/forms';
+import { LandingPageComponent } from './landing-page/landing-page.component';
+import { OAuthModule } from 'angular-oauth2-oidc'
+import { BrowserModule } from '@angular/platform-browser'
+import { SharedModule } from './shared/shared.module';
+import { BASE_URL } from './app.tokens'
 
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    AdminLayoutComponent,
-    ThingsComponent,
-    SupportDialogComponent
-  ],
   imports: [
+    BrowserModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(AppRoutes,{
-      useHash: true
+    RouterModule.forRoot(AppRoutes, {
+      useHash: false,
+      initialNavigation: true
     }),
     SidebarModule,
     NavbarModule,
     ToastrModule.forRoot(),
+    OAuthModule.forRoot(),
     FooterModule,
     FixedPluginModule,
     HttpClientModule,
-    MatDialogModule
+    FormsModule,
+    SharedModule.forRoot(),
+    OAuthModule.forRoot({
+      resourceServer: {
+        allowedUrls: ['http://localhost:8080'],
+        sendAccessToken: true
+      }
+    })
   ],
-  providers: [],
+  declarations: [
+    AppComponent,
+    ThingBucketComponent,
+    LandingPageComponent
+  ],
+  providers: [{ provide: BASE_URL, useValue: 'http://localhost:4200' }],
   bootstrap: [AppComponent],
-  entryComponents: [SupportDialogComponent]
+  entryComponents: []
 })
 export class AppModule { }
