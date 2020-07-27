@@ -49,8 +49,6 @@ services:
       - OAUTH2_SCOPE=offline openid profile dcd:things
 
       - ACP_URL=http://localhost:4466
-    ports:
-      - 8080:8080
 
   # bucket:
   #   build: 

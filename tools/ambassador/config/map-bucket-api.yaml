@@ -4,4 +4,4 @@ name:  bucket-api-mapping
 prefix: /bucket/api
 rewrite: /bucket/api
 timeout_ms: 10000
-service: bucket-api:8080
+service: bucket-api:443
