@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+  bucket-api:
+    build: 
+        context: ./bucket-api
+    container_name: bucket-api
+    environment: 
+      - HOST_DATA_FOLDER=~/bucket
+
+      - JWT_SECRET=TEST
+      
+      - NODE_ENV=development
+      - DEV_USER=dcd:persons:test@test.test
+      - DEV_TOKEN=tester-token
+      
+      - HTTP_HOST=localhost
+      - HTTP_PORT=8080
+      - HTTP_SECURED=false
+      - HTTP_BASE_URL=""
+      
+      - MQTT_HOST=localhost
+      - MQTT_PORT=1883
+      - MQTT_CLIENT_ID=bucket-mqtt-client
+      - MQTT_CLIENT_USER=bucket
+      - MQTT_CLIENT_PASS=bucket
+      
+      - KEY_PATH=/etc/certs/bucket.key
+      - CERT_PATH=/etc/certs/bucket.pem
+      
+      - POSTGRES_HOST=bucket-data
+      - POSTGRES_USER=tester
+      - POSTGRES_PASSWORD=test123
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=bucket
+      - POSTGRES_LOGGING=true
+      
+      - INFLUXDB_HOST=bucket-influxdb
+      - INFLUXDB_DB=bucket
+      
+      - OAUTH2_INTROSPECT_URL=https://dwd.tudelft.nl/oauth2/introspect
+      - OAUTH2_TOKEN_URL=https://dwd.tudelft.nl/oauth2/token
+      - OAUTH2_REVOKE_URL=https://dwd.tudelft.nl/oauth2/revoke
+      - OAUTH2_AUTH_URL=https://dwd.tudelft.nl/oauth2/auth
+      - OAUTH2_PROFILE_URL=https://dwd.tudelft.nl/userinfo
+      - OAUTH2_REDIRECT_URL=http://localhost:8080/test/auth/callback
+      - OAUTH2_CLIENT_ID=clients:test-client-id
+      - OAUTH2_CLIENT_SECRET=test-client-secret
+      - OAUTH2_SCOPE=offline openid profile dcd:things
+      
+      - ACP_URL=http://localhost:4466
+    ports:
+      - 8080:8080
+
+  bucket:
+    build: 
+        context: ./bucket
+    container_name: bucket
+
+  bucket-data:
+    image: postgres:9.6
+    container_name: bucket-data
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_PORT=$POSTGRES_PORT
+      - POSTGRES_DB=$POSTGRES_DB
+    volumes:
+      - $HOST_DATA_FOLDER/postgresql:/var/lib/postgresql/data
+    ports:
+      - $POSTGRES_PORT:$POSTGRES_PORT
+
+  bucket-influxdb:
+    image: influxdb
+    container_name: bucket-influxdb
+    volumes:
+      - $HOST_DATA_FOLDER/influxdb:/var/lib/influxdb
+    ports:
+      - 8086:8086
+      - 8083:8083
+    environment:
+      - INFLUXDB_DB=$INFLUXDB_DB
+      - INFLUXDB_ADMIN_ENABLED=true
