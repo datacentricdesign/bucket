@@ -1,0 +1,71 @@
+{
+  "name": "@datacentricdesign/bucket-api",
+  "version": "0.0.3",
+  "description": "A bucket of data, in the cloud.",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "start": "npm run migration:run && set debug=* && ts-node-dev --respawn --transpileOnly ./index.ts",
+    "prod": "npm run migration:run && tsc && node ./build/app.js",
+    "typeorm:cli": "ts-node ./node_modules/typeorm/cli -f ./config/ormMigrationWrap.ts",
+    "migration:run": "npm run typeorm:cli migration:run",
+    "doc": "apidoc -i things/ThingRouter.ts -o dist/public/docs/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datacentricdesign/bucket.git"
+  },
+  "author": "Data-Centric Design Lab <lab@datacentricdesign.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/datacentricdesign/bucket/issues"
+  },
+  "homepage": "https://github.com/datacentricdesign/bucket#readme",
+  "dependencies": {
+    "aedes": "^0.42.2",
+    "apidoc": "^0.22.0",
+    "class-validator": "^0.9.1",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "envalid": "^6.0.1",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "helmet": "^3.22.0",
+    "influx": "^5.5.1",
+    "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.3",
+    "mqtt": "^4.1.0",
+    "node-fetch": "^2.6.0",
+    "passport": "^0.4.1",
+    "passport-oauth2": "^1.5.0",
+    "passport-oauth2-refresh": "^2.0.0",
+    "pem-jwk": "^2.0.0",
+    "pg": "^8.0.3",
+    "postgres": "^1.0.2",
+    "reflect-metadata": "^0.1.10",
+    "simple-oauth2": "^3.4.0",
+    "ts-node-dev": "^1.0.0-pre.32",
+    "typeorm": "^0.2.24",
+    "url": "^0.11.0",
+    "uuid": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.2",
+    "@types/express-session": "^1.17.0",
+    "@types/passport": "^1.0.3",
+    "@types/passport-oauth2-refresh": "^1.1.1",
+    "@types/express": "^4.17.6",
+    "@types/simple-oauth2": "^2.5.3",
+    "@types/body-parser": "^1.17.0",
+    "@types/cors": "^2.8.4",
+    "@types/helmet": "0.0.42",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/jwk-to-pem": "^2.0.0",
+    "@types/node-fetch": "^2.5.7",
+    "@types/pem-jwk": "^1.5.0",
+    "@types/uuid": "^7.0.3",
+    "@types/node": "^8.0.29",
+    "ts-node": "3.3.0",
+    "typescript": "2.5.2"
+  }
+}

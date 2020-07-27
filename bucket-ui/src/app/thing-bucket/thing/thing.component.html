@@ -1,0 +1,39 @@
+<div class="row" *ngIf="thing$ | async as thing else noData">
+    <div class="col-lg-4 col-md-6 col-sm-6" *ngFor="let property of thing.properties; let iProperty = index">
+        <div class="card card-stats">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5 col-md-4">
+                        <div [className]="property.status ? 'text-warning' : ''">
+                            <div class="icon-big text-center icon-warning">
+                                <i class="nc-icon nc-bulb-63" *ngIf="property.type.id === 'ACCELEROMETER'"></i>
+                                <i class="nc-icon nc-button-power" *ngIf="thing.type === 'Switch'"></i>
+                            </div>
+                            {{property.type.name}}
+                        </div>
+                    </div>
+                    <div class="col-7 col-md-8">
+                        <div class="numbers">
+                            {{property.name}}
+                            <p class="card-category">
+                                {{property.description}}
+                            </p>
+                        </div>
+                        <div *ngFor="let dimension of property.type.dimensions" style="text-align: right;">
+                            {{dimension.name}} ({{dimension.unit}})<br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer ">
+                <hr>
+                <div class="stats">
+                    <i class="fa fa-refresh"></i> 
+                    {{property.createdAt}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #noData>No Data Available</ng-template>
