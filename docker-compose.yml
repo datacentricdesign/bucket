@@ -52,10 +52,10 @@ services:
     ports:
       - 8080:8080
 
-  bucket:
-    build: 
-        context: ./bucket
-    container_name: bucket
+  # bucket:
+  #   build: 
+  #       context: ./bucket
+  #   container_name: bucket
 
   bucket-data:
     image: postgres:9.6
