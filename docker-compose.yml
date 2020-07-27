@@ -59,7 +59,7 @@ services:
 
   bucket-postgres:
     image: postgres:9.6
-    container_name: bucket-data
+    container_name: bucket-postgres
     environment:
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
