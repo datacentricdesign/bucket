@@ -28,5 +28,3 @@ export const ORMConfig: ConnectionOptions = {
     //     subscribersDir: "./thing/subscriber"
     // }
 };
-
-// module.exports = ORMConfig;
