@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { DCDError } from "../../types/DCDError";
-import { envConfig } from "../../config/envConfig";
-import { Context } from "../../config";
+import { Request, Response, NextFunction } from "express"
+import { DCDError } from "../../types/DCDError"
+import config from "../../config"
 
 /**
    * Introspect the token from the 'Authorization' HTTP header to
@@ -11,13 +10,16 @@ export const introspectToken = (requiredScope: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         // If running on development environment,
         // we skip the authentication and pretend we this is the DEV_USER
-        if (envConfig.env === 'development') {
+        if (config.env.env === 'development') {
             const user = {
-                entityId: envConfig.devUser,
-                token: envConfig.devToken,
+                entityId: config.env.devUser,
+                token: config.env.devToken,
                 sub: req.params.entityId
             }
-            req.context = new Context(user.entityId)
+            console.log(user)
+            req.context = {
+                userId: user.entityId
+            }
             return next()
         }
         if (requiredScope.length === 0 && req.params.entity !== undefined) {
@@ -45,7 +47,9 @@ export const introspectToken = (requiredScope: string[]) => {
                 }
             })
             .then((user:any) => {
-                req.context = new Context(user.entityId)
+                req.context = {
+                    userId: user.entityId
+                }
                 next()
             })
             .catch((error: DCDError ) => next(error))

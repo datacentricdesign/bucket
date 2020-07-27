@@ -8,8 +8,6 @@ import {
 } from "typeorm";
 import {Length, IsNotEmpty, IsEmpty} from "class-validator";
 import { Property } from "./property/Property"
-import { Person } from "../types";
-
 import {Thing as IThing, Property as IProperty} from "../types";
 /**
  * A Thing represents a physical or virtual component collecting data.

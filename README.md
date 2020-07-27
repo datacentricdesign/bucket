@@ -10,6 +10,15 @@ To get started, install the angular cli
 npm install -g @angular/cli
 ```
 
+# Deployment
+
+
+```sh
+docker network create dcd-net
+```
+
+Add Ambassador's rules 
+
 
 # Run in Production
 

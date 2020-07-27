@@ -14,7 +14,7 @@ import { envConfig } from "../../config/envConfig";
 import { InfluxDB } from "influx";
 import config from "../../config";
 import { ValueOptions, DTOProperty } from "../../types";
-import { ThingService } from "../ThingService";
+import { ThingService } from "../services/ThingService";
 
 export class PropertyService {
 
