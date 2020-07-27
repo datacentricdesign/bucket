@@ -32,8 +32,8 @@ createConnection(config.orm)
         app.use(cookieParser());
 
         // Set all routes from routes folder
-        app.use("/things", ThingRouter);
-        app.use("/types", PropertyTypeRouter);
+        app.use(config.http.baseUrl + "/things", ThingRouter);
+        app.use(config.http.baseUrl + "/types", PropertyTypeRouter);
         app.use(errorMiddleware)
 
         setupPassport(app)
