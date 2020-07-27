@@ -81,3 +81,8 @@ services:
     environment:
       - INFLUXDB_DB=$INFLUXDB_DB
       - INFLUXDB_ADMIN_ENABLED=true
+
+networks: 
+  default:
+      external:
+        name: dcd-net
