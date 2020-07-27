@@ -50,10 +50,14 @@ services:
 
       - ACP_URL=http://localhost:4466
 
-  # bucket:
-  #   build: 
-  #       context: ./bucket
-  #   container_name: bucket
+  bucket-ui:
+    build:
+        context: ./bucket-ui
+    container_name: bucket-ui
+    image: datacentricdesign/bucket-ui:release-0.0.1
+    environment:
+     - NGINX_HOST=localhost
+     - NGINX_PORT=80
 
   bucket-postgres:
     image: postgres:9.6
