@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  # Proxy making only the services we want to expose available on the same port
+  ambassador:
+    image: quay.io/datawire/ambassador:0.76.0
+    container_name: ambassador
+    ports:
+      - $PORT:8081
+    volumes:
+      - ./config:/ambassador/ambassador-config
+    environment:
+      # don't try to watch Kubernetes for configuration changes
+      - AMBASSADOR_NO_KUBEWATCH=no_kubewatch
+      - AMBASSADOR_NO_SECRETS=True
+
+networks: 
+  default:
+      external:
+        name: dcd-net
