@@ -57,7 +57,7 @@ services:
   #       context: ./bucket
   #   container_name: bucket
 
-  bucket-data:
+  bucket-postgres:
     image: postgres:9.6
     container_name: bucket-data
     environment:
