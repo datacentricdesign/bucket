@@ -7,7 +7,10 @@ A bucket of data, in the cloud.
 [![GitHub issues open](https://img.shields.io/github/issues/datacentricdesign/bucket.svg?maxAge=2592000)]()
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/datacentricdesign/bucket.svg?maxAge=2592000)]()
 
-[Bucket page](https://datacentricdesign.org/bucket)
+![Docker Cloud Build Status (UI)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-ui?label=docker%20build%20%28ui%29)
+![Docker Cloud Build Status (API)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-api?label=docker%20build%20%28api%29)
+
+[Bucket page](https://datacentricdesign.org/tools/bucket)
 
 
 # Developer 
