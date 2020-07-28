@@ -4,4 +4,4 @@ name:  bucket-mapping
 prefix: /bucket
 rewrite: /bucket
 timeout_ms: 10000
-service: bucket:8080
+service: bucket:80
