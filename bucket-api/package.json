@@ -1,6 +1,6 @@
 {
   "name": "@datacentricdesign/bucket-api",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A bucket of data, in the cloud.",
   "main": "index.js",
   "scripts": {
