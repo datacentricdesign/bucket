@@ -1,6 +1,6 @@
 {
   "name": "@datacentricdesign/bucket-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A bucket of data, in the cloud.",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/datacentricdesign/bucket#readme",
   "dependencies": {
+    "@datacentricdesign/types": "0.0.1",
     "aedes": "^0.42.2",
     "apidoc": "^0.22.0",
     "class-validator": "^0.9.1",

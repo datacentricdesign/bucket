@@ -4,7 +4,7 @@ import {validate} from "class-validator";
 
 import {Thing} from "../Thing";
 import {ThingService} from "../services/ThingService"
-import { DCDError } from "../../types/DCDError";
+import { DCDError } from "@datacentricdesign/types";
 
 export class ThingController {
 

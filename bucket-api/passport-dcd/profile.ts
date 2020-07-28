@@ -1,4 +1,4 @@
-import { Profile, JSONProfile } from "../types";
+import { Profile, JSONProfile } from "@datacentricdesign/types";
 
 
 /**

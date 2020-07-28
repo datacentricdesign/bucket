@@ -5,7 +5,7 @@ import {
 } from "typeorm";
 import {IsNotEmpty} from "class-validator";
 
-import {Role as IRole} from "../../types";
+import {Role as IRole} from "@datacentricdesign/types";
 
 
 @Entity()

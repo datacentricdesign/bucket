@@ -9,7 +9,7 @@ import {Length, IsNotEmpty} from "class-validator";
 import { Thing } from "../Thing"
 import { PropertyType } from "./propertyType/PropertyType"
 
-import {Property as IProperty, Dimension as IDimension, Thing as IThing} from "../../types";
+import {Property as IProperty, Dimension as IDimension, Thing as IThing} from "@datacentricdesign/types";
 import { Dimension } from "./dimension/Dimension";
 
 @Entity()

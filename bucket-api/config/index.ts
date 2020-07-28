@@ -8,7 +8,7 @@ import { authConfig } from './authConfig';
 import { influxdbConfig } from './influxdbConfig';
 import { mqttConfig } from './mqttConfig';
 import aedes = require('aedes');
-import { Context } from '../types';
+import { Context } from '@datacentricdesign/types';
 
 function validateEnv() {
   cleanEnv(process.env, {

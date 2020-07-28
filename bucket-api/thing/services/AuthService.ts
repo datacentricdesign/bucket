@@ -8,7 +8,7 @@ import * as qs from 'querystring'
 import * as SimpleOauth from 'simple-oauth2'
 import { httpConfig } from '../../config/httpConfig'
 import { authConfig } from '../../config/authConfig'
-import { DCDError } from '../../types/DCDError'
+import { DCDError } from '@datacentricdesign/types'
 import { Token } from './ThingService'
 import { PolicyService } from './PolicyService'
 

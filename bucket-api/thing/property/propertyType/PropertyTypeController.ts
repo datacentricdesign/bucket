@@ -2,7 +2,7 @@ import {Request, Response, Router, NextFunction} from "express";
 import {getRepository, DeleteResult} from "typeorm";
 import {validate} from "class-validator";
 
-import { ValueOptions, DTOProperty } from "../../../types";
+import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { PropertyType } from "./PropertyType";
 import { PropertyTypeService } from "./PropertyTypeService";
 

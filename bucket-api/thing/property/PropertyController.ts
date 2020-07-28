@@ -8,8 +8,8 @@ import { Thing } from "../Thing";
 import { PropertyService } from "./PropertyService"
 import { ThingService } from "../services/ThingService"
 
-import { DCDError } from "../../types/DCDError";
-import { ValueOptions, DTOProperty } from "../../types";
+import { DCDError } from "@datacentricdesign/types";
+import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 
 export class PropertyController {
 

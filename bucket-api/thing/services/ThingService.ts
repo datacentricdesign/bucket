@@ -2,7 +2,7 @@
 import { getRepository, DeleteResult} from "typeorm";
 
 import { Thing } from "../Thing";
-import { DCDError } from "../../types/DCDError";
+import { DCDError } from "@datacentricdesign/types";
 import { AuthService } from "./AuthService";
 import { PolicyService } from "./PolicyService";
 

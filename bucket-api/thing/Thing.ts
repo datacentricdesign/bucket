@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import {Length, IsNotEmpty, IsEmpty} from "class-validator";
 import { Property } from "./property/Property"
-import {Thing as IThing, Property as IProperty} from "../types";
+import {Thing as IThing, Property as IProperty} from "@datacentricdesign/types";
 /**
  * A Thing represents a physical or virtual component collecting data.
  * For example, a phone which collects acceleration, a website recording
