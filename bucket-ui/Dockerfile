@@ -12,7 +12,7 @@ WORKDIR /bucket-ui
 COPY . .
 
 # Build the project and copy the files
-RUN npm run ng build -- --prod
+RUN npm run build -- —-base-href="/bucket" --prod
 
 
 FROM nginx:alpine

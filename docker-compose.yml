@@ -2,7 +2,7 @@ version: '3'
 
 services:
   bucket-api:
-    image: datacentricdesign/bucket-api:release-0.0.5
+    image: datacentricdesign/bucket-api:release-0.0.7
     container_name: bucket-api
     environment: 
       - HOST_DATA_FOLDER=$HOST_DATA_FOLDER
@@ -50,7 +50,7 @@ services:
       - ACP_URL=http://localhost:4466
 
   bucket-ui:
-    image: datacentricdesign/bucket-ui:release-0.0.5
+    image: datacentricdesign/bucket-ui:release-0.0.7
     container_name: bucket-ui
     environment:
      - NGINX_HOST=localhost
