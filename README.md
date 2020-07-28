@@ -2,12 +2,15 @@
 
 A bucket of data, in the cloud.
 
-![version](https://img.shields.io/badge/version-0.0.5-blue.svg)
+![version](https://img.shields.io/badge/version-0.0.6-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 [![GitHub issues open](https://img.shields.io/github/issues/datacentricdesign/bucket.svg?maxAge=2592000)]()
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/datacentricdesign/bucket.svg?maxAge=2592000)]()
 
-[Bucket page](https://datacentricdesign.org/bucket)
+![Docker Cloud Build Status (UI)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-ui?label=docker%20build%20%28ui%29)
+![Docker Cloud Build Status (API)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-api?label=docker%20build%20%28api%29)
+
+[Bucket page](https://datacentricdesign.org/tools/bucket)
 
 
 # Developer 
