@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { Thing } from '../../../../../bucket-api/types';
+import { Thing } from '@datacentricdesign/types';
 import { catchError, map } from 'rxjs/operators';
 
 export interface RouteInfo {

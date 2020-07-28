@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { DCDError } from '../../types/DCDError';
+import { DCDError } from '@datacentricdesign/types';
 import { envConfig } from '../../config/envConfig';
 
 export default function errorMiddleware(error: DCDError, request: Request, response: Response, next: NextFunction) {

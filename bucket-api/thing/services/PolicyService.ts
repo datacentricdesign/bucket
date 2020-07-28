@@ -1,6 +1,6 @@
 import { getRepository } from "typeorm";
 import { httpConfig } from "../../config/httpConfig"
-import { DCDError } from "../../types/DCDError"
+import { DCDError } from "@datacentricdesign/types"
 
 import fetch, { Response } from 'node-fetch';
 import { authConfig } from "../../config/authConfig";

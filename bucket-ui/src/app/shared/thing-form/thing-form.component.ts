@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DTOThing, DTORaspberryPi } from '../../../../../bucket-api/types';
+import { DTOThing, DTORaspberryPi } from '@datacentricdesign/types';
 import { HttpClient } from '@angular/common/http';
 
 @Component({

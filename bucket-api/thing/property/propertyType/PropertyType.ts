@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { Dimension } from "../dimension/Dimension";
 
-import {PropertyType as IPropertyType, Dimension as IDimension} from "../../../types"
+import {PropertyType as IPropertyType, Dimension as IDimension} from "@datacentricdesign/types"
 
 
 @Entity()

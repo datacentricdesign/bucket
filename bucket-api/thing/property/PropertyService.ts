@@ -7,13 +7,13 @@ import { PropertyType } from "./propertyType/PropertyType";
 
 import { PropertyTypeService } from "./propertyType/PropertyTypeService"
 
-import { DCDError } from "../../types/DCDError";
+import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from 'uuid';
 import { envConfig } from "../../config/envConfig";
 import { InfluxDB } from "influx";
 import config from "../../config";
-import { ValueOptions, DTOProperty } from "../../types";
+import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { ThingService } from "../services/ThingService";
 
 export class PropertyService {

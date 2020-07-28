@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 
 import { map, catchError } from 'rxjs/operators';
-import { Thing } from '../../../../../bucket-api/types';
+import { Thing } from '@datacentricdesign/types';
 
 @Component({
     selector: 'thing-cmp',

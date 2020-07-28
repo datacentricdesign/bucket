@@ -6,7 +6,7 @@ import * as net from 'net'
 import * as ws from 'websocket-stream'
 import config from '../../config'
 import { ThingMQTTClient } from './ThingMQTTClient'
-import { Context } from '../../types'
+import { Context } from '@datacentricdesign/types'
 
 interface Client extends Aedes.Client {
   context: Context

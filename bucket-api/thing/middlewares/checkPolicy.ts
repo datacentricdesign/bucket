@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { DCDError } from "../../types/DCDError";
+import { DCDError } from "@datacentricdesign/types";
 import { envConfig } from "../../config/envConfig";
 
 /**
