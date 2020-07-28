@@ -4,6 +4,12 @@ import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { OAuthService } from 'angular-oauth2-oidc';
 
+
+interface UserProfile {
+  name: string;
+  email: string;
+}
+
 @Component({
   moduleId: module.id,
   selector: 'navbar-cmp',
@@ -16,7 +22,7 @@ export class NavbarComponent implements OnInit {
   private nativeElement: Node;
   private toggleButton;
   private sidebarVisible: boolean;
-  private userProfile: object;
+  public userProfile: UserProfile;
 
   public isCollapsed = true;
   @ViewChild("navbar-cmp", { static: false }) button;
