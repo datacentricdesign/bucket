@@ -2,7 +2,7 @@
 
 A bucket of data, in the cloud.
 
-![version](https://img.shields.io/badge/version-0.0.7-blue.svg)
+![version](https://img.shields.io/badge/version-0.0.8-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 [![GitHub issues open](https://img.shields.io/github/issues/datacentricdesign/bucket.svg?maxAge=2592000)]()
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/datacentricdesign/bucket.svg?maxAge=2592000)]()
@@ -34,6 +34,11 @@ Add Ambassador's rules
 
 ```
 git checkout -b release-0.0.x develop
+```
+
+Bumb versions: in readme, in both package.json, in docker-compose.yml
+
+```
 cd bucket-ui
 npm publish
 cd bucket-api
