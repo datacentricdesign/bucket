@@ -30,6 +30,24 @@ docker network create dcd-net
 
 Add Ambassador's rules 
 
+## Step 5: Making a new release
+
+```
+git checkout -b release-0.0.x develop
+cd bucket-ui
+npm publish
+cd bucket-api
+npm publish
+git commit -a -m "Bumped version number to 0.0.x"
+git checkout master
+git merge --no-ff release-0.0.x
+git tag -a 0.0.x
+git push --follow-tags
+git checkout develop
+git merge --no-ff release-0.0.x
+git branch -d release-0.0.x
+```
+
 
 # Run in Production
 
