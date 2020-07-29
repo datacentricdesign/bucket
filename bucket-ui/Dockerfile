@@ -12,13 +12,13 @@ WORKDIR /bucket-ui
 COPY . .
 
 # Build the project and copy the files
-RUN npm run build -- --base-href="/bucket" --prod
+RUN npm run build -- --base-href="/bucket" --deploy-url="/bucket/" --prod
 
 FROM nginx:alpine
 
 #!/bin/sh
 
-COPY ./.nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./.nginx/* /etc/nginx/
 
 ## Remove default nginx index page
 RUN rm -rf /usr/share/nginx/html/*
