@@ -2,7 +2,7 @@
 
 A bucket of data, in the cloud.
 
-![version](https://img.shields.io/badge/version-0.0.10-blue.svg)
+![version](https://img.shields.io/badge/version-0.0.11-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 [![GitHub issues open](https://img.shields.io/github/issues/datacentricdesign/bucket.svg?maxAge=2592000)]()
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/datacentricdesign/bucket.svg?maxAge=2592000)]()
@@ -30,7 +30,7 @@ docker network create dcd-net
 
 Add Ambassador's rules 
 
-## Step 5: Making a new release
+## Making a new release
 
 ```
 git checkout -b release-0.0.x develop
