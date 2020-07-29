@@ -12,7 +12,7 @@ exports.config = {
     'browserName': 'chrome'
   },
   directConnect: true,
-  baseUrl: 'http://localhost:4200/',
+  baseUrl: 'https://dwd.tudelft.nl/bucket/',
   framework: 'jasmine',
   jasmineNodeOpts: {
     showColors: true,

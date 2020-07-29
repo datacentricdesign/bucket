@@ -29,7 +29,7 @@ export class ThingFormComponent implements OnInit {
   }
 
   onSubmit() { 
-    this.http.post("http://localhost:8080/things", this.model).subscribe((data: any) => {
+    this.http.post("https://dwd.tudelft.nl/bucket/api/things", this.model).subscribe((data: any) => {
       console.log(data)
     });
   }

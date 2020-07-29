@@ -1,7 +1,7 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
 
 export const authCodeFlowConfig: AuthConfig = {
-  issuer: 'http://localhost:8081/',
+  issuer: 'https://dwd.tudelft.nl/',
 
   // URL of the SPA to redirect the user to after login
   redirectUri:
@@ -9,7 +9,7 @@ export const authCodeFlowConfig: AuthConfig = {
 
   // The SPA's id. The SPA is registerd with this id at the auth-server
   // clientId: 'server.code',
-  clientId: 'clients:bucket-app-ui',
+  clientId: 'clients:bucket-ui',
 
   // Just needed if your auth server demands a secret. In general, this
   // is a sign that the auth server is not configured with SPAs in mind

@@ -29,7 +29,7 @@ export class ThingComponent implements OnInit {
     ngOnInit() {
         this._Activatedroute.paramMap.subscribe(params => {
             this.id = params.get('id');
-             this.thing$ = this.http.get<Thing>("http://localhost:8080/things/" + this.id).pipe(
+             this.thing$ = this.http.get<Thing>("https://dwd.tudelft.nl/bucket/api/things/" + this.id).pipe(
                 map((data: Thing) => {
                     this.thing = data
                     return data;
