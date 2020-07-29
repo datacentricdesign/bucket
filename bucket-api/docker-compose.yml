@@ -43,12 +43,11 @@ services:
       - OAUTH2_REVOKE_URL=https://dwd.tudelft.nl/oauth2/revoke
       - OAUTH2_AUTH_URL=https://dwd.tudelft.nl/oauth2/auth
       - OAUTH2_PROFILE_URL=https://dwd.tudelft.nl/userinfo
-      - OAUTH2_REDIRECT_URL=http://localhost:8080/test/auth/callback
       - OAUTH2_CLIENT_ID=clients:test-client-id
       - OAUTH2_CLIENT_SECRET=test-client-secret
       - OAUTH2_SCOPE=offline openid profile dcd:things
       
-      - ACP_URL=http://localhost:4466
+      - ACP_URL=http://ory-keto:4466
     ports:
       - 8080:8080
 

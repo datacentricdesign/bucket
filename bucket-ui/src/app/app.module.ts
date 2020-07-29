@@ -42,7 +42,7 @@ import { BASE_URL } from './app.tokens'
     SharedModule.forRoot(),
     OAuthModule.forRoot({
       resourceServer: {
-        allowedUrls: ['http://localhost:8080'],
+        allowedUrls: ['https://dwd.tudelft.nl'],
         sendAccessToken: true
       }
     })
@@ -52,7 +52,7 @@ import { BASE_URL } from './app.tokens'
     ThingBucketComponent,
     LandingPageComponent
   ],
-  providers: [{ provide: BASE_URL, useValue: 'http://localhost:4200' }],
+  providers: [{ provide: BASE_URL, useValue: 'https://dwd.tudelft.nl/bucket' }],
   bootstrap: [AppComponent],
   entryComponents: []
 })

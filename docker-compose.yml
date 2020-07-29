@@ -53,7 +53,7 @@ services:
     image: datacentricdesign/bucket-ui:release-0.0.9
     container_name: bucket-ui
     environment:
-     - NGINX_HOST=localhost
+     - NGINX_HOST=dwd.tudelft.nl
      - NGINX_PORT=80
 
   bucket-postgres:

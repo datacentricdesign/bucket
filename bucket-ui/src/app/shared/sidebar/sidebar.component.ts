@@ -33,7 +33,7 @@ export class SidebarComponent implements OnInit {
     ngOnInit() {
         this.menuItems = ROUTES.filter(menuItem => menuItem);
 
-        this.http.get("http://localhost:8080/things").subscribe((data: any) => {
+        this.http.get("https://dwd.tudelft.nl/bucket/api/things").subscribe((data: any) => {
             console.log(data)
             for (let index = 0; index < data.length; index++) {
                 this.menuItems.push({ path: '/thing/' + data[index].id, title: data[index].name, icon: 'nc-bank', class: '' })
