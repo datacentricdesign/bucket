@@ -34,6 +34,11 @@ Add Ambassador's rules
 
 ```
 git checkout -b release-0.0.x develop
+```
+
+Bumb versions: in readme, in both package.json, in docker-compose.yml
+
+```
 cd bucket-ui
 npm publish
 cd bucket-api
