@@ -30,7 +30,7 @@ docker network create dcd-net
 
 Add Ambassador's rules 
 
-## Step 5: Making a new release
+## Making a new release
 
 ```
 git checkout -b release-0.0.x develop
