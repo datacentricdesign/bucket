@@ -18,7 +18,7 @@ import { PolicyService } from './PolicyService'
  */
 export class AuthService {
 
-    oauth2: any
+    oauth2: SimpleOauth.ClientCredentials
     token = null
     jwtTokenMap = []
     private static policyService = new PolicyService()
@@ -47,7 +47,7 @@ export class AuthService {
                 bodyFormat: 'form'
             }
         }
-        this.oauth2 = SimpleOauth.create(params)
+        this.oauth2 = new SimpleOauth.ClientCredentials(params)
     }
 
     /**
@@ -264,10 +264,9 @@ export class AuthService {
     }
 
     requestNewToken() {
-        return this.oauth2.clientCredentials
-            .getToken({ scope: authConfig.scope })
+        return this.oauth2.getToken({ scope: authConfig.scope })
             .then(result => {
-                this.token = this.oauth2.accessToken.create(result)
+                this.token = this.oauth2.createToken(result)
                 return Promise.resolve()
             })
             .catch(error => {
@@ -303,7 +302,7 @@ export class AuthService {
         if (body !== null) {
             let bodyStr = ''
             if (type === 'application/x-www-form-urlencoded') {
-                bodyStr = qs.stringify(body)
+                bodyStr = qs.stringify(body as qs.ParsedUrlQueryInput)
             } else {
                 bodyStr = JSON.stringify(body)
             }

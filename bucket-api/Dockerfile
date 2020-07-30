@@ -1,17 +1,22 @@
-FROM node:14.6.0-alpine
-
+# stage 1
+FROM node:14.6.0-alpine as builder
 # Create app directory
-WORKDIR /usr/src/app
-
+WORKDIR /usr/app
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
 COPY package*.json ./
-
-# If you are building your code for production
-RUN npm install --only=production
-
-# Bundle app source
+RUN npm install
+# Copy source and compile
 COPY . .
+RUN npm run build
 
+# stage 2
+FROM node:14.6.0-alpine
+# Create app directory
+WORKDIR /usr/app
+# Install ONLY prod dependencies
+COPY package*.json ./
+RUN npm install --production
+# Copy compiled sources
+COPY --from=builder /usr/app/dist ./dist
+# Run the production script
 CMD [ "npm", "run", "prod" ]
