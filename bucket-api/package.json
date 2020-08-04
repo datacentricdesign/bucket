@@ -8,7 +8,7 @@
     "build": "tsc",
     "typeorm:cli": "node ./node_modules/typeorm/cli -f ./dist/config/ormMigrationWrap.js",
     "migration:run": "npm run typeorm:cli migration:run",
-    "prod": "node ./dist/index.js",
+    "prod": "ts-node ./index.ts",
     "doc": "apidoc -i things/ThingRouter.ts -o dist/public/docs/"
   },
   "repository": {

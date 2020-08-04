@@ -27,7 +27,7 @@ function waitAndConnect(delayMs:number) {
         })
         // Could not connect wait and try again
         .catch((error) => {
-            console.log(error);
+            console.log(JSON.stringify(error));
             console.log("Retrying to connect in " + delayMs + " ms.");
             delay(delayMs).then(()=>{
                 waitAndConnect(delayMs*1.5);

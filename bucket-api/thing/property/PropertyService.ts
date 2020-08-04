@@ -33,25 +33,24 @@ export class PropertyService {
 
     async init(delayMs:number) {
         // Connect to the time series database
-        try {
-            this.influx = new InfluxDB(config.influxdb)
-            this.influx.getDatabaseNames()
-                // Double check the timeseries db exists
-                .then(async names => {
-                    if (names.indexOf(config.influxdb.database) > -1) {
-                        await this.influx.createDatabase(config.influxdb.database);
-                        this.ready = true;
-                    }
-                    this.ready = true
-                    return Promise.resolve()
+        this.influx = new InfluxDB(config.influxdb)
+        this.influx.getDatabaseNames()
+            // Double check the timeseries db exists
+            .then(async names => {
+                console.log("Connected to InfluxDb");
+                if (names.indexOf(config.influxdb.database) > -1) {
+                    await this.influx.createDatabase(config.influxdb.database);
+                    this.ready = true;
+                }
+                this.ready = true
+                return Promise.resolve()
+            }).catch((error) => {
+                console.log(JSON.stringify(error));
+                console.log("Retrying to connect to InfluxDB in " + delayMs + " ms.");
+                delay(delayMs).then(()=>{
+                    this.init(delayMs*1.5);
                 })
-        } catch(error) {
-            console.log(error);
-            console.log("Retrying to connect to InfluxDB in " + delayMs + " ms.");
-            delay(delayMs).then(()=>{
-                this.init(delayMs*1.5);
-            })
-        }
+            });
     }
 
     /**
