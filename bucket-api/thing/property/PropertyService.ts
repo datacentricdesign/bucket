@@ -28,22 +28,30 @@ export class PropertyService {
      * @constructor
      */
     constructor() {
-        this.init()
+        this.init(1000)
     }
 
-    async init() {
+    async init(delayMs:number) {
         // Connect to the time series database
-        this.influx = new InfluxDB(config.influxdb)
-        this.influx.getDatabaseNames()
-            // Double check the timeseries db exists
-            .then(async names => {
-                if (names.indexOf(config.influxdb.database) > -1) {
-                    await this.influx.createDatabase(config.influxdb.database);
-                    this.ready = true;
-                }
-                this.ready = true
-                return Promise.resolve()
+        try {
+            this.influx = new InfluxDB(config.influxdb)
+            this.influx.getDatabaseNames()
+                // Double check the timeseries db exists
+                .then(async names => {
+                    if (names.indexOf(config.influxdb.database) > -1) {
+                        await this.influx.createDatabase(config.influxdb.database);
+                        this.ready = true;
+                    }
+                    this.ready = true
+                    return Promise.resolve()
+                })
+        } catch(error) {
+            console.log(error);
+            console.log("Retrying to connect to InfluxDB in " + delayMs + " ms.");
+            delay(delayMs).then(()=>{
+                this.init(delayMs*1.5);
             })
+        }
     }
 
     /**
@@ -261,4 +269,8 @@ export class PropertyService {
             return Promise.resolve(property)
         })
     }
+}
+
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
 }

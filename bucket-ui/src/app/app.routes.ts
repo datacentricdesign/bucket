@@ -4,7 +4,7 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 
 export const AppRoutes: Routes = [
   {
-    path: 'about',
+    path: 'about.html',
     component: LandingPageComponent
   },
   {

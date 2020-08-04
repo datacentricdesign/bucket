@@ -2,9 +2,11 @@ version: '3'
 
 services:
   bucket-api:
-    image: datacentricdesign/bucket-api:release-0.0.12
+    # image: datacentricdesign/bucket-api:release-0.0.12
+    build:
+      context: ./bucket-api
     container_name: bucket-api
-    environment: 
+    environment:
       - HOST_DATA_FOLDER=$HOST_DATA_FOLDER
 
       - JWT_SECRET=TEST
@@ -27,58 +29,67 @@ services:
       - KEY_PATH=$KEY_PATH
       - CERT_PATH=$CERT_PATH
       
-      - POSTGRES_HOST=$POSTGRES_HOST
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-      - POSTGRES_PORT=$POSTGRES_PORT
-      - POSTGRES_DB=$POSTGRES_DB
-      - POSTGRES_LOGGING=$POSTGRES_LOGGING
+      - POSTGRES_HOST=$BUCKET_POSTGRES_HOST
+      - POSTGRES_USER=$BUCKET_POSTGRES_USER
+      - POSTGRES_PASSWORD=$BUCKET_POSTGRES_PASSWORD
+      - POSTGRES_PORT=$BUCKET_POSTGRES_PORT
+      - POSTGRES_DB=$BUCKET_POSTGRES_DB
+      - POSTGRES_LOGGING=$BUCKET_POSTGRES_LOGGING
 
-      - INFLUXDB_HOST=$INFLUXDB_HOST
-      - INFLUXDB_DB=$INFLUXDB_DB
+      - INFLUXDB_HOST=$BUCKET_INFLUXDB_HOST
+      - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
 
-      - OAUTH2_INTROSPECT_URL=https://dwd.tudelft.nl/oauth2/introspect
-      - OAUTH2_TOKEN_URL=https://dwd.tudelft.nl/oauth2/token
-      - OAUTH2_REVOKE_URL=https://dwd.tudelft.nl/oauth2/revoke
-      - OAUTH2_AUTH_URL=https://dwd.tudelft.nl/oauth2/auth
-      - OAUTH2_PROFILE_URL=https://dwd.tudelft.nl/userinfo
-      - OAUTH2_REDIRECT_URL=http://localhost:8080/test/auth/callback
-      - OAUTH2_CLIENT_ID=clients:test-client-id
-      - OAUTH2_CLIENT_SECRET=test-client-secret
-      - OAUTH2_SCOPE=offline openid profile dcd:things
+      - OAUTH2_INTROSPECT_URL=$OAUTH2_INTROSPECT_URL
+      - OAUTH2_TOKEN_URL=$OAUTH2_TOKEN_URL
+      - OAUTH2_REVOKE_URL=$OAUTH2_REVOKE_URL
+      - OAUTH2_AUTH_URL=$OAUTH2_AUTH_URL
+      - OAUTH2_PROFILE_URL=$OAUTH2_PROFILE_URL
+      - OAUTH2_REDIRECT_URL=$OAUTH2_REDIRECT_URL
+      - OAUTH2_CLIENT_ID=$OAUTH2_CLIENT_ID
+      - OAUTH2_CLIENT_SECRET=$OAUTH2_CLIENT_SECRET
+      - OAUTH2_SCOPE=$OAUTH2_SCOPE
 
       - ACP_URL=http://localhost:4466
+    ports:
+      - 8889:8080
+    depends_on:
+      - bucket-postgres
+      - bucket-influxdb
 
   bucket-ui:
-    image: datacentricdesign/bucket-ui:release-0.0.11
+    # image: datacentricdesign/bucket-ui:release-0.0.12
+    build:
+      context: ./bucket-ui
     container_name: bucket-ui
     environment:
-     - NGINX_HOST=dwd.tudelft.nl
-     - NGINX_PORT=80
+     - NGINX_HOST=localhost
+     - NGINX_PORT=8888
+    ports:
+      - 8888:8888
 
   bucket-postgres:
     image: postgres:9.6
     container_name: bucket-postgres
     environment:
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-      - POSTGRES_PORT=$POSTGRES_PORT
-      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$BUCKET_POSTGRES_USER
+      - POSTGRES_PASSWORD=$BUCKET_POSTGRES_PASSWORD
+      - POSTGRES_PORT=$BUCKET_POSTGRES_PORT
+      - POSTGRES_DB=$BUCKET_POSTGRES_DB
     volumes:
-      - $HOST_DATA_FOLDER/postgresql:/var/lib/postgresql/data
+      - $HOST_DATA_FOLDER/bucket-postgres:/var/lib/postgresql/data
     ports:
-      - $POSTGRES_PORT:$POSTGRES_PORT
+      - $BUCKET_POSTGRES_PORT:$BUCKET_POSTGRES_PORT
 
   bucket-influxdb:
     image: influxdb
     container_name: bucket-influxdb
     volumes:
-      - $HOST_DATA_FOLDER/influxdb:/var/lib/influxdb
+      - $HOST_DATA_FOLDER/bucket-influxdb:/var/lib/influxdb
     ports:
       - 8086:8086
       - 8083:8083
     environment:
-      - INFLUXDB_DB=$INFLUXDB_DB
+      - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
       - INFLUXDB_ADMIN_ENABLED=true
 
 networks: 
