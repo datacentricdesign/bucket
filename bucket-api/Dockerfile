@@ -1,5 +1,5 @@
 # stage 1
-FROM node:14.6.0-alpine as builder
+# FROM node:14.6.0-alpine as builder
 # Create app directory
 # WORKDIR /usr/app
 # # Install app dependencies
