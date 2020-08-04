@@ -12,7 +12,7 @@ WORKDIR /bucket-ui
 COPY . .
 
 # Build the project and copy the files
-RUN npm run build -- --base-href="http://localhost:8888/bucket/" --deploy-url="/bucket/" --prod
+RUN npm run build -- --base-href="https://dwd.tudelft.nl/bucket/" --deploy-url="/bucket/" --prod
 
 FROM nginx:alpine
 
