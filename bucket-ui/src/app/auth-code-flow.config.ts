@@ -1,7 +1,7 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
 
 export const authCodeFlowConfig: AuthConfig = {
-  issuer: 'https://dwd.tudelft.nl/',
+  issuer: 'https://dwd.tudelft.nl:443/',
 
   // URL of the SPA to redirect the user to after login
   redirectUri:
