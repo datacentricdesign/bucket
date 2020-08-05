@@ -1,8 +1,0 @@
-apiVersion: ambassador/v1
-kind: Module
-name: ambassador
-config:
-#  x_forwarded_proto_redirect: true
-  diagnostics:
-    # Stop the diagnostics endpoint from being publicly available
-    enabled: True
