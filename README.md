@@ -20,36 +20,3 @@ To get started, install the angular cli
 ```bash
 npm install -g @angular/cli
 ```
-
-## Making a new release
-
-```
-git checkout -b release-0.0.x develop
-```
-
-Bumb versions: in readme, in both package.json, in docker-compose.yml
-
-```
-cd bucket-ui
-npm publish
-cd bucket-api
-npm publish
-git commit -a -m "Bumped version number to 0.0.x"
-git checkout master
-git merge --no-ff release-0.0.x
-git tag -a 0.0.x
-git push --follow-tags
-git checkout develop
-git merge --no-ff release-0.0.x
-git branch -d release-0.0.x
-```
-
-
-# Run in Production
-
-If not existing, create Docker network dcd-net.
-
-Run docker-compose up.
-
-- It builds the frontend and serve it with NGinx
-- It builds and serve the bucket api
