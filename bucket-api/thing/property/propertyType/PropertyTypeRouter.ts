@@ -21,5 +21,5 @@ export const PropertyTypeRouter = Router({mergeParams: true});
 **/
 PropertyTypeRouter.get(
      "/",
-     [introspectToken(['dcd:types']), checkPolicy('types', 'list')],
+     [introspectToken(['dcd:types'])],
      PropertyTypeController.getPropertyTypes);

@@ -91,6 +91,7 @@ export class PolicyService {
 
 
   async createPolicy(subjectId: string, resourceId: string, roleName: string, effect = 'allow', id?: string) {
+    console.log("creating policy...")
     const roleRepository = getRepository(Role);
     const newRole: Role = {
       id: id !== undefined ? id : uuidv4(),
@@ -108,10 +109,11 @@ export class PolicyService {
     const policy = {
       id: id,
       effect: effect,
-      actions: roleToActions(roleName),
+      actions: PolicyService.roleToActions(roleName),
       subjects: [subjectId],
-      resources: entityToResource(resourceId)
+      resources: PolicyService.entityToResource(resourceId)
     }
+    console.log(policy)
     return this.updateKetoPolicy(policy)
   }
 
@@ -138,17 +140,10 @@ export class PolicyService {
     }
     try {
       const res = await fetch(url, options);
-
-      console.log(res)
       if (res.ok) {
-        const json:any = res.json();
-        if (!json.allowed) {
-          return Promise.reject(new DCDError(403, 'Request was not allowed'));
-        }
+        return Promise.resolve();
       }
-      const body = await Promise.reject(new DCDError(res.status, res.statusText));
-      
-      return Promise.resolve(body);
+      return Promise.reject(new DCDError(4031, 'Request was not allowed'));
     }
     catch (error) {
       return Promise.reject(error);
@@ -162,7 +157,7 @@ export class PolicyService {
    */
   async updateKetoPolicy(policy: any): Promise<Response> {
     try {
-      const result = await fetch(config.oauth2.acpURL.origin + 'engines/acp/ory/regex/policies', {
+      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/regex/policies', {
         headers: this.ketoHeaders,
         method: 'PUT',
         body: JSON.stringify(policy)
@@ -176,7 +171,7 @@ export class PolicyService {
 
   async deleteKetoPolicy(policyId: string) {
     try {
-      const result = await fetch(config.oauth2.acpURL.origin + 'engines/acp/ory/regex/policies/' + policyId, {
+      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/regex/policies/' + policyId, {
         headers: this.ketoHeaders,
         method: 'DELETE'
       });
@@ -186,9 +181,9 @@ export class PolicyService {
       return Promise.reject(new DCDError(403, 'Not allowed: ' + error.message));
     }
   }
-}
 
-const roleToActions = (role: string) => {
+
+  static roleToActions(role: string) {
   switch (role) {
     case 'user':
       return ['dcd:actions:create', 'dcd:actions:list']
@@ -211,15 +206,16 @@ const roleToActions = (role: string) => {
   }
 }
 
-const entityToResource = entityId => {
-  if (entityId === 'dcd') {
-    return ['dcd:things', 'dcd:persons']
+  static entityToResource(entityId:string) {
+    if (entityId === 'dcd') {
+      return ['dcd:things', 'dcd:persons']
+    }
+    return [
+      entityId,
+      entityId + ':properties',
+      entityId + ':properties:<.*>',
+      entityId + ':interactions',
+      entityId + ':interactions:<.*>'
+    ]
   }
-  return [
-    entityId,
-    entityId + ':properties',
-    entityId + ':properties:<.*>',
-    entityId + ':interactions',
-    entityId + ':interactions:<.*>'
-  ]
 }

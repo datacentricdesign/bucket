@@ -16,6 +16,7 @@ export const checkPolicy = (resource: string, action: string) => {
             action: 'dcd:actions:' + action,
             subject: req.context.userId
         }
+        console.log(acp)
         AuthController.policyService
             .check(acp)
             .then(() => next())
@@ -37,16 +38,11 @@ function buildACPResource(resource: string, req: Request): string {
     //   acpResource += ":" + resource;
     // }
     let acpResource = ''
-    if (req.params.entityId !== undefined) {
-        acpResource += req.params.entityId
-    } else {
-        acpResource += 'dcd:' + resource
-    }
-    if (req.params.component !== undefined) {
-        acpResource += ':' + req.params.component
+    if (req.params.thingId !== undefined) {
+        acpResource += req.params.thingId
     }
     if (req.params.propertyId !== undefined) {
-        acpResource += ':' + req.params.propertyId
+        acpResource += ':' + req.params.propertyId.replace('dcd:','')
     }
     return acpResource
 }

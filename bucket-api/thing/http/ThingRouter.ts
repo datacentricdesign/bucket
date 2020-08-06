@@ -34,7 +34,7 @@ ThingRouter.get(
 **/
 ThingRouter.get(
      "/",
-     [introspectToken(['dcd:things']), checkPolicy('things', 'list')],
+     [introspectToken(['dcd:things'])],
      ThingController.getThingsOfAPerson);
 
 /**
@@ -82,7 +82,7 @@ ThingRouter.get(
      **/
 ThingRouter.post(
      "/",
-     [introspectToken(['dcd:things']), checkPolicy('things', 'create')],
+     [introspectToken(['dcd:things'])],
      ThingController.createNewThing);
 
 /**

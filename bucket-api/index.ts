@@ -16,6 +16,7 @@ import { mqttInit } from './thing/mqtt/MQTTServer';
 import { setupPassport } from './passport-dcd';
 
 
+console.log("starting...")
 
 waitAndConnect(1000);
 
@@ -41,9 +42,6 @@ function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
-
-
-
 function startAPI() {
     // Create a new express application instance
     const app = express();
@@ -60,7 +58,7 @@ function startAPI() {
     app.use(config.http.baseUrl + "/types", PropertyTypeRouter);
     app.use(errorMiddleware)
 
-    setupPassport(app)
+    // setupPassport(app)
 
     // Start listening
     app.listen(config.http.port, () => {

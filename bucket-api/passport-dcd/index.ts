@@ -50,8 +50,10 @@ export const setupPassport = (app: Application) => {
     // Whenever the UI need to authenticate, trigger /auth
     app.get(config.http.baseUrl + '/auth', logMid(), passport.authenticate('oauth2'));
     
-    // When the OAuth2 dance is completed, redirect to the original UI URL
-    app.get(new URL(config.oauth2.oAuth2RedirectURL).pathname, passport.authenticate('oauth2',
+    const pathRedirect = new URL(config.oauth2.oAuth2RedirectURL).pathname
+
+    // // When the OAuth2 dance is completed, redirect to the original UI URL
+    app.get("", passport.authenticate('oauth2',
         { failureRedirect: '/auth', failWithError: true }),
         (req: Request, res: Response) => {
             // After success, redirect to the page we came from originally

@@ -57,7 +57,6 @@ export class ThingService {
             // Read negative, the Thing does not exist yet
             if (findError.name === "EntityNotFound") {
                 await thingRepository.save(thing);
-                this.toKafka(thing);
                 await ThingService.policyService.grant(thing.personId, thing.id, 'owner');
                 await ThingService.policyService.grant(thing.id, thing.id, 'subject');
                 console.log(thing)
@@ -129,15 +128,6 @@ export class ThingService {
             throw new DCDError( 404, 'Thing to delete ' + thingId + ' could not be not found.')
         }
         return thingRepository.delete(thingId);
-    }
-
-    /**
-     * Send Thing to Kafka.
-     * @param {Thing} thing
-     */
-    toKafka(thing: Thing) {
-        return Promise.resolve();
-        // return this.kafka.pushData('things', [thing], thing.id)
     }
 
     /**
