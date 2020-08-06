@@ -33,6 +33,19 @@ export class AppComponent {
 
   private configureCodeFlow() {
     this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.requestAccessToken = true;
+    
+    console.log("app component")
+    if (
+      this.oauthService.hasValidAccessToken() &&
+      this.oauthService.hasValidIdToken()
+    ) {
+      console.log("=> yes")
+    } else {
+      console.log("=> no")
+    }
+
+
     this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
 }

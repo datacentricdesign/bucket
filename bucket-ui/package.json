@@ -13,7 +13,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve -o",
+    "start": "ng serve --baseHref=http://localhost:4200/bucket/ --deployUrl=/bucket/ --serve-path=/bucket/ -o",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
