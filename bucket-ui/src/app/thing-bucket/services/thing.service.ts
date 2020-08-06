@@ -4,19 +4,25 @@ import { BASE_URL } from '../../app.tokens';
 import { Observable } from 'rxjs';
 import { Thing } from '@datacentricdesign/types';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { AppService } from 'app/app.service';
 
 @Injectable()
 export class ThingService {
+
+  private apiURL: string
+
   constructor(
     private oauthService: OAuthService,
     private http: HttpClient,
-    @Inject(BASE_URL) private baseUrl: string
-  ) {}
+    private appService: AppService
+  ) {
+    this.apiURL = appService.settings.apiURL;
+  }
 
   public things: Array<Thing> = [];
 
   find(): void {
-    let url = this.baseUrl + '/things';
+    let url = this.apiURL + '/things';
     let headers = new HttpHeaders().set('Accept', 'application/json')
     .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
