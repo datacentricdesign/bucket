@@ -152,16 +152,19 @@ export class AuthService {
 
     async setJWK(setId: string, jwk: any) {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
-        try {
-            const result = await this.authorisedRequest('PUT', url, jwk)
-            const createdJWK = result.keys[0]
-            // Convert the JWK into a public key, and store it for later use
-            this.jwtTokenMap[setId] = jwkToBuffer(createdJWK)
-            return Promise.resolve(createdJWK)
-        }
-        catch (error) {
-            return Promise.reject(error)
-        }
+        return this.refresh()
+                .then(() => {
+                    return this.authorisedRequest('PUT', url, {keys:[jwk]});
+                })
+                .then((result) => {
+                    const createdJWK = result.keys[0]
+                    // Convert the JWK into a public key, and store it for later use
+                    this.jwtTokenMap[setId] = jwkToBuffer(createdJWK)
+                    return Promise.resolve(createdJWK)
+                })
+                .catch(error => {
+                    return Promise.reject(error)
+                })
     }
 
     setPEM(setId: string, pem: string) {
@@ -250,15 +253,12 @@ export class AuthService {
     }
 
     requestNewToken() {
-        console.debug("request new token")
         return this.oauth2.getToken({ scope: config.oauth2.oAuth2Scope })
             .then(result => {
-                console.debug("create token")
                 this.token = this.oauth2.createToken(result)
                 return Promise.resolve()
             })
             .catch(error => {
-                console.debug(error)
                 return Promise.reject(error)
             })
     }

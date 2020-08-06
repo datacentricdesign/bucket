@@ -97,13 +97,25 @@ export class ThingController {
         res.status(204).send();
     };
 
-    static editThingPEM = async (req: Request, res: Response) => {
+    static editThingPEM = async (req: Request, res: Response, next: NextFunction) => {
         // Get the thing ID from the url
         const thingId = req.params.thingId;
         // Get pem from body
-        const pem = req.params.body;
+        const pem = req.body.pem;
+        if (pem === undefined) {
+            return next(new DCDError(400, 'The public key should be provided in the body parameter "pem".'))
+        }
+        if (!pem.startsWith('-----BEGIN PUBLIC KEY-----') ||
+            !pem.endsWith('-----END PUBLIC KEY-----')) {
+            return next(new DCDError(400, 'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"'))
+        }
         // Call the Service
-        await ThingController.thingService.editThingPEM(thingId, pem)
+        ThingController.thingService.editThingPEM(thingId, pem)
+        .then( () => {
+            res.status(204).send();
+        }).catch( (error) => {
+            next(error)
+        })
     }
 
     static deleteOneThing = async (req: Request, res: Response, next: NextFunction) => {
