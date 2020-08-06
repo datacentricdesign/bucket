@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { DCDError } from "@datacentricdesign/types"
 import config from "../../config"
+import { AuthController } from "../http/AuthController";
 
 /**
    * Introspect the token from the 'Authorization' HTTP header to
@@ -10,49 +11,52 @@ export const introspectToken = (requiredScope: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         // If running on development environment,
         // we skip the authentication and pretend we this is the DEV_USER
-        if (config.env.env === 'development') {
-            const user = {
-                entityId: config.env.devUser,
-                token: config.env.devToken,
-                sub: req.params.entityId
-            }
-            console.log(user)
-            req.context = {
-                userId: user.entityId
-            }
-            return next()
-        }
+        // const user = {
+        //     entityId: config.env.devUser,
+        //     token: config.env.devToken,
+        //     sub: req.params.entityId
+        // }
+        // console.log(user)
+        // req.context = {
+        //     userId: user.entityId
+        // }
+        // return next()
         if (requiredScope.length === 0 && req.params.entity !== undefined) {
             requiredScope = [req.params.entity]
         }
-        const token = extractToken(req)
-        return this.refresh()
-            .then(() => {
-                if (
-                    token.split('.').length === 3 &&
-                    req.params.entityId !== undefined
-                ) {
-                    return this.model.auth
-                        .checkJWTAuth(token, req.params.entityId)
-                        .then((token:any) => {
-                            const user = {
-                                entityId: req.params.entityId,
-                                token: token,
-                                sub: req.params.entityId
-                            }
-                            return Promise.resolve(user)
-                        })
-                } else {
-                    return this.model.auth.introspect(token, requiredScope)
-                }
-            })
-            .then((user:any) => {
-                req.context = {
-                    userId: user.entityId
-                }
-                next()
-            })
-            .catch((error: DCDError ) => next(error))
+        
+        try {
+            const token = extractToken(req)
+            return AuthController.authService.refresh()
+                .then(() => {
+                    if (
+                        token.split('.').length === 3 &&
+                        req.params.entityId !== undefined
+                    ) {
+                        return AuthController.authService
+                            .checkJWTAuth(token, req.params.entityId)
+                            .then((token:any) => {
+                                const user = {
+                                    entityId: req.params.entityId,
+                                    token: token,
+                                    sub: req.params.entityId
+                                }
+                                return Promise.resolve(user)
+                            })
+                    } else {
+                        return AuthController.authService.introspect(token, requiredScope)
+                    }
+                })
+                .then((user:any) => {
+                    req.context = {
+                        userId: user.sub
+                    }
+                    next()
+                })
+                .catch((error: DCDError ) => next(error))
+        } catch(error) {
+            next(error)
+        }
     }
 };
 

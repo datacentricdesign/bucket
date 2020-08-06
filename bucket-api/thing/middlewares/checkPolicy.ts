@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { DCDError } from "@datacentricdesign/types";
 import { envConfig } from "../../config/envConfig";
+import { AuthController } from "../http/AuthController";
 
 /**
  * Check Access Control Policy with Keto, based on subject
@@ -9,16 +10,13 @@ import { envConfig } from "../../config/envConfig";
  */
 export const checkPolicy = (resource: string, action: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        if (envConfig.env === 'development') {
-            return next()
-        }
         const acpResource = buildACPResource(resource, req)
         const acp = {
             resource: acpResource,
             action: 'dcd:actions:' + action,
             subject: req.context.userId
         }
-        this.policies
+        AuthController.policyService
             .check(acp)
             .then(() => next())
             .catch((error: DCDError) => next(error))

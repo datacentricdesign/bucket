@@ -4,7 +4,7 @@
   "description": "A bucket of data, in the cloud.",
   "main": "index.js",
   "scripts": {
-    "start": "set debug=* && ts-node-dev --respawn --transpileOnly ./index.ts",
+    "start": "ts-node-dev --respawn --transpile-only  ./index.ts",
     "build": "tsc",
     "typeorm:cli": "node ./node_modules/typeorm/cli -f ./dist/config/ormMigrationWrap.js",
     "migration:run": "npm run typeorm:cli migration:run",

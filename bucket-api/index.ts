@@ -1,3 +1,4 @@
+import config from "./config";
 
 import {ThingRouter} from './thing/http/ThingRouter';
 
@@ -8,12 +9,13 @@ import * as bodyParser from "body-parser";
 import * as cookieParser from 'cookie-parser'
 import * as helmet from "helmet";
 import * as cors from "cors";
-import config from "./config";
 import errorMiddleware from './thing/middlewares/ErrorMiddleware';
 import { PropertyTypeRouter } from './thing/property/propertyType/PropertyTypeRouter';
 
 import { mqttInit } from './thing/mqtt/MQTTServer';
 import { setupPassport } from './passport-dcd';
+
+
 
 waitAndConnect(1000);
 

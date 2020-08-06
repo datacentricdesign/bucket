@@ -3,10 +3,10 @@ import { httpConfig } from "../../config/httpConfig"
 import { DCDError } from "@datacentricdesign/types"
 
 import fetch, { Response } from 'node-fetch';
-import { authConfig } from "../../config/authConfig";
 import { Role } from "../role/Role";
 
 import { v4 as uuidv4 } from 'uuid';
+import config from "../../config";
 
 /**
  * Manage access policies
@@ -129,7 +129,8 @@ export class PolicyService {
   }
 
   async check(acp: any) {
-    const url = authConfig.acpURL.href + '/engines/acp/ory/regex/allowed'
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/regex/allowed'
+    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'POST',
@@ -137,6 +138,8 @@ export class PolicyService {
     }
     try {
       const res = await fetch(url, options);
+
+      console.log(res)
       if (res.ok) {
         const json:any = res.json();
         if (!json.allowed) {
@@ -159,7 +162,7 @@ export class PolicyService {
    */
   async updateKetoPolicy(policy: any): Promise<Response> {
     try {
-      const result = await fetch(authConfig.acpURL.href + 'engines/acp/ory/regex/policies', {
+      const result = await fetch(config.oauth2.acpURL.origin + 'engines/acp/ory/regex/policies', {
         headers: this.ketoHeaders,
         method: 'PUT',
         body: JSON.stringify(policy)
@@ -173,7 +176,7 @@ export class PolicyService {
 
   async deleteKetoPolicy(policyId: string) {
     try {
-      const result = await fetch(authConfig.acpURL.href + 'engines/acp/ory/regex/policies/' + policyId, {
+      const result = await fetch(config.oauth2.acpURL.origin + 'engines/acp/ory/regex/policies/' + policyId, {
         headers: this.ketoHeaders,
         method: 'DELETE'
       });

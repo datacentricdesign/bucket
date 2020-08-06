@@ -1,5 +1,4 @@
-
-import {URL} from 'url'
+import 'dotenv/config';
 
 export const envConfig: any = {
     env: process.env.NODE_ENV,

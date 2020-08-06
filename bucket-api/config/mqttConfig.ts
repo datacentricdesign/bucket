@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { URL } from 'url'
 
 export const mqttConfig: any = {

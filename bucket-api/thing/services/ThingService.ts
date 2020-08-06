@@ -58,10 +58,8 @@ export class ThingService {
             if (findError.name === "EntityNotFound") {
                 await thingRepository.save(thing);
                 this.toKafka(thing);
-                if (envConfig.env === 'production') {
-                    await ThingService.policyService.grant(thing.personId, thing.id, 'owner');
-                    await ThingService.policyService.grant(thing.id, thing.id, 'subject');
-                }
+                await ThingService.policyService.grant(thing.personId, thing.id, 'owner');
+                await ThingService.policyService.grant(thing.id, thing.id, 'subject');
                 console.log(thing)
                 if (thing.pem !== '') {
                     return ThingService.authService.setPEM(thing.id, thing.pem);

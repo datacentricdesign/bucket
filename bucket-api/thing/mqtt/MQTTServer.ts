@@ -7,6 +7,7 @@ import * as ws from 'websocket-stream'
 import config from '../../config'
 import { ThingMQTTClient } from './ThingMQTTClient'
 import { Context } from '@datacentricdesign/types'
+import { httpConfig } from '../../config/httpConfig'
 
 interface Client extends Aedes.Client {
   context: Context
@@ -16,7 +17,7 @@ const aedes = Aedes()
 
 let server: any
 
-if (process.env.HTTPS === 'true') {
+if (httpConfig.secured === 'true') {
   const options = {
     key: fs.readFileSync(config.mqtt.secure.keyPath),
     cert: fs.readFileSync(config.mqtt.secure.certPath)

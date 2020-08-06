@@ -6,15 +6,14 @@ import fetch from 'node-fetch'
 import {RequestInit} from 'node-fetch'
 import * as qs from 'querystring'
 import * as SimpleOauth from 'simple-oauth2'
-import { httpConfig } from '../../config/httpConfig'
-import { authConfig } from '../../config/authConfig'
 import { DCDError } from '@datacentricdesign/types'
 import { Token } from './ThingService'
 import { PolicyService } from './PolicyService'
+import config from '../../config'
+import { URL } from 'url'
 
 /**
  * This class handle Authentication and Authorisation processes
- * when interacting with the DCD Hub.
  */
 export class AuthService {
 
@@ -27,18 +26,18 @@ export class AuthService {
         const header = {
             Accept: 'application/json'
         }
-        if (httpConfig.secured) {
+        if (config.http.secured) {
             header['X-Forwarded-Proto'] = 'https'
         }
         const params: SimpleOauth.ModuleOptions = {
             client: {
-                id: process.env.OAUTH2_CLIENT_ID,
-                secret: process.env.OAUTH2_CLIENT_SECRET
+                id: config.oauth2.oAuth2ClientId,
+                secret: config.oauth2.oAuth2ClientSecret
             },
             auth: {
-                tokenHost: 'http://' + authConfig.oAuth2TokenURL.host,
-                tokenPath: authConfig.oAuth2TokenURL.path,
-                revokePath: authConfig.oAuth2RevokeURL.path
+                tokenHost: new URL(config.oauth2.oAuth2TokenURL).origin,
+                tokenPath: new URL(config.oauth2.oAuth2TokenURL).pathname,
+                revokePath: new URL(config.oauth2.oAuth2RevokeURL).pathname
             },
             http: {
                 headers: header
@@ -58,7 +57,10 @@ export class AuthService {
     introspect(token: Token, requiredScope: string[] = []) {
         const body = { token: token }
         // const body = { token: token, scope: requiredScope.join(" ") };
-        const url = process.env.OAUTH2_INTROSPECT_URL
+        const url = config.oauth2.oAuth2IntrospectURL
+
+        console.log(url)
+
         return this.authorisedRequest(
             'POST',
             url,
@@ -76,22 +78,6 @@ export class AuthService {
                         new DCDError(4031, 'The bearer token is not an access token')
                     )
                 }
-                // const scopeArray = body.scope.split(" ");
-                // logger.debug("provided scope:");
-                // logger.debug(scopeArray);
-                // for (let index = 0; index < requiredScope.length; index++) {
-                //   logger.debug("looking for required scope " + requiredScope[index]);
-                //   if (!scopeArray.includes(requiredScope[index])) {
-                //     logger.debug("array does not include " + requiredScope[index]);
-                //     return Promise.reject(
-                //       new DCDError(
-                //         4031,
-                //         "The bearer token does not grant access to the required scope " +
-                //           requiredScope[index]
-                //       )
-                //     );
-                //   }
-                // }
                 return Promise.resolve(body)
             })
             .catch(error => {
@@ -104,12 +90,12 @@ export class AuthService {
      * @param {String} privateKey
      * @returns {*}
      */
-    generateJWT(privateKey) {
+    generateJWT(privateKey: string):string {
         const currentTime = Math.floor(Date.now() / 1000)
         const token = {
             iat: currentTime - 3600,
             exp: currentTime + 10 * 31557600, // 10 years
-            aud: process.env.API_URL
+            aud: config.http.url
         }
         const algorithm = 'RS256'
         return jwt.sign(token, privateKey, { algorithm: algorithm })
@@ -121,8 +107,8 @@ export class AuthService {
      * @param body
      * @returns {Promise}
      */
-    generateJWK(set, body) {
-        const url = process.env.HYDRA_ADMIN_URL + '/keys/' + set
+    generateJWK(set:any, body:any) {
+        const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + set
         return this.authorisedRequest('POST', url, body)
             .then(result => {
                 const jwk = result.keys[0]
@@ -150,7 +136,7 @@ export class AuthService {
      * @returns {Promise<string|DCDError>}
      */
     getJWK(setId) {
-        const url = process.env.HYDRA_ADMIN_URL + '/keys/' + setId
+        const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
         return this.authorisedRequest('GET', url)
             .then(result => {
                 const jwk = result.keys[0]
@@ -165,7 +151,7 @@ export class AuthService {
     }
 
     async setJWK(setId: string, jwk: any) {
-        const url = process.env.HYDRA_ADMIN_URL + '/keys/' + setId
+        const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
         try {
             const result = await this.authorisedRequest('PUT', url, jwk)
             const createdJWK = result.keys[0]
@@ -203,7 +189,7 @@ export class AuthService {
 
         if (
             introspectionToken.aud !== undefined &&
-            introspectionToken.aud === httpConfig.url &&
+            introspectionToken.aud === config.http.url &&
             introspectionToken.exp !== undefined &&
             introspectionToken.exp > currentTime
         ) {
@@ -241,7 +227,7 @@ export class AuthService {
 
                 if (
                     introspectionToken.aud !== undefined &&
-                    introspectionToken.aud === httpConfig.url &&
+                    introspectionToken.aud === config.http.url &&
                     introspectionToken.exp !== undefined &&
                     introspectionToken.exp > currentTime
                 ) {
@@ -264,12 +250,15 @@ export class AuthService {
     }
 
     requestNewToken() {
-        return this.oauth2.getToken({ scope: authConfig.scope })
+        console.debug("request new token")
+        return this.oauth2.getToken({ scope: config.oauth2.oAuth2Scope })
             .then(result => {
+                console.debug("create token")
                 this.token = this.oauth2.createToken(result)
                 return Promise.resolve()
             })
             .catch(error => {
+                console.debug(error)
                 return Promise.reject(error)
             })
     }
@@ -296,7 +285,7 @@ export class AuthService {
             method: method,
             timeout: 15000
         }
-        if (httpConfig.secured) {
+        if (config.http.secured) {
             options.headers['X-Forwarded-Proto'] = 'https'
         }
         if (body !== null) {

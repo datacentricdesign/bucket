@@ -7,7 +7,6 @@ import { httpConfig } from "./httpConfig";
 import { authConfig } from './authConfig';
 import { influxdbConfig } from './influxdbConfig';
 import { mqttConfig } from './mqttConfig';
-import aedes = require('aedes');
 import { Context } from '@datacentricdesign/types';
 
 function validateEnv() {
@@ -42,12 +41,13 @@ function validateEnv() {
     MQTT_CLIENT_USER: str(),
     MQTT_CLIENT_PASS: str(),
     // OAuth2 Settings
+    OAUTH2_INTROSPECT_URL: url(),
     OAUTH2_TOKEN_URL: url(),
     OAUTH2_REVOKE_URL: url(),
-    OAUTH2_INTROSPECT_URL: url(),
     OAUTH2_CLIENT_ID: str(),
     OAUTH2_CLIENT_SECRET: str(),
     OAUTH2_SCOPE: str(),
+    OAUTH2_HYDRA_ADMIN_URL: url(),
     ACP_URL: url(),
   });
 

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 
 export const httpConfig: any = {
     host: process.env.HTTP_HOST,
