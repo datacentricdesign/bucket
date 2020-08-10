@@ -13,8 +13,6 @@ function validateEnv() {
   cleanEnv(process.env, {
     // Host folder where to store the data
     HOST_DATA_FOLDER: str(),
-    // Secret to encrypt all JWT
-    JWT_SECRET: str(),
     // Environment
     NODE_ENV: str(),
     DEV_USER: str(),
@@ -57,7 +55,6 @@ validateEnv()
 
 export default {
   homeDataFolder: process.env.HOME_DATA_FOLDER,
-  jwtSecret: process.env.JWT_SECRET,
   env: envConfig,
   orm: ORMConfig,
   http: httpConfig,

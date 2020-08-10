@@ -8,8 +8,6 @@ services:
     container_name: bucket-api
     environment:
       - HOST_DATA_FOLDER=$HOST_DATA_FOLDER
-
-      - JWT_SECRET=TEST
       
       - NODE_ENV=$NODE_ENV
       - DEV_USER=dcd:persons:test@test.test
