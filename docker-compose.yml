@@ -10,8 +10,8 @@ services:
       - HOST_DATA_FOLDER=$HOST_DATA_FOLDER
       
       - NODE_ENV=$NODE_ENV
-      - DEV_USER=dcd:persons:test@test.test
-      - DEV_TOKEN=tester-token
+      - DEV_USER=$DEV_USER
+      - DEV_TOKEN=$DEV_TOKEN
       
       - HTTP_HOST=$HTTP_HOST
       - HTTP_PORT=$HTTP_PORT
@@ -47,12 +47,14 @@ services:
       - OAUTH2_CLIENT_SECRET=$OAUTH2_CLIENT_SECRET
       - OAUTH2_SCOPE=$OAUTH2_SCOPE
 
-      - ACP_URL=http://localhost:4466
+      - ACP_URL=$ACP_URL
     ports:
-      - 8889:8080
+      - 8081:8081
     depends_on:
       - bucket-postgres
       - bucket-influxdb
+    volumes:
+      - ./certs:/etc/certs
 
   bucket-ui:
     # image: datacentricdesign/bucket-ui:release-0.0.12
@@ -61,9 +63,9 @@ services:
     container_name: bucket-ui
     environment:
      - NGINX_HOST=localhost
-     - NGINX_PORT=8888
+     - NGINX_PORT=8081
     ports:
-      - 8888:8888
+      - 8081:8081
 
   bucket-postgres:
     image: postgres:9.6
@@ -83,9 +85,9 @@ services:
     container_name: bucket-influxdb
     volumes:
       - $HOST_DATA_FOLDER/bucket-influxdb:/var/lib/influxdb
-    ports:
-      - 8086:8086
-      - 8083:8083
+    # ports:
+    #   - 8086:8086
+    #   - 8083:8083
     environment:
       - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
       - INFLUXDB_ADMIN_ENABLED=true
