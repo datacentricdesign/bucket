@@ -61,10 +61,8 @@ services:
       context: ./bucket-ui
     container_name: bucket-ui
     environment:
-     - NGINX_HOST=localhost
+     - NGINX_HOST=dwd.tudelft.nl
      - NGINX_PORT=8081
-    ports:
-      - 8081:8081
 
   bucket-postgres:
     image: postgres:9.6
