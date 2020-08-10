@@ -22,7 +22,7 @@ export class NavbarComponent implements OnInit {
   private nativeElement: Node;
   private toggleButton;
   private sidebarVisible: boolean;
-  public userProfile: object;
+  public userProfile: UserProfile;
 
   public isCollapsed = true;
   @ViewChild("navbar-cmp", { static: false }) button;
@@ -41,7 +41,11 @@ export class NavbarComponent implements OnInit {
       this.sidebarClose();
     });
     if (this.oauthService.hasValidAccessToken() && this.oauthService.hasValidIdToken()) {
-      this.userProfile = this.oauthService.getIdentityClaims()
+      const claim:any = this.oauthService.getIdentityClaims()
+      this.userProfile = {
+        name: claim.name,
+        email: claim.email
+      }
     }
   }
   getTitle() {
