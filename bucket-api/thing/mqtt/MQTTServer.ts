@@ -3,17 +3,100 @@ import { Subscription, PublishPacket } from 'aedes'
 import * as fs from 'fs'
 import * as tls from 'tls'
 import * as net from 'net'
-import * as ws from 'websocket-stream'
 import config from '../../config'
 import { ThingMQTTClient } from './ThingMQTTClient'
-import { Context } from '@datacentricdesign/types'
+import { Context, DCDError } from '@datacentricdesign/types'
 import { httpConfig } from '../../config/httpConfig'
+import { AuthController } from '../http/AuthController'
+import PropertyController from '../property/PropertyController'
+import { Property } from '../property/Property'
 
 interface Client extends Aedes.Client {
   context: Context
 }
 
-const aedes = Aedes()
+const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, packet: PublishPacket, callback: Function) => {
+  if (client.context.userId === config.mqtt.client.username) {
+    return callback(null)
+  }
+
+  let resource = 'dcd:' + packet.topic.substr(1).split('/').join(':')
+  if (resource.startsWith('dcd:things:dcd:things:')) {
+    resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
+  }
+
+  const acp = {
+    action: 'dcd:actions:update',
+    resource: resource,
+    subject: client.context.userId
+  }
+
+  try {
+    await AuthController.policyService.check(acp)
+    callback(null)
+  } catch(errorResult) {
+      console.debug(JSON.stringify(errorResult))
+      const error = new DCDError(4031, 'NOT authorised to publish on ' + packet.topic)
+      callback(error)
+  }
+}
+
+const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Client, packet: Subscription, callback: Function) => {
+  if (client.context.userId === config.mqtt.client.username) {
+    return callback(null, packet)
+  }
+
+  let resource = 'dcd:'
+    + packet.topic.substr(1).split('/').join(':').replace('#', '<.*>')
+  if (resource.startsWith('dcd:things:dcd:things:')) {
+    resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
+  }
+
+  const acp = {
+    action: 'dcd:actions:read',
+    resource: resource,
+    subject: client.context.userId
+  }
+
+  try {
+    await AuthController.policyService.check(acp)
+    callback(null, packet)
+  } catch(errorResult) {
+      console.error('error subscribe keto')
+      console.error(errorResult)
+      const error = new DCDError(4031, 'Subscription denied to ' + packet.topic)
+      console.debug(JSON.stringify(error))
+      callback(error)
+  }
+}
+
+const authenticate: Aedes.AuthenticateHandler = (client: Client, username: string, password: Buffer, callback: Function) => {
+  console.log('authenticate with credentials: ' + username)
+  if (username === config.mqtt.client.username) {
+    console.log('DCD client mqtt')
+    client.context = {
+      userId: username
+    }
+    // client.user.token = password
+    return callback(null, true)
+  } else {
+    console.log('NOT DCD client mqtt')
+  }
+
+  AuthController.authService.checkJWTAuth(password.toString(), username)
+    .then(() => {
+      client.context = {
+        userId: username
+      }
+      callback(null, true)
+    })
+    .catch((error:DCDError) => {
+      console.error(error)
+      callback(error, false)
+    })
+}
+
+const aedes = Aedes({authenticate, authorizePublish, authorizeSubscribe})
 
 let server: any
 
@@ -35,118 +118,59 @@ export const mqttInit = () => {
   })
 }
 
-server.on('clientReady', (client: Client) => {
+aedes.on('clientReady', (client: Client) => {
   console.log('New connection: ' + client.id)
+  updateStatusProperty(client as Client, "Connected")
 })
 
-server.on('subscribed', () => {
+aedes.on('subscribe', (result) => {
   console.log('subscribed')
+  console.log(result)
 })
 
-// if (process.env.WS === 'true') {
-//   const httpServer = require('http').createServer()
-//   const port = 8888
+aedes.on('closed', () => {
+  console.log('closed')
+})
 
-//   ws.createServer({ server: httpServer }, aedes.handle)
+aedes.on('ping', (packet, client) => {
+  console.log('ping')
+  updateStatusProperty(client as Client, "Ping")
+})
 
-//   httpServer.listen(port, function () {
-//     console.log('websocket server listening on port ', port)
-//   })
-// }
+aedes.on('clientDisconnect', (client) => {
+  console.log('clientDisconnect')
+  updateStatusProperty(client as Client, "Disconnected")
+})
 
-server.authorizePublish = (client: Client, packet: PublishPacket, callback: Function) => {
-  console.log('Authorising to publish on ' + packet.topic)
-  if (client.context.userId === config.mqtt.client.username) {
-    return callback(null, true)
+function updateStatusProperty(client: Client, status:string) {
+  console.log('update status property...')
+  if (client.context.userId.startsWith('dcd:things:')) {
+    findOrCreateMQTTStatusProperty(client.context.userId)
+      .then( (property: Property) => {
+        property.values = [[new Date().getTime(),status]]
+        PropertyController.propertyService.updatePropertyValues(property)
+      })
+      .catch( (error) => {
+        console.log(error)
+      })
   }
-
-  let resource = 'dcd:' + packet.topic.substr(1).split('/').join(':')
-  if (resource.startsWith('dcd:things:dcd:things:')) {
-    resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
-  }
-
-  const acp = {
-    action: 'dcd:actions:update',
-    resource: resource,
-    subject: client.context.userId
-  }
-  console.log(acp)
-
-  return callback(null, true)
-
-  // model.policies.check(acp)
-  //   .then(() => {
-  //     console.log('authorised to publish on ' + packet.topic)
-  //     callback(null, true)
-  //   })
-  //   .catch(() => {
-  //     const message = 'NOT authorised to publish on ' + packet.topic
-  //     console.error(message)
-  //     callback(new Error(message), false)
-  //   })
 }
 
-server.authorizeSubscribe = (client: Client, packet: Subscription, callback: Function) => {
-  console.log('Authorising to subscribe on ' + packet.topic)
-  if (client.context.userId === this.settings.client.username) {
-    return callback(null, true)
-  }
-
-  let resource = 'dcd:'
-    + packet.topic.substr(1).split('/').join(':').replace('#', '<.*>')
-  if (resource.startsWith('dcd:things:dcd:things:')) {
-    resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
-  }
-
-  const acp = {
-    action: 'dcd:actions:read',
-    resource: resource,
-    subject: client.context.userId
-  }
-
-  return callback(null, true)
-
-  // model.policies.check(acp)
-  //   .then(() => {
-  //     console.log('authorised to subscribe on ' + packet.topic)
-  //     callback(null, true)
-  //   })
-  //   .catch(() => {
-  //     const message = 'Subscription denied to ' + packet.topic
-  //     callback(new Error(message), false)
-  //   })
-}
-
-server.authenticate = (client: Client, username: string, password: Buffer, callback: Function) => {
-  console.log('authenticate with credentials: ' + username)
-  if (username === config.mqtt.client.username) {
-    console.log('DCD client mqtt')
-    client.context = {
-      userId: username
+/**
+ * 
+ * @param thingId
+ */
+async function findOrCreateMQTTStatusProperty(thingId: string): Promise<Property> {
+  try {
+    const properties = await PropertyController.propertyService.getPropertiesByTypeId(thingId, 'MQTT_STATUS')
+    if (properties.length > 0) {
+      return Promise.resolve(properties[0])
     }
-    // client.user.token = password
-    return callback(null, true)
-  } else {
-    console.log('NOT DCD client mqtt')
-  }
-
-  if (config.env.env === 'development') {
-    client.context = {
-      userId: config.env.devUser
+    else {
+      return PropertyController.propertyService.createNewProperty(thingId, { typeId: 'MQTT_STATUS' })
     }
-    // client.user.token = config.env.devToken
-    return callback(null, true)
   }
-
-  // model.auth.checkJWTAuth(password, username)
-  //   .then(() => {
-  //     client.user = {}
-  //     client.user.subject = username
-  //     client.user.token = password
-  //     callback(null, true)
-  //   })
-  //   .catch((error) => {
-  //     console.error(error)
-  //     callback(error, false)
-  //   })
+  catch (error) {
+    return Promise.reject(error)
+  }
 }

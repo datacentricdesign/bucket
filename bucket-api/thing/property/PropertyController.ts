@@ -16,6 +16,7 @@ export class PropertyController {
     static propertyService = new PropertyService();
     static thingService = new ThingService();
 
+
     static parseValueOptions(req: Request): ValueOptions {
         return {
             from: Number.parseInt(req.query.from + ""),
@@ -54,6 +55,8 @@ export class PropertyController {
             res.status(404).send("Property not found in the thing.");
             return;
         }
+
+
         return res.send(property);
     };
 

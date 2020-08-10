@@ -22,6 +22,7 @@ export class PropertyService {
     static thingService = new ThingService();
     private influx: InfluxDB
     private ready: boolean = false
+    private cachedTypes = {}
 
     /**
      *
@@ -75,7 +76,6 @@ export class PropertyService {
         // Try to retrieve Property from the database
         const propertyRepository = getRepository(Property);
         await propertyRepository.save(property);
-        this.toKafka(property);
         return property;
     }
 
@@ -134,6 +134,26 @@ export class PropertyService {
     }
 
     /**
+     * List Properties by Type Id.
+     * @param {string} propertyId
+     * returns {Property[]}
+     **/
+    async getPropertiesByTypeId(thingId: string, typeId: string): Promise<Property[]> {
+        // Get properties from the database
+        const propertyRepository = getRepository(Property);
+        let properties = await propertyRepository
+                                .createQueryBuilder("property")
+                                .innerJoinAndSelect("property.thing", "thing")
+                                .innerJoinAndSelect("property.type", "type")
+                                .innerJoinAndSelect("type.dimensions", "dimensions")
+                                .where("thing.id = :thingId AND type.id = :typeId")
+                                .setParameters({ thingId: thingId, typeId: typeId })
+                                .getMany();
+                            
+        return properties
+    }
+
+    /**
      * Edit one Property
      * @param property
      * returns Promise
@@ -148,8 +168,26 @@ export class PropertyService {
      * @param property
      * returns Promise
      **/
-    updatePropertyValues(property: Property) {
+    async updatePropertyValues(property: Property) {
+        if (property.type === undefined) {
+            property.type = await this.getPropertyType(property.id)
+        }
         return this.valuesToInfluxDB(property)
+    }
+
+    async getPropertyType(propertyId: string) {
+        if (!this.cachedTypes.hasOwnProperty(propertyId)) {
+            const propertyRepository = getRepository(Property)
+            const property: Property = await propertyRepository
+                                                .createQueryBuilder("property")
+                                                .innerJoinAndSelect("property.type", "type")
+                                                .innerJoinAndSelect("type.dimensions", "dimensions")
+                                                .where("property.id = :propertyId")
+                                                .setParameters({ propertyId: propertyId })
+                                                .getOne()
+            this.cachedTypes[propertyId] = property.type
+        }
+        return this.cachedTypes[propertyId]
     }
 
     /**
@@ -167,15 +205,6 @@ export class PropertyService {
     }
 
     /**
-     * Send Property to Kafka.
-     * @param {Property} property
-     */
-    toKafka(property: Property) {
-        return Promise.resolve();
-        // return this.kafka.pushData('properties', [property], property.id)
-    }
-
-    /**
      * @param {Property} property
      */
     private valuesToInfluxDB(property:Property) {
@@ -184,7 +213,6 @@ export class PropertyService {
         for (let index in property.values) {
             let ts:any;
             const values:Array<string|number> = property.values[index]
-            console.log(values)
             if (values.length - 1 === dimensions.length ||
                 values.length === dimensions.length) {
                 if (values.length === dimensions.length) {

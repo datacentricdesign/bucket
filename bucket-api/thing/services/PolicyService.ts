@@ -92,9 +92,10 @@ export class PolicyService {
 
   async createPolicy(subjectId: string, resourceId: string, roleName: string, effect = 'allow', id?: string) {
     console.log("creating policy...")
+    const policyId: string = id !== undefined ? id : uuidv4()
     const roleRepository = getRepository(Role);
     const newRole: Role = {
-      id: id !== undefined ? id : uuidv4(),
+      id: policyId,
       actorEntityId: subjectId,
       subjectEntityId: resourceId,
       role: roleName
@@ -107,7 +108,7 @@ export class PolicyService {
     }
 
     const policy = {
-      id: id,
+      id: policyId,
       effect: effect,
       actions: PolicyService.roleToActions(roleName),
       subjects: [subjectId],
@@ -132,7 +133,6 @@ export class PolicyService {
 
   async check(acp: any) {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/regex/allowed'
-    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'POST',
@@ -206,16 +206,15 @@ export class PolicyService {
   }
 }
 
-  static entityToResource(entityId:string) {
-    if (entityId === 'dcd') {
-      return ['dcd:things', 'dcd:persons']
+  static entityToResource(thingId:string) {
+    if (thingId === 'dcd') {
+      return ['dcd:things']
     }
     return [
-      entityId,
-      entityId + ':properties',
-      entityId + ':properties:<.*>',
-      entityId + ':interactions',
-      entityId + ':interactions:<.*>'
+      thingId,
+      thingId + ':properties',
+      thingId + ':properties:<.*>',
+      thingId + ':logs',
     ]
   }
 }

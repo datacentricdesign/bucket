@@ -21,8 +21,8 @@ export const introspectToken = (requiredScope: string[]) => {
         //     userId: user.entityId
         // }
         // return next()
-        if (requiredScope.length === 0 && req.params.entity !== undefined) {
-            requiredScope = [req.params.entity]
+        if (requiredScope.length === 0) {
+            requiredScope = ['dcd:things']
         }
         
         try {
@@ -31,15 +31,15 @@ export const introspectToken = (requiredScope: string[]) => {
                 .then(() => {
                     if (
                         token.split('.').length === 3 &&
-                        req.params.entityId !== undefined
+                        req.params.thingId !== undefined
                     ) {
                         return AuthController.authService
-                            .checkJWTAuth(token, req.params.entityId)
+                            .checkJWTAuth(token, req.params.thingId)
                             .then((token:any) => {
                                 const user = {
-                                    entityId: req.params.entityId,
+                                    entityId: req.params.thingId,
                                     token: token,
-                                    sub: req.params.entityId
+                                    sub: req.params.thingId
                                 }
                                 return Promise.resolve(user)
                             })

@@ -28,7 +28,7 @@ export class Property implements IProperty {
     @ManyToOne(type => PropertyType, propertyType => propertyType)
     type: PropertyType;
 
-    @OneToOne(type => Thing, thing => thing.id)
+    @ManyToOne(type => Thing, thing => thing.id)
     @JoinColumn({name:"thingId"})
     thing: IThing;
 
