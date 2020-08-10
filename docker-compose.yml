@@ -48,8 +48,6 @@ services:
       - OAUTH2_SCOPE=$OAUTH2_SCOPE
 
       - ACP_URL=$ACP_URL
-    ports:
-      - 8081:8081
     depends_on:
       - bucket-postgres
       - bucket-influxdb
