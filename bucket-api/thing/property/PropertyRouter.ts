@@ -137,3 +137,15 @@ PropertyRouter.delete(
      [introspectToken(['dcd:properties']), checkPolicy('properties', 'delete')],
      PropertyController.deleteOneProperty
 );
+
+PropertyRouter.get(
+     "/:propertyId/count",
+     [introspectToken(['dcd:properties']), checkPolicy('properties', 'read')],
+     PropertyController.countDataPoints
+);
+
+PropertyRouter.get(
+     "/:propertyId/last",
+     [introspectToken(['dcd:properties']), checkPolicy('properties', 'read')],
+     PropertyController.lastDataPoints
+);

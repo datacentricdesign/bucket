@@ -18,6 +18,9 @@ export class PropertyController {
 
 
     static parseValueOptions(req: Request): ValueOptions {
+        if (req.query.from === undefined || req.query.to === undefined) {
+            return undefined
+        }
         return {
             from: Number.parseInt(req.query.from + ""),
             to: Number.parseInt(req.query.to + ""),
@@ -49,6 +52,15 @@ export class PropertyController {
         // Get the Property from the Service
         const property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId, options)
         
+        if (req.accepts('application/json')) {
+            return res.send(property)
+          } else if (req.accepts('text/csv')) {
+              res.set({ 'Content-Type': 'text/csv' })
+              res.send(PropertyController.toCSV(property))
+          } else {
+            return res.send(property)
+          }
+
         // Double-check the property is actually part of this thing
         if (property === undefined) {
             // If not found, send a 404 response
@@ -158,6 +170,47 @@ export class PropertyController {
             next(error)
         }
     };
+
+    static countDataPoints = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the property ID from the url
+        const thingId = req.params.thingId;
+        const propertyId = req.params.propertyId;
+        const from = req.query.from as string;
+        const timeInterval = req.query.timeInterval as string;
+        // Call the Service
+        try {
+            const result = await PropertyController.propertyService.countDataPoints(thingId, propertyId, undefined, from, timeInterval)
+            res.status(200).send(result);
+        } catch(error) {
+            next(error)
+        }
+    };
+
+    static lastDataPoints = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the property ID from the url
+        const thingId = req.params.thingId;
+        const propertyId = req.params.propertyId;
+        // Call the Service
+        try {
+            const result = await PropertyController.propertyService.lastDataPoints(thingId, propertyId)
+            res.status(200).send(result);
+        } catch(error) {
+            next(error)
+        }
+    };
+
+    static toCSV(property:Property) {
+        let csv = 'time'
+        for (let i = 0; i < property.type.dimensions.length; i++) {
+          csv += ',' + property.type.dimensions[i].name
+        }
+        csv += '\n'
+        for (let i = 0; i < property.values.length; i++) {
+          csv += property.values[i].join(',')
+          csv += '\n'
+        }
+        return csv
+      }
 };
 
 export default PropertyController;

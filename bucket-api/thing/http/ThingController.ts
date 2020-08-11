@@ -39,7 +39,7 @@ export class ThingController {
 
     static createNewThing = async (req: Request, res: Response, next: NextFunction) => {
         // Get parameters from the body
-        let {name, description, type} = req.body;
+        let {name, description, type, pem} = req.body;
         let thing = new Thing();
         thing.name = name;
         thing.description = description
@@ -56,6 +56,11 @@ export class ThingController {
 
         try {
             const createdThing = await ThingController.thingService.createNewThing(thing)
+            if (pem !== undefined) {
+                const error = checkPEM(pem)
+                if (error!==undefined) return next(error)
+                await ThingController.thingService.editThingPEM(thing.id, pem)
+            }
             // If all ok, send 201 response
             return res.status(201).send(createdThing);
         } catch (error) {
@@ -102,13 +107,8 @@ export class ThingController {
         const thingId = req.params.thingId;
         // Get pem from body
         const pem = req.body.pem;
-        if (pem === undefined) {
-            return next(new DCDError(400, 'The public key should be provided in the body parameter "pem".'))
-        }
-        if (!pem.startsWith('-----BEGIN PUBLIC KEY-----') ||
-            !pem.endsWith('-----END PUBLIC KEY-----')) {
-            return next(new DCDError(400, 'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"'))
-        }
+        const error = checkPEM(pem)
+        if (error!==undefined) return next(error)
         // Call the Service
         ThingController.thingService.editThingPEM(thingId, pem)
         .then( () => {
@@ -130,6 +130,31 @@ export class ThingController {
             next(error)
         }
     };
+
+    static countDataPoints = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the property ID from the url
+        const from = req.query.from;
+        const timeInterval = req.query.timeInterval;
+        // Call the Service
+        try {
+            const result = await ThingController.thingService.countDataPoints(req.context.userId, from, timeInterval)
+            console.log(result)
+            res.status(200).send(result);
+        } catch(error) {
+            next(error)
+        }
+    };
+
 };
 
 export default ThingController;
+
+function checkPEM(pem:string) {
+    if (pem === undefined) {
+        return new DCDError(400, 'The public key should be provided in the body parameter "pem".')
+    }
+    if (!pem.startsWith('-----BEGIN PUBLIC KEY-----') ||
+        !pem.endsWith('-----END PUBLIC KEY-----')) {
+        return new DCDError(400, 'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"')
+    }
+}

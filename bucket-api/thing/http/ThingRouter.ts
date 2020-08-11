@@ -37,6 +37,12 @@ ThingRouter.get(
      [introspectToken(['dcd:things'])],
      ThingController.getThingsOfAPerson);
 
+
+ThingRouter.get(
+     "/count",
+     [introspectToken(['dcd:things'])],
+     ThingController.countDataPoints);
+
 /**
      * @api {get} /things/:thingId Read
      * @apiGroup Thing

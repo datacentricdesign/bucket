@@ -21,7 +21,7 @@ import { OAuthModule } from 'angular-oauth2-oidc'
 import { BrowserModule } from '@angular/platform-browser'
 import { SharedModule } from './shared/shared.module';
 import { BASE_URL } from './app.tokens'
-import { AppService } from './app.service'
+import { AppService } from './app.service';
 
 export function init_app(appService: AppService) {
   return () => appService.load();

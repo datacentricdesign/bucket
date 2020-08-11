@@ -3,7 +3,7 @@ import * as jwt from 'jsonwebtoken'
 import { pem2jwk } from 'pem-jwk'
 
 import fetch from 'node-fetch'
-import {RequestInit} from 'node-fetch'
+import { RequestInit } from 'node-fetch'
 import * as qs from 'querystring'
 import * as SimpleOauth from 'simple-oauth2'
 import { DCDError } from '@datacentricdesign/types'
@@ -90,7 +90,7 @@ export class AuthService {
      * @param {String} privateKey
      * @returns {*}
      */
-    generateJWT(privateKey: string):string {
+    generateJWT(privateKey: string): string {
         const currentTime = Math.floor(Date.now() / 1000)
         const token = {
             iat: currentTime - 3600,
@@ -107,7 +107,7 @@ export class AuthService {
      * @param body
      * @returns {Promise}
      */
-    generateJWK(set:any, body:any) {
+    generateJWK(set: any, body: any) {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + set
         return this.authorisedRequest('POST', url, body)
             .then(result => {
@@ -135,7 +135,7 @@ export class AuthService {
      * @param {string} setId
      * @returns {Promise<string|DCDError>}
      */
-    getJWK(setId:string) {
+    getJWK(setId: string) {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
         console.log(url)
         return this.authorisedRequest('GET', url)
@@ -154,18 +154,18 @@ export class AuthService {
     async setJWK(setId: string, jwk: any) {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
         return this.refresh()
-                .then(() => {
-                    return this.authorisedRequest('PUT', url, {keys:[jwk]});
-                })
-                .then((result) => {
-                    const createdJWK = result.keys[0]
-                    // Convert the JWK into a public key, and store it for later use
-                    this.jwtTokenMap[setId] = jwkToBuffer(createdJWK)
-                    return Promise.resolve(createdJWK)
-                })
-                .catch(error => {
-                    return Promise.reject(error)
-                })
+            .then(() => {
+                return this.authorisedRequest('PUT', url, { keys: [jwk] });
+            })
+            .then((result) => {
+                const createdJWK = result.keys[0]
+                // Convert the JWK into a public key, and store it for later use
+                this.jwtTokenMap[setId] = jwkToBuffer(createdJWK)
+                return Promise.resolve(createdJWK)
+            })
+            .catch(error => {
+                return Promise.reject(error)
+            })
     }
 
     setPEM(setId: string, pem: string) {
@@ -188,7 +188,7 @@ export class AuthService {
                     return Promise.reject(error)
                 })
         }
-        const introspectionToken:any = jwt.verify(acp.token, this.jwtTokenMap[entity])
+        const introspectionToken: any = jwt.verify(acp.token, this.jwtTokenMap[entity])
         const currentTime = Math.floor(new Date().getMilliseconds() / 1000)
 
         if (
@@ -230,13 +230,15 @@ export class AuthService {
                     return Promise.reject(error)
                 })
         }
+        console.log('known public key')
         return jwt.verify(
             token.toString(),
             this.jwtTokenMap[thingId],
             {},
             (error: Error, introspectionToken: Token) => {
-                console.log(error)
+                console.log('result verify')
                 if (error) {
+                    console.log(error)
                     return Promise.reject(error)
                 }
                 const currentTime = Math.floor(new Date().getMilliseconds() / 1000)
@@ -292,7 +294,7 @@ export class AuthService {
      * @returns {Promise}
      */
     async authorisedRequest(method: string, url: string, body: object = null, type: string = 'application/json'): Promise<any> {
-        const options:RequestInit = {
+        const options: RequestInit = {
             headers: {
                 Authorization: this.getBearer(),
                 'Content-Type': type,

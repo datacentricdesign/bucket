@@ -1,0 +1,95 @@
+<div *ngIf="property$ | async as property else noData">
+    <h1><i class="nc-icon nc-sound-wave"></i>&nbsp;{{property.name}}</h1>
+    <p>
+        <i class="nc-icon nc-app"></i>&nbsp;
+        <a href="./things/{{property.thing.id}}">{{property.thing.name}}</a>
+    </p>
+    <p>{{property.description}}</p>
+
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <form (ngSubmit)="download()" #propertyForm="ngForm">
+                <div class="card card-stats">
+                    <div class="card-header">
+                        <h3>Download data</h3>
+                        Here you can download all or part of the data attached to the property. This data is formatted
+                        as Comma-Separated Values. The first line will represent the columns' labels. The first column
+                        represent the time (UNIX timestamp) and the followings are each property dimension.
+                    </div>
+                    <div class="card-body">
+                        <div style="max-width: 500px;">
+                            <div class="form-group">
+                                <label for="from">From</label>
+                                <input type="date" class="form-control" id="from" required
+                                    [(ngModel)]="downloadModel.from" name="from" #from="ngModel">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="to">To</label>
+                                <input type="date" class="form-control" id="to" required [(ngModel)]="downloadModel.to"
+                                    name="to" #to="ngModel">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer ">
+                        <hr>
+                        <button type="submit" class="btn btn-success">
+                            <i class="nc-icon nc-cloud-download-93"></i>
+                            Download
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <h3>Settings</h3>
+                    <p>
+                        ID: {{property.id}}
+                    </p>
+                    <div style="max-width: 500px;">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                [(ngModel)]="updateProperty.name" #name="ngModel">
+                            <button (click)="editName(name.value)" class="btn btn-success"
+                                [disabled]="updateProperty.name===''">Rename</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Description</label>
+                            <input type="text" class="form-control" id="description" name="description"
+                                [(ngModel)]="updateProperty.description" #description="ngModel">
+                            <button (click)="editDescription(description.value)" class="btn btn-success"
+                                [disabled]="updateProperty.description===''">Update the description</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <h3>Dangerous Zone</h3>
+                    <p>
+                        Here you can delete your Property.<br>
+                        <b>Attention:</b> this action cannot be undone. It will erase all data attached to this
+                        Property.
+                    </p>
+                    <button (click)="delete()" class="btn btn-danger">Delete {{property.name}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #noData>Loading Property's Data...</ng-template>

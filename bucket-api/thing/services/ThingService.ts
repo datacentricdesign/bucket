@@ -8,6 +8,8 @@ import { PolicyService } from "./PolicyService";
 
 import { v4 as uuidv4 } from 'uuid';
 import { envConfig } from "../../config/envConfig";
+import PropertyController from "../property/PropertyController";
+import { Property } from "../property/Property";
 
 export interface Token {
     aud: string,
@@ -59,10 +61,6 @@ export class ThingService {
                 await thingRepository.save(thing);
                 await ThingService.policyService.grant(thing.personId, thing.id, 'owner');
                 await ThingService.policyService.grant(thing.id, thing.id, 'subject');
-                console.log(thing)
-                if (thing.pem !== '') {
-                    return ThingService.authService.setPEM(thing.id, thing.pem);
-                }
                 return thing;
             }
             // unknown error to report
@@ -144,5 +142,19 @@ export class ThingService {
         return ThingService.authService.refresh().then(() => {
             return ThingService.authService.generateJWK(thingId, jwkParams)
         })
+    }
+
+    async countDataPoints(personId, from, timeInterval): Promise<any> {
+        const things = await this.getThingsOfAPerson(personId);
+        for (let i=0;i<things.length;i++) {
+            const thing = things[i]
+            for (let j=0; j<thing.properties.length;j++) {
+                const property:Property = thing.properties[j]
+                const result = await PropertyController.propertyService.countDataPoints(thing.id, property.id, property.type.id, from, timeInterval)
+                console.log(result)
+                property.values = result
+            }
+        }
+        return things
     }
 }

@@ -20,6 +20,7 @@ export class AppComponent {
       .subscribe(_ => {
         console.debug('state', this.oauthService.state);
         this.oauthService.loadUserProfile();
+        window.location.href = './things/dashboard'
       });
 
       // Display all events

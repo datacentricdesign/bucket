@@ -13,7 +13,7 @@ export const AppRoutes: Routes = [
     component: LandingPageComponent
   },
   {
-    path: 'dashboard',
+    path: 'things',
     loadChildren: () =>
       import('./thing-bucket/thing-bucket.module').then(
         mod => mod.ThingBucketModule

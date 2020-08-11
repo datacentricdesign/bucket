@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DTOThing, DTORaspberryPi } from '@datacentricdesign/types';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AppService } from 'app/app.service';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 @Component({
   selector: 'app-thing-form',
@@ -19,7 +20,8 @@ export class ThingFormComponent implements OnInit {
   model:DTOThing = {
     name: 'My Test Thing',
     description: 'A Thing to test!',
-    typeId: 'GENERIC'
+    type: 'GENERIC',
+    pem: ''
   }
 
   raspberryPi:DTORaspberryPi = {
@@ -31,15 +33,18 @@ export class ThingFormComponent implements OnInit {
     eduroamPass: ''
   }
 
+  constructor(private http: HttpClient, private appService: AppService, private oauthService: OAuthService) {
+    this.apiURL = this.appService.settings.apiURL;
+  }
+
   onSubmit() { 
-    this.http.post(this.apiURL + "/things", this.model).subscribe((data: any) => {
-      console.log(data)
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+    .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    this.http.post(this.apiURL + "/things", this.model, {headers}).subscribe((data: any) => {
+      window.location.href = './things/' + data.id;
     });
   }
 
-  constructor(private http: HttpClient, private appService: AppService) {
-    this.apiURL = this.appService.settings.apiURL;
-  }
 
   ngOnInit(): void {
   }
