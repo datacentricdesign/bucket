@@ -82,6 +82,9 @@ const authenticate: Aedes.AuthenticateHandler = (client: Client, username: strin
     console.log('NOT DCD client mqtt')
   }
 
+  if (password === undefined) {
+    return callback(new DCDError(403, 'Missing token in the password field.'), false)
+  }
   AuthController.authService.checkJWTAuth(password.toString(), username)
     .then(() => {
       client.context = {
