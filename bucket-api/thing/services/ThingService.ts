@@ -151,7 +151,6 @@ export class ThingService {
             for (let j=0; j<thing.properties.length;j++) {
                 const property:Property = thing.properties[j]
                 const result = await PropertyController.propertyService.countDataPoints(thing.id, property.id, property.type.id, from, timeInterval)
-                console.log(result)
                 property.values = result
             }
         }

@@ -54,6 +54,8 @@ services:
       - bucket-influxdb
     volumes:
       - ./certs:/etc/certs
+    ports:
+      - 8883:8883
 
   bucket-ui:
     # image: datacentricdesign/bucket-ui:release-0.0.12
@@ -82,9 +84,9 @@ services:
     container_name: bucket-influxdb
     volumes:
       - $HOST_DATA_FOLDER/bucket-influxdb:/var/lib/influxdb
-    # ports:
-    #   - 8086:8086
-    #   - 8083:8083
+    ports:
+      - 8086:8086
+      - 8083:8083
     environment:
       - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
       - INFLUXDB_ADMIN_ENABLED=true

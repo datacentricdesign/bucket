@@ -138,7 +138,6 @@ export class ThingController {
         // Call the Service
         try {
             const result = await ThingController.thingService.countDataPoints(req.context.userId, from, timeInterval)
-            console.log(result)
             res.status(200).send(result);
         } catch(error) {
             next(error)
