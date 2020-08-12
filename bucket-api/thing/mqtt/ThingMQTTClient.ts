@@ -4,6 +4,7 @@ import { PropertyService } from '../property/PropertyService'
 import PropertyController from '../property/PropertyController'
 import { MqttClient } from 'mqtt'
 import { Property } from '../property/Property'
+import config from '../../config'
 
 /**
  * This class set up an MQTT client as Bucket MQTT API,
@@ -23,7 +24,7 @@ export class ThingMQTTClient {
   }
 
   connect() {
-    const url = 'mqtt://' + this.host + ':' + this.port;
+    const url = 'mqtt' + (config.http.secured?'s':'') + '://' + this.host + ':' + this.port;
     console.log('MQTT connect: ' + url);
     this.client = mqtt.connect(url, this.settings);
     this.client.on('connect', onMQTTConnect.bind(this));
