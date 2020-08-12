@@ -6,7 +6,6 @@ import * as net from 'net'
 import config from '../../config'
 import { ThingMQTTClient } from './ThingMQTTClient'
 import { Context, DCDError } from '@datacentricdesign/types'
-import { httpConfig } from '../../config/httpConfig'
 import { AuthController } from '../http/AuthController'
 import PropertyController from '../property/PropertyController'
 import { Property } from '../property/Property'
@@ -100,7 +99,7 @@ const aedes = Aedes({authenticate, authorizePublish, authorizeSubscribe})
 
 let server: any
 
-if (httpConfig.secured === 'true') {
+if (config.http.secured === 'true') {
   console.log('Starting mqtts server over SSL...')
   const options = {
     key: fs.readFileSync(config.mqtt.secure.keyPath),
