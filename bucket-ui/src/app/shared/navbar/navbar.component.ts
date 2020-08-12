@@ -110,4 +110,9 @@ export class NavbarComponent implements OnInit {
     this.oauthService.logOut();
     this.oauthService.revokeTokenAndLogout();
   }
+
+  editProfile() {
+    var win = window.open('https://dwd.tudelft.nl/profile', '_blank');
+    win.focus();
+  }
 }
