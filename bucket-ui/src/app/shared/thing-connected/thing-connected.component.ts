@@ -30,7 +30,7 @@ export class ThingConnectedComponent implements OnInit {
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
     this.http.get<Thing[]>(this.apiURL + "/things", { headers }).subscribe((data: Thing[]) => {
-      if (this.things.length > 0) {
+      if (data.length > 0) {
         this.checkMQTTStatus(data).then((connectedThings) => {
           this.things = connectedThings
         })
