@@ -99,7 +99,7 @@ const aedes = Aedes({authenticate, authorizePublish, authorizeSubscribe})
 
 let server: any
 
-if (config.http.secured === 'true') {
+if (config.http.secured) {
   console.log('Starting mqtts server over SSL...')
   const options = {
     key: fs.readFileSync(config.mqtt.secure.keyPath),
