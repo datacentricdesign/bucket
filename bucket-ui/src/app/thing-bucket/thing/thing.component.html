@@ -28,7 +28,7 @@
                             </p>
                         </div>
                         <div *ngFor="let dimension of property.type.dimensions" style="text-align: right;">
-                            {{dimension.name}} <span *ngIf="{{dimension.unit!==''}}">({{dimension.unit}})</span><br>
+                            {{dimension.name}} <span *ngIf="dimension.unit!==''">({{dimension.unit}})</span><br>
                         </div>
                         <!-- </div> -->
                         <!-- </div> -->
