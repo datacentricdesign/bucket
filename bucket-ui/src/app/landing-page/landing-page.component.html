@@ -11,8 +11,7 @@
             </p>
 
             <div style="padding: 50px 0px" *ngIf="userProfile === undefined; else elseBlock">
-                <button (click)="loginCode()"  class="btn btn-success">Sign In</button>
-                <button (click)="signup()"  class="btn btn-info">Sign Up</button>
+                <button (click)="loginCode()"  class="btn btn-info">Sign In / Sign Up</button>
             </div>
 
             <ng-template #elseBlock>
