@@ -29,10 +29,16 @@ export class ThingConnectedComponent implements OnInit {
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
-    this.http.get<Thing[]>(this.apiURL + "/things", {headers}).subscribe((data: Thing[]) => {
-      this.checkMQTTStatus(data).then( (connectedThings) => {
-        this.things = connectedThings
-      })
+    this.http.get<Thing[]>(this.apiURL + "/things", { headers }).subscribe((data: Thing[]) => {
+      if (this.things.length > 0) {
+        this.checkMQTTStatus(data).then((connectedThings) => {
+          this.things = connectedThings
+        })
+      } else {
+        // if there is no things yet, we skip the statistics all together
+        document.getElementById('connected-things-panel').style.display = 'none';
+      }
+
     });
   }
 

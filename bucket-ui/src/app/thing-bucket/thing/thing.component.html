@@ -28,16 +28,16 @@
                             </p>
                         </div>
                         <div *ngFor="let dimension of property.type.dimensions" style="text-align: right;">
-                            {{dimension.name}} ({{dimension.unit}})<br>
+                            {{dimension.name}} <span *ngIf="{{dimension.unit!==''}}">({{dimension.unit}})</span><br>
                         </div>
                         <!-- </div> -->
                         <!-- </div> -->
                     </div>
                     <div class="card-footer ">
-                        <hr>
+                        <!-- <hr>
                         <div class="stats">
                             <i class="fa fa-refresh"></i> {{property.createdAt}}
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>

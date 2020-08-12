@@ -18,8 +18,9 @@
   .status {
     width: 10px;
     height: 10px;
-    animation: blinking 1s infinite;
     display: inline-block;
+    animation: none;
+    background-color: 'none';
   }
   .statusConnected {
     animation: blinking 1s infinite;

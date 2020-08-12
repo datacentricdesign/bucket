@@ -21,10 +21,15 @@ export class ThingStatsComponent implements OnInit {
   constructor(private thingService: ThingService) { }
 
   async ngOnInit(): Promise<void> {
+    const thingsAll = await this.thingService.dpCount('now()-52w')
+    if (thingsAll.length > 0){
+      this.buildChartTypes(thingsAll)
     const things1d = await this.thingService.dpCount('now()-1d', '1h')
     this.buildDataPointsChart(things1d)
-    const thingsAll = await this.thingService.dpCount('now()-52w')
-    this.buildChartTypes(thingsAll)
+    } else {
+      // if there is no things yet, we skip the statistics all together
+      document.getElementById('stats-panel').style.display = 'none';
+    }
   }
 
   buildChartTypes(things) {
