@@ -1,15 +1,18 @@
-import {Request, Response, Router, NextFunction} from "express";
-import {getRepository, DeleteResult} from "typeorm";
-import {validate} from "class-validator";
+import { Request, Response, Router, NextFunction } from "express";
+import { getRepository, DeleteResult } from "typeorm";
+import { validate } from "class-validator";
 
 import { Property } from "./Property";
 import { Thing } from "../Thing";
+
+import { multiparty } from 'multiparty'
 
 import { PropertyService } from "./PropertyService"
 import { ThingService } from "../services/ThingService"
 
 import { DCDError } from "@datacentricdesign/types";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
+import { Dimension } from "./dimension/Dimension";
 
 export class PropertyController {
 
@@ -38,7 +41,7 @@ export class PropertyController {
             const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(thingId)
             // Send the things object
             res.send(properties);
-        } catch(error) {
+        } catch (error) {
             res.status(404).send(error);
         }
     };
@@ -51,15 +54,15 @@ export class PropertyController {
 
         // Get the Property from the Service
         const property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId, options)
-        
+
         if (req.accepts('application/json')) {
             return res.send(property)
-          } else if (req.accepts('text/csv')) {
-              res.set({ 'Content-Type': 'text/csv' })
-              res.send(PropertyController.toCSV(property))
-          } else {
+        } else if (req.accepts('text/csv')) {
+            res.set({ 'Content-Type': 'text/csv' })
+            res.send(PropertyController.toCSV(property))
+        } else {
             return res.send(property)
-          }
+        }
 
         // Double-check the property is actually part of this thing
         if (property === undefined) {
@@ -74,8 +77,8 @@ export class PropertyController {
 
     static createNewProperty = async (req: Request, res: Response, next: NextFunction) => {
         // Get parameters from the body
-        let {name, description, typeId} = req.body;
-        let property:DTOProperty = {};
+        let { name, description, typeId } = req.body;
+        let property: DTOProperty = {};
         property.name = name;
         property.description = description
         property.typeId = typeId
@@ -100,7 +103,7 @@ export class PropertyController {
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
         // Get values from the body
-        const {name, description} = req.body;
+        const { name, description } = req.body;
         let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
         if (property === undefined) {
             // If not found, send a 404 response
@@ -128,12 +131,10 @@ export class PropertyController {
         res.status(204).send();
     };
 
-    static updatePropertyValues = async (req: Request, res: Response) => {
+    static updatePropertyValues = async (req: Request, res: Response, next: NextFunction) => {
         // Get the ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
-        // Get values from the body
-        const {values} = req.body;
         let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
 
         // Double-check the property is actually part of this thing
@@ -143,15 +144,15 @@ export class PropertyController {
             return;
         }
 
-        property.values = values
-
-        // Try to save
-        try {
-            await PropertyController.propertyService.updatePropertyValues(property)
-        } catch (e) {
-            console.log(e)
-            res.status(500).send("failed updating property values");
-            return;
+        const contentType = req.headers['content-type']
+        if (contentType.indexOf('application/json') === 0) {
+            // Get values from the body
+            const { values } = req.body;
+            property.values = values
+            saveValuesAndRespond(property, res)
+        } else if (contentType.indexOf('multipart/form-data') === 0) {
+            // Look for data in a CSV file
+            return PropertyController.uploadDataFile(property, req, res, next)
         }
         // After all send a 204 (no content, but accepted) response
         res.status(204).send();
@@ -166,7 +167,7 @@ export class PropertyController {
             await PropertyController.propertyService.deleteOneProperty(thingId, propertyId)
             // After all send a 204 (no content, but accepted) response
             res.status(204).send();
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
@@ -181,10 +182,30 @@ export class PropertyController {
         try {
             const result = await PropertyController.propertyService.countDataPoints(thingId, propertyId, undefined, from, timeInterval)
             res.status(200).send(result);
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
+
+    static uploadDataFile(property: Property, request, response, next) {
+        const form = new multiparty.Form()
+        let dataStr = ''
+        // listen on part event for data file
+        form.on('part', part => {
+            if (!part.filename) {
+                return
+            }
+            part.on('data', buf => {
+                dataStr += buf.toString()
+            })
+        })
+        form.on('close', () => {
+            property.values = csvStrToValueArray(property.type.dimensions, dataStr)
+            saveValuesAndRespond(property, response)
+        })
+        form.on('error', next)
+        form.parse(request)
+    }
 
     static lastDataPoints = async (req: Request, res: Response, next: NextFunction) => {
         // Get the property ID from the url
@@ -194,23 +215,60 @@ export class PropertyController {
         try {
             const result = await PropertyController.propertyService.lastDataPoints(thingId, propertyId)
             res.status(200).send(result);
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
 
-    static toCSV(property:Property) {
+    static toCSV(property: Property) {
         let csv = 'time'
         for (let i = 0; i < property.type.dimensions.length; i++) {
-          csv += ',' + property.type.dimensions[i].name
+            csv += ',' + property.type.dimensions[i].name
         }
         csv += '\n'
         for (let i = 0; i < property.values.length; i++) {
-          csv += property.values[i].join(',')
-          csv += '\n'
+            csv += property.values[i].join(',')
+            csv += '\n'
         }
         return csv
-      }
+    }
 };
 
 export default PropertyController;
+
+/**
+ * @param property
+ * @param csvStr
+ * @returns {{id: *, values: Array}}
+ */
+function csvStrToValueArray(dimensions: Dimension[], csvStr: string) {
+    const values = []
+    csvStr.split('\n').forEach(line => {
+        if (line !== '') {
+            const val: any[] = line.split(',')
+            for (let i = 1; i < values.length; i++) {
+                switch (dimensions[i - 1].type) {
+                    case 'number': val[i] = Number(val[i]);
+                        break;
+                    case 'boolean': val[i] = Boolean(val[i]);
+                        break;
+                    default: // string, keep as it is
+                }
+            }
+            values.push(val)
+        }
+    })
+    return values
+}
+
+async function saveValuesAndRespond(property: Property, res: Response) {
+    // Try to save
+    try {
+        const result = await PropertyController.propertyService.updatePropertyValues(property)
+        res.json(result)
+    } catch (e) {
+        console.log(e)
+        res.status(500).send("failed updating property values");
+        return;
+    }
+}
