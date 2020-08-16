@@ -238,12 +238,13 @@ export class PropertyService {
                         "personId": property.thing.personId
                     },
                     fields: fields,
-                    time: ts
+                    timestamp: ts
                 };
                 points.push(point);
             }
         }
-        return this.influx.writePoints(points);
+        console.log(points)
+        return this.influx.writePoints(points, {precision: 'ms'});
     }
 
 

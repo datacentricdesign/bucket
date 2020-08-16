@@ -5,7 +5,7 @@ import { validate } from "class-validator";
 import { Property } from "./Property";
 import { Thing } from "../Thing";
 
-import { multiparty } from 'multiparty'
+import * as multiparty from 'multiparty'
 
 import { PropertyService } from "./PropertyService"
 import { ThingService } from "../services/ThingService"
@@ -132,6 +132,7 @@ export class PropertyController {
     };
 
     static updatePropertyValues = async (req: Request, res: Response, next: NextFunction) => {
+        console.log('update property values')
         // Get the ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -149,7 +150,7 @@ export class PropertyController {
             // Get values from the body
             const { values } = req.body;
             property.values = values
-            saveValuesAndRespond(property, res)
+            return saveValuesAndRespond(property, res)
         } else if (contentType.indexOf('multipart/form-data') === 0) {
             // Look for data in a CSV file
             return PropertyController.uploadDataFile(property, req, res, next)
@@ -188,6 +189,8 @@ export class PropertyController {
     };
 
     static uploadDataFile(property: Property, request, response, next) {
+        console.log("upload data file")
+        const hasLabel = request.query.hasLabel === 'true'
         const form = new multiparty.Form()
         let dataStr = ''
         // listen on part event for data file
@@ -200,7 +203,8 @@ export class PropertyController {
             })
         })
         form.on('close', () => {
-            property.values = csvStrToValueArray(property.type.dimensions, dataStr)
+            property.values = csvStrToValueArray(property.type.dimensions, dataStr, hasLabel)
+            console.log(property.values)
             saveValuesAndRespond(property, response)
         })
         form.on('error', next)
@@ -241,12 +245,14 @@ export default PropertyController;
  * @param csvStr
  * @returns {{id: *, values: Array}}
  */
-function csvStrToValueArray(dimensions: Dimension[], csvStr: string) {
+function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel:boolean) {
     const values = []
+    let first = true;
     csvStr.split('\n').forEach(line => {
-        if (line !== '') {
+        if ((!first || !hasLabel) && line !== '') {
             const val: any[] = line.split(',')
-            for (let i = 1; i < values.length; i++) {
+            val[0] = Number(val[0])
+            for (let i = 1; i < val.length; i++) {
                 switch (dimensions[i - 1].type) {
                     case 'number': val[i] = Number(val[i]);
                         break;
@@ -256,6 +262,9 @@ function csvStrToValueArray(dimensions: Dimension[], csvStr: string) {
                 }
             }
             values.push(val)
+        }
+        if (first) {
+            first = false
         }
     })
     return values
