@@ -13,9 +13,10 @@ export interface RouteInfo {
     class: string;
 }
 
-const dashboardRoute = { path: '/things/dashboard', title: 'Dashboard', icon: 'nc-chart-pie-36', class: '' }
+const dashboardRoute = { path: '/things/dashboard', title: 'Dashboard', icon: 'nc-layout-11', class: '' }
+const exploreRoute = { path: '/things/explore', title: 'Explore', icon: 'nc-compass-05', class: '' }
 
-export const ROUTES: RouteInfo[] = [dashboardRoute];
+export const ROUTES: RouteInfo[] = [dashboardRoute, exploreRoute];
 
 @Component({
     moduleId: module.id,
@@ -43,7 +44,6 @@ export class SidebarComponent implements OnInit {
         .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
         this.http.get(this.apiURL + "/things", {headers}).subscribe((data: any) => {
-            console.log(data)
             for (let index = 0; index < data.length; index++) {
                 const t = data[index]
                 this.menuItems.push({ path: t.id, title: t.name, type: 'thing', icon: 'nc-app', class: '' })

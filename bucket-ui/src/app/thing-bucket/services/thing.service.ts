@@ -128,6 +128,38 @@ export class ThingService {
       );
   }
 
+  grant(thingId: string, propertyId:string, subjects:string[], actions:string[]): void {
+    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents';
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+
+    this.http.post(url, { subjects: subjects, actions: actions }, { headers })
+      .subscribe(
+        result => {
+          window.location.reload();
+        },
+        err => {
+          console.warn('status', err.status);
+        }
+      );
+  }
+
+  revoke(thingId: string, propertyId:string, consentId: string): void {
+    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents/' + consentId;
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+
+    this.http.delete(url, { headers })
+      .subscribe(
+        result => {
+          window.location.reload();
+        },
+        err => {
+          console.warn('status', err.status);
+        }
+      );
+  }
+
   editProperty(thingId: string, propertyId: string, fields: DTOProperty): void {
     let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
     let headers = new HttpHeaders().set('Accept', 'application/json')
