@@ -14,6 +14,9 @@ import { PropertyTypeRouter } from './thing/property/propertyType/PropertyTypeRo
 
 import { mqttInit } from './thing/mqtt/MQTTServer';
 import { setupPassport } from './passport-dcd';
+import { introspectToken } from "./thing/middlewares/introspectToken";
+import { checkPolicy } from "./thing/middlewares/checkPolicy";
+import PropertyController from "./thing/property/PropertyController";
 
 
 console.log("starting...")
@@ -56,6 +59,10 @@ function startAPI() {
     // Set all routes from routes folder
     app.use(config.http.baseUrl + "/things", ThingRouter);
     app.use(config.http.baseUrl + "/types", PropertyTypeRouter);
+    app.get(config.http.baseUrl + "/properties",
+        [introspectToken(['dcd:properties', 'dcd:consents'])],
+         PropertyController.getProperties);
+
     app.use(errorMiddleware)
 
     // setupPassport(app)

@@ -1,15 +1,15 @@
-import {Request, Response, Router, NextFunction} from "express";
-import {getRepository, DeleteResult} from "typeorm";
-import {validate} from "class-validator";
+import { Request, Response, Router, NextFunction } from "express";
+import { getRepository, DeleteResult } from "typeorm";
+import { validate } from "class-validator";
 
 import { Property } from "./Property";
-import { Thing } from "../Thing";
+import { v4 as uuidv4 } from 'uuid';
 
 import { PropertyService } from "./PropertyService"
 import { ThingService } from "../services/ThingService"
 
-import { DCDError } from "@datacentricdesign/types";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
+import { AuthController } from "../http/AuthController";
 
 export class PropertyController {
 
@@ -38,7 +38,17 @@ export class PropertyController {
             const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(thingId)
             // Send the things object
             res.send(properties);
-        } catch(error) {
+        } catch (error) {
+            res.status(404).send(error);
+        }
+    };
+
+    static getProperties = async (req: Request, res: Response) => {
+        console.log(req.context.userId)
+        try {
+            const properties: Property[] = await PropertyController.propertyService.getProperties(req.context.userId)
+            res.send(properties);
+        } catch (error) {
             res.status(404).send(error);
         }
     };
@@ -51,15 +61,15 @@ export class PropertyController {
 
         // Get the Property from the Service
         const property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId, options)
-        
+
         if (req.accepts('application/json')) {
             return res.send(property)
-          } else if (req.accepts('text/csv')) {
-              res.set({ 'Content-Type': 'text/csv' })
-              res.send(PropertyController.toCSV(property))
-          } else {
+        } else if (req.accepts('text/csv')) {
+            res.set({ 'Content-Type': 'text/csv' })
+            res.send(PropertyController.toCSV(property))
+        } else {
             return res.send(property)
-          }
+        }
 
         // Double-check the property is actually part of this thing
         if (property === undefined) {
@@ -74,8 +84,8 @@ export class PropertyController {
 
     static createNewProperty = async (req: Request, res: Response, next: NextFunction) => {
         // Get parameters from the body
-        let {name, description, typeId} = req.body;
-        let property:DTOProperty = {};
+        let { name, description, typeId } = req.body;
+        let property: DTOProperty = {};
         property.name = name;
         property.description = description
         property.typeId = typeId
@@ -100,7 +110,7 @@ export class PropertyController {
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
         // Get values from the body
-        const {name, description} = req.body;
+        const { name, description } = req.body;
         let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
         if (property === undefined) {
             // If not found, send a 404 response
@@ -133,7 +143,7 @@ export class PropertyController {
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
         // Get values from the body
-        const {values} = req.body;
+        const { values } = req.body;
         let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
 
         // Double-check the property is actually part of this thing
@@ -166,7 +176,7 @@ export class PropertyController {
             await PropertyController.propertyService.deleteOneProperty(thingId, propertyId)
             // After all send a 204 (no content, but accepted) response
             res.status(204).send();
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
@@ -181,7 +191,7 @@ export class PropertyController {
         try {
             const result = await PropertyController.propertyService.countDataPoints(thingId, propertyId, undefined, from, timeInterval)
             res.status(200).send(result);
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
@@ -194,23 +204,73 @@ export class PropertyController {
         try {
             const result = await PropertyController.propertyService.lastDataPoints(thingId, propertyId)
             res.status(200).send(result);
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
 
-    static toCSV(property:Property) {
+    static toCSV(property: Property) {
         let csv = 'time'
         for (let i = 0; i < property.type.dimensions.length; i++) {
-          csv += ',' + property.type.dimensions[i].name
+            csv += ',' + property.type.dimensions[i].name
         }
         csv += '\n'
         for (let i = 0; i < property.values.length; i++) {
-          csv += property.values[i].join(',')
-          csv += '\n'
+            csv += property.values[i].join(',')
+            csv += '\n'
         }
         return csv
-      }
+    }
+
+    static grantConsent = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the property ID from the url
+        const thingId = req.params.thingId;
+        const propertyId = req.params.propertyId;
+        const body = req.body;
+        const id = uuidv4()
+        const acp = {
+            subjects: body.subjects,
+            actions: body.actions,
+            resources: [propertyId],
+            effect: 'allow',
+            id: id
+        }
+        console.log("granting: " + JSON.stringify(acp))
+        // Call the Service
+        try {
+            const result = await AuthController.policyService.updateKetoPolicy(acp, 'exact')
+            res.status(201).send(result);
+        } catch (error) {
+            next(error)
+        }
+    };
+
+    static revokeConsent = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the property ID from the url
+        const consentId = req.params.consentId;
+        // Call the Service
+        try {
+            await AuthController.policyService.deleteKetoPolicy(consentId, 'exact')
+            // After all send a 204 (no content, but accepted) response
+            res.status(204).send();
+        } catch (error) {
+            next(error)
+        }
+    };
+
+    static listConsents = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the property ID from the url
+        const propertyId = req.params.propertyId;
+        const resource = propertyId
+        // Call the Service
+        try {
+            const consents = await AuthController.policyService.listConsents('resource', resource)
+            // After all send a 200 (no content, but accepted) response
+            res.status(200).send(consents);
+        } catch (error) {
+            next(error)
+        }
+    };
 };
 
 export default PropertyController;

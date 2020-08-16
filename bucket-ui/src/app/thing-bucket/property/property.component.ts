@@ -27,6 +27,9 @@ export class PropertyComponent implements OnInit {
   name: string
   property: Property
 
+  consents$: Observable<any>;
+  consents: any
+
   downloadModel: any = {
     from: moment().subtract(1, 'days').format('YYYY-MM-DD'),
     to: moment().format('YYYY-MM-DD'),
@@ -40,6 +43,11 @@ export class PropertyComponent implements OnInit {
     description: ''
   }
 
+  grantModel = {
+    subjects: '',
+    actions: 'dcd:read'
+  }
+
   constructor(
     private _Activatedroute: ActivatedRoute,
     private _router: Router,
@@ -48,25 +56,34 @@ export class PropertyComponent implements OnInit {
     private titleService: Title,
     private appService: AppService,
     private thingService: ThingService) {
-      this.apiURL = appService.settings.apiURL
-    }
+    this.apiURL = appService.settings.apiURL
+  }
 
   ngOnInit(): void {
     this._Activatedroute.paramMap.subscribe(params => {
       this.thingId = params.get('id');
       this.id = params.get('propertyId');
       let headers = new HttpHeaders().set('Accept', 'application/json')
-          .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+        .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
       this.property$ = this.http.get<Property>(this.apiURL + "/things/" + this.thingId + '/properties/' + this.id, { headers }).pipe(
-          map((data: Property) => {
-              this.property = data
-              this.titleService.setTitle(this.property.name);
-              return data;
-          }), catchError(error => {
-              return throwError('Property not found!');
-          })
+        map((data: Property) => {
+          this.property = data
+          this.titleService.setTitle(this.property.name);
+          return data;
+        }), catchError(error => {
+          return throwError('Property not found!');
+        })
       )
-  });
+
+      this.consents$ = this.http.get<any>(this.apiURL + "/things/" + this.thingId + '/properties/' + this.id + '/consents', { headers }).pipe(
+        map((data: any) => {
+          this.consents = data
+          return data;
+        }), catchError(error => {
+          return throwError('Consents not found!');
+        })
+      )
+    });
   }
 
   editName() {
@@ -84,8 +101,8 @@ export class PropertyComponent implements OnInit {
   download() {
     console.log(this.downloadModel)
     const options: ValueOptions = {
-      from: moment(this.downloadModel.from, "YYYY-MM-DD").unix()*1000,
-      to: moment(this.downloadModel.to, "YYYY-MM-DD").unix()*1000+86400000,
+      from: moment(this.downloadModel.from, "YYYY-MM-DD").unix() * 1000,
+      to: moment(this.downloadModel.to, "YYYY-MM-DD").unix() * 1000 + 86400000,
       timeInterval: this.downloadModel.timeInterval,
       fctInterval: this.downloadModel.fctInterval,
       fill: this.downloadModel.fill
@@ -95,4 +112,46 @@ export class PropertyComponent implements OnInit {
     const csvFormat = true
     this.thingService.getPropertyValues(this.thingId, this.id, options, csvFormat)
   }
+
+  grant() {
+    this.thingService.grant(
+      this.thingId,
+      this.id,
+      this.grantModel.subjects.split(';'),
+      this.grantModel.actions.split(';'))
+  }
+
+  revoke(consentId) {
+    this.thingService.revoke(this.thingId, this.id, consentId)
+  }
+
+
+
+
+  // keyword = 'name';
+  // data = [
+  //   {
+  //     id: 1,
+  //     name: 'Usa'
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'England'
+  //   }
+  // ];
+
+
+  // selectEvent(item) {
+  //   // do something with selected item
+  // }
+
+  // onChangeSearch(val: string) {
+  //   // fetch remote data from here
+  //   // And reassign the 'data' which is binded to 'data' property.
+  //   console.log(val)
+  // }
+
+  // onFocused(e){
+  //   // do something when input is focused
+  // }
 }

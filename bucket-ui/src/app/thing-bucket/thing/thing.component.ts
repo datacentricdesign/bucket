@@ -74,11 +74,6 @@ export class ThingComponent implements OnInit {
                     return throwError('Thing not found!');
                 })
             )
-        });
-        this._Activatedroute.paramMap.subscribe(params => {
-            this.id = params.get('id');
-            let headers = new HttpHeaders().set('Accept', 'application/json')
-                .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
             this.types$ = this.http.get<PropertyType[]>(this.apiURL + "/types", { headers }).pipe(
                 map((data: PropertyType[]) => {
                     this.types = data;
@@ -88,7 +83,6 @@ export class ThingComponent implements OnInit {
                 })
             )
         });
-
     }
 
     async checkMQTTStatus() {

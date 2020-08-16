@@ -3,13 +3,11 @@ import { getRepository, DeleteResult} from "typeorm";
 
 import { Thing } from "../Thing";
 import { DCDError } from "@datacentricdesign/types";
-import { AuthService } from "./AuthService";
-import { PolicyService } from "./PolicyService";
 
 import { v4 as uuidv4 } from 'uuid';
-import { envConfig } from "../../config/envConfig";
 import PropertyController from "../property/PropertyController";
 import { Property } from "../property/Property";
+import { AuthController } from "../http/AuthController";
 
 export interface Token {
     aud: string,
@@ -17,16 +15,6 @@ export interface Token {
 }
 
 export class ThingService {
-
-    private static authService = new AuthService()
-    private static policyService = new PolicyService()
-
-    /**
-     *
-     * @constructor
-     */
-    constructor() {
-    }
 
     /**
      * Create a new Thing.
@@ -59,8 +47,8 @@ export class ThingService {
             // Read negative, the Thing does not exist yet
             if (findError.name === "EntityNotFound") {
                 await thingRepository.save(thing);
-                await ThingService.policyService.grant(thing.personId, thing.id, 'owner');
-                await ThingService.policyService.grant(thing.id, thing.id, 'subject');
+                await AuthController.policyService.grant(thing.personId, thing.id, 'owner');
+                await AuthController.policyService.grant(thing.id, thing.id, 'subject');
                 return thing;
             }
             // unknown error to report
@@ -109,7 +97,7 @@ export class ThingService {
     }
 
     editThingPEM(thingId: string, pem: string) {
-        return ThingService.authService.setPEM(thingId, pem)
+        return AuthController.authService.setPEM(thingId, pem)
     }
 
     /**
@@ -139,8 +127,8 @@ export class ThingService {
             alg: 'RS256',
             use: 'sig'
         }
-        return ThingService.authService.refresh().then(() => {
-            return ThingService.authService.generateJWK(thingId, jwkParams)
+        return AuthController.authService.refresh().then(() => {
+            return AuthController.authService.generateJWK(thingId, jwkParams)
         })
     }
 
