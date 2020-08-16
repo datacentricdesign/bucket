@@ -8,6 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { catchError, map } from 'rxjs/operators';
+import { ToastrService } from "ngx-toastr";
 
 import * as moment from 'moment';
 
@@ -38,6 +39,11 @@ export class PropertyComponent implements OnInit {
     fill: 'none'
   }
 
+  uploadModel: any = {
+    hasLabel: false,
+    fileToUpload: File = null
+  }
+
   updateProperty: DTOProperty = {
     name: '',
     description: ''
@@ -55,7 +61,8 @@ export class PropertyComponent implements OnInit {
     private oauthService: OAuthService,
     private titleService: Title,
     private appService: AppService,
-    private thingService: ThingService) {
+    private thingService: ThingService,
+    private toastr: ToastrService) {
     this.apiURL = appService.settings.apiURL
   }
 
@@ -154,4 +161,31 @@ export class PropertyComponent implements OnInit {
   // onFocused(e){
   //   // do something when input is focused
   // }
+  upload() {
+    this.thingService.csvFileUpload(this.thingId, this.id, this.uploadModel.fileToUpload, this.uploadModel.hasLabel)
+      .subscribe(() => {
+        const message = 'Data uploaded to your property.'
+        this.toast(message, 'success', 'nc-cloud-upload-94')
+      }, error => {
+        this.toast(error, 'error', 'nc-cloud-upload-94')
+      });
+  }
+
+  handleFileInput(files: FileList) {
+    this.uploadModel.fileToUpload = files.item(0);
+  }
+
+  toast(message:string, type:string, icon:string) {
+    this.toastr.info(
+      '<span data-notify="icon" class="nc-icon '+icon+'"></span><span data-notify="message">'+message+'</span>',
+        "",
+        {
+          timeOut: 4000,
+          closeButton: true,
+          enableHtml: true,
+          toastClass: "alert alert-"+type+" alert-with-icon",
+          positionClass: "toast-top-center"
+        }
+      );
+  }
 }

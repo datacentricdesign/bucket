@@ -5,11 +5,14 @@ import { validate } from "class-validator";
 import { Property } from "./Property";
 import { v4 as uuidv4 } from 'uuid';
 
+import * as multiparty from 'multiparty'
+
 import { PropertyService } from "./PropertyService"
 import { ThingService } from "../services/ThingService"
 
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
+import { Dimension } from "./dimension/Dimension";
 
 export class PropertyController {
 
@@ -138,7 +141,8 @@ export class PropertyController {
         res.status(204).send();
     };
 
-    static updatePropertyValues = async (req: Request, res: Response) => {
+    static updatePropertyValues = async (req: Request, res: Response, next: NextFunction) => {
+        console.log('update property values')
         // Get the ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -153,15 +157,15 @@ export class PropertyController {
             return;
         }
 
-        property.values = values
-
-        // Try to save
-        try {
-            await PropertyController.propertyService.updatePropertyValues(property)
-        } catch (e) {
-            console.log(e)
-            res.status(500).send("failed updating property values");
-            return;
+        const contentType = req.headers['content-type']
+        if (contentType.indexOf('application/json') === 0) {
+            // Get values from the body
+            const { values } = req.body;
+            property.values = values
+            return saveValuesAndRespond(property, res)
+        } else if (contentType.indexOf('multipart/form-data') === 0) {
+            // Look for data in a CSV file
+            return PropertyController.uploadDataFile(property, req, res, next)
         }
         // After all send a 204 (no content, but accepted) response
         res.status(204).send();
@@ -195,6 +199,29 @@ export class PropertyController {
             next(error)
         }
     };
+
+    static uploadDataFile(property: Property, request, response, next) {
+        console.log("upload data file")
+        const hasLabel = request.query.hasLabel === 'true'
+        const form = new multiparty.Form()
+        let dataStr = ''
+        // listen on part event for data file
+        form.on('part', part => {
+            if (!part.filename) {
+                return
+            }
+            part.on('data', buf => {
+                dataStr += buf.toString()
+            })
+        })
+        form.on('close', () => {
+            property.values = csvStrToValueArray(property.type.dimensions, dataStr, hasLabel)
+            console.log(property.values)
+            saveValuesAndRespond(property, response)
+        })
+        form.on('error', next)
+        form.parse(request)
+    }
 
     static lastDataPoints = async (req: Request, res: Response, next: NextFunction) => {
         // Get the property ID from the url
@@ -274,3 +301,45 @@ export class PropertyController {
 };
 
 export default PropertyController;
+
+/**
+ * @param property
+ * @param csvStr
+ * @returns {{id: *, values: Array}}
+ */
+function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel:boolean) {
+    const values = []
+    let first = true;
+    csvStr.split('\n').forEach(line => {
+        if ((!first || !hasLabel) && line !== '') {
+            const val: any[] = line.split(',')
+            val[0] = Number(val[0])
+            for (let i = 1; i < val.length; i++) {
+                switch (dimensions[i - 1].type) {
+                    case 'number': val[i] = Number(val[i]);
+                        break;
+                    case 'boolean': val[i] = Boolean(val[i]);
+                        break;
+                    default: // string, keep as it is
+                }
+            }
+            values.push(val)
+        }
+        if (first) {
+            first = false
+        }
+    })
+    return values
+}
+
+async function saveValuesAndRespond(property: Property, res: Response) {
+    // Try to save
+    try {
+        const result = await PropertyController.propertyService.updatePropertyValues(property)
+        res.json(result)
+    } catch (e) {
+        console.log(e)
+        res.status(500).send("failed updating property values");
+        return;
+    }
+}

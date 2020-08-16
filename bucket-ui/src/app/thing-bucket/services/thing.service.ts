@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Thing, PropertyType, DTOThing, DTOProperty, ValueOptions, Property } from '@datacentricdesign/types';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { AppService } from 'app/app.service';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable()
 export class ThingService {
@@ -42,7 +43,7 @@ export class ThingService {
       );
   }
 
-  getPropertyValues(thingId: string, propertyId: string, options: ValueOptions, csvFormat:boolean): void {
+  getPropertyValues(thingId: string, propertyId: string, options: ValueOptions, csvFormat: boolean): void {
     let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
     let params = new HttpParams()
       .set('from', options.from + '')
@@ -51,12 +52,12 @@ export class ThingService {
     if (options.timeInterval !== undefined) params.set('timeInterval', options.timeInterval)
     if (options.fill !== undefined) params.set('fill', options.fill)
     console.log(params)
-    let headers = new HttpHeaders().set('Accept', csvFormat?'text/csv':'application/json')
+    let headers = new HttpHeaders().set('Accept', csvFormat ? 'text/csv' : 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken())
 
 
     this.http
-      .get(url, { headers, params, responseType: 'blob' as 'blob'})
+      .get(url, { headers, params, responseType: 'blob' as 'blob' })
       .subscribe(
         blob => {
           const a = document.createElement('a')
@@ -206,20 +207,20 @@ export class ThingService {
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
     return this.http.get(url, { headers }).toPromise()
-      // .subscribe(
-      //   result => {
-      //     return Promise.resolve(result)
-      //   },
-      //   err => {
-      //     console.warn('status', err.status);
-      //     return Promise.reject(error)
-      //   }
-      // );
+    // .subscribe(
+    //   result => {
+    //     return Promise.resolve(result)
+    //   },
+    //   err => {
+    //     console.warn('status', err.status);
+    //     return Promise.reject(error)
+    //   }
+    // );
   }
 
   dpCount(timeExpressionFrom, timeInterval?): Promise<any> {
     let url = this.apiURL + '/things/count?from=' + timeExpressionFrom
-    if (timeInterval!==undefined) url += '&timeInterval=' + timeInterval;
+    if (timeInterval !== undefined) url += '&timeInterval=' + timeInterval;
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
@@ -245,5 +246,16 @@ export class ThingService {
         }
       );
     return Promise.resolve(this.propertyTypes)
+  }
+
+  csvFileUpload(thingId: string, propertyId: string, fileToUpload: File, hasLabel: boolean): Observable<boolean> {
+    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '?hasLabel=' + (hasLabel ? 'true' : 'false');
+
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+
+    const formData: FormData = new FormData();
+    formData.append('fileKey', fileToUpload, fileToUpload.name);
+    return this.http.put<any>(url, formData, { headers: headers })
   }
 }

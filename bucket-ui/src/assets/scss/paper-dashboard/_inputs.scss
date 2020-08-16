@@ -353,17 +353,17 @@ textarea.form-control{
 }
 
 // Input files - hide actual input - requires specific markup in the sample.
-.form-group input[type=file] {
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 100;
-}
+// .form-group input[type=file] {
+//   opacity: 0;
+//   position: absolute;
+//   top: 0;
+//   right: 0;
+//   bottom: 0;
+//   left: 0;
+//   width: 100%;
+//   height: 100%;
+//   z-index: 100;
+// }
 
 .form-text{
     font-size: $font-size-small;
