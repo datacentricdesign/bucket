@@ -151,13 +151,38 @@ export class PolicyService {
   }
 
   /**
-   *
+   * Get the list of consents that concern a subject, a resource or an action
+   * @param type subject, resource, action
+   * @param  id the id of the concerned subject, resource or action
+   */
+  async listConsents(type:string, id: string) {
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/exact/policies?' + type + '=' + id
+    console.log(url)
+    const options = {
+      headers: this.ketoHeaders,
+      method: 'GET'
+    }
+    console.log(options)
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) {
+        return Promise.resolve(res.json());
+      }
+      return Promise.reject(new DCDError(4031, 'Request was not allowed'));
+    }
+    catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * 
    * @param policy
    * @returns {Promise<Response>}
    */
-  async updateKetoPolicy(policy: any): Promise<Response> {
+  async updateKetoPolicy(policy: any, flavor:string = 'regex'): Promise<Response> {
     try {
-      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/regex/policies', {
+      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies', {
         headers: this.ketoHeaders,
         method: 'PUT',
         body: JSON.stringify(policy)
@@ -169,9 +194,9 @@ export class PolicyService {
     }
   }
 
-  async deleteKetoPolicy(policyId: string) {
+  async deleteKetoPolicy(policyId: string, flavor:string = 'regex') {
     try {
-      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/regex/policies/' + policyId, {
+      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies/' + policyId, {
         headers: this.ketoHeaders,
         method: 'DELETE'
       });

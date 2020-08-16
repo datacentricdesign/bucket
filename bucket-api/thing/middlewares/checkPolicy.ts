@@ -8,9 +8,9 @@ import { AuthController } from "../http/AuthController";
  * @param resource
  * @param action
  */
-export const checkPolicy = (resource: string, action: string) => {
+export const checkPolicy = (action: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const acpResource = buildACPResource(resource, req)
+        const acpResource = buildACPResource(req)
         const acp = {
             resource: acpResource,
             action: 'dcd:actions:' + action,
@@ -30,7 +30,7 @@ export const checkPolicy = (resource: string, action: string) => {
  * @param req
  * @return {string}
  */
-function buildACPResource(resource: string, req: Request): string {
+function buildACPResource(req: Request): string {
     // let acpResource = "dcd";
     // if (req.entityType !== undefined) {
     //   acpResource += ":" + req.entityType;
@@ -43,6 +43,9 @@ function buildACPResource(resource: string, req: Request): string {
     }
     if (req.params.propertyId !== undefined) {
         acpResource += ':' + req.params.propertyId.replace('dcd:','')
+    }
+    if (req.params.consentId !== undefined) {
+        acpResource += ':' + req.params.consentId.replace('dcd:','')
     }
     return acpResource
 }

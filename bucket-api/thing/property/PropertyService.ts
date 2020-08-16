@@ -1,5 +1,5 @@
 
-import { getRepository, DeleteResult } from "typeorm";
+import { getRepository, DeleteResult, SelectQueryBuilder } from "typeorm";
 
 import { Thing } from "../Thing";
 import { Property } from "./Property";
@@ -15,6 +15,7 @@ import { InfluxDB } from "influx";
 import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { ThingService } from "../services/ThingService";
+import { AuthController } from "../http/AuthController";
 
 export class PropertyService {
 
@@ -95,19 +96,32 @@ export class PropertyService {
             .setParameters({ thingId: thingId })
             .getMany();
         return properties
-        // return propertyRepository.find({ where: { thingId: thingId },
-        //     relations: ['type', 'type.dimensions', 'thing']
-        //   })
-        //     .then( async (properties: Property[]) => {
-        //         if (valueOptions != undefined) {
-        //             const propWithValues = []
-        //             for (let index in properties) {
-        //                 propWithValues.push(await this.readValuesFromInfluxDB(properties[index], valueOptions))
-        //             }
-        //             return Promise.resolve(propWithValues)
-        //         }
-        //         return Promise.resolve(properties)
-        //     })
+    }
+
+    /**
+     * List all accessible Properties.
+     * @param {string} personId
+     **/
+    async getProperties(subject: string): Promise<Property[]> {
+        // Get the list of all consent concerning the current subject
+        const consents = await AuthController.policyService.listConsents('subject', subject)
+        console.log(consents)
+        let resources = []
+        for (let i=0;i<consents.length;i++) {
+            if (consents[i].effect === 'allow') {
+                resources = resources.concat(consents[i].resources)
+            }
+        }
+        // Get properties from the database
+        const propertyRepository = getRepository(Property);
+        let properties = await propertyRepository
+            .createQueryBuilder("property")
+            .innerJoinAndSelect("property.type", "type")
+            .innerJoinAndSelect("type.dimensions", "dimensions")
+            .where("property.id = ANY (:values)")
+            .setParameters({ values: resources })
+            .getMany();
+        return properties
     }
 
     /**
