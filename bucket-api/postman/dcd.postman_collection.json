@@ -1,0 +1,718 @@
+{
+	"info": {
+		"_postman_id": "6a01ad1b-2ef5-4a58-9a9c-cb1cb391f789",
+		"name": "Data-Centric Design - User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Profile/Auth",
+			"item": [],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Profile/Persons",
+			"item": [
+				{
+					"name": "Create a Person",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Receiver\",\n\t\"email\": \"receiver@tudelft.nl\",\n\t\"password\": \"testtest\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{profile_api}}/persons",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"persons"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read a Person",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/persons/dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"persons",
+								"dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List a Person's sessions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/persons/dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7/sessions",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"persons",
+								"dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7",
+								"sessions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Person's session",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/persons/dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7/sessions/clients:bucket-ui",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"persons",
+								"dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7",
+								"sessions",
+								"clients:bucket-ui"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Person",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/persons/dcd:persons:dc466af0-2d11-43ba-9aa6-173039c345e5",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"persons",
+								"dcd:persons:dc466af0-2d11-43ba-9aa6-173039c345e5"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Bucket/Properties",
+			"item": [
+				{
+					"name": "List Properties",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"type": "text",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{bucket_api}}/properties",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"properties"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Bucket/Things",
+			"item": [
+				{
+					"name": "Properties",
+					"item": [
+						{
+							"name": "Consents",
+							"item": [
+								{
+									"name": "List consents",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:8e0aff1a-d3ba-45c3-9af7-225e85447a57/consents",
+											"host": [
+												"{{bucket_api}}"
+											],
+											"path": [
+												"things",
+												"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+												"properties",
+												"dcd:properties:8e0aff1a-d3ba-45c3-9af7-225e85447a57",
+												"consents"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Grant consent",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"subjects\": [\"dcd:persons:3bd78a79-715f-4397-ab37-7dcc20a7c488\"],\n    \"actions\": [\"dcd:read\"]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:8e0aff1a-d3ba-45c3-9af7-225e85447a57/consents",
+											"host": [
+												"{{bucket_api}}"
+											],
+											"path": [
+												"things",
+												"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+												"properties",
+												"dcd:properties:8e0aff1a-d3ba-45c3-9af7-225e85447a57",
+												"consents"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Revoke consent",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:f5b56d75-9bf5-4439-b036-2115a8cd412d/consents/600cd2b2-2e8a-435d-8c3d-df05796bd309",
+											"host": [
+												"{{bucket_api}}"
+											],
+											"path": [
+												"things",
+												"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+												"properties",
+												"dcd:properties:f5b56d75-9bf5-4439-b036-2115a8cd412d",
+												"consents",
+												"600cd2b2-2e8a-435d-8c3d-df05796bd309"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Create a Property",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"My Test prop\",\n\t\"typeId\": \"ACCELEROMETER\",\n\t\"description\": \"Test prop description\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:9595960d-9acc-4af2-8e4f-52fc39df860e/properties",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:9595960d-9acc-4af2-8e4f-52fc39df860e",
+										"properties"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a Property (it's values)",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"values\": [\n\t\t[\n\t\t\t{{$timestamp}}000, {{$randomInt}}, {{$randomInt}}\n\t\t]\n\t]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:3a089756-eb87-4e4f-b942-845a41ceee3c",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+										"properties",
+										"dcd:properties:3a089756-eb87-4e4f-b942-845a41ceee3c"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a Property (it's values) from CSV file",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/jbourgeois/Desktop/heart-rate.csv"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:3a089756-eb87-4e4f-b942-845a41ceee3c?hasLabel=true",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+										"properties",
+										"dcd:properties:3a089756-eb87-4e4f-b942-845a41ceee3c"
+									],
+									"query": [
+										{
+											"key": "hasLabel",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Properties",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+										"properties"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Property",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:ae4d889a-bf40-4f13-b24f-5ff7d99ca15b/properties/dcd:properties:8d4d36cb-0742-477f-9818-375bef265d15",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:ae4d889a-bf40-4f13-b24f-5ff7d99ca15b",
+										"properties",
+										"dcd:properties:8d4d36cb-0742-477f-9818-375bef265d15"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a Property",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:3a089756-eb87-4e4f-b942-845a41ceee3c?from=0&to={{$timestamp}}000",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+										"properties",
+										"dcd:properties:3a089756-eb87-4e4f-b942-845a41ceee3c"
+									],
+									"query": [
+										{
+											"key": "from",
+											"value": "0"
+										},
+										{
+											"key": "to",
+											"value": "{{$timestamp}}000"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Count datapoint",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:f5b56d75-9bf5-4439-b036-2115a8cd412d/count",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+										"properties",
+										"dcd:properties:f5b56d75-9bf5-4439-b036-2115a8cd412d",
+										"count"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get last",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279/properties/dcd:properties:8dd5753c-eaf7-41e3-8949-81d92900f80c/last",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+										"properties",
+										"dcd:properties:8dd5753c-eaf7-41e3-8949-81d92900f80c",
+										"last"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Property Types",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{bucket_api}}/types",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit a Property",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"My new Test prop\",\n\t\"description\": \"Test new prop description\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{bucket_api}}/things/dcd:things:ae4d889a-bf40-4f13-b24f-5ff7d99ca15b/properties/dcd:properties:8d4d36cb-0742-477f-9818-375bef265d15",
+									"host": [
+										"{{bucket_api}}"
+									],
+									"path": [
+										"things",
+										"dcd:things:ae4d889a-bf40-4f13-b24f-5ff7d99ca15b",
+										"properties",
+										"dcd:properties:8d4d36cb-0742-477f-9818-375bef265d15"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "List Things",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{bucket_api}}/things",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Count data points",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "",
+								"type": "text",
+								"value": "",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{bucket_api}}/things/count?from=now()-1d&timeInterval=1h",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things",
+								"count"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "now()-1d"
+								},
+								{
+									"key": "timeInterval",
+									"value": "1h"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Thing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"My Wheelchair Demo\",\n\t\"type\": \"Wheelchair\",\n\t\"description\": \"A demo of wheelchait with Force Sensitive Resistors\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bucket_api}}/things",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Thing",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"My Wheelchair Demo updated again\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bucket_api}}/things/dcd:things:9595960d-9acc-4af2-8e4f-52fc39df860e",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things",
+								"dcd:things:9595960d-9acc-4af2-8e4f-52fc39df860e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Thing",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bucket_api}}/things/dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things",
+								"dcd:things:4fe2d313-0293-4cf0-8c8f-5625c90d9279"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete one Thing",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{bucket_api}}/things/dcd:things:415bb09d-76b0-4282-9ed1-7965a8ae75f3",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things",
+								"dcd:things:415bb09d-76b0-4282-9ed1-7965a8ae75f3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Thing PEM",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pem\":\"-----BEGIN PUBLIC KEY-----\\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAoLl89OZVsC0xGPElHKVa\\nHxquG2SWQ6YxyjDXG6O6mCe0LOkSb7ig3naMNDQNqVYSMNBRTKUffNuqAlyvu8mo\\n2a0Xp28a03Hu88aG5PvQqIEfS2OrYlpPelcjHC3BaEFaU1e8HFL08Hz2WxrPuv48\\novlbsqXmSf4Aai+qPp45h88IavpbzWdU71bO+NpiXqgpJCIDOT/pc8jbX0+dG9N7\\n+sL3NA4b1sZ3AMrOaHXp9b9i/J7YGekGrtefNX+zJo1FGTc+1+pLptpoOiIH60IG\\nYfutInB65A2FxaJrK+iBvXdEAgqrMIKl1VV4hudiPf6G7NQ4KBzbMm7OAnP695Gv\\nNBwBVOu+rU7uZEZLlk3BEV/RoyuPmiI3G7iRCureMAjHuAXYnhFPPcJaY382U1Ve\\nGvPlmUKVgcogdZ+M/phOT/qjZqzuW4IMtdiKseGWRDjX14nwzd6KAV8PG6hQIROq\\nEiwmvdRTVJ8HCHOW0xMTjJmzgmCJ5cbNCgEcdDn5cSasJEjOdAtdBAqjbAL2XGfV\\ntmudNWTH6IMOH4YNWBYbkEStvNkRXLrGLRilMxUCylRTtWh+tdRady05Q/zejsFu\\n6qH3g+kIRcHblEYyozj/ooinAUJG29uTFcKp4U6EyrjpFBD/e4yt42jWiLmDqjmC\\nkwjtnpeClZAkcJ+677VJzBkCAwEAAQ==\\n-----END PUBLIC KEY-----\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{bucket_api}}/things/dcd:things:ff58d419-ae5e-4be8-87a3-89ee388b9db6/pem",
+							"host": [
+								"{{bucket_api}}"
+							],
+							"path": [
+								"things",
+								"dcd:things:ff58d419-ae5e-4be8-87a3-89ee388b9db6",
+								"pem"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "yjasbXLPxO7k0cyN71j5hY-l2ktAMPHkl7SN4YqgkxM.hSV_a6X69VYcpu8n99cd4ssqIJc2blHGlz-LIz7x9d0",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "0c203572-a635-4019-a50b-8adc94b63880",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "18ddea4f-fda9-42b3-a700-25c29f91e237",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

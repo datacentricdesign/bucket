@@ -1,7 +1,7 @@
 <div class="wrapper">
     <div class="main-panel" style="width: 100%;">
         <div class="content" style="min-height:calc(100vh - 165px);">
-            <img src="/assets/img/bucket-logo.svg" style="max-width: 150px;">
+            <img src="assets/img/bucket-logo.svg" style="max-width: 150px;">
             <h1>
                 Collect data for your design<br>
                 with Bucket
@@ -11,12 +11,11 @@
             </p>
 
             <div style="padding: 50px 0px" *ngIf="userProfile === undefined; else elseBlock">
-                <button (click)="loginCode()"  class="btn btn-success">Sign In</button>
-                <button (click)="signup()"  class="btn btn-info">Sign Up</button>
+                <button (click)="loginCode()"  class="btn btn-info">Sign In / Sign Up</button>
             </div>
 
             <ng-template #elseBlock>
-                <p>Welcome back {{userProfile.name}}, have a look at <a href="/">your bucket of things</a>!</p>
+                <p>Welcome back {{userProfile.name}}, have a look at <a href="things/dashboard">your bucket of things</a>!</p>
             </ng-template>
             
             <div class="row">

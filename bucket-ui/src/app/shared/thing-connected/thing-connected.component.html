@@ -1,0 +1,23 @@
+<div id="connected-things-panel">
+  <h2>Connected Things</h2>
+
+  <div class="col-lg-4 col-md-6 col-sm-6" *ngFor="let thing of things; let iThing = index">
+    <div class="card card-stats">
+      <div class="card-body ">
+        <h3>
+          <i class="nc-icon nc-app"></i><br>
+          <a href="./things/{{thing.id}}">{{thing.name}}</a>
+        </h3>
+      </div>
+      <div class="card-footer ">
+        <hr>
+        <div class="stats">
+          <i class="fa fa-refresh"></i> Connected {{thing.updatedAt}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+</div>

@@ -1,7 +1,0 @@
-apiVersion: ambassador/v1
-kind:  Mapping
-name:  bucket-mapping
-prefix: /bucket
-rewrite: /
-timeout_ms: 10000
-service: bucket-ui:80

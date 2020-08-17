@@ -105,3 +105,5 @@ dist
 
 # Ignore certs folder, specific and secret to each host
 certs
+
+data

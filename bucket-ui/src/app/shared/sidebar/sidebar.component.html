@@ -1,21 +1,20 @@
-
 <div class="sidebar-wrapper">
   <div class="logo">
-    <a href="https://datacentricdesign.org" class="simple-text logo-mini">
+    <a href="./" class="simple-text logo-mini">
       <div class="logo-image-small">
-        <img src="assets/img/bucket-logo.svg">
+        <img src="./assets/img/bucket-logo.svg">
       </div>
     </a>
-    <a href="https://datacentricdesign.org" class="simple-text logo-normal">
+    <a href="./" class="simple-text logo-normal">
       Bucket
     </a>
   </div>
-    <ul class="nav">
-        <li *ngFor="let menuItem of menuItems" routerLinkActive="active" class="{{menuItem.class}}">
-            <a [routerLink]="[menuItem.path]">
-                <i class="nc-icon {{menuItem.icon}}"></i>
-                <p>{{menuItem.title}}</p>
-            </a>
-        </li>
-    </ul>
+  <ul class="nav">
+    <li *ngFor="let menuItem of menuItems" routerLinkActive="active" class="{{menuItem.class}}">
+      <a [routerLink]="[menuItem.path]">
+        <i class="nc-icon {{menuItem.icon}} {{menuItem.type}}"></i>
+        <p>{{menuItem.title}}</p>
+      </a>
+    </li>
+  </ul>
 </div>

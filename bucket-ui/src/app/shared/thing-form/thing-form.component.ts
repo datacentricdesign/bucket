@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DTOThing, DTORaspberryPi } from '@datacentricdesign/types';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AppService } from 'app/app.service';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 @Component({
   selector: 'app-thing-form',
@@ -13,10 +15,13 @@ export class ThingFormComponent implements OnInit {
 
   submitted = false;
 
+  private apiURL: string
+
   model:DTOThing = {
     name: 'My Test Thing',
     description: 'A Thing to test!',
-    typeId: 'GENERIC'
+    type: 'GENERIC',
+    pem: ''
   }
 
   raspberryPi:DTORaspberryPi = {
@@ -28,16 +33,18 @@ export class ThingFormComponent implements OnInit {
     eduroamPass: ''
   }
 
+  constructor(private http: HttpClient, private appService: AppService, private oauthService: OAuthService) {
+    this.apiURL = this.appService.settings.apiURL;
+  }
+
   onSubmit() { 
-    this.http.post("https://dwd.tudelft.nl/bucket/api/things", this.model).subscribe((data: any) => {
-      console.log(data)
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+    .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    this.http.post(this.apiURL + "/things", this.model, {headers}).subscribe((data: any) => {
+      window.location.href = './things/' + data.id;
     });
   }
 
-  // TODO: Remove this when we're done
-  get diagnostic() { return JSON.stringify(this.model); }
-
-  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
   }

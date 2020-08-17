@@ -1,11 +1,11 @@
 import { AuthConfig } from 'angular-oauth2-oidc';
 
 export const authCodeFlowConfig: AuthConfig = {
-  issuer: 'https://dwd.tudelft.nl/',
+  issuer: 'https://dwd.tudelft.nl:443/',
 
   // URL of the SPA to redirect the user to after login
   redirectUri:
-    window.location.origin,
+    window.location.origin + '/bucket',
 
   // The SPA's id. The SPA is registerd with this id at the auth-server
   // clientId: 'server.code',

@@ -27,7 +27,7 @@ export class NavbarComponent implements OnInit {
   public isCollapsed = true;
   @ViewChild("navbar-cmp", { static: false }) button;
 
-  constructor(location: Location, private renderer: Renderer2, private element: ElementRef, private router: Router/*,private oauthService: OAuthService*/) {
+  constructor(location: Location, private renderer: Renderer2, private element: ElementRef, private router: Router,private oauthService: OAuthService) {
     this.location = location;
     this.nativeElement = element.nativeElement;
     this.sidebarVisible = false;
@@ -40,9 +40,13 @@ export class NavbarComponent implements OnInit {
     this.router.events.subscribe((event) => {
       this.sidebarClose();
     });
-    // if (this.oauthService.hasValidAccessToken() && this.oauthService.hasValidIdToken()) {
-    //   this.userProfile = this.oauthService.getIdentityClaims()
-    // }
+    if (this.oauthService.hasValidAccessToken() && this.oauthService.hasValidIdToken()) {
+      const claim:any = this.oauthService.getIdentityClaims()
+      this.userProfile = {
+        name: claim.name,
+        email: claim.email
+      }
+    }
   }
   getTitle() {
     var titlee = this.location.prepareExternalUrl(this.location.path());
@@ -102,8 +106,13 @@ export class NavbarComponent implements OnInit {
     }
 
   }
-  // logout() {
-  //   // this.oauthService.logOut();
-  //   this.oauthService.revokeTokenAndLogout();
-  // }
+  logout() {
+    this.oauthService.logOut();
+    this.oauthService.revokeTokenAndLogout();
+  }
+
+  editProfile() {
+    var win = window.open('https://dwd.tudelft.nl/profile', '_blank');
+    win.focus();
+  }
 }

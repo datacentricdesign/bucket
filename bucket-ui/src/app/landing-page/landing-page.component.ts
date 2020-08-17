@@ -31,7 +31,7 @@ export class LandingPageComponent implements OnInit {
     // Tweak config for code flow
     this.oauthService.configure(authCodeFlowConfig);
     await this.oauthService.loadDiscoveryDocument();
-    sessionStorage.setItem('flow', 'code');
+    this.oauthService.requestAccessToken = true;
 
     this.oauthService.initLoginFlow('/some-state;p1=1;p2=2?p3=3&p4=4');
     // the parameter here is optional. It's passed around and can be used after logging in

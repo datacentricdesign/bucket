@@ -6,56 +6,53 @@
                 For example, a phone which collects acceleration, a website recording
                 number of page views.
             </p>
-            {{diagnostic}}
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-8 col-md-8">
-                        <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" class="form-control" id="name" required [(ngModel)]="model.name" name="name" #name="ngModel">
-                        <div [hidden]="name.valid || name.pristine" class="alert alert-danger">Name is required</div>
-                        </div>
-                
-                        <div class="form-group">
-                        <label for="name">Description</label>
-                        <input type="text" class="form-control" id="description" required [(ngModel)]="model.description" name="description" #description="ngModel">
-                        <div [hidden]="description.valid || description.pristine" class="alert alert-danger">Description is required</div>
-                        </div>
-                
-                        <div class="form-group">
-                        <label for="typeId">Type</label>
-                        <select class="form-control" id="typeId" required [(ngModel)]="model.typeId" name="typeId">
-                            <option *ngFor="let typeId of types" [value]="typeId">{{typeId}}</option>
-                        </select>
-                        </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" required [(ngModel)]="model.name" name="name"
+                    #name="ngModel">
+                <div [hidden]="name.valid || name.pristine" class="alert alert-danger">Name is required</div>
+            </div>
 
-                        <div class="form-group" *ngIf="model.typeId==='GENERIC'">
-                            <label for="name">
-                                Public key
-                                <a href="https://datacentricdesign.org/tools-openssl/" target="_blank">
-                                    <i class="nc-icon nc-alert-circle-i"></i>
-                                </a>
-                            </label>
-                            <textarea rows="10" type="text"
-                                class="form-control" id="pem"
-                                required [(ngModel)]="model.pem" name="pem"
-                                #description="ngModel"
-                                placeholder="-----BEGIN RSA PUBLIC KEY-----">
-                            </textarea>
-                        </div>
+            <div class="form-group">
+                <label for="name">Description</label>
+                <input type="text" class="form-control" id="description" required [(ngModel)]="model.description"
+                    name="description" #description="ngModel">
+                <div [hidden]="description.valid || description.pristine" class="alert alert-danger">Description is
+                    required</div>
+            </div>
 
-                        <div  *ngIf="model.typeId==='RASPBERRYPI'">
-                            We will prepare a Raspberry Pi distribution for you, taking care of securing it,
-                            setting up all necessary network and Python library to be ready to go. You will 
-                            receive the download link via email. Curious ab out it, have a look to our
-                            <a href="https://github.com/datacentricdesign/raspbian-dist" target="_blank">GitHub repository</a>
-                            <div class="form-group">
-                            <label for="name">NetId</label>
-                            <input type="text" class="form-control" id="netid" required [(ngModel)]="raspberryPi.netid" name="netid" #description="ngModel">
-                        </div>
-                        </div>
-                        
+            <div class="form-group">
+                <label for="type">Type</label>
+                <select class="form-control" id="type" required [(ngModel)]="model.type" name="type">
+                    <option *ngFor="let type of types" [value]="type">{{type}}</option>
+                </select>
+            </div>
+
+            <div class="form-group" *ngIf="model.type==='GENERIC'">
+                <label for="name">
+                    Public key
+                    <a href="https://datacentricdesign.org/tools-openssl/" target="_blank">
+                        <i class="nc-icon nc-alert-circle-i"></i>
+                    </a>
+                </label>
+                <textarea rows="10" type="text" class="form-control" id="pem" required [(ngModel)]="model.pem"
+                    name="pem" #description="ngModel" placeholder="-----BEGIN RSA PUBLIC KEY-----">
+                </textarea>
+            </div>
+
+            <div *ngIf="model.type==='RASPBERRYPI'">
+                <p>
+                    We will prepare a Raspberry Pi distribution for you, taking care of securing it,
+                    setting up all necessary network and Python library to be ready to go. You will
+                    receive the download link via email. Curious ab out it, have a look to our
+                    <a href="https://github.com/datacentricdesign/raspbian-dist" target="_blank">GitHub repository</a>
+                </p>
+                <div class="form-group">
+                    <label for="name">NetId</label>
+                    <input type="text" class="form-control" id="netid" required [(ngModel)]="raspberryPi.netid"
+                        name="netid" #description="ngModel">
                 </div>
             </div>
         </div>

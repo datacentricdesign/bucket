@@ -1,39 +1,170 @@
-<div class="row" *ngIf="thing$ | async as thing else noData">
-    <div class="col-lg-4 col-md-6 col-sm-6" *ngFor="let property of thing.properties; let iProperty = index">
-        <div class="card card-stats">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-5 col-md-4">
-                        <div [className]="property.status ? 'text-warning' : ''">
-                            <div class="icon-big text-center icon-warning">
-                                <i class="nc-icon nc-bulb-63" *ngIf="property.type.id === 'ACCELEROMETER'"></i>
-                                <i class="nc-icon nc-button-power" *ngIf="thing.type === 'Switch'"></i>
+<div *ngIf="thing$ | async as thing else noData">
+    <h1>
+        <i class="nc-icon nc-app"></i>
+        &nbsp;{{thing.name}}
+        <div class="status status{{mqttStatus[1]}}"></div>
+    </h1>
+    <p>{{thing.description}}</p>
+    <h2>Properties</h2>
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12" *ngFor="let property of thing.properties; let iProperty = index">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <!-- <div class="row"> -->
+                    <!-- <div class="col-5 col-md-4">
+                            <div [className]="property.status ? 'text-warning' : ''">
+                                <div class="icon-big text-center icon-warning">
+                                    <i class="nc-icon nc-app"></i>
+                                </div>
                             </div>
-                            {{property.type.name}}
                         </div>
-                    </div>
-                    <div class="col-7 col-md-8">
-                        <div class="numbers">
+                        <div class="col-7 col-md-8"> -->
+                    <div class="numbers">
+                        <a href="./things/{{thing.id}}/properties/{{property.id}}">
                             {{property.name}}
-                            <p class="card-category">
-                                {{property.description}}
-                            </p>
-                        </div>
-                        <div *ngFor="let dimension of property.type.dimensions" style="text-align: right;">
-                            {{dimension.name}} ({{dimension.unit}})<br>
-                        </div>
+                        </a>
+                        <p class="card-category">
+                            {{property.description}}
+                        </p>
                     </div>
+                    <div *ngFor="let dimension of property.type.dimensions" style="text-align: right;">
+                        {{dimension.name}} <span *ngIf="dimension.unit!==''">({{dimension.unit}})</span><br>
+                    </div>
+                    <!-- </div> -->
+                    <!-- </div> -->
+                </div>
+                <div class="card-footer ">
+                    <!-- <hr>
+                        <div class="stats">
+                            <i class="fa fa-refresh"></i> {{property.createdAt}}
+                        </div> -->
                 </div>
             </div>
-            <div class="card-footer ">
-                <hr>
-                <div class="stats">
-                    <i class="fa fa-refresh"></i> 
-                    {{property.createdAt}}
+        </div>
+        <div *ngIf="thing.properties.length === 0">
+            <p>
+                This thing contains no property yet.
+            </p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <form (ngSubmit)="onSubmit()" #propertyForm="ngForm">
+                <div class="card card-stats">
+                    <div class="card-header">
+                        <h3>Create a new Property</h3>
+                        <p>
+                            A Property represents an variable element of your Thing, generating a data trace over time.
+                            It is composed of dimensions evolving together. For example, a temperature property has one
+                            dimension of temperature in Celsius degree while an accelerometer property
+                            has three dimensions, one for each axis.
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        <div style="max-width: 500px;">
+                            <div class="form-group" *ngIf="types$ | async as types else loadingTypes">
+                                <label for="type">Type</label>
+                                <select class="form-control" id="type" required [(ngModel)]="model.type" name="type">
+                                    <option *ngFor="let type of types" (click)="selectType(type)">{{type.name}}</option>
+                                </select>
+                                <div id="typeDetails"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" class="form-control" id="name" required [(ngModel)]="model.name"
+                                    name="name" #name="ngModel">
+                                <div [hidden]="name.valid || name.pristine" class="alert alert-danger">Name is required
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Description</label>
+                                <input type="text" class="form-control" id="description" required
+                                    [(ngModel)]="model.description" name="description" #description="ngModel">
+                                <div [hidden]="description.valid || description.pristine" class="alert alert-danger">
+                                    Description is required</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer ">
+                        <hr>
+                        <button type="submit" class="btn btn-success"
+                            [disabled]="!propertyForm.form.valid">Create</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <h3>Settings</h3>
+                    <p>
+                        ID: {{thing.id}}
+                    </p>
+                    <div style="max-width: 500px;">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" [(ngModel)]="updateThing.name"
+                                #name="ngModel">
+                            <button (click)="editName(name.value)" class="btn btn-success"
+                                [disabled]="updateThing.name===''">Rename</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Description</label>
+                            <input type="text" class="form-control" id="description" name="description"
+                                [(ngModel)]="updateThing.description" #description="ngModel">
+                            <button (click)="editDescription(description.value)" class="btn btn-success"
+                                [disabled]="updateThing.description===''">Update the description</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">
+                                Public key
+                                <a href="https://datacentricdesign.org/tools-openssl/" target="_blank">
+                                    <i class="nc-icon nc-alert-circle-i"></i>
+                                </a>
+                            </label>
+                            <textarea rows="10" type="text" class="form-control" id="pem" [(ngModel)]="updateThing.pem"
+                                name="pem" #pem="ngModel" placeholder="-----BEGIN PUBLIC KEY-----
+                                
+                                -----END PUBLIC KEY-----">
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <button (click)="updatePEM()" class="btn btn-success" [disabled]="updateThing.pem===''">Set new
+                        PEM</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <h3>Dangerous Zone</h3>
+                    <p>
+                        Here you can delete your Thing.<br>
+                        <b>Attention:</b> this action cannot be undone. It will erase all properties attached to this
+                        Thing as well as their data.
+                    </p>
+                    <button (click)="delete()" class="btn btn-danger">Delete {{thing.name}}</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<ng-template #noData>No Data Available</ng-template>
+
+<ng-template #noData>Loading Thing's Data</ng-template>
+
+<ng-template #loadingTypes>Loading property types...</ng-template>

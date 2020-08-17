@@ -1,4 +1,3 @@
-
 <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
   <div class="container-fluid">
     <div class="navbar-wrapper">
@@ -18,7 +17,7 @@
       <span class="navbar-toggler-bar navbar-kebab"></span>
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="collapseExample" [ngbCollapse]="isCollapsed">
-      <form>
+      <!-- <form>
         <div class="input-group no-border">
           <input type="text" value="" class="form-control" placeholder="Search...">
           <div class="input-group-append">
@@ -27,7 +26,7 @@
             </div>
           </div>
         </div>
-      </form>
+      </form> -->
       <ul class="navbar-nav">
 
         <li class="nav-item btn-rotate" ngbDropdown placement="bottom-left">
@@ -38,23 +37,27 @@
             </p>
           </a>
           <div ngbDropdownMenu aria-labelledby="navbarDropdownMenuLink" class="dropdown-menu dropdown-menu-right">
-            <span style="font-size:1em;padding:3px">
-              {{userProfile.name}}<br>
+            <a ngbDropdownItem>
+              <i class="nc-icon nc-single-02"></i>
+              {{userProfile.name}}
+            </a>
+            <a ngbDropdownItem>
+              <i class="nc-icon nc-email-85"></i>
               {{userProfile.email}}
-            </span>
+            </a>
             <div class="dropdown-divider"></div>
-            <a ngbDropdownItem href="javascript:void(0)">
-              <i class="nc-icon nc-settings-90"></i>
+            <a ngbDropdownItem (click)="editProfile()">
+              <i class="nc-icon nc-settings-gear-65"></i>
               Profile Settings
             </a>
-            <a ngbDropdownItem href="javascript:logout()">
+            <a ngbDropdownItem (click)="logout()">
               <i class="nc-icon nc-simple-remove"></i>
               Log out
             </a>
           </div>
         </li>
         <li class="nav-item">
-          <a class="nav-link btn-rotate">
+          <a class="nav-link btn-rotate" href="https://datacentricdesign.org/tools/bucket" target="_blank" alt="Help" title="Help">
             <i class="nc-icon nc-support-17"></i>
             <p>
               <span class="d-lg-none d-md-block">Help</span>

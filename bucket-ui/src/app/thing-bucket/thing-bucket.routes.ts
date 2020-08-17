@@ -4,6 +4,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { ThingComponent } from './thing/thing.component';
 import { AuthGuard } from '../shared/auth/auth.guard';
 import { ThingBucketComponent } from './thing-bucket.component';
+import { PropertyComponent } from './property/property.component';
+import { ExploreComponent } from './explore/explore.component';
 
 export const ThingBucketRoutes: Routes = [
     {
@@ -16,8 +18,16 @@ export const ThingBucketRoutes: Routes = [
             component: DashboardComponent
           },
           {
-            path: 'thing/:id',
+            path: 'explore',
+            component: ExploreComponent
+          },
+          {
+            path: ':id',
             component: ThingComponent
+          },
+          {
+            path: ':id/properties/:propertyId',
+            component: PropertyComponent
           }
         ]
       }

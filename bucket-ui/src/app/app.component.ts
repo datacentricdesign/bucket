@@ -12,7 +12,7 @@ import { authCodeFlowConfig } from './auth-code-flow.config';
 export class AppComponent {
 
   constructor(private router: Router, private oauthService: OAuthService) {
-      this.configureCodeFlow();
+    this.configureCodeFlow();
 
     // Automatically load user profile
     this.oauthService.events
@@ -20,9 +20,10 @@ export class AppComponent {
       .subscribe(_ => {
         console.debug('state', this.oauthService.state);
         this.oauthService.loadUserProfile();
+        window.location.href = './things/dashboard'
       });
 
-      // Display all events
+    // Display all events
     this.oauthService.events.subscribe(e => {
       console.debug('oauth/oidc event', e);
     });
@@ -33,6 +34,19 @@ export class AppComponent {
 
   private configureCodeFlow() {
     this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.requestAccessToken = true;
+
+    console.log("app component")
+    if (
+      this.oauthService.hasValidAccessToken() &&
+      this.oauthService.hasValidIdToken()
+    ) {
+      console.log("=> yes")
+    } else {
+      console.log("=> no")
+    }
+
+
     this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
 }

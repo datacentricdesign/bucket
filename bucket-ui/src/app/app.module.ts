@@ -1,5 +1,5 @@
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
-import { NgModule } from '@angular/core'
+import { NgModule, APP_INITIALIZER } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { ToastrModule } from "ngx-toastr"
 
@@ -20,8 +20,11 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 import { OAuthModule } from 'angular-oauth2-oidc'
 import { BrowserModule } from '@angular/platform-browser'
 import { SharedModule } from './shared/shared.module';
-import { BASE_URL } from './app.tokens'
+import { AppService } from './app.service';
 
+export function init_app(appService: AppService) {
+  return () => appService.load();
+}
 
 @NgModule({
   imports: [
@@ -52,7 +55,12 @@ import { BASE_URL } from './app.tokens'
     ThingBucketComponent,
     LandingPageComponent
   ],
-  providers: [{ provide: BASE_URL, useValue: 'https://dwd.tudelft.nl/bucket' }],
+  providers: [{ 
+    provide: APP_INITIALIZER, 
+    useFactory: init_app, 
+    deps: [ AppService ], 
+    multi: true
+  }],
   bootstrap: [AppComponent],
   entryComponents: []
 })
