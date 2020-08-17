@@ -10,7 +10,7 @@ A bucket of data, in the cloud.
 ![Docker Cloud Build Status (UI)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-ui?label=docker%20build%20%28ui%29)
 ![Docker Cloud Build Status (API)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-api?label=docker%20build%20%28api%29)
 
-[Bucket page](https://datacentricdesign.org/tools/bucket)
+[Bucket page](https://dwd.tudelft.nl/bucket)
 
 
 # Developer 
@@ -42,3 +42,43 @@ docker logs bucket-ui --tail=1000 -f
 ## Test with Postman
 
 You can import in Postman the environment (local and cloud) and the API collection from the subfolder bucket-api/postman.
+
+## HTTP API
+
+Documentation for the REST API is available [here](https://dwd.tudelft.nl/bucket/api/docs)
+
+## MQTT API
+
+The MQTT API follow the structure of the REST API. The verb is placed at the end.
+
+Each published payload must be JSON format and content a requestId. This request id is an identifier
+of your choice. It is added to responses and logs to recognise what it relates to.
+
+### Publishing:
+
+* Create property /things/:thingId/properties/create
+Payload: {"requestId": "myId", "property": {"name": "Prop name", "typeId": "ACCELEROMETER"}}
+
+Response on /things/:thingId/reply
+Payload: {"requestId": "myId", "property": Property}
+
+* Update property /things/:thingId/properties/:propertyId/update
+Payload: {"requestId": "myId", "property": {"id": "dcd:properties:....", "values": [[ timestamp, val, val ], [ timestamp, val, val ]]}}
+
+* Read thing /things/:thingId/read
+Payload: {"requestId": "myId"}
+
+Response on /things/:thingId/reply
+Payload: {"requestId": "myId", "thing": Thing}
+
+### Subscribing:
+
+* Logs /things/:thingId/log
+* Request's response /things/:thingId/reply
+
+
+const propertyCreateRegEx = new RegExp('\/things\/.*\/properties\/create')
+const propertyUpdateRegEx = new RegExp('\/things\/.*\/properties\/.*\/update')
+const thingReadRegEx = new RegExp('\/things\/.*\/read')
+const thingLogsRegEx = new RegExp('\/things\/.*\/log')
+const thingDataRegEx = new RegExp('\/things\/.*\/reply')

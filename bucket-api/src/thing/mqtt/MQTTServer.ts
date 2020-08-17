@@ -19,17 +19,22 @@ const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, p
     return callback(null)
   }
 
-  let resource = 'dcd:' + packet.topic.substr(1).split('/').join(':')
+  let topicArray = packet.topic.substr(1).split('/')
+  
+  let action = 'dcd:actions:' + topicArray.pop()
+
+  let resource = 'dcd:' + topicArray.join(':')
   if (resource.startsWith('dcd:things:dcd:things:')) {
     resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
   }
 
   const acp = {
-    action: 'dcd:actions:update',
+    action: action,
     resource: resource,
     subject: client.context.userId
   }
 
+  console.log('publish acp: ' + JSON.stringify(acp))
   try {
     await AuthController.policyService.check(acp)
     callback(null)
@@ -45,18 +50,22 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
     return callback(null, packet)
   }
 
-  let resource = 'dcd:'
-    + packet.topic.substr(1).split('/').join(':').replace('#', '<.*>')
+  let topicArray = packet.topic.substr(1).split('/')
+  
+  let action = 'dcd:actions:' + topicArray.pop()
+
+  let resource = 'dcd:' + topicArray.join(':').replace('#', '<.*>')
   if (resource.startsWith('dcd:things:dcd:things:')) {
     resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
   }
 
   const acp = {
-    action: 'dcd:actions:read',
+    action: action,
     resource: resource,
     subject: client.context.userId
   }
 
+  console.log(acp)
   try {
     await AuthController.policyService.check(acp)
     callback(null, packet)

@@ -225,7 +225,12 @@ export class PolicyService {
         'dcd:actions:revoke'
       ]
     case 'subject':
-      return ['dcd:actions:create', 'dcd:actions:read', 'dcd:actions:update']
+      return [
+        'dcd:actions:create',
+        'dcd:actions:read',
+        'dcd:actions:update',
+        'dcd:actions:log',
+        'dcd:actions:reply']
     default:
       return []
   }
@@ -238,8 +243,7 @@ export class PolicyService {
     return [
       thingId,
       thingId + ':properties',
-      thingId + ':properties:<.*>',
-      thingId + ':logs',
+      thingId + ':properties:<.*>'
     ]
   }
 }
