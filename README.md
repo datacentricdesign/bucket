@@ -75,10 +75,3 @@ Payload: {"requestId": "myId", "thing": Thing}
 
 * Logs /things/:thingId/log
 * Request's response /things/:thingId/reply
-
-
-const propertyCreateRegEx = new RegExp('\/things\/.*\/properties\/create')
-const propertyUpdateRegEx = new RegExp('\/things\/.*\/properties\/.*\/update')
-const thingReadRegEx = new RegExp('\/things\/.*\/read')
-const thingLogsRegEx = new RegExp('\/things\/.*\/log')
-const thingDataRegEx = new RegExp('\/things\/.*\/reply')
