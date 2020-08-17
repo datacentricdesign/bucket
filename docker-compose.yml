@@ -55,7 +55,8 @@ services:
     volumes:
       - ./certs:/etc/certs
     ports:
-      - 8883:8883
+      - $HTTP_PORT:$HTTP_PORT
+      - $MQTT_PORT:$MQTT_PORT
 
   bucket-ui:
     # image: datacentricdesign/bucket-ui:release-0.0.12
@@ -64,7 +65,9 @@ services:
     container_name: bucket-ui
     environment:
      - NGINX_HOST=dwd.tudelft.nl
-     - NGINX_PORT=8081
+     - NGINX_PORT=4200
+    ports:
+     - 4200:4200
 
   bucket-postgres:
     image: postgres:9.6
