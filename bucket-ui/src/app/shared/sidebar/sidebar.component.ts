@@ -14,7 +14,7 @@ export interface RouteInfo {
 }
 
 const dashboardRoute = { path: '/things/dashboard', title: 'Dashboard', icon: 'nc-layout-11', class: '' }
-const exploreRoute = { path: '/things/explore', title: 'Explore', icon: 'nc-compass-05', class: '' }
+const exploreRoute = { path: '/things/explore', title: 'Shared Properties', icon: 'nc-share-66', class: '' }
 
 export const ROUTES: RouteInfo[] = [dashboardRoute, exploreRoute];
 

@@ -62,12 +62,15 @@ services:
     # image: datacentricdesign/bucket-ui:release-0.0.12
     build:
       context: ./bucket-ui
+      args:
+        - BASE_HREF=$BUCKET_UI_BASE_HREF
+        - DEPLOY_URL=$BUCKET_UI_DEPLOY_URL
     container_name: bucket-ui
     environment:
-     - NGINX_HOST=dwd.tudelft.nl
-     - NGINX_PORT=4200
+     - NGINX_HOST=$BUCKET_UI_HOST
+     - NGINX_PORT=$BUCKET_UI_PORT
     ports:
-     - 4200:4200
+     - $BUCKET_UI_PORT:$BUCKET_UI_PORT
 
   bucket-postgres:
     image: postgres:9.6
