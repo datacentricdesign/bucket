@@ -31,12 +31,6 @@ export const checkPolicy = (action: string) => {
  * @return {string}
  */
 function buildACPResource(req: Request): string {
-    // let acpResource = "dcd";
-    // if (req.entityType !== undefined) {
-    //   acpResource += ":" + req.entityType;
-    // } else {
-    //   acpResource += ":" + resource;
-    // }
     let acpResource = ''
     if (req.params.thingId !== undefined) {
         acpResource += req.params.thingId

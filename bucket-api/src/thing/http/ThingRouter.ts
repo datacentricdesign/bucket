@@ -58,7 +58,7 @@ ThingRouter.get(
      **/
 ThingRouter.get(
      "/:thingId",
-     [introspectToken(['dcd:things']), checkPolicy('things', 'read')],
+     [introspectToken(['dcd:things']), checkPolicy('read')],
      ThingController.getOneThingById
 );
 
@@ -104,7 +104,7 @@ ThingRouter.post(
 **/
 ThingRouter.patch(
      "/:thingId",
-     [introspectToken(['dcd:things']), checkPolicy('things', 'update')],
+     [introspectToken(['dcd:things']), checkPolicy('update')],
      ThingController.editThing
 );
 
@@ -117,14 +117,14 @@ ThingRouter.patch(
      *
      * @apiHeader {string} Authorization TOKEN ID
      *
-     * @apiParam {string} thingId Id of the Thing to update.
+     * @apiParam (Path) {string} thingId Id of the Thing to update.
      *
-     * @apiBody {string} thingId Id of the Thing to update.
-     * @apiBody {string} pem of the Thing to update.
+     * @apiParam (Body) {string} thingId Id of the Thing to update.
+     * @apiParam (Body) {string} pem of the Thing to update.
 **/
 ThingRouter.patch(
      "/:thingId/pem",
-     [introspectToken(['dcd:things']), checkPolicy('things', 'update')],
+     [introspectToken(['dcd:things']), checkPolicy('update')],
      ThingController.editThingPEM
 );
 
@@ -141,7 +141,7 @@ ThingRouter.patch(
 **/
 ThingRouter.delete(
      "/:thingId",
-     [introspectToken(['dcd:things']), checkPolicy('things', 'delete')],
+     [introspectToken(['dcd:things']), checkPolicy('delete')],
      ThingController.deleteOneThing
 );
 

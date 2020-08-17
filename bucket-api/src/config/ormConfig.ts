@@ -11,17 +11,17 @@ export const ORMConfig: ConnectionOptions = {
     synchronize: true,
     logging: Boolean(process.env.POSTGRES_LOGGING),
     entities: [
-        "./thing/Thing.ts",
-        "./thing/role/Role.ts",
-        "./thing/property/Property.ts",
-        "./thing/property/dimension/Dimension.ts",
-        "./thing/property/propertyType/PropertyType.ts"
+        "./src/thing/Thing.ts",
+        "./src/thing/role/Role.ts",
+        "./src/thing/property/Property.ts",
+        "./src/thing/property/dimension/Dimension.ts",
+        "./src/thing/property/propertyType/PropertyType.ts"
     ],
     migrations: [
-        "./thing/migration/**/*.ts"
+        "./src/thing/migration/**/*.ts"
     ],
     subscribers: [
-        "./thing/subscriber/**/*.ts"
+        "./src/thing/subscriber/**/*.ts"
     ],
     // cli: {
     //     entitiesDir: "./thing/entities",
