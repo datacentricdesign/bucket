@@ -45,13 +45,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{profile_api}}/persons/dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7",
+							"raw": "{{profile_api}}/persons/dcd:persons:admin",
 							"host": [
 								"{{profile_api}}"
 							],
 							"path": [
 								"persons",
-								"dcd:persons:d6ef4944-2e3e-4250-8486-3329ed26b7e7"
+								"dcd:persons:admin"
 							]
 						}
 					},
@@ -109,6 +109,168 @@
 							"path": [
 								"persons",
 								"dcd:persons:dc466af0-2d11-43ba-9aa6-173039c345e5"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Profile/Groups",
+			"item": [
+				{
+					"name": "List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/groups",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/groups/dcd:groups:bla/check",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups",
+								"dcd:groups:bla",
+								"check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"dcd:groups:test\",\n    \"members\": [\n        \"dcd:persons:test\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{profile_api}}/groups",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"dcd:groups:test\",\n    \"members\": [\n        \"dcd:persons:test\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{profile_api}}/groups/dcd:groups:test",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups",
+								"dcd:groups:test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/groups/dcd:groups:public/members",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups",
+								"dcd:groups:public",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Members",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"members\": [\"dcd:persons:test\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{profile_api}}/groups/dcd:groups:public/members",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups",
+								"dcd:groups:public",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Members",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{profile_api}}/groups/dcd:groups:public/members/dcd:persons:test",
+							"host": [
+								"{{profile_api}}"
+							],
+							"path": [
+								"groups",
+								"dcd:groups:public",
+								"members",
+								"dcd:persons:test"
 							]
 						}
 					},
@@ -677,7 +839,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "yjasbXLPxO7k0cyN71j5hY-l2ktAMPHkl7SN4YqgkxM.hSV_a6X69VYcpu8n99cd4ssqIJc2blHGlz-LIz7x9d0",
+				"value": "vjwBPjIzyFZcRPAM57QbIU96GCqH3JDHvmzTalKT9I4.kIBy9d-ZrqplzQIF9poWHjr6R5kxZ-wjgVxhtdFl1Sc",
 				"type": "string"
 			},
 			{
