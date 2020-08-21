@@ -5,6 +5,8 @@ import { checkPolicy } from "../middlewares/checkPolicy";
 import { PropertyRouter } from '../property/PropertyRouter';
 
 import ThingController from "./ThingController";
+import { DPiRouter } from "../dpi/DPiRouter";
+import config from "../../config";
 
 export const ThingRouter = Router();
 
@@ -144,5 +146,10 @@ ThingRouter.delete(
      [introspectToken(['dcd:things']), checkPolicy('delete')],
      ThingController.deleteOneThing
 );
+
+// If there is a config for DPi, it means we should be able to use it!
+if (config.env.dpiUrl !== undefined && config.env.dpiUrl !== '') {
+     ThingRouter.use("/:thingId/types/dpi", DPiRouter)
+} 
 
 ThingRouter.use("/:thingId/properties", PropertyRouter)
