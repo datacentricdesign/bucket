@@ -11,6 +11,7 @@ services:
       - NODE_ENV=$NODE_ENV
       - DEV_USER=$DEV_USER
       - DEV_TOKEN=$DEV_TOKEN
+      - DPI_URL=$DPI_URL
       
       - HTTP_HOST=$HTTP_HOST
       - HTTP_PORT=$HTTP_PORT
