@@ -53,6 +53,7 @@ services:
       - bucket-influxdb
     volumes:
       - ./certs:/etc/certs
+      - $HOST_DATA_FOLDER:$HOST_DATA_FOLDER
     ports:
     #   - $HTTP_PORT:$HTTP_PORT
       - $MQTT_PORT:$MQTT_PORT
