@@ -56,5 +56,9 @@ export class Log {
 }
 
 function logToTransport(logObject: ILogObject) {
-  appendFileSync(config.hostDataFolder + '/logs/' + moment(new Date()).format('YYYY-MM-DD_HH') + '.log', JSON.stringify(logObject) + "\n");
+  try {
+    appendFileSync(config.hostDataFolder + '/logs/' + moment(new Date()).format('YYYY-MM-DD_HH') + '.log', JSON.stringify(logObject) + "\n");
+  } catch(error) {
+    console.log(error)
+  }
 }
