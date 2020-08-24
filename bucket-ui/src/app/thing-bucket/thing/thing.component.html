@@ -2,7 +2,20 @@
     <h1>
         <i class="nc-icon nc-app"></i>
         &nbsp;{{thing.name}}
-        <div class="status status{{mqttStatus[1]}}"></div>
+        <ul class="nc-icon-ul ip">
+            <li *ngIf="ipAddress.length > 0">
+                <div class="status status{{mqttStatus[1]}}"></div>MQTT {{mqttStatus[1]}}
+            </li>
+            <li *ngIf="ipAddress.length > 0">
+                <i class="nc-icon nc-world-2"></i>Local IP: {{ipAddress[3]}}
+                (IPv{{ipAddress[1]}})
+            </li>
+            <li *ngIf="ipAddress.length > 0">
+                <i class="nc-icon nc-world-2"></i>External IP: {{ipAddress[4]}}
+                (IPv{{ipAddress[2]}})
+            </li>
+        </ul>
+
     </h1>
     <p>{{thing.description}}</p>
     <h2>Properties</h2>
@@ -102,7 +115,7 @@
     <hr>
 
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-6 col-md-6 col-sm-12">
             <div class="card card-stats">
                 <div class="card-body">
                     <h3>Settings</h3>
@@ -146,15 +159,49 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="card card-stats">
+                <div class="card-header">
+                    <h3>Custom Settings for '{{thing.type}}'</h3>
+                </div>
+                <div *ngIf="thing.type==='GENERIC'">
+                    <div class="card-body">
+                        No custom settings for things of type 'Generic'.
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+                <div *ngIf="thing.type==='RASPBERRYPI'">
+                    <form (ngSubmit)="onRaspberryPiSubmit()" #raspberryForm="ngForm">
+                        <div class="card-body">
+                            <app-raspberry-pi-thing [thingName]="thing.name" [thingId]="thing.id"
+                                (foundEvent)="dpiEventHander($event)"></app-raspberry-pi-thing>
+                        </div>
+                        <div class="card-footer">
+                            <div *ngIf="!dpiFound">
+                                <hr>
+                                <button type="submit" class="btn btn-success"
+                                    [disabled]="!raspberryForm.form.valid">Create</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+
+
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-12 col-md-12 col-sm-6=12">
             <div class="card card-stats">
                 <div class="card-body">
                     <h3>Dangerous Zone</h3>
                     <p>
                         Here you can delete your Thing.<br>
-                        <b>Attention:</b> this action cannot be undone. It will erase all properties attached to this
+                        <b>Attention:</b> this action cannot be undone. It will erase all properties attached to
+                        this
                         Thing as well as their data.
                     </p>
                     <button (click)="delete()" class="btn btn-danger">Delete {{thing.name}}</button>
@@ -162,9 +209,8 @@
             </div>
         </div>
     </div>
-</div>
 
 
-<ng-template #noData>Loading Thing's Data</ng-template>
+    <ng-template #noData>Loading Thing's Data</ng-template>
 
-<ng-template #loadingTypes>Loading property types...</ng-template>
+    <ng-template #loadingTypes>Loading property types...</ng-template>

@@ -1,17 +1,19 @@
-import {Request, Response, Router, NextFunction} from "express";
-import {getRepository, DeleteResult} from "typeorm";
-import {validate} from "class-validator";
+import { Request, Response, Router, NextFunction } from "express";
+import { getRepository, DeleteResult } from "typeorm";
+import { validate } from "class-validator";
 
-import {Thing} from "../Thing";
-import {ThingService} from "../services/ThingService"
+import { Thing } from "../Thing";
+import { ThingService } from "../services/ThingService"
 import { DCDError } from "@datacentricdesign/types";
+import config from "../../config";
+import fetch from "node-fetch";
 
 export class ThingController {
 
     static thingService = new ThingService();
 
     static apiHealth = async (req: Request, res: Response) => {
-        res.send({status: "OK"});
+        res.send({ status: "OK" });
     };
 
     static getThingsOfAPerson = async (req: Request, res: Response) => {
@@ -20,7 +22,7 @@ export class ThingController {
             const things: Thing[] = await ThingController.thingService.getThingsOfAPerson(req.context.userId)
             // Send the things object
             res.send(things);
-        } catch(error) {
+        } catch (error) {
             res.status(404).send(error);
         }
     };
@@ -39,7 +41,7 @@ export class ThingController {
 
     static createNewThing = async (req: Request, res: Response, next: NextFunction) => {
         // Get parameters from the body
-        let {name, description, type, pem} = req.body;
+        let { name, description, type, pem, dpi } = req.body;
         let thing = new Thing();
         thing.name = name;
         thing.description = description
@@ -58,9 +60,28 @@ export class ThingController {
             const createdThing = await ThingController.thingService.createNewThing(thing)
             if (pem !== undefined) {
                 const error = checkPEM(pem)
-                if (error!==undefined) return next(error)
+                if (error !== undefined) return next(error)
                 await ThingController.thingService.editThingPEM(thing.id, pem)
             }
+
+
+            if (thing.type === 'RASPBERRYPI' && dpi !== undefined) {
+                const url = config.env.dpiUrl + '/'
+                dpi.id = thing.id
+                // TODO: fetch email from user profile
+                dpi.email = ''
+                const options = {
+                    method: 'POST',
+                    body: JSON.stringify(dpi),
+                    // timeout: 10000,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                const result = await fetch(url, options);
+                const text = await result.text()
+            }
+
             // If all ok, send 201 response
             return res.status(201).send(createdThing);
         } catch (error) {
@@ -72,7 +93,7 @@ export class ThingController {
         // Get the ID from the url
         const thingId = req.params.thingId;
         // Get values from the body
-        const {name, description} = req.body;
+        const { name, description } = req.body;
         let thing: Thing;
         try {
             thing = await ThingController.thingService.getOneThingById(thingId)
@@ -108,14 +129,14 @@ export class ThingController {
         // Get pem from body
         const pem = req.body.pem;
         const error = checkPEM(pem)
-        if (error!==undefined) return next(error)
+        if (error !== undefined) return next(error)
         // Call the Service
         ThingController.thingService.editThingPEM(thingId, pem)
-        .then( () => {
-            res.status(204).send();
-        }).catch( (error) => {
-            next(error)
-        })
+            .then(() => {
+                res.status(204).send();
+            }).catch((error) => {
+                next(error)
+            })
     }
 
     static deleteOneThing = async (req: Request, res: Response, next: NextFunction) => {
@@ -126,7 +147,7 @@ export class ThingController {
             await ThingController.thingService.deleteOneThing(thingId)
             // After all send a 204 (no content, but accepted) response
             res.status(204).send();
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
@@ -139,7 +160,7 @@ export class ThingController {
         try {
             const result = await ThingController.thingService.countDataPoints(req.context.userId, from, timeInterval)
             res.status(200).send(result);
-        } catch(error) {
+        } catch (error) {
             next(error)
         }
     };
@@ -148,7 +169,7 @@ export class ThingController {
 
 export default ThingController;
 
-function checkPEM(pem:string) {
+function checkPEM(pem: string) {
     if (pem === undefined) {
         return new DCDError(400, 'The public key should be provided in the body parameter "pem".')
     }

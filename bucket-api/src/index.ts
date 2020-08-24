@@ -1,4 +1,6 @@
 import config from "./config";
+import { Log } from "./Logger";
+Log.init("Bucket")
 
 import { ThingRouter } from './thing/http/ThingRouter';
 
@@ -16,8 +18,9 @@ import { mqttInit } from './thing/mqtt/MQTTServer';
 import { introspectToken } from "./thing/middlewares/introspectToken";
 import PropertyController from "./thing/property/PropertyController";
 
+import { mkdir } from "fs";
 
-console.log("starting...")
+Log.info("Bucket starting...")
 
 waitAndConnect(1000);
 
@@ -31,8 +34,8 @@ function waitAndConnect(delayMs: number) {
         })
         // Could not connect wait and try again
         .catch((error) => {
-            console.log(JSON.stringify(error));
-            console.log("Retrying to connect in " + delayMs + " ms.");
+            Log.debug(JSON.stringify(error));
+            Log.info("Retrying to connect in " + delayMs + " ms.");
             delay(delayMs).then(() => {
                 waitAndConnect(delayMs * 1.5);
             })
@@ -79,6 +82,6 @@ function startAPI() {
 
     // Start listening
     app.listen(config.http.port, () => {
-        console.log("Server started on port " + config.http.port + "!");
+        Log.info("Server started on port " + config.http.port + "!");
     });
 }

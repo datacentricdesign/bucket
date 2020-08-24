@@ -1,9 +1,8 @@
+import { Log } from "../../Logger";
+Log.init("Bucket Migration")
+
 import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
-import { Thing } from "../Thing";
-import { v4 as uuidv4 } from 'uuid';
 import { PropertyType } from "../property/propertyType/PropertyType";
-import { Dimension } from "../property/dimension/Dimension";
-import { Property } from "@datacentricdesign/types";
 
 export class TypesMQTT1589877780000 implements MigrationInterface {
 
@@ -236,12 +235,23 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
                     { id:'state', name: 'Value', description: '', unit: '', type:'number' }
                 ]
             },
+            {
+                id: 'IP_ADDRESS',
+                name: 'IP Address',
+                description: 'Local and external IP address',
+                dimensions: [
+                    { id: 'local-ip-address', name: 'Local IP', description: 'Local IP', unit: '', type: 'string' },
+                    { id: 'local-ip-address-type', name: 'Type Local IP', description: 'Type Local IP', unit: '', type: 'number' },
+                    { id: 'external-ip-address', name: 'External IP', description: 'External IP', unit: '', type: 'string' },
+                    { id: 'external-ip-address-type', name: 'Type External IP', description: 'Type External IP', unit: '', type: 'number' }
+                ]
+            }
         ]
 
         const propertyTypeRepository = getRepository(PropertyType);
         propertyTypes.forEach(property => {
             propertyTypeRepository.save(property).catch( (error) => {
-                console.error(JSON.stringify(error))
+                Log.error(JSON.stringify(error))
             });
         });
     }

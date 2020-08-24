@@ -1,0 +1,87 @@
+<form (ngSubmit)="onSubmit()" #thingForm="ngForm">
+    <div class="card card-stats">
+        <div class="card-header">
+            <h1>Create a new Thing</h1>
+            <p>A Thing represents a physical or virtual component collecting data.
+                For example, a phone which collects acceleration, a website recording
+                number of page views.
+            </p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" required [(ngModel)]="model.name" name="name"
+                            #name="ngModel">
+                        <div [hidden]="name.valid || name.pristine" class="alert alert-danger">Name is required</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Description</label>
+                        <input type="text" class="form-control" id="description" required
+                            [(ngModel)]="model.description" name="description" #description="ngModel">
+                        <div [hidden]="description.valid || description.pristine" class="alert alert-danger">Description
+                            is
+                            required</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="type">Type</label>
+                        <select class="form-control" id="type" required [(ngModel)]="model.type" name="type">
+                            <option *ngFor="let type of types" [value]="type.id">{{type.name}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="form-group" *ngIf="model.type==='GENERIC'">
+                        <label for="name">
+                            Public key
+                        </label>
+                        <textarea rows="10" type="text" class="form-control" id="pem" required [(ngModel)]="model.pem"
+                            name="pem" #description="ngModel" placeholder="-----BEGIN RSA PUBLIC KEY-----">
+                        </textarea>
+                        <details>
+                            <summary><i class="nc-icon nc-alert-circle-i"></i>Public/Private keys? What and How
+                            </summary>
+                            <p>
+                                We must authenticate all Things interacting with Bucket to ensure that each of them
+                                fully and only access and control
+                                what they are authorised to. Authentication is addressed with a set of private and
+                                public keys.
+                                <a href="https://www.youtube.com/watch?v=KuCt1GhzKJE" target="_blank">Check out this
+                                    illustration by Udacity</a>
+                            </p>
+                            To generate a public/private set of keys
+                            <ul>
+                                <li>Install OpenSSL. On Mac, this tool is already installed. On Windows, you can
+                                    download and install openssl here</li>
+                                <li>
+                                    In the terminal, type in the following command to generate a private key. The private key is saved saved in file ‘private.pem’. You should keep this file secret on your computer and never share it.
+                                    <code>
+                                        openssl genrsa -out private.pem 4096
+                                    </code>
+                                </li>
+                                <li>
+                                    Then, extract the attached public key with the following command. The public key is saved in the file ‘public.pem’
+                                    <code>
+                                        openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+                                    </code>
+                                </li>
+                            </ul>
+                        </details>
+                    </div>
+
+                    <div *ngIf="model.type==='RASPBERRYPI'">
+                        <app-raspberry-pi-thing [thingName]="model.name"></app-raspberry-pi-thing>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer ">
+            <hr>
+            <button type="submit" class="btn btn-success" [disabled]="!thingForm.form.valid">Create</button>
+        </div>
+    </div>
+</form>

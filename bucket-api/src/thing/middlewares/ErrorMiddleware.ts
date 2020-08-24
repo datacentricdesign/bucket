@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { DCDError } from '@datacentricdesign/types';
-import { envConfig } from '../../config/envConfig';
+import { Log } from '../../Logger';
+import config from '../../config';
 
 export default function errorMiddleware(error: DCDError, request: Request, response: Response, next: NextFunction) {
     const status = error._statusCode || 500;
     const message = error.message || 'Something went wrong';
-    console.debug(JSON.stringify({
+    Log.debug(JSON.stringify({
         status,
         message,
         name: error.name,
@@ -14,7 +15,7 @@ export default function errorMiddleware(error: DCDError, request: Request, respo
         stack: error.stack,
         code: error.errorCode,
     }))
-    if (envConfig.env === 'development') {
+    if (config.env.env === 'development') {
         return response.status(status).send({
             status,
             message,

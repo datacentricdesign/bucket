@@ -18,6 +18,7 @@
   .status {
     width: 10px;
     height: 10px;
+    margin: auto 3px;
     display: inline-block;
     animation: none;
     background-color: 'none';
@@ -28,4 +29,9 @@
   .statusDisconnected {
     animation: none;
     background-color: #c0c1c2;
+  }
+
+  .ip {
+    display: inline-block;
+    font-size: small;
   }

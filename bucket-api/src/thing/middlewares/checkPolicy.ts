@@ -16,7 +16,6 @@ export const checkPolicy = (action: string) => {
             action: 'dcd:actions:' + action,
             subject: req.context.userId
         }
-        console.log(acp)
         AuthController.policyService
             .check(acp)
             .then(() => next())

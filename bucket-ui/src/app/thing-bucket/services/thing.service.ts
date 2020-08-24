@@ -121,7 +121,7 @@ export class ThingService {
     this.http.delete(url, { headers })
       .subscribe(
         result => {
-          window.location.href = './things';
+          window.location.href = './things/dashboard';
         },
         err => {
           console.warn('status', err.status);
@@ -258,4 +258,34 @@ export class ThingService {
     formData.append('fileKey', fileToUpload, fileToUpload.name);
     return this.http.put<any>(url, formData, { headers: headers })
   }
+
+  dpiStatus(thingId: string): Promise<any> {
+    let url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+  dpiCancel(thingId: string): Promise<any> {
+    let url = this.apiURL + '/things/' + thingId + '/types/dpi/cancel'
+    let headers = new HttpHeaders({timeout: `${20000}`})
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+  dpiDelete(thingId: string): Promise<any> {
+    let url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.delete(url, { headers }).toPromise()
+  }
+
+  dpiDownload(thingId: string) {
+    let url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    let params = new HttpParams().set('download', 'true')
+    return this.http.get(url, { headers, params, responseType: 'blob' as 'blob' }).toPromise()
+  }
+
 }

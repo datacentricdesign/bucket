@@ -11,6 +11,7 @@ import { Token } from './ThingService'
 import { PolicyService } from './PolicyService'
 import config from '../../config'
 import { URL } from 'url'
+import { Log } from '../../Logger'
 
 /**
  * This class handle Authentication and Authorisation processes
@@ -58,8 +59,6 @@ export class AuthService {
         const body = { token: token }
         // const body = { token: token, scope: requiredScope.join(" ") };
         const url = config.oauth2.oAuth2IntrospectURL
-
-        console.log(url)
 
         return this.authorisedRequest(
             'POST',
@@ -137,7 +136,6 @@ export class AuthService {
      */
     getJWK(setId: string) {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
-        console.log(url)
         return this.authorisedRequest('GET', url)
             .then(result => {
                 const jwk = result.keys[0]
@@ -209,7 +207,7 @@ export class AuthService {
      * @param entity 
      */
     checkJWTAuth(token: string, thingId: string) {
-        console.log("\ncheck JWT auth\n")
+        Log.debug("\ncheck JWT auth\n")
         // Public keys are cached by thingId, we check if this one is cached
         if (!this.jwtTokenMap.hasOwnProperty(thingId)) {
             // Not found, let's get it from keto
@@ -217,8 +215,6 @@ export class AuthService {
                 .then(() => {
                     return this.getJWK(thingId)
                         .then((publicKey) => {
-                            console.log("result from hydra")
-                            console.log(publicKey)
                             // Now that we have the JWK, let's rerun the function
                             return this.checkJWTAuth(token, thingId)
                         })
@@ -230,28 +226,25 @@ export class AuthService {
                     return Promise.reject(error)
                 })
         }
-        console.log('known public key')
+        
         return jwt.verify(
             token.toString(),
             this.jwtTokenMap[thingId],
             {},
             (error: Error, introspectionToken: Token) => {
-                console.log('result verify')
                 if (error) {
-                    console.log(error)
+                    Log.error(error)
                     return Promise.reject(error)
                 }
                 const currentTime = Math.floor(new Date().getMilliseconds() / 1000)
 
-                console.log(introspectionToken)
-                console.log(config.http.url)
+                Log.debug(introspectionToken)
                 if (
                     introspectionToken.aud !== undefined &&
                     introspectionToken.aud === config.http.url &&
                     introspectionToken.exp !== undefined &&
                     introspectionToken.exp > currentTime
                 ) {
-                    console.log('token valid')
                     return Promise.resolve(introspectionToken)
                 } else {
                     return Promise.reject(new DCDError(403, 'Token expired'))

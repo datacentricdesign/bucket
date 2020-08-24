@@ -4,7 +4,7 @@ import DPiController from "./DPiController";
 import { introspectToken } from "../middlewares/introspectToken";
 import { checkPolicy } from "../middlewares/checkPolicy";
 
-export const DPiRouter = Router();
+export const DPiRouter = Router({mergeParams: true});
 
 /**
  * @api {get} /
@@ -12,12 +12,10 @@ export const DPiRouter = Router();
  * @apiDescription Get DPi Image
  *
  * @apiVersion 0.0.1
- *
- * @apiSuccess {DPi}
 **/
 DPiRouter.get(
     "/",
-    [introspectToken(['dcd:things']), checkPolicy('read')],
+    [introspectToken(['dcd:things'])],
     DPiController.getOneDPIImage);
 
 /**
@@ -27,10 +25,8 @@ DPiRouter.get(
  *
  * @apiVersion 0.1.0
  *
- * @apiParam (Body) {DTODPi}
+ * @apiParam (Body) {DTODPi} details of the DPi image
  * @apiHeader {String} Content-type application/json
- *
- * @apiSuccess {DPi}
  **/
 DPiRouter.post(
     "/",
@@ -43,8 +39,6 @@ DPiRouter.post(
  * @apiDescription Delete DPi Image
  *
  * @apiVersion 0.1.0
- *
- * @apiSuccess {DPi}
  **/
 DPiRouter.delete(
     "/",
@@ -57,8 +51,6 @@ DPiRouter.delete(
  * @apiDescription Cancel DPi Image Generation
  *
  * @apiVersion 0.1.0
- *
- * @apiSuccess {DPi}
  **/
 DPiRouter.get(
     "/cancel",

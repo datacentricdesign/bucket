@@ -54,7 +54,7 @@ function validateEnv() {
 validateEnv()
 
 export default {
-  homeDataFolder: process.env.HOME_DATA_FOLDER,
+  hostDataFolder: process.env.HOST_DATA_FOLDER,
   env: envConfig,
   orm: ORMConfig,
   http: httpConfig,

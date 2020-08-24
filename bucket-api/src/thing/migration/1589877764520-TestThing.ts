@@ -1,9 +1,10 @@
+import { Log } from "../../Logger";
+Log.init("Bucket Migration")
+
 import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
 import { Thing } from "../Thing";
 import { v4 as uuidv4 } from 'uuid';
-import { PropertyType } from "../property/propertyType/PropertyType";
-import { Dimension } from "../property/dimension/Dimension";
-import { Property } from "@datacentricdesign/types";
+
 
 export class TestThing1589877764520 implements MigrationInterface {
 

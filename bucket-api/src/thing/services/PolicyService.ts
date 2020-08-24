@@ -7,6 +7,7 @@ import { Role } from "../role/Role";
 
 import { v4 as uuidv4 } from 'uuid';
 import config from "../../config";
+import { Log } from "../../Logger";
 
 /**
  * Manage access policies
@@ -91,7 +92,7 @@ export class PolicyService {
 
 
   async createPolicy(subjectId: string, resourceId: string, roleName: string, effect = 'allow', id?: string) {
-    console.log("creating policy...")
+    Log.debug("creating policy...")
     const policyId: string = id !== undefined ? id : uuidv4()
     const roleRepository = getRepository(Role);
     const newRole: Role = {
@@ -114,7 +115,7 @@ export class PolicyService {
       subjects: [subjectId],
       resources: PolicyService.entityToResource(resourceId)
     }
-    console.log(policy)
+    Log.debug(policy)
     return this.updateKetoPolicy(policy)
   }
 
@@ -157,12 +158,10 @@ export class PolicyService {
    */
   async listConsents(type:string, id: string) {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/exact/policies?' + type + '=' + id
-    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'GET'
     }
-    console.log(options)
     try {
       const res = await fetch(url, options);
       if (res.ok) {

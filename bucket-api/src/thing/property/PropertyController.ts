@@ -13,6 +13,7 @@ import { ThingService } from "../services/ThingService"
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
+import { Log } from "../../Logger";
 
 export class PropertyController {
 
@@ -47,7 +48,7 @@ export class PropertyController {
     };
 
     static getProperties = async (req: Request, res: Response) => {
-        console.log(req.context.userId)
+        Log.debug(req.context.userId)
         try {
             const properties: Property[] = await PropertyController.propertyService.getProperties(req.context.userId)
             res.send(properties);
@@ -142,7 +143,7 @@ export class PropertyController {
     };
 
     static updatePropertyValues = async (req: Request, res: Response, next: NextFunction) => {
-        console.log('update property values')
+        Log.debug('update property values')
         // Get the ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -201,7 +202,7 @@ export class PropertyController {
     };
 
     static uploadDataFile(property: Property, request, response, next) {
-        console.log("upload data file")
+        Log.debug("upload data file")
         const hasLabel = request.query.hasLabel === 'true'
         const form = new multiparty.Form()
         let dataStr = ''
@@ -216,7 +217,7 @@ export class PropertyController {
         })
         form.on('close', () => {
             property.values = csvStrToValueArray(property.type.dimensions, dataStr, hasLabel)
-            console.log(property.values)
+            Log.debug(property.values)
             saveValuesAndRespond(property, response)
         })
         form.on('error', next)
@@ -262,7 +263,7 @@ export class PropertyController {
             effect: 'allow',
             id: id
         }
-        console.log("granting: " + JSON.stringify(acp))
+        Log.debug("granting: " + JSON.stringify(acp))
         // Call the Service
         try {
             const result = await AuthController.policyService.updateKetoPolicy(acp, 'exact')
@@ -338,7 +339,7 @@ async function saveValuesAndRespond(property: Property, res: Response) {
         const result = await PropertyController.propertyService.updatePropertyValues(property)
         res.json(result)
     } catch (e) {
-        console.log(e)
+        Log.error(e)
         res.status(500).send("failed updating property values");
         return;
     }

@@ -16,7 +16,7 @@ export const introspectToken = (requiredScope: string[]) => {
         //     token: config.env.devToken,
         //     sub: req.params.entityId
         // }
-        // console.log(user)
+        // Log.debug(user)
         // req.context = {
         //     userId: user.entityId
         // }

@@ -1,0 +1,414 @@
+<div *ngIf="found">
+    <div *ngIf="image">
+        <p>
+            Your image is ready for download.<br>
+        </p>
+
+        <details>
+            <summary><i class="nc-icon nc-alert-circle-i"></i> What shall I do with this?</summary>
+            <ul>
+                <li>
+                    Once downloaded, unzip the file to you obtain an image file (extension .img).
+                </li>
+                <li>
+                    To install this image on the SD card, download and install
+                    <a href="https://www.balena.io/etcher/" target="_blank">Etcher</a>.
+                </li>
+                <li>
+                    Starting Etcher, you first select your image file, then your SD card, and 'Flash'
+                </li>
+            </ul>
+        </details>
+        <button id="downloadImage" type="button" (click)="download()" class="btn btn-info">
+            <div class="button-spinning">
+                Download
+            </div>
+            <div id="spinnerDownloadImage" style="display:none" class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+            </div>
+        </button>
+        <button type="button" (click)="delete()" class="btn btn-danger">Delete</button>
+    </div>
+
+    <div *ngIf="!image">
+        <ul class="nc-icon-ul">
+            <li>Image being prepared.</li>
+            <li><i class="nc-icon nc-watch-time"></i><b>Estimated total time:</b> several hours</li>
+            <li><i class="nc-icon nc-button-play icon-bullet"></i><b>Started:</b> {{started_at}}</li>
+            <li><i class="nc-icon nc-refresh-69 icon-bullet"></i><b>Last Update:</b> {{updated_at}}</li>
+        </ul>
+
+        <label>
+            <i class="nc-icon nc-minimal-right"></i>
+            <b>Current Status:</b> {{status}}
+        </label>
+        <div class="progress">
+            <div class="progress-bar {{statusColor}}" role="progressbar" [ngStyle]="{'width': progress}"></div>
+        </div>
+
+        <button id="cancelGeneration" type="button" class="btn btn-danger" (click)="cancel()">
+            <div class="button-spinning">
+                Cancel
+            </div>
+            <div id="spinnerCancelGeneration" style="display:none" class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+            </div>
+        </button>
+
+    </div>
+</div>
+
+<div *ngIf="!found">
+
+    <p>
+        Bucket will prepare a Raspberry Pi distribution for you, taking care of securing it,
+        setting up all necessary network and Python library to be ready to go. You will
+        receive the download link via email. Curious about it, have a look to our
+        <a href="https://github.com/datacentricdesign/raspbian-dist" target="_blank">GitHub repository</a>.
+    </p>
+
+    <details open>
+        <summary>Provisioning login credentials</summary>
+        <div class="form-group">
+            <label for="first_user_name">First user name (netId if using eduroam)</label>
+            <input type="text" class="form-control" id="first_user_name" required
+                [(ngModel)]="raspberryPi.first_user_name" name="first_user_name" #first_user_name="ngModel"
+                placeholder="">
+        </div>
+        <div class="form-group">
+            <label for="first_user_password">First user password (at least 8 characters)</label>
+            <input type="password" class="form-control" id="first_user_password" required minlength="8"
+                [(ngModel)]="raspberryPi.first_user_password" name="first_user_password" #first_user_password="ngModel">
+            <div *ngIf="first_user_password.invalid && (first_user_password.dirty || first_user_password.touched)"
+                class="alert alert-danger">
+                <div *ngIf="first_user_password.errors.required">
+                    A password is required
+                </div>
+                <div *ngIf="first_user_password.errors.minlength">
+                    Your password must be at least 8 characters long.
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="target_hostname">Hostname (name of your Raspberry Pi on the network)</label>
+            <input type="text" class="form-control" id="target_hostname" required
+                [(ngModel)]="raspberryPi.target_hostname" name="target_hostname" #target_hostname="ngModel">
+        </div>
+    </details>
+
+    <div class="form-check">
+        <label class="form-check-label">
+            <input class="form-check-input" type="checkbox" d="enable_SSH" [(ngModel)]="raspberryPi.enable_SSH"
+                name="enable_SSH" #enable_SSH="ngModel" checked>
+            Enable SSH (open access from the network)
+            <span class="form-check-sign"></span>
+        </label>
+    </div>
+
+    <hr>
+
+    <details>
+        <summary>Provisioning a home network</summary>
+        <p>
+            You can provide the credentials of a home network. The Raspberry Pi will connect to it
+            automatically.<br>
+        </p>
+
+        <div class="form-group">
+            <label for="home_ESSID">Home Network ESSID</label>
+            <input type="text" class="form-control" id="home_ESSID" [(ngModel)]="raspberryPi.home_ESSID"
+                name="home_ESSID" #wpa_ESSID="ngModel" placeholder="">
+        </div>
+        <div class="form-group">
+            <label for="home_password">Home Network Password</label>
+            <input type="password" class="form-control" id="home_password" [(ngModel)]="raspberryPi.home_password"
+                name="home_password" #home_password="ngModel">
+        </div>
+    </details>
+
+    <hr>
+
+    <details>
+        <summary>Provisioning a WPA network</summary>
+        <p>
+            You can provide the credentials of a enterprise network such as Eduroam. The Raspberry Pi will
+            connect to it automatically.<br>
+            <b>Note:</b> You must provide your WPA username in the field 'First user name' above (e.g. your
+            netId in the case of eduroam).
+        </p>
+
+        <div class="form-group">
+            <label for="wpa_ESSID">WPA Network ESSID</label>
+            <input type="text" class="form-control" id="wpa_ESSID" [(ngModel)]="raspberryPi.wpa_ESSID" name="wpa_ESSID"
+                #wpa_ESSID="ngModel" placeholder="eduroam">
+        </div>
+        <div class="form-group">
+            <label for="wpa_password">WPA Network Password</label>
+            <input type="password" class="form-control" id="wpa_password" [(ngModel)]="raspberryPi.wpa_password"
+                name="wpa_password" #wpa_password="ngModel">
+        </div>
+        <div class="form-group">
+            <label for="wpa_country">Country code</label>
+            <select class="form-control" id="wpa_country" [(ngModel)]="raspberryPi.wpa_country" name="wpa_coutry">
+                <option (click)="selectCountryCode()" (click)="selectCountryCode()" value="AF">Afghanistan</option>
+                <option (click)="selectCountryCode()" value="AX">Åland Islands</option>
+                <option (click)="selectCountryCode()" value="AL">Albania</option>
+                <option (click)="selectCountryCode()" value="DZ">Algeria</option>
+                <option (click)="selectCountryCode()" value="AS">American Samoa</option>
+                <option (click)="selectCountryCode()" value="AD">Andorra</option>
+                <option (click)="selectCountryCode()" value="AO">Angola</option>
+                <option (click)="selectCountryCode()" value="AI">Anguilla</option>
+                <option (click)="selectCountryCode()" value="AQ">Antarctica</option>
+                <option (click)="selectCountryCode()" value="AG">Antigua and Barbuda</option>
+                <option (click)="selectCountryCode()" value="AR">Argentina</option>
+                <option (click)="selectCountryCode()" value="AM">Armenia</option>
+                <option (click)="selectCountryCode()" value="AW">Aruba</option>
+                <option (click)="selectCountryCode()" value="AU">Australia</option>
+                <option (click)="selectCountryCode()" value="AT">Austria</option>
+                <option (click)="selectCountryCode()" value="AZ">Azerbaijan</option>
+                <option (click)="selectCountryCode()" value="BS">Bahamas</option>
+                <option (click)="selectCountryCode()" value="BH">Bahrain</option>
+                <option (click)="selectCountryCode()" value="BD">Bangladesh</option>
+                <option (click)="selectCountryCode()" value="BB">Barbados</option>
+                <option (click)="selectCountryCode()" value="BY">Belarus</option>
+                <option (click)="selectCountryCode()" value="BE">Belgium</option>
+                <option (click)="selectCountryCode()" value="BZ">Belize</option>
+                <option (click)="selectCountryCode()" value="BJ">Benin</option>
+                <option (click)="selectCountryCode()" value="BM">Bermuda</option>
+                <option (click)="selectCountryCode()" value="BT">Bhutan</option>
+                <option (click)="selectCountryCode()" value="BO">Bolivia, Plurinational State of</option>
+                <option (click)="selectCountryCode()" value="BQ">Bonaire, Sint Eustatius and Saba</option>
+                <option (click)="selectCountryCode()" value="BA">Bosnia and Herzegovina</option>
+                <option (click)="selectCountryCode()" value="BW">Botswana</option>
+                <option (click)="selectCountryCode()" value="BV">Bouvet Island</option>
+                <option (click)="selectCountryCode()" value="BR">Brazil</option>
+                <option (click)="selectCountryCode()" value="IO">British Indian Ocean Territory</option>
+                <option (click)="selectCountryCode()" value="BN">Brunei Darussalam</option>
+                <option (click)="selectCountryCode()" value="BG">Bulgaria</option>
+                <option (click)="selectCountryCode()" value="BF">Burkina Faso</option>
+                <option (click)="selectCountryCode()" value="BI">Burundi</option>
+                <option (click)="selectCountryCode()" value="KH">Cambodia</option>
+                <option (click)="selectCountryCode()" value="CM">Cameroon</option>
+                <option (click)="selectCountryCode()" value="CA">Canada</option>
+                <option (click)="selectCountryCode()" value="CV">Cape Verde</option>
+                <option (click)="selectCountryCode()" value="KY">Cayman Islands</option>
+                <option (click)="selectCountryCode()" value="CF">Central African Republic</option>
+                <option (click)="selectCountryCode()" value="TD">Chad</option>
+                <option (click)="selectCountryCode()" value="CL">Chile</option>
+                <option (click)="selectCountryCode()" value="CN">China</option>
+                <option (click)="selectCountryCode()" value="CX">Christmas Island</option>
+                <option (click)="selectCountryCode()" value="CC">Cocos (Keeling) Islands</option>
+                <option (click)="selectCountryCode()" value="CO">Colombia</option>
+                <option (click)="selectCountryCode()" value="KM">Comoros</option>
+                <option (click)="selectCountryCode()" value="CG">Congo</option>
+                <option (click)="selectCountryCode()" value="CD">Congo, the Democratic Republic of the</option>
+                <option (click)="selectCountryCode()" value="CK">Cook Islands</option>
+                <option (click)="selectCountryCode()" value="CR">Costa Rica</option>
+                <option (click)="selectCountryCode()" value="CI">Côte d'Ivoire</option>
+                <option (click)="selectCountryCode()" value="HR">Croatia</option>
+                <option (click)="selectCountryCode()" value="CU">Cuba</option>
+                <option (click)="selectCountryCode()" value="CW">Curaçao</option>
+                <option (click)="selectCountryCode()" value="CY">Cyprus</option>
+                <option (click)="selectCountryCode()" value="CZ">Czech Republic</option>
+                <option (click)="selectCountryCode()" value="DK">Denmark</option>
+                <option (click)="selectCountryCode()" value="DJ">Djibouti</option>
+                <option (click)="selectCountryCode()" value="DM">Dominica</option>
+                <option (click)="selectCountryCode()" value="DO">Dominican Republic</option>
+                <option (click)="selectCountryCode()" value="EC">Ecuador</option>
+                <option (click)="selectCountryCode()" value="EG">Egypt</option>
+                <option (click)="selectCountryCode()" value="SV">El Salvador</option>
+                <option (click)="selectCountryCode()" value="GQ">Equatorial Guinea</option>
+                <option (click)="selectCountryCode()" value="ER">Eritrea</option>
+                <option (click)="selectCountryCode()" value="EE">Estonia</option>
+                <option (click)="selectCountryCode()" value="ET">Ethiopia</option>
+                <option (click)="selectCountryCode()" value="FK">Falkland Islands (Malvinas)</option>
+                <option (click)="selectCountryCode()" value="FO">Faroe Islands</option>
+                <option (click)="selectCountryCode()" value="FJ">Fiji</option>
+                <option (click)="selectCountryCode()" value="FI">Finland</option>
+                <option (click)="selectCountryCode()" value="FR">France</option>
+                <option (click)="selectCountryCode()" value="GF">French Guiana</option>
+                <option (click)="selectCountryCode()" value="PF">French Polynesia</option>
+                <option (click)="selectCountryCode()" value="TF">French Southern Territories</option>
+                <option (click)="selectCountryCode()" value="GA">Gabon</option>
+                <option (click)="selectCountryCode()" value="GM">Gambia</option>
+                <option (click)="selectCountryCode()" value="GE">Georgia</option>
+                <option (click)="selectCountryCode()" value="DE">Germany</option>
+                <option (click)="selectCountryCode()" value="GH">Ghana</option>
+                <option (click)="selectCountryCode()" value="GI">Gibraltar</option>
+                <option (click)="selectCountryCode()" value="GR">Greece</option>
+                <option (click)="selectCountryCode()" value="GL">Greenland</option>
+                <option (click)="selectCountryCode()" value="GD">Grenada</option>
+                <option (click)="selectCountryCode()" value="GP">Guadeloupe</option>
+                <option (click)="selectCountryCode()" value="GU">Guam</option>
+                <option (click)="selectCountryCode()" value="GT">Guatemala</option>
+                <option (click)="selectCountryCode()" value="GG">Guernsey</option>
+                <option (click)="selectCountryCode()" value="GN">Guinea</option>
+                <option (click)="selectCountryCode()" value="GW">Guinea-Bissau</option>
+                <option (click)="selectCountryCode()" value="GY">Guyana</option>
+                <option (click)="selectCountryCode()" value="HT">Haiti</option>
+                <option (click)="selectCountryCode()" value="HM">Heard Island and McDonald Islands</option>
+                <option (click)="selectCountryCode()" value="VA">Holy See (Vatican City State)</option>
+                <option (click)="selectCountryCode()" value="HN">Honduras</option>
+                <option (click)="selectCountryCode()" value="HK">Hong Kong</option>
+                <option (click)="selectCountryCode()" value="HU">Hungary</option>
+                <option (click)="selectCountryCode()" value="IS">Iceland</option>
+                <option (click)="selectCountryCode()" value="IN">India</option>
+                <option (click)="selectCountryCode()" value="ID">Indonesia</option>
+                <option (click)="selectCountryCode()" value="IR">Iran, Islamic Republic of</option>
+                <option (click)="selectCountryCode()" value="IQ">Iraq</option>
+                <option (click)="selectCountryCode()" value="IE">Ireland</option>
+                <option (click)="selectCountryCode()" value="IM">Isle of Man</option>
+                <option (click)="selectCountryCode()" value="IL">Israel</option>
+                <option (click)="selectCountryCode()" value="IT">Italy</option>
+                <option (click)="selectCountryCode()" value="JM">Jamaica</option>
+                <option (click)="selectCountryCode()" value="JP">Japan</option>
+                <option (click)="selectCountryCode()" value="JE">Jersey</option>
+                <option (click)="selectCountryCode()" value="JO">Jordan</option>
+                <option (click)="selectCountryCode()" value="KZ">Kazakhstan</option>
+                <option (click)="selectCountryCode()" value="KE">Kenya</option>
+                <option (click)="selectCountryCode()" value="KI">Kiribati</option>
+                <option (click)="selectCountryCode()" value="KP">Korea, Democratic People's Republic of</option>
+                <option (click)="selectCountryCode()" value="KR">Korea, Republic of</option>
+                <option (click)="selectCountryCode()" value="KW">Kuwait</option>
+                <option (click)="selectCountryCode()" value="KG">Kyrgyzstan</option>
+                <option (click)="selectCountryCode()" value="LA">Lao People's Democratic Republic</option>
+                <option (click)="selectCountryCode()" value="LV">Latvia</option>
+                <option (click)="selectCountryCode()" value="LB">Lebanon</option>
+                <option (click)="selectCountryCode()" value="LS">Lesotho</option>
+                <option (click)="selectCountryCode()" value="LR">Liberia</option>
+                <option (click)="selectCountryCode()" value="LY">Libya</option>
+                <option (click)="selectCountryCode()" value="LI">Liechtenstein</option>
+                <option (click)="selectCountryCode()" value="LT">Lithuania</option>
+                <option (click)="selectCountryCode()" value="LU">Luxembourg</option>
+                <option (click)="selectCountryCode()" value="MO">Macao</option>
+                <option (click)="selectCountryCode()" value="MK">Macedonia, the former Yugoslav Republic of</option>
+                <option (click)="selectCountryCode()" value="MG">Madagascar</option>
+                <option (click)="selectCountryCode()" value="MW">Malawi</option>
+                <option (click)="selectCountryCode()" value="MY">Malaysia</option>
+                <option (click)="selectCountryCode()" value="MV">Maldives</option>
+                <option (click)="selectCountryCode()" value="ML">Mali</option>
+                <option (click)="selectCountryCode()" value="MT">Malta</option>
+                <option (click)="selectCountryCode()" value="MH">Marshall Islands</option>
+                <option (click)="selectCountryCode()" value="MQ">Martinique</option>
+                <option (click)="selectCountryCode()" value="MR">Mauritania</option>
+                <option (click)="selectCountryCode()" value="MU">Mauritius</option>
+                <option (click)="selectCountryCode()" value="YT">Mayotte</option>
+                <option (click)="selectCountryCode()" value="MX">Mexico</option>
+                <option (click)="selectCountryCode()" value="FM">Micronesia, Federated States of</option>
+                <option (click)="selectCountryCode()" value="MD">Moldova, Republic of</option>
+                <option (click)="selectCountryCode()" value="MC">Monaco</option>
+                <option (click)="selectCountryCode()" value="MN">Mongolia</option>
+                <option (click)="selectCountryCode()" value="ME">Montenegro</option>
+                <option (click)="selectCountryCode()" value="MS">Montserrat</option>
+                <option (click)="selectCountryCode()" value="MA">Morocco</option>
+                <option (click)="selectCountryCode()" value="MZ">Mozambique</option>
+                <option (click)="selectCountryCode()" value="MM">Myanmar</option>
+                <option (click)="selectCountryCode()" value="NA">Namibia</option>
+                <option (click)="selectCountryCode()" value="NR">Nauru</option>
+                <option (click)="selectCountryCode()" value="NP">Nepal</option>
+                <option (click)="selectCountryCode()" value="NL">Netherlands</option>
+                <option (click)="selectCountryCode()" value="NC">New Caledonia</option>
+                <option (click)="selectCountryCode()" value="NZ">New Zealand</option>
+                <option (click)="selectCountryCode()" value="NI">Nicaragua</option>
+                <option (click)="selectCountryCode()" value="NE">Niger</option>
+                <option (click)="selectCountryCode()" value="NG">Nigeria</option>
+                <option (click)="selectCountryCode()" value="NU">Niue</option>
+                <option (click)="selectCountryCode()" value="NF">Norfolk Island</option>
+                <option (click)="selectCountryCode()" value="MP">Northern Mariana Islands</option>
+                <option (click)="selectCountryCode()" value="NO">Norway</option>
+                <option (click)="selectCountryCode()" value="OM">Oman</option>
+                <option (click)="selectCountryCode()" value="PK">Pakistan</option>
+                <option (click)="selectCountryCode()" value="PW">Palau</option>
+                <option (click)="selectCountryCode()" value="PS">Palestinian Territory, Occupied</option>
+                <option (click)="selectCountryCode()" value="PA">Panama</option>
+                <option (click)="selectCountryCode()" value="PG">Papua New Guinea</option>
+                <option (click)="selectCountryCode()" value="PY">Paraguay</option>
+                <option (click)="selectCountryCode()" value="PE">Peru</option>
+                <option (click)="selectCountryCode()" value="PH">Philippines</option>
+                <option (click)="selectCountryCode()" value="PN">Pitcairn</option>
+                <option (click)="selectCountryCode()" value="PL">Poland</option>
+                <option (click)="selectCountryCode()" value="PT">Portugal</option>
+                <option (click)="selectCountryCode()" value="PR">Puerto Rico</option>
+                <option (click)="selectCountryCode()" value="QA">Qatar</option>
+                <option (click)="selectCountryCode()" value="RE">Réunion</option>
+                <option (click)="selectCountryCode()" value="RO">Romania</option>
+                <option (click)="selectCountryCode()" value="RU">Russian Federation</option>
+                <option (click)="selectCountryCode()" value="RW">Rwanda</option>
+                <option (click)="selectCountryCode()" value="BL">Saint Barthélemy</option>
+                <option (click)="selectCountryCode()" value="SH">Saint Helena, Ascension and Tristan da Cunha</option>
+                <option (click)="selectCountryCode()" value="KN">Saint Kitts and Nevis</option>
+                <option (click)="selectCountryCode()" value="LC">Saint Lucia</option>
+                <option (click)="selectCountryCode()" value="MF">Saint Martin (French part)</option>
+                <option (click)="selectCountryCode()" value="PM">Saint Pierre and Miquelon</option>
+                <option (click)="selectCountryCode()" value="VC">Saint Vincent and the Grenadines</option>
+                <option (click)="selectCountryCode()" value="WS">Samoa</option>
+                <option (click)="selectCountryCode()" value="SM">San Marino</option>
+                <option (click)="selectCountryCode()" value="ST">Sao Tome and Principe</option>
+                <option (click)="selectCountryCode()" value="SA">Saudi Arabia</option>
+                <option (click)="selectCountryCode()" value="SN">Senegal</option>
+                <option (click)="selectCountryCode()" value="RS">Serbia</option>
+                <option (click)="selectCountryCode()" value="SC">Seychelles</option>
+                <option (click)="selectCountryCode()" value="SL">Sierra Leone</option>
+                <option (click)="selectCountryCode()" value="SG">Singapore</option>
+                <option (click)="selectCountryCode()" value="SX">Sint Maarten (Dutch part)</option>
+                <option (click)="selectCountryCode()" value="SK">Slovakia</option>
+                <option (click)="selectCountryCode()" value="SI">Slovenia</option>
+                <option (click)="selectCountryCode()" value="SB">Solomon Islands</option>
+                <option (click)="selectCountryCode()" value="SO">Somalia</option>
+                <option (click)="selectCountryCode()" value="ZA">South Africa</option>
+                <option (click)="selectCountryCode()" value="GS">South Georgia and the South Sandwich Islands</option>
+                <option (click)="selectCountryCode()" value="SS">South Sudan</option>
+                <option (click)="selectCountryCode()" value="ES">Spain</option>
+                <option (click)="selectCountryCode()" value="LK">Sri Lanka</option>
+                <option (click)="selectCountryCode()" value="SD">Sudan</option>
+                <option (click)="selectCountryCode()" value="SR">Suriname</option>
+                <option (click)="selectCountryCode()" value="SJ">Svalbard and Jan Mayen</option>
+                <option (click)="selectCountryCode()" value="SZ">Swaziland</option>
+                <option (click)="selectCountryCode()" value="SE">Sweden</option>
+                <option (click)="selectCountryCode()" value="CH">Switzerland</option>
+                <option (click)="selectCountryCode()" value="SY">Syrian Arab Republic</option>
+                <option (click)="selectCountryCode()" value="TW">Taiwan, Province of China</option>
+                <option (click)="selectCountryCode()" value="TJ">Tajikistan</option>
+                <option (click)="selectCountryCode()" value="TZ">Tanzania, United Republic of</option>
+                <option (click)="selectCountryCode()" value="TH">Thailand</option>
+                <option (click)="selectCountryCode()" value="TL">Timor-Leste</option>
+                <option (click)="selectCountryCode()" value="TG">Togo</option>
+                <option (click)="selectCountryCode()" value="TK">Tokelau</option>
+                <option (click)="selectCountryCode()" value="TO">Tonga</option>
+                <option (click)="selectCountryCode()" value="TT">Trinidad and Tobago</option>
+                <option (click)="selectCountryCode()" value="TN">Tunisia</option>
+                <option (click)="selectCountryCode()" value="TR">Turkey</option>
+                <option (click)="selectCountryCode()" value="TM">Turkmenistan</option>
+                <option (click)="selectCountryCode()" value="TC">Turks and Caicos Islands</option>
+                <option (click)="selectCountryCode()" value="TV">Tuvalu</option>
+                <option (click)="selectCountryCode()" value="UG">Uganda</option>
+                <option (click)="selectCountryCode()" value="UA">Ukraine</option>
+                <option (click)="selectCountryCode()" value="AE">United Arab Emirates</option>
+                <option (click)="selectCountryCode()" value="GB">United Kingdom</option>
+                <option (click)="selectCountryCode()" value="US">United States</option>
+                <option (click)="selectCountryCode()" value="UM">United States Minor Outlying Islands</option>
+                <option (click)="selectCountryCode()" value="UY">Uruguay</option>
+                <option (click)="selectCountryCode()" value="UZ">Uzbekistan</option>
+                <option (click)="selectCountryCode()" value="VU">Vanuatu</option>
+                <option (click)="selectCountryCode()" value="VE">Venezuela, Bolivarian Republic of</option>
+                <option (click)="selectCountryCode()" value="VN">Viet Nam</option>
+                <option (click)="selectCountryCode()" value="VG">Virgin Islands, British</option>
+                <option (click)="selectCountryCode()" value="VI">Virgin Islands, U.S.</option>
+                <option (click)="selectCountryCode()" value="WF">Wallis and Futuna</option>
+                <option (click)="selectCountryCode()" value="EH">Western Sahara</option>
+                <option (click)="selectCountryCode()" value="YE">Yemen</option>
+                <option (click)="selectCountryCode()" value="ZM">Zambia</option>
+                <option (click)="selectCountryCode()" value="ZW">Zimbabwe</option>
+            </select>
+        </div>
+
+    </details>
+</div>

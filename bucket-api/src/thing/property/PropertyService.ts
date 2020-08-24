@@ -16,6 +16,7 @@ import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { ThingService } from "../services/ThingService";
 import { AuthController } from "../http/AuthController";
+import { Log } from "../../Logger";
 
 export class PropertyService {
 
@@ -39,7 +40,7 @@ export class PropertyService {
         this.influx.getDatabaseNames()
             // Double check the timeseries db exists
             .then(async names => {
-                console.log("Connected to InfluxDb");
+                Log.info("Connected to InfluxDb");
                 if (names.indexOf(config.influxdb.database) > -1) {
                     await this.influx.createDatabase(config.influxdb.database);
                     this.ready = true;
@@ -47,8 +48,8 @@ export class PropertyService {
                 this.ready = true
                 return Promise.resolve()
             }).catch((error) => {
-                console.log(JSON.stringify(error));
-                console.log("Retrying to connect to InfluxDB in " + delayMs + " ms.");
+                Log.error(JSON.stringify(error));
+                Log.info("Retrying to connect to InfluxDB in " + delayMs + " ms.");
                 delay(delayMs).then(() => {
                     this.init(delayMs * 1.5);
                 })
@@ -105,9 +106,9 @@ export class PropertyService {
     async getProperties(subject: string): Promise<Property[]> {
         // Get the list of all consent concerning the current subject
         const consents = await AuthController.policyService.listConsents('subject', subject)
-        console.log(consents)
+        Log.debug(consents)
         let resources = []
-        for (let i=0;i<consents.length;i++) {
+        for (let i = 0; i < consents.length; i++) {
             if (consents[i].effect === 'allow') {
                 resources = resources.concat(consents[i].resources)
             }
@@ -142,8 +143,7 @@ export class PropertyService {
             .getOne();
 
         if (property !== undefined && valueOptions != undefined) {
-            console.log('hello')
-            console.log(valueOptions.from)
+            Log.debug(valueOptions.from)
             return this.readValuesFromInfluxDB(property, valueOptions)
         }
         return property
@@ -257,8 +257,7 @@ export class PropertyService {
                 points.push(point);
             }
         }
-        console.log(points)
-        return this.influx.writePoints(points, {precision: 'ms'});
+        return this.influx.writePoints(points, { precision: 'ms' });
     }
 
 
@@ -272,7 +271,7 @@ export class PropertyService {
      * @return {Promise<Property>}
      */
     private readValuesFromInfluxDB(property: Property, opt: ValueOptions): Promise<Property> {
-        console.log(opt)
+        Log.debug(opt)
         let query = `SELECT "time"`
         for (let index in property.type.dimensions) {
             if (opt.timeInterval !== undefined) {
@@ -293,7 +292,7 @@ export class PropertyService {
             query += ` GROUP BY time(${opt.timeInterval}) fill(${opt.fill})`
         }
 
-        console.log(query)
+        Log.debug(query)
 
         return this.influx
             .queryRaw(query, {
@@ -314,27 +313,23 @@ export class PropertyService {
             })
     }
 
-    async countDataPoints(thingId: string, propertyId: string, typeId:string=undefined, from:string, timeInterval): Promise<any> {
+    async countDataPoints(thingId: string, propertyId: string, typeId: string = undefined, from: string, timeInterval): Promise<any> {
         let measurement = typeId
-        if (measurement===undefined) {
+        if (measurement === undefined) {
             const property = await this.getOnePropertyById(thingId, propertyId);
             measurement = property.type.id
         }
 
-        console.log("interval")
-        console.log(timeInterval)
-
         let query = `SELECT COUNT(*) FROM ${measurement} WHERE time > ${from} AND "propertyId" = '${propertyId}'`
-        if (timeInterval!==undefined) query += ` GROUP BY time(${timeInterval})`
-        
+        if (timeInterval !== undefined) query += ` GROUP BY time(${timeInterval})`
+
         return this.influx
             .queryRaw(query, {
-                precision: 'ms',                                          
+                precision: 'ms',
                 database: config.influxdb.database
             })
             .then(data => {
-                console.log(data.results[0])
-                if (data.results[0].series===undefined) return Promise.resolve([])
+                if (data.results[0].series === undefined) return Promise.resolve([])
                 return Promise.resolve(data.results[0].series[0].values)
             })
             .catch(error => {
