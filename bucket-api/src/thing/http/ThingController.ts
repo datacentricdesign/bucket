@@ -7,6 +7,9 @@ import { ThingService } from "../services/ThingService"
 import { DCDError } from "@datacentricdesign/types";
 import config from "../../config";
 import fetch from "node-fetch";
+import { PolicyService } from "../services/PolicyService";
+import { AuthService } from "../services/AuthService";
+import { AuthController } from "./AuthController";
 
 export class ThingController {
 
@@ -64,12 +67,11 @@ export class ThingController {
                 await ThingController.thingService.editThingPEM(thing.id, pem)
             }
 
-
             if (thing.type === 'RASPBERRYPI' && dpi !== undefined) {
+                const keys = await AuthController.authService.generateKeys(thing.id)
                 const url = config.env.dpiUrl + '/'
                 dpi.id = thing.id
-                // TODO: fetch email from user profile
-                dpi.email = ''
+                dpi.private_key = keys.privateKey
                 const options = {
                     method: 'POST',
                     body: JSON.stringify(dpi),

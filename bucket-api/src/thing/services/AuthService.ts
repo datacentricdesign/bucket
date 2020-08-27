@@ -1,6 +1,7 @@
 import * as jwkToBuffer from 'jwk-to-pem'
 import * as jwt from 'jsonwebtoken'
 import { pem2jwk } from 'pem-jwk'
+import { v4 as uuidv4 } from 'uuid';
 
 import fetch from 'node-fetch'
 import { RequestInit } from 'node-fetch'
@@ -101,12 +102,28 @@ export class AuthService {
     }
 
     /**
+       * Generate a JWK set of keys for a given thing id.
+       * @param {string} thingId
+       * @returns {Promise<Object>}
+       */
+    generateKeys(thingId) {
+        const jwkParams = {
+            kid: uuidv4(),
+            alg: 'RS256',
+            use: 'sig'
+        }
+        return this.refresh().then(() => {
+            return this.generateJWK(thingId, jwkParams)
+        })
+    }
+
+    /**
      * Generate a set of private/public keys out of a JWK managed by Hydra.
      * @param set
      * @param body
      * @returns {Promise}
      */
-    generateJWK(set: any, body: any) {
+    generateJWK(set: string, body: any) {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + set
         return this.authorisedRequest('POST', url, body)
             .then(result => {
@@ -226,7 +243,7 @@ export class AuthService {
                     return Promise.reject(error)
                 })
         }
-        
+
         return jwt.verify(
             token.toString(),
             this.jwtTokenMap[thingId],
