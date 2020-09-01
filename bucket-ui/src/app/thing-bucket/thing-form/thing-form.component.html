@@ -81,7 +81,19 @@
         </div>
         <div class="card-footer ">
             <hr>
-            <button type="submit" class="btn btn-success" [disabled]="!thingForm.form.valid">Create</button>
+            <button id="createThingButton" type="submit" class="btn btn-info" [disabled]="!thingForm.form.valid">
+                <div class="button-spinning">
+                    Create
+                </div>
+                <div id="spinnerCreateThing" style="display:none" class="spinner">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                </div>
+            </button>
+
         </div>
     </div>
 </form>

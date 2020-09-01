@@ -18,8 +18,6 @@ import { mqttInit } from './thing/mqtt/MQTTServer';
 import { introspectToken } from "./thing/middlewares/introspectToken";
 import PropertyController from "./thing/property/PropertyController";
 
-import { mkdir } from "fs";
-
 Log.info("Bucket starting...")
 
 waitAndConnect(1000);
@@ -75,6 +73,7 @@ function startAPI() {
     app.get(config.http.baseUrl + "/properties",
         [introspectToken(['dcd:properties', 'dcd:consents'])],
         PropertyController.getProperties);
+    
 
     app.use(config.http.baseUrl + "/docs", express.static('dist/public/docs'))
 

@@ -36,6 +36,11 @@ export class ThingFormComponent implements OnInit {
   }
 
   onSubmit() {
+    const button = document.getElementById("createThingButton") as HTMLButtonElement
+    button.disabled = true
+    const spinner = document.getElementById("spinnerCreateThing") as HTMLElement
+    spinner.style.display = 'inline-block'
+
     const body: any = {
       name: this.model.name,
       description: this.model.description,

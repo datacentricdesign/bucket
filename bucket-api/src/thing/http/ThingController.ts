@@ -71,11 +71,11 @@ export class ThingController {
                 const keys = await AuthController.authService.generateKeys(thing.id)
                 const url = config.env.dpiUrl + '/'
                 dpi.id = thing.id
+                dpi.enable_SSH = dpi.enable_SSH ? '1' : '0'
                 dpi.private_key = keys.privateKey
                 const options = {
                     method: 'POST',
                     body: JSON.stringify(dpi),
-                    // timeout: 10000,
                     headers: {
                         'Content-Type': 'application/json'
                     }

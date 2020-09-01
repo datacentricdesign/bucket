@@ -3,6 +3,7 @@ import config from "../../config";
 import fetch from "node-fetch";
 import * as fs from 'fs'
 import { Log } from "../../Logger";
+import { AuthController } from "../http/AuthController";
 
 export class DPiController {
 
@@ -15,13 +16,11 @@ export class DPiController {
         try {
             const result = await fetch(url, options);
             const json = await result.json()
-            // const blob = await result.blob()
             if (json.errorCode !== undefined) {
                 res.status(json.errorCode).json(json)
             } else if (json.code === 0 && req.query.download === 'true') {
                 const dpiId = thingId.replace('dcd:things:', '')
 
-                // const downloadURL = "http://localhost:8081/test"
                 const downloadURL = "http://dpi.io.tudelft.nl:8082/dpi/" + dpiId + "?download=true"
                 const result = await fetch(downloadURL);
                 await new Promise((resolve, reject) => {
@@ -33,16 +32,6 @@ export class DPiController {
                         resolve();
                     });
                 });
-
-                // return res.redirect()
-                // const path = config.hostDataFolder + '/dpi/images/' + dpiId + '/deploy/image_' + dpiId + '.zip';
-                // return res.download((path), function (error) {
-                //     if (error) {
-                //         Log.error("Failed to serve image " + path + " Error: " + error)
-                //     } else {
-                //         Log.info("Served image " + path)
-                //     }
-                // })
             } else {
                 res.status(200).json(json)
             }
@@ -55,38 +44,16 @@ export class DPiController {
         }
     };
 
-    static testDownload = async (req: Request, res: Response) => {
-        const path = config.hostDataFolder + '/image_test3.zip';
-        return res.download((path), function (error) {
-            if (error) {
-                Log.error("Failed to serve image " + path + " Error: " + error)
-            } else {
-                Log.info("Served image " + path)
-            }
-        })
-    };
-
-    static pipeDownload = async (req: Request, res: Response) => {
-        const downloadURL = "http://localhost:8081/bucket/api/test"
-        const result = await fetch(downloadURL);
-        await new Promise((resolve, reject) => {
-            res
-            result.body.pipe(res);
-            result.body.on("error", (err) => {
-                reject(err);
-            });
-            res.on("finish", function () {
-                resolve();
-            });
-        });
-    };
-
     static generateNewDPIImage = async (req: Request, res: Response, next: NextFunction) => {
         const dpi = req.body
         const url = config.env.dpiUrl + '/'
         dpi.id = req.params.thingId
-        // TODO: fetch email from user profile
-        dpi.email = ''
+
+        const keys = await AuthController.authService.generateKeys(req.params.thingId)
+
+        dpi.enable_SSH = dpi.enable_SSH ? '1' : '0'
+        dpi.private_key = keys.privateKey
+
         const options = {
             method: 'POST',
             body: JSON.stringify(dpi),
