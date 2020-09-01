@@ -18,6 +18,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { ExploreComponent } from './explore/explore.component';
 import { ThingFormComponent } from './thing-form/thing-form.component';
 import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thing.component';
+import { SAVER, getSaver } from './services/saver.provider';
 
 @NgModule({
   imports: [
@@ -40,7 +41,10 @@ import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thi
     RaspberryPiThingComponent,
     ExploreComponent
   ],
-  providers: [ThingService],
+  providers: [
+    ThingService,
+    {provide: SAVER, useFactory: getSaver}
+  ],
 })
 
 export class ThingBucketModule { }

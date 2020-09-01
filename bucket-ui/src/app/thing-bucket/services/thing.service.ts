@@ -1,11 +1,20 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpEvent, HttpResponse, HttpEventType, HttpProgressEvent } from '@angular/common/http';
 import { BASE_URL } from '../../app.tokens';
 import { Observable } from 'rxjs';
 import { Thing, PropertyType, DTOThing, DTOProperty, ValueOptions, Property } from '@datacentricdesign/types';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { AppService } from 'app/app.service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, scan } from 'rxjs/operators';
+import { saveAs } from 'file-saver';
+import { Saver, SAVER } from './saver.provider';
+
+export interface Download {
+  state: 'PENDING' | 'IN_PROGRESS' | 'DONE'
+  progress: number
+  content: Blob | null
+}
+
 
 @Injectable()
 export class ThingService {
@@ -16,7 +25,8 @@ export class ThingService {
   constructor(
     private oauthService: OAuthService,
     private http: HttpClient,
-    private appService: AppService
+    private appService: AppService,
+    @Inject(SAVER) private save: Saver
   ) {
     console.log('constructor thing service')
     this.apiURL = appService.settings.apiURL;
@@ -129,7 +139,7 @@ export class ThingService {
       );
   }
 
-  grant(thingId: string, propertyId:string, subjects:string[], actions:string[]): void {
+  grant(thingId: string, propertyId: string, subjects: string[], actions: string[]): void {
     let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents';
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
@@ -145,7 +155,7 @@ export class ThingService {
       );
   }
 
-  revoke(thingId: string, propertyId:string, consentId: string): void {
+  revoke(thingId: string, propertyId: string, consentId: string): void {
     let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents/' + consentId;
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
@@ -268,7 +278,7 @@ export class ThingService {
 
   dpiCancel(thingId: string): Promise<any> {
     let url = this.apiURL + '/things/' + thingId + '/types/dpi/cancel'
-    let headers = new HttpHeaders({timeout: `${20000}`})
+    let headers = new HttpHeaders({ timeout: `${20000}` })
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
     return this.http.get(url, { headers }).toPromise()
   }
@@ -280,12 +290,90 @@ export class ThingService {
     return this.http.delete(url, { headers }).toPromise()
   }
 
-  dpiDownload(thingId: string) {
+  // dpiDownload(thingId: string) {
+  //   let url = this.apiURL + '/things/' + thingId + '/types/dpi'
+  //   let headers = new HttpHeaders().set('Accept', 'application/json')
+  //     .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+  //   let params = new HttpParams().set('download', 'true')
+  //   return this.http.get(url, {
+  //     headers,
+  //     params,
+  //     responseType: 'blob' as 'blob',
+  //     reportProgress: true,
+  //     observe: 'events',
+  //   }).toPromise()
+  // }
+
+  dpiDownload(thingId: string): Observable<Download> {
     let url = this.apiURL + '/things/' + thingId + '/types/dpi'
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
     let params = new HttpParams().set('download', 'true')
-    return this.http.get(url, { headers, params, responseType: 'blob' as 'blob' }).toPromise()
+    const fileName = 'dpi_image_' + thingId.replace('dcd:things:', '') + '.zip'
+    return this.http.get(url, {
+      headers,
+      params,
+      reportProgress: true,
+      observe: 'events',
+      responseType: 'blob'
+    }).pipe(download(blob => this.save(blob, fileName)))
   }
 
+  createGrafanaThing(thingId: string) {
+    let url = this.apiURL + '/things/' + thingId + '/apps/grafana'
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.post(url, { headers }).toPromise()
+  }
+
+  getGrafanaId(thingId: string) {
+    let url = this.apiURL + '/things/' + thingId + '/apps/grafana/user'
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+}
+
+export function download(
+  saver?: (b: Blob) => void
+): (source: Observable<HttpEvent<Blob>>) => Observable<Download> {
+  return (source: Observable<HttpEvent<Blob>>) =>
+    source.pipe(
+      scan((previous: Download, event: HttpEvent<Blob>): Download => {
+        if (isHttpProgressEvent(event)) {
+          return {
+            progress: event.total
+              ? Math.round((100 * event.loaded) / event.total)
+              : previous.progress,
+            state: 'IN_PROGRESS',
+            content: null
+          }
+        }
+        if (isHttpResponse(event)) {
+          if (saver && event.body) {
+            saver(event.body)
+          }
+          return {
+            progress: 100,
+            state: 'DONE',
+            content: event.body
+          }
+        }
+        return previous
+      },
+        { state: 'PENDING', progress: 0, content: null }
+      )
+    )
+}
+
+
+
+function isHttpResponse<T>(event: HttpEvent<T>): event is HttpResponse<T> {
+  return event.type === HttpEventType.Response
+}
+
+function isHttpProgressEvent(event: HttpEvent<unknown>): event is HttpProgressEvent {
+  return event.type === HttpEventType.DownloadProgress
+    || event.type === HttpEventType.UploadProgress
 }

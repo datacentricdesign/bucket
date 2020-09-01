@@ -1,7 +1,8 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { ThingService } from '../services/thing.service';
+import { ThingService, Download } from '../services/thing.service';
 import * as moment from 'moment'
 import { ToastrService } from 'ngx-toastr';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-raspberry-pi-thing',
@@ -13,6 +14,8 @@ export class RaspberryPiThingComponent implements OnInit {
   @Input() thingId: string;
   @Input() thingName: string;
   @Output() foundEvent = new EventEmitter<boolean>();
+
+  download$: Observable<Download>
 
   found: boolean = false;
   image: boolean = false;
@@ -108,21 +111,24 @@ export class RaspberryPiThingComponent implements OnInit {
     button.disabled = true
     const spinner = document.getElementById("spinnerDownloadImage") as HTMLElement
     spinner.style.display = 'inline-block'
-    this.thingService.dpiDownload(this.thingId).then((blob) => {
-      const a = document.createElement('a')
-      const objectUrl = URL.createObjectURL(blob)
-      a.href = objectUrl
-      a.download = this.thingId.replace('dcd:things:', '') + '.zip';
-      a.click();
-      URL.revokeObjectURL(objectUrl);
-      button.disabled = false
-      spinner.style.display = 'none'
-    }).catch((error) => {
-      console.warn('status', error.status);
-      this.toast(error.status, 'error', 'nc-cloud-download');
-      button.disabled = false
-      spinner.style.display = 'none'
-    })
+    this.download$ = this.thingService.dpiDownload(this.thingId)
+    
+    // .then((blob) => {
+    //   // const a = document.createElement('a')
+    //   // const objectUrl = URL.createObjectURL(blob)
+    //   // a.href = objectUrl
+    //   // a.download = this.thingId.replace('dcd:things:', '') + '.zip';
+    //   // a.click();
+    //   // URL.revokeObjectURL(objectUrl);
+    //   saveAs(blob, 'dpi_image_' + this.thingId.replace('dcd:things:', '') + '.zip')
+    //   button.disabled = false
+    //   spinner.style.display = 'none'
+    // }).catch((error) => {
+    //   console.warn('status', error.status);
+    //   this.toast(error.status, 'error', 'nc-cloud-download');
+    //   button.disabled = false
+    //   spinner.style.display = 'none'
+    // })
   }
 
   onFoundChange() {
