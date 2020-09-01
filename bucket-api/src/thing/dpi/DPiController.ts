@@ -22,7 +22,7 @@ export class DPiController {
                 const dpiId = thingId.replace('dcd:things:', '')
 
                 // const downloadURL = "http://localhost:8081/test"
-                const downloadURL = "http://dpi-api:8082/dpi/" + dpiId + "?download=true"
+                const downloadURL = "http://dpi.io.tudelft.nl:8082/dpi/" + dpiId + "?download=true"
                 const result = await fetch(downloadURL);
                 await new Promise((resolve, reject) => {
                     result.body.pipe(res);
