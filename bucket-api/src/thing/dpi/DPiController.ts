@@ -1,6 +1,7 @@
 import { Request, Response, Router, NextFunction } from "express";
 import config from "../../config";
 import fetch from "node-fetch";
+import * as fs from 'fs'
 import { Log } from "../../Logger";
 
 export class DPiController {
@@ -19,14 +20,29 @@ export class DPiController {
                 res.status(json.errorCode).json(json)
             } else if (json.code === 0 && req.query.download === 'true') {
                 const dpiId = thingId.replace('dcd:things:', '')
-                const path = config.hostDataFolder + '/dpi/images/' + dpiId + '/deploy/image_' + dpiId + '.zip';
-                return res.download((path), function (error) {
-                    if (error) {
-                        Log.error("Failed to serve image " + path + " Error: " + error)
-                    } else {
-                        Log.info("Served image " + path)
-                    }
-                })
+
+                // const downloadURL = "http://localhost:8081/test"
+                const downloadURL = "http://dpi-api:8082/dpi/" + dpiId + "?download=true"
+                const result = await fetch(downloadURL);
+                await new Promise((resolve, reject) => {
+                    result.body.pipe(res);
+                    result.body.on("error", (err) => {
+                        reject(err);
+                    });
+                    res.on("finish", function () {
+                        resolve();
+                    });
+                });
+
+                // return res.redirect()
+                // const path = config.hostDataFolder + '/dpi/images/' + dpiId + '/deploy/image_' + dpiId + '.zip';
+                // return res.download((path), function (error) {
+                //     if (error) {
+                //         Log.error("Failed to serve image " + path + " Error: " + error)
+                //     } else {
+                //         Log.info("Served image " + path)
+                //     }
+                // })
             } else {
                 res.status(200).json(json)
             }
@@ -37,6 +53,32 @@ export class DPiController {
             }
             return res.status(500).send(error)
         }
+    };
+
+    static testDownload = async (req: Request, res: Response) => {
+        const path = config.hostDataFolder + '/image_test3.zip';
+        return res.download((path), function (error) {
+            if (error) {
+                Log.error("Failed to serve image " + path + " Error: " + error)
+            } else {
+                Log.info("Served image " + path)
+            }
+        })
+    };
+
+    static pipeDownload = async (req: Request, res: Response) => {
+        const downloadURL = "http://localhost:8081/bucket/api/test"
+        const result = await fetch(downloadURL);
+        await new Promise((resolve, reject) => {
+            res
+            result.body.pipe(res);
+            result.body.on("error", (err) => {
+                reject(err);
+            });
+            res.on("finish", function () {
+                resolve();
+            });
+        });
     };
 
     static generateNewDPIImage = async (req: Request, res: Response, next: NextFunction) => {
@@ -56,7 +98,7 @@ export class DPiController {
             const result = await fetch(url, options);
             const text = await result.text()
             res.status(200).json(text)
-        } catch(error) {
+        } catch (error) {
             return next(error)
         }
     };
