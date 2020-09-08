@@ -18,7 +18,6 @@ import { Log } from "../../Logger";
 export class PropertyController {
 
     static propertyService = new PropertyService();
-    static thingService = new ThingService();
 
 
     static parseValueOptions(req: Request): ValueOptions {

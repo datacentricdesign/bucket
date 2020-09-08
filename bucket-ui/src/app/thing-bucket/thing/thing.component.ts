@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, config } from 'rxjs';
 
 import { map, catchError } from 'rxjs/operators';
 import { Thing, PropertyType, DTOProperty, DTOThing } from '@datacentricdesign/types';
@@ -52,6 +52,8 @@ export class ThingComponent implements OnInit {
         pem: ''
     }
 
+    grafanaId: number = 0
+
     constructor(private _Activatedroute: ActivatedRoute,
         private _router: Router,
         private http: HttpClient,
@@ -90,6 +92,13 @@ export class ThingComponent implements OnInit {
                 })
             )
         });
+
+        // this.thingService.getGrafanaId(this.id).then( (result:any) => {
+        //     console.log(result)
+        //     this.grafanaId = result.grafanaId 
+            // document.getElementById("grafanaButton").style.display = 'block'
+            // document.getElementById("grafanaLink").style.display = 'none'
+        // })
     }
 
     async checkMQTTStatusAndIpAddress() {
@@ -177,6 +186,10 @@ export class ThingComponent implements OnInit {
         console.log('found changed ')
         this.dpiFound = $event;
         console.log(this.dpiFound)
+    }
+
+    async visualiseWithGrafana(thingId: string) {
+        await this.thingService.createGrafanaThing(thingId)
     }
 
 }

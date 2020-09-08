@@ -17,11 +17,11 @@ import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { ThingService } from "../services/ThingService";
 import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
+import ThingController from "../http/ThingController";
 
 export class PropertyService {
 
     static propertyTypeService = new PropertyTypeService();
-    static thingService = new ThingService();
     private influx: InfluxDB
     private ready: boolean = false
     private cachedTypes = {}
@@ -68,7 +68,7 @@ export class PropertyService {
         // Retrieve the property type
         property.type = await PropertyService.propertyTypeService.getOnePropertyTypeById(dtoProperty.typeId)
         // Retrieve thing details from thingId
-        property.thing = await PropertyService.thingService.getOneThingById(thingId)
+        property.thing = await ThingController.thingService.getOneThingById(thingId)
         // If no name was provided, then use the generic type's
         property.name = (dtoProperty.name === undefined || dtoProperty.name === '') ? property.type.name : dtoProperty.name
         // If no description was provided, then use the generic type's
