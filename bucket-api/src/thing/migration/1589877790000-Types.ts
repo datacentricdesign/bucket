@@ -228,6 +228,14 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
                 ]
             },
             {
+                id: 'CPU',
+                name: 'CPU',
+                description: '',
+                dimensions: [
+                    { id:'cpu', name: 'CPU', description: 'CPU Usage', unit: '%', type:'number' }
+                ]
+            },
+            {
                 id: 'STATE',
                 name: 'State',
                 description: '',
