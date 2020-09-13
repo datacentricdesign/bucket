@@ -146,24 +146,25 @@ export class ThingComponent implements OnInit {
     }
 
     onRaspberryPiSubmit() {
-        console.log(this.dpi)
+        const dpi = this.dpi.raspberryPi
+        console.log(dpi)
 
         const body: any = {
-            first_user_name: this.dpi.raspberryPi.first_user_name,
-            first_user_password: this.dpi.raspberryPi.first_user_password,
-            target_hostname: this.dpi.raspberryPi.target_hostname,
-            enable_SSH: this.dpi.raspberryPi.enable_SSH
+            first_user_name: dpi.first_user_name,
+            first_user_password: dpi.first_user_password,
+            target_hostname: dpi.target_hostname,
+            enable_SSH: dpi.enable_SSH
         }
 
-        if (this.dpi.raspberryPi.home_ESSID !== '' && this.dpi.raspberryPi.home_password !== '') {
-            body.dpi.home_ESSID = this.dpi.raspberryPi.home_ESSID;
-            body.dpi.home_password = this.dpi.raspberryPi.home_password;
+        if (dpi.home_ESSID && dpi.home_password) {
+            body.dpi.home_ESSID = dpi.home_ESSID;
+            body.dpi.home_password = dpi.home_password;
         }
 
-        if (this.dpi.raspberryPi.wpa_ESSID !== '' && this.dpi.raspberryPi.wpa_password !== '' && this.dpi.raspberryPi.wpa_country !== '') {
-            body.dpi.wpa_ESSID = this.dpi.raspberryPi.wpa_ESSID;
-            body.dpi.wpa_password = this.dpi.raspberryPi.wpa_password;
-            body.dpi.wpa_country = this.dpi.raspberryPi.wpa_country;
+        if (dpi.wpa_ESSID && dpi.wpa_password && dpi.wpa_country) {
+            body.dpi.wpa_ESSID = dpi.wpa_ESSID;
+            body.dpi.wpa_password = dpi.wpa_password;
+            body.dpi.wpa_country = dpi.wpa_country;
         }
 
         console.log(body)
