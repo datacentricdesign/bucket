@@ -345,7 +345,7 @@ export function download(
         if (isHttpProgressEvent(event)) {
           return {
             progress: event.total
-              ? Math.round((100 * event.loaded) / event.total)
+              ? Math.round((100 * event.loaded) / 1166082792)
               : previous.progress,
             state: 'IN_PROGRESS',
             content: null
