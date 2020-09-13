@@ -33,7 +33,8 @@
         </button>
         <button type="button" (click)="delete()" class="btn btn-danger">Delete</button>
         <div class="progress" *ngIf="download$ | async as download">
-            <div class="progress-bar progress-bar-info" role="progressbar" [ngStyle]="{'width': download.progress}"></div>
+            {{(download | async)?.progress}}
+            <div class="progress-bar progress-bar-info" role="progressbar" [ngStyle]="{'width': download.progress + '%'}"></div>
         </div>
     </div>
 
