@@ -8,6 +8,7 @@ import { AppService } from 'app/app.service';
 import { catchError, map, scan } from 'rxjs/operators';
 import { saveAs } from 'file-saver';
 import { Saver, SAVER } from './saver.provider';
+import { element } from 'protractor';
 
 export interface Download {
   state: 'PENDING' | 'IN_PROGRESS' | 'DONE'
@@ -344,6 +345,15 @@ export function download(
         console.log(event)
         if (isHttpProgressEvent(event)) {
           const total = 1166082792
+          let progress = Math.round((100 * event.loaded) / total)
+          if (progress>100) progress = 100
+          
+          // fix to improve!
+          const elem:HTMLElement = document.getElementById("download-dpi-image-progress")
+          if (elem) {
+            elem.style.width = progress + '%'
+          }
+
           return {
             // progress: event.total
             //   ? Math.round((100 * event.loaded) / event.total)
@@ -359,6 +369,14 @@ export function download(
           if (saver && event.body) {
             saver(event.body)
           }
+
+          const bt:HTMLButtonElement = document.getElementById("downloadImage") as HTMLButtonElement
+          if (bt) bt.disabled = false
+          const btSpinner:HTMLElement = document.getElementById("spinnerDownloadImage")
+          if (btSpinner) btSpinner.style.display = 'none'
+          const bar:HTMLElement = document.getElementById("download-dpi-image-progress-bar")
+          if (bar) bar.style.display = 'none'
+
           return {
             progress: 100,
             state: 'DONE',
