@@ -342,7 +342,6 @@ export function download(
   return (source: Observable<HttpEvent<Blob>>) =>
     source.pipe(
       scan((previous: Download, event: HttpEvent<Blob>): Download => {
-        console.log(event)
         if (isHttpProgressEvent(event)) {
           const total = 1166082792
           let progress = Math.round((100 * event.loaded) / total)
