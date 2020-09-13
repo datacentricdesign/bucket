@@ -343,9 +343,13 @@ export function download(
       scan((previous: Download, event: HttpEvent<Blob>): Download => {
         console.log(event)
         if (isHttpProgressEvent(event)) {
+          const total = 1166082792
           return {
-            progress: event.total
-              ? Math.round((100 * event.loaded) / 1166082792)
+            // progress: event.total
+            //   ? Math.round((100 * event.loaded) / event.total)
+            //   : previous.progress,
+            progress: total
+              ? Math.round((100 * event.loaded) / total)
               : previous.progress,
             state: 'IN_PROGRESS',
             content: null
