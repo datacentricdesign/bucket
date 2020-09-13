@@ -157,14 +157,14 @@ export class ThingComponent implements OnInit {
         }
 
         if (dpi.home_ESSID && dpi.home_password) {
-            body.dpi.home_ESSID = dpi.home_ESSID;
-            body.dpi.home_password = dpi.home_password;
+            body.home_ESSID = dpi.home_ESSID;
+            body.home_password = dpi.home_password;
         }
 
         if (dpi.wpa_ESSID && dpi.wpa_password && dpi.wpa_country) {
-            body.dpi.wpa_ESSID = dpi.wpa_ESSID;
-            body.dpi.wpa_password = dpi.wpa_password;
-            body.dpi.wpa_country = dpi.wpa_country;
+            body.wpa_ESSID = dpi.wpa_ESSID;
+            body.wpa_password = dpi.wpa_password;
+            body.wpa_country = dpi.wpa_country;
         }
 
         console.log(body)
