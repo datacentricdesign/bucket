@@ -341,6 +341,7 @@ export function download(
   return (source: Observable<HttpEvent<Blob>>) =>
     source.pipe(
       scan((previous: Download, event: HttpEvent<Blob>): Download => {
+        console.log(event)
         if (isHttpProgressEvent(event)) {
           return {
             progress: event.total
