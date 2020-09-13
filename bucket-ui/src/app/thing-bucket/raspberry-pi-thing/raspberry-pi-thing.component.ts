@@ -103,7 +103,9 @@ export class RaspberryPiThingComponent implements OnInit {
   }
 
   delete() {
-    this.thingService.dpiDelete(this.thingId)
+    this.thingService.dpiDelete(this.thingId).then(() => {
+      window.location.reload()
+    })
   }
 
   download() {

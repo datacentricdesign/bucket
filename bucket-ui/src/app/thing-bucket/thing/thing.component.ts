@@ -146,6 +146,8 @@ export class ThingComponent implements OnInit {
     }
 
     onRaspberryPiSubmit() {
+        console.log(this.dpi)
+
         const body: any = {
             first_user_name: this.dpi.raspberryPi.first_user_name,
             first_user_password: this.dpi.raspberryPi.first_user_password,
