@@ -87,6 +87,7 @@
                 placeholder="">
             <div *ngIf="first_user_name.invalid && (first_user_name.dirty || first_user_name.touched)"
                 class="alert alert-danger">
+                {{first_user_name}}
                 <div *ngIf="first_user_name.errors.required">
                     The user name is required for your Raspberry Pi.
                 </div>
