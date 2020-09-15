@@ -96,11 +96,9 @@ export class ThingComponent implements OnInit {
         for (let i = 0; i < this.thing.properties.length; i++) {
             if (this.thing.properties[i].type.id === 'MQTT_STATUS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
-                console.log(result)
                 this.mqttStatus = result[0]
             } else if (this.thing.properties[i].type.id === 'IP_ADDRESS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
-                console.log(result)
                 this.ipAddress = result[0]
             }
         }
@@ -147,7 +145,6 @@ export class ThingComponent implements OnInit {
 
     onRaspberryPiSubmit() {
         const dpi = this.dpi.raspberryPi
-        console.log(dpi)
 
         const body: any = {
             first_user_name: dpi.first_user_name,
@@ -167,8 +164,6 @@ export class ThingComponent implements OnInit {
             body.wpa_country = dpi.wpa_country;
         }
 
-        console.log(body)
-
         let headers = new HttpHeaders().set('Accept', 'application/json')
             .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
         this.http.post(this.apiURL + "/things/" + this.id + '/types/dpi', body, { headers }).subscribe((data: any) => {
@@ -177,9 +172,7 @@ export class ThingComponent implements OnInit {
     }
 
     dpiEventHander($event: any) {
-        console.log('found changed ')
         this.dpiFound = $event;
-        console.log(this.dpiFound)
     }
 
 }

@@ -69,8 +69,6 @@ export class ThingFormComponent implements OnInit {
       }
     }
 
-    console.log(body)
-
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
     this.http.post(this.apiURL + "/things", body, { headers }).subscribe((data: any) => {

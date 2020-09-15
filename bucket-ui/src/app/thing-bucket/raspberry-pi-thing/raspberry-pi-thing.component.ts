@@ -48,7 +48,6 @@ export class RaspberryPiThingComponent implements OnInit {
   }
 
   async refreshData() {
-    console.log('refresh')
     if (this.thingId !== undefined) {
       try {
         const result = await this.thingService.dpiStatus(this.thingId)

@@ -44,17 +44,13 @@ export class ThingConnectedComponent implements OnInit {
 
   async checkMQTTStatus(allThings: any): Promise<any> {
     const connectedThings: any = []
-    console.log('check mqtt status')
     for (let i = 0; i < allThings.length; i++) {
       const thing = allThings[i]
       for (let j = 0; j < thing.properties.length; j++) {
         const property = thing.properties[j]
         if (property.type.id === 'MQTT_STATUS') {
-          console.log('check mqtt status: type MQTT')
           const result = await this.thingService.lastValues(thing.id, property.id)
-          console.log(result)
           if (result[0][1] === 'Connected') {
-            console.log('1 connected thing!')
             thing.updatedAt = moment(new Date(result[0][0])).fromNow()
             connectedThings.push(thing)
           }

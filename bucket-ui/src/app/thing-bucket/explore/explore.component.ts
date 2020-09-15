@@ -37,11 +37,9 @@ export class ExploreComponent implements OnInit {
         .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
       this.properties$ = this.http.get<Property[]>(this.apiURL + "/properties", { headers }).pipe(
         map((data: Property[]) => {
-          console.log(data)
           this.properties = data
           return data;
         }), catchError(error => {
-          console.log(error)
           return throwError('Properties not found!');
         })
       )

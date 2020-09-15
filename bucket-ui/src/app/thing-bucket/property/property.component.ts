@@ -106,7 +106,6 @@ export class PropertyComponent implements OnInit {
   }
 
   download() {
-    console.log(this.downloadModel)
     const options: ValueOptions = {
       from: moment(this.downloadModel.from, "YYYY-MM-DD").unix() * 1000,
       to: moment(this.downloadModel.to, "YYYY-MM-DD").unix() * 1000 + 86400000,
@@ -114,8 +113,6 @@ export class PropertyComponent implements OnInit {
       fctInterval: this.downloadModel.fctInterval,
       fill: this.downloadModel.fill
     }
-    console.log(options)
-    console.log(new Date(options.from))
     const csvFormat = true
     this.thingService.getPropertyValues(this.thingId, this.id, options, csvFormat)
   }

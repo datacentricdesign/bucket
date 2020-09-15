@@ -29,7 +29,6 @@ export class ThingService {
     private appService: AppService,
     @Inject(SAVER) private save: Saver
   ) {
-    console.log('constructor thing service')
     this.apiURL = appService.settings.apiURL;
   }
 
@@ -62,7 +61,6 @@ export class ThingService {
     if (options.fctInterval !== undefined) params.set('fctInterval', options.fctInterval + '')
     if (options.timeInterval !== undefined) params.set('timeInterval', options.timeInterval)
     if (options.fill !== undefined) params.set('fill', options.fill)
-    console.log(params)
     let headers = new HttpHeaders().set('Accept', csvFormat ? 'text/csv' : 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken())
 
@@ -96,7 +94,6 @@ export class ThingService {
     if (fields.description !== undefined && fields.description !== '') {
       body.description = fields.description;
     }
-    console.log(body)
     this.http.patch(url, body, { headers })
       .subscribe(
         result => {
@@ -184,7 +181,6 @@ export class ThingService {
     if (fields.description !== undefined && fields.description !== '') {
       body.description = fields.description;
     }
-    console.log(body)
     this.http.patch(url, body, { headers })
       .subscribe(
         result => {
@@ -249,7 +245,6 @@ export class ThingService {
       .get<PropertyType[]>(url, { headers })
       .subscribe(
         propertyTypes => {
-          console.log(propertyTypes)
           this.propertyTypes = propertyTypes;
         },
         err => {

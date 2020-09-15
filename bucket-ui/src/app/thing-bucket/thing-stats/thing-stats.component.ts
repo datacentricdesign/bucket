@@ -134,9 +134,7 @@ export class ThingStatsComponent implements OnInit {
     let legend = ''
 
     for (let i = 0; i < things.length; i++) {
-      console.log(things[i])
       for (let j = 0; j < things[i].properties.length; j++) {
-        console.log(things[i].properties[j].id)
         const values = things[i].properties[j].values
         let points = []
         let labelTime = []
@@ -169,8 +167,6 @@ export class ThingStatsComponent implements OnInit {
       labels: labels,
       datasets: datasets
     };
-
-    console.log(dpCount)
 
     var chartOptions = {
       legend: {
