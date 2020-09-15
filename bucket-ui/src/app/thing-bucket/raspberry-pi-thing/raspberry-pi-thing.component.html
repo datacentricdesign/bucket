@@ -166,9 +166,9 @@
             <label for="wpa_password">WPA Network Password</label>
             <input type="password" class="form-control" id="wpa_password" [(ngModel)]="raspberryPi.wpa_password"
                 name="wpa_password" #wpa_password="ngModel" minlength="8" maxlength="63">
-            <div *ngIf="wpa_password.errors.minlength || wpa_password.errors.maxlength">
+            <!-- <div *ngIf="wpa_password.errors.minlength || wpa_password.errors.maxlength">
                 Your WPA password must include between 8 and 63 characters.
-            </div>
+            </div> -->
         </div>
         <div class="form-group">
             <label for="wpa_country">Country code</label>
