@@ -85,22 +85,21 @@
             <input type="text" class="form-control" id="first_user_name" required pattern="^[a-z][-a-z0-9_]*$"
                 [(ngModel)]="raspberryPi.first_user_name" name="first_user_name" #first_user_name="ngModel"
                 placeholder="">
-            <div *ngIf="first_user_name.invalid && (first_user_name.dirty || first_user_name.touched)"
+            <!-- <div *ngIf="first_user_name.invalid && (first_user_name.dirty || first_user_name.touched)"
                 class="alert alert-danger">
-                {{first_user_name}}
                 <div *ngIf="first_user_name.errors.required">
                     The user name is required for your Raspberry Pi.
                 </div>
                 <div *ngIf="first_user_name.errors.pattern">
                     The user name should contain only lowercase letters, digits and '_', starting with a letter.
                 </div>
-            </div>
+            </div> -->
         </div>
         <div class="form-group">
             <label for="first_user_password">First user password (at least 8 characters)</label>
             <input type="password" class="form-control" id="first_user_password" required minlength="8"
                 [(ngModel)]="raspberryPi.first_user_password" name="first_user_password" #first_user_password="ngModel">
-            <div *ngIf="first_user_password.invalid && (first_user_password.dirty || first_user_password.touched)"
+            <!-- <div *ngIf="first_user_password.invalid && (first_user_password.dirty || first_user_password.touched)"
                 class="alert alert-danger">
                 <div *ngIf="first_user_password.errors.required">
                     A password is required
@@ -108,7 +107,7 @@
                 <div *ngIf="first_user_password.errors.minlength || first_user_password.errors.maxlength">
                     Your user name must include between 8 and 31 characters.
                 </div>
-            </div>
+            </div> -->
         </div>
         <div class="form-group">
             <label for="target_hostname">Hostname (name of your Raspberry Pi on the network)</label>
