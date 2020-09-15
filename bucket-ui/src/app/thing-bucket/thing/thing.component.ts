@@ -144,8 +144,14 @@ export class ThingComponent implements OnInit {
     }
 
     onRaspberryPiSubmit() {
+        // Block the create button and start spinning
+        const button = document.getElementById("createRPiButton") as HTMLButtonElement
+        button.disabled = true
+        const spinner = document.getElementById("spinnerCreateRPi") as HTMLElement
+        spinner.style.display = 'inline-block'
         const dpi = this.dpi.raspberryPi
 
+        // Prepare the body with network blocks if full settings
         const body: any = {
             first_user_name: dpi.first_user_name,
             first_user_password: dpi.first_user_password,
@@ -164,10 +170,17 @@ export class ThingComponent implements OnInit {
             body.wpa_country = dpi.wpa_country;
         }
 
+        // Call the bucket api
         let headers = new HttpHeaders().set('Accept', 'application/json')
             .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
         this.http.post(this.apiURL + "/things/" + this.id + '/types/dpi', body, { headers }).subscribe((data: any) => {
+            // On callback, refresh, there should be a status to fetch from Bucket
             this.dpi.refreshData()
+            // Unlock the button / stop spinner (although the button should be hidden if the build started)
+            const button = document.getElementById("createRPiButton") as HTMLButtonElement
+            button.disabled = true
+            const spinner = document.getElementById("spinnerCreateRPi") as HTMLElement
+            spinner.style.display = 'inline-block'
         });
     }
 

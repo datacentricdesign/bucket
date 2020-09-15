@@ -182,8 +182,19 @@
                         <div class="card-footer">
                             <div *ngIf="!dpiFound">
                                 <hr>
-                                <button type="submit" class="btn btn-success"
-                                    [disabled]="!raspberryForm.form.valid">Create</button>
+                                <button id="createRPiButton" type="submit" class="btn btn-info"
+                                    [disabled]="!raspberryForm.form.valid">
+                                    <div class="button-spinning">
+                                        Create
+                                    </div>
+                                    <div id="spinnerCreateRPi" style="display:none" class="spinner">
+                                        <div class="rect1"></div>
+                                        <div class="rect2"></div>
+                                        <div class="rect3"></div>
+                                        <div class="rect4"></div>
+                                        <div class="rect5"></div>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </form>
