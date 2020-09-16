@@ -73,7 +73,7 @@ export class ThingController {
                 dpi.id = thing.id
                 dpi.enable_SSH = dpi.enable_SSH ? '1' : '0'
                 dpi.private_key = keys.privateKey
-                console.log(dpi)
+                // console.log(dpi)
                 // const options = {
                 //     method: 'POST',
                 //     body: JSON.stringify(dpi),

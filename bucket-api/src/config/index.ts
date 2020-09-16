@@ -50,7 +50,9 @@ function validateEnv() {
     ACP_URL: url(),
     // GRAFANA Settings
     GRAFANA_API_URL: url(),
-    GRAFANA_API_KEY: str()
+    GRAFANA_API_KEY: str(),
+    GRAFANA_USER: str(),
+    GRAFANA_PASS: str()
   });
 
 }

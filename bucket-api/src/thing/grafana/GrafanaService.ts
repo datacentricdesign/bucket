@@ -86,7 +86,7 @@ export class GrafanaService {
     const url = config.grafana.apiURL.href + '/users/search?query=' + personId.replace('dcd:persons:', '')
     console.log(url)
     const headers = {
-      Authorization: 'Basic ' + btoa('admin:admin')
+      Authorization: 'Basic ' + btoa(config.grafana.user + ':' + config.grafana.pass)
     }
     console.log(headers)
     try {
