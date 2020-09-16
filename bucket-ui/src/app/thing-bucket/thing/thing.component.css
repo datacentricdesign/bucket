@@ -8,35 +8,43 @@
 } */
 
 @keyframes blinking {
-    0% {
-      background-color: #06c3d1;
-    }
-    100% {
-      background-color: #270da6;
-    }
+  0% {
+    background-color: #06c3d1;
   }
-  .status {
-    width: 10px;
-    height: 10px;
-    margin: auto 3px;
-    display: inline-block;
-    animation: none;
-    background-color: 'none';
+  100% {
+    background-color: #270da6;
   }
-  .statusConnected {
-    animation: blinking 1s infinite;
-  }
-  .statusDisconnected {
-    animation: none;
-    background-color: #c0c1c2;
-  }
+}
 
-  .ip {
-    display: inline-block;
-    font-size: small;
-  }
+.status {
+  width: 10px;
+  height: 10px;
+  margin: auto 3px;
+  display: inline-block;
+  animation: none;
+  background-color: 'none';
+}
 
+.statusConnected {
+  animation: blinking 1s infinite;
+}
 
+.statusDisconnected {
+  animation: none;
+  background-color: #c0c1c2;
+}
+
+.ip {
+  display: inline-block;
+  font-size: small;
+}
+
+.spinner {
+  width: 50px;
+  height: 10px;
+  text-align: center;
+  display: inline-block;
+}
 
 .spinner>div {
   background-color: #fff;
@@ -70,21 +78,21 @@
 
 @-webkit-keyframes sk-stretchdelay {
   0%, 40%, 100% {
-      -webkit-transform: scaleY(0.4)
+    -webkit-transform: scaleY(0.4)
   }
   20% {
-      -webkit-transform: scaleY(1.0)
+    -webkit-transform: scaleY(1.0)
   }
 }
 
 @keyframes sk-stretchdelay {
   0%, 40%, 100% {
-      transform: scaleY(0.4);
-      -webkit-transform: scaleY(0.4);
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
   }
   20% {
-      transform: scaleY(1.0);
-      -webkit-transform: scaleY(1.0);
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
   }
 }
 
