@@ -68,7 +68,7 @@ export class GrafanaService {
       }
       const resultPost = await fetch(config.grafana.apiURL.href + '/folders', {
         headers: this.grafanaHeaders,
-        body: JSON.stringify({ uid: personId.replace('dcd:persons:', ''), title: 'Bucket Dashboards' }),
+        body: JSON.stringify({ uid: personId.replace('dcd:persons:', ''), title: personId.replace('dcd:persons:', '') }),
         method: 'POST'
       });
       const newJsonFolder = await resultPost.json()
