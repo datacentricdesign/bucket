@@ -22,7 +22,7 @@ GrafanaRouter.post(
 /**
  * @api {get} /user
  * @apiGroup Grafana
- * @apiDescription Create Grafana dashboard for a Thing
+ * @apiDescription Get user id on Grafana
  *
  * @apiVersion 0.0.1
 **/

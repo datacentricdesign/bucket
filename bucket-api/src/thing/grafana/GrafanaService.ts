@@ -84,18 +84,18 @@ export class GrafanaService {
 
   async getGrafanaId(personId: string) {
     const url = config.grafana.apiURL.href + '/users/search?query=' + personId.replace('dcd:persons:', '')
-    // console.log(url)
+    console.log(url)
     const headers = {
       Authorization: 'Basic ' + btoa('admin:admin')
     }
-    // console.log(headers)
+    console.log(headers)
     try {
       const result = await fetch(url, {
         headers: headers,
         method: 'GET'
       });
       const json = await result.json()
-      // console.log(json)
+      console.log(json)
       if (json.users.length === 1) {
         return Promise.resolve(json.users[0].id)
       } else {
