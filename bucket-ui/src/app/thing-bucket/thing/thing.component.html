@@ -18,8 +18,8 @@
 
     </h1>
     <p>{{thing.description}}</p>
-    <button id="grafanaButton" *ngIf="grafana !== 0" type="button" (click)="visualiseWithGrafana(thing.id)" class="btn btn-success">Visualise with Grafana</button>
-    <a id="grafanaLink" *ngIf="grafana === 0" href="https://dwd.tudelft.nl/grafana" target="_blank">Give permission to visualise your data with Grafana</a>
+    <button *ngIf="grafanaId !== 0" type="button" (click)="visualiseWithGrafana(thing.id)" class="btn btn-success">Visualise with Grafana</button>
+    <a *ngIf="grafanaId === 0" href="{{grafanaUrl}}" target="_blank">Give permission to visualise your data with Grafana</a>
 
     <h2>Properties</h2>
     <div class="row">

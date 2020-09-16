@@ -53,6 +53,7 @@ export class ThingComponent implements OnInit {
     }
 
     grafanaId: number = 0
+    grafanaURL: string
 
     constructor(private _Activatedroute: ActivatedRoute,
         private _router: Router,
@@ -62,6 +63,7 @@ export class ThingComponent implements OnInit {
         private appService: AppService,
         private thingService: ThingService) {
         this.apiURL = appService.settings.apiURL
+        this.grafanaURL = appService.settings.grafanaURL
         this.mqttStatus = []
         this.ipAddress = []
     }
@@ -93,12 +95,10 @@ export class ThingComponent implements OnInit {
             )
         });
 
-        // this.thingService.getGrafanaId(this.id).then( (result:any) => {
-        //     console.log(result)
-        //     this.grafanaId = result.grafanaId 
-            // document.getElementById("grafanaButton").style.display = 'block'
-            // document.getElementById("grafanaLink").style.display = 'none'
-        // })
+        this.thingService.getGrafanaId(this.id).then( (result:any) => {
+            console.log(result)
+            this.grafanaId = result.grafanaId
+        })
     }
 
     async checkMQTTStatusAndIpAddress() {
@@ -189,7 +189,9 @@ export class ThingComponent implements OnInit {
     }
 
     async visualiseWithGrafana(thingId: string) {
-        await this.thingService.createGrafanaThing(thingId)
+        await this.thingService.createGrafanaThing(thingId).then( (result) => {
+            window.location.href = this.grafanaURL + '/d/' + thingId.replace('dcd:things:','');
+        })
     }
 
 }

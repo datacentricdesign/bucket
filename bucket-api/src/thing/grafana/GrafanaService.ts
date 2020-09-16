@@ -45,7 +45,7 @@ export class GrafanaService {
       console.log(folderId)
       // lock permission for this user only, as editor
       const resultPermission = await this.setPersonFolderPermission(personId, grafanaId)
-      console.log(resultPermission)
+      // console.log(resultPermission)
       // create a dashboard inside the user folder, with Thing name, thing id
       const thing: Thing = await ThingController.thingService.getOneThingById(thingId)
       const resultDashboard = await this.createThingDashboard(personId, thing, folderId)
@@ -57,7 +57,7 @@ export class GrafanaService {
 
   async createPersonFolder(personId) {
     try {
-      const folderUID = personId.replace('dcd:persons:','')
+      const folderUID = personId.replace('dcd:persons:', '')
       const resultGet = await fetch(config.grafana.apiURL.href + '/folders/' + folderUID, {
         headers: this.grafanaHeaders,
         method: 'GET'
@@ -68,7 +68,7 @@ export class GrafanaService {
       }
       const resultPost = await fetch(config.grafana.apiURL.href + '/folders', {
         headers: this.grafanaHeaders,
-        body: JSON.stringify({ uid: personId.replace('dcd:persons:',''), title: 'Bucket Dashboards' }),
+        body: JSON.stringify({ uid: personId.replace('dcd:persons:', ''), title: 'Bucket Dashboards' }),
         method: 'POST'
       });
       const newJsonFolder = await resultPost.json()
@@ -83,19 +83,19 @@ export class GrafanaService {
   }
 
   async getGrafanaId(personId: string) {
-    const url = 'http://localhost:3000/grafana/api/users/search?query=' + personId.replace('dcd:persons:','')
-    console.log(url)
+    const url = config.grafana.apiURL.href + '/users/search?query=' + personId.replace('dcd:persons:', '')
+    // console.log(url)
     const headers = {
       Authorization: 'Basic ' + btoa('admin:admin')
     }
-    console.log(headers)
+    // console.log(headers)
     try {
       const result = await fetch(url, {
         headers: headers,
         method: 'GET'
       });
       const json = await result.json()
-      console.log(json)
+      // console.log(json)
       if (json.users.length === 1) {
         return Promise.resolve(json.users[0].id)
       } else {
@@ -109,13 +109,13 @@ export class GrafanaService {
 
   async setPersonFolderPermission(personId: string, grafanaId: number) {
     try {
-      const result = await fetch(config.grafana.apiURL.href + '/folders/' + personId.replace('dcd:persons:','') + '/permissions', {
+      const result = await fetch(config.grafana.apiURL.href + '/folders/' + personId.replace('dcd:persons:', '') + '/permissions', {
         headers: this.grafanaHeaders,
         body: JSON.stringify({
           "items": [
             {
               "userId": grafanaId,
-              "permission": 1
+              "permission": 2
             },
           ]
         }),
@@ -130,14 +130,19 @@ export class GrafanaService {
 
   async createThingDashboard(personId: string, thing: Thing, folderId: number) {
     const panels = []
-    for (let i = 0; i < 1; i++) {
-      panels.push(this.createPropertyPanel(thing, thing.properties[i]))
+    let x = 0
+    let y = 0
+    const h = 6
+    const w = 24
+    for (let i = 0; i < thing.properties.length; i++) {
+      panels.push(this.createPropertyPanel(thing, thing.properties[i], { x, y, h, w}))
+      y += 6
     }
 
     const dashboard = {
       "dashboard": {
         "id": null,
-        // "uid": thing.id,
+        "uid": thing.id.replace('dcd:things:',''),
         "title": thing.name,
         "timezone": "browser",
         // "schemaVersion": 16,
@@ -149,7 +154,7 @@ export class GrafanaService {
       // "overwrite": false,
     }
 
-    console.log(JSON.stringify(dashboard))
+    // console.log(JSON.stringify(dashboard))
 
     try {
       const result = await fetch(config.grafana.apiURL.href + '/dashboards/db', {
@@ -164,22 +169,27 @@ export class GrafanaService {
     }
   }
 
-  createPropertyPanel(thing: Thing, property: Property) {
+  createPropertyPanel(thing: Thing, property: Property, gridPos) {
     const dim = property.type.dimensions
-    let onlyNumbers
+    let onlyNumbers = true
+    console.log(property)
     for (let i = 0; i < dim.length; i++) {
+      console.log(dim[i].type)
       onlyNumbers = onlyNumbers && dim[i].type === 'number'
     }
     if (onlyNumbers) { // only numirical values
-      return this.panelChart(thing, property)
+      console.log("### only numbers")
+      return this.panelChart(thing, property, gridPos)
     } else if (dim.length > 1) { // mix of types
-      return this.panelTable(thing, property)
+      console.log("### mix type")
+      return this.panelTable(thing, property, gridPos)
     } else {    // 1 non numerical dimension, show last value
-      return this.panelSingleValue(thing, property)
+      console.log("### 1 non numerical")
+      return this.panelSingleValue(thing, property, gridPos)
     }
   }
 
-  panelTable(property, thing) {
+  panelTable(thing: Thing, property: Property, gridPos) {
     const panel = {
       "datasource": "Bucket",
       "fieldConfig": {
@@ -217,12 +227,13 @@ export class GrafanaService {
         }
       ],
       "title": property.name,
-      "type": "table"
+      "type": "table",
+      "gridPos": gridPos
     }
     return panel
   }
 
-  panelChart(thing, property) {
+  panelChart(thing, property, gridPos) {
     const panel = {
       "bars": false,
       "dashLength": 10,
@@ -304,12 +315,13 @@ export class GrafanaService {
       "yaxis": {
         "align": false,
         "alignLevel": null
-      }
+      },
+      "gridPos": gridPos
     }
     return panel
   }
 
-  panelSingleValue(thing, property) {
+  panelSingleValue(thing, property, gridPos) {
     const panel = {
       "datasource": "Bucket",
       "description": property.description,
@@ -336,7 +348,8 @@ export class GrafanaService {
         }
       ],
       "title": "Last value of " + property.name,
-      "type": "stat"
+      "type": "stat",
+      "gridPos": gridPos
     }
     return panel
   }
