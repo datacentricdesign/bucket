@@ -7,6 +7,7 @@ import { httpConfig } from "./httpConfig";
 import { authConfig } from './authConfig';
 import { influxdbConfig } from './influxdbConfig';
 import { mqttConfig } from './mqttConfig';
+import { grafanaConfig } from './grafanaConfig';
 import { Context } from '@datacentricdesign/types';
 
 function validateEnv() {
@@ -47,6 +48,9 @@ function validateEnv() {
     OAUTH2_SCOPE: str(),
     OAUTH2_HYDRA_ADMIN_URL: url(),
     ACP_URL: url(),
+    // GRAFANA Settings
+    GRAFANA_API_URL: url(),
+    GRAFANA_API_KEY: str()
   });
 
 }
@@ -61,6 +65,7 @@ export default {
   oauth2: authConfig,
   influxdb: influxdbConfig,
   mqtt: mqttConfig,
+  grafana: grafanaConfig,
 };
 
 // Setup context of Request to pass user info once identified

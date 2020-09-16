@@ -286,20 +286,6 @@ export class ThingService {
     return this.http.delete(url, { headers }).toPromise()
   }
 
-  // dpiDownload(thingId: string) {
-  //   let url = this.apiURL + '/things/' + thingId + '/types/dpi'
-  //   let headers = new HttpHeaders().set('Accept', 'application/json')
-  //     .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-  //   let params = new HttpParams().set('download', 'true')
-  //   return this.http.get(url, {
-  //     headers,
-  //     params,
-  //     responseType: 'blob' as 'blob',
-  //     reportProgress: true,
-  //     observe: 'events',
-  //   }).toPromise()
-  // }
-
   dpiDownload(thingId: string): Observable<Download> {
     let url = this.apiURL + '/things/' + thingId + '/types/dpi'
     let headers = new HttpHeaders().set('Accept', 'application/json')
@@ -319,7 +305,7 @@ export class ThingService {
     let url = this.apiURL + '/things/' + thingId + '/apps/grafana'
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-    return this.http.post(url, { headers }).toPromise()
+    return this.http.post(url, {}, { headers }).toPromise()
   }
 
   getGrafanaId(thingId: string) {

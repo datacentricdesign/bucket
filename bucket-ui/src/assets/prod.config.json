@@ -3,5 +3,6 @@
     "version": "0.0.1",
     "environment": "production",
     "basehref": "bucket",
-    "apiURL": "https://dwd.tudelft.nl/bucket/api"
+    "apiURL": "https://dwd.tudelft.nl/bucket/api",
+    "grafanaURL": "https://dwd.tudelft.nl/grafana"
 }

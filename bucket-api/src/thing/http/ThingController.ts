@@ -73,15 +73,16 @@ export class ThingController {
                 dpi.id = thing.id
                 dpi.enable_SSH = dpi.enable_SSH ? '1' : '0'
                 dpi.private_key = keys.privateKey
-                const options = {
-                    method: 'POST',
-                    body: JSON.stringify(dpi),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-                const result = await fetch(url, options);
-                const text = await result.text()
+                console.log(dpi)
+                // const options = {
+                //     method: 'POST',
+                //     body: JSON.stringify(dpi),
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     }
+                // }
+                // const result = await fetch(url, options);
+                // const text = await result.text()
             }
 
             // If all ok, send 201 response

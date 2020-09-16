@@ -7,6 +7,7 @@ import { PropertyRouter } from '../property/PropertyRouter';
 import ThingController from "./ThingController";
 import { DPiRouter } from "../dpi/DPiRouter";
 import config from "../../config";
+import { GrafanaRouter } from "../grafana/GrafanaRouter";
 
 export const ThingRouter = Router();
 
@@ -153,3 +154,5 @@ if (config.env.dpiUrl !== undefined && config.env.dpiUrl !== '') {
 } 
 
 ThingRouter.use("/:thingId/properties", PropertyRouter)
+
+ThingRouter.use("/:thingId/apps/grafana", GrafanaRouter)

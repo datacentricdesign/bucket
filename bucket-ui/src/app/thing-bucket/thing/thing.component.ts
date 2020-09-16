@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, config } from 'rxjs';
 
 import { map, catchError } from 'rxjs/operators';
 import { Thing, PropertyType, DTOProperty, DTOThing } from '@datacentricdesign/types';
@@ -52,6 +52,9 @@ export class ThingComponent implements OnInit {
         pem: ''
     }
 
+    grafanaId: number = 0
+    grafanaURL: string
+
     constructor(private _Activatedroute: ActivatedRoute,
         private _router: Router,
         private http: HttpClient,
@@ -60,6 +63,7 @@ export class ThingComponent implements OnInit {
         private appService: AppService,
         private thingService: ThingService) {
         this.apiURL = appService.settings.apiURL
+        this.grafanaURL = appService.settings.grafanaURL
         this.mqttStatus = []
         this.ipAddress = []
     }
@@ -90,6 +94,11 @@ export class ThingComponent implements OnInit {
                 })
             )
         });
+
+        this.thingService.getGrafanaId(this.id).then( (result:any) => {
+            console.log(result)
+            this.grafanaId = result.grafanaId
+        })
     }
 
     async checkMQTTStatusAndIpAddress() {
@@ -186,6 +195,12 @@ export class ThingComponent implements OnInit {
 
     dpiEventHander($event: any) {
         this.dpiFound = $event;
+    }
+
+    async visualiseWithGrafana(thingId: string) {
+        await this.thingService.createGrafanaThing(thingId).then( (result) => {
+            window.location.href = this.grafanaURL + '/d/' + thingId.replace('dcd:things:','');
+        })
     }
 
 }
