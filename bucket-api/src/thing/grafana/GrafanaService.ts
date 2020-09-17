@@ -83,12 +83,11 @@ export class GrafanaService {
   }
 
   async getGrafanaId(personId: string) {
-    const url = config.grafana.apiURL.href + '/users/search?query=' + personId.replace('dcd:persons:', '')
+    const url = config.grafana.apiURL.href + '/users/lookup?loginOrEmail=' + personId.replace('dcd:persons:', '')
     console.log(url)
     const headers = {
       Authorization: 'Basic ' + btoa(config.grafana.user + ':' + config.grafana.pass)
     }
-    console.log(headers)
     try {
       const result = await fetch(url, {
         headers: headers,
@@ -96,11 +95,7 @@ export class GrafanaService {
       });
       const json = await result.json()
       console.log(json)
-      if (json.users.length === 1) {
-        return Promise.resolve(json.users[0].id)
-      } else {
-        return Promise.reject(new DCDError(404, "Grafana user not found"));
-      }
+      return Promise.resolve(json.id)
     }
     catch (error) {
       return Promise.reject(error);
