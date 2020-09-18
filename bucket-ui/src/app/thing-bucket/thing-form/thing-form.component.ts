@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AppService } from 'app/app.service';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { RaspberryPiThingComponent } from '../raspberry-pi-thing/raspberry-pi-thing.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-thing-form',
@@ -30,12 +31,18 @@ export class ThingFormComponent implements OnInit {
     pem: ''
   }
 
-  constructor(private http: HttpClient, private appService: AppService, private oauthService: OAuthService) {
+  constructor(private http: HttpClient,
+    private appService: AppService,
+    private oauthService: OAuthService,
+    private toastr: ToastrService) {
     this.apiURL = this.appService.settings.apiURL;
-    // this.suggestHostname()
   }
 
   onSubmit() {
+    if (!this.dpi.dpiGenerator) {
+      return this.toast("The DPi generator is not available at the moment.", "danger", "nc-alert-circle-i")
+    }
+
     const button = document.getElementById("createThingButton") as HTMLButtonElement
     button.disabled = true
     const spinner = document.getElementById("spinnerCreateThing") as HTMLElement
@@ -50,25 +57,10 @@ export class ThingFormComponent implements OnInit {
       body.pem = this.model.pem
     }
     if (this.model.type === 'RASPBERRYPI') {
-      body.dpi = {
-        first_user_name: this.dpi.raspberryPi.first_user_name,
-        first_user_password: this.dpi.raspberryPi.first_user_password,
-        target_hostname: this.dpi.raspberryPi.target_hostname,
-        enable_SSH: this.dpi.raspberryPi.enable_SSH
-      }
-
-      if (this.dpi.raspberryPi.home_ESSID !== '' && this.dpi.raspberryPi.home_password !== '') {
-        body.dpi.home_ESSID = this.dpi.raspberryPi.home_ESSID;
-        body.dpi.home_password = this.dpi.raspberryPi.home_password;
-      }
-
-      if (this.dpi.raspberryPi.wpa_ESSID !== '' && this.dpi.raspberryPi.wpa_password !== '' && this.dpi.raspberryPi.wpa_country !== '') {
-        body.dpi.wpa_ESSID = this.dpi.raspberryPi.wpa_ESSID;
-        body.dpi.wpa_password = this.dpi.raspberryPi.wpa_password;
-        body.dpi.wpa_country = this.dpi.raspberryPi.wpa_country;
-      }
+      body.dpi = this.dpi.getValues()
     }
 
+    console.log(body)
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
     this.http.post(this.apiURL + "/things", body, { headers }).subscribe((data: any) => {
@@ -78,5 +70,19 @@ export class ThingFormComponent implements OnInit {
 
 
   ngOnInit(): void {
+  }
+
+  toast(message: string, type: string, icon: string) {
+    this.toastr.error(
+      '<span data-notify="icon" class="nc-icon ' + icon + '"></span><span data-notify="message">' + message + '</span>',
+      "",
+      {
+        timeOut: 4000,
+        closeButton: true,
+        enableHtml: true,
+        toastClass: "alert alert-" + type + " alert-with-icon",
+        positionClass: "toast-top-center"
+      }
+    );
   }
 }

@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import * as fs from 'fs'
 import { Log } from "../../Logger";
 import { AuthController } from "../http/AuthController";
+import { DCDError } from "@datacentricdesign/types";
 
 export class DPiController {
 
@@ -67,6 +68,20 @@ export class DPiController {
             res.status(200).json(text)
         } catch (error) {
             return next(error)
+        }
+    };
+
+    static healthStatus = async (req: Request, res: Response, next: NextFunction) => {
+        const url = config.env.dpiUrl + '/health'
+        const options = {
+            method: 'GET'
+        }
+        try {
+            await fetch(url, options);
+            res.status(200).send()
+        }
+        catch (error) {
+            return res.status(503).send(new DCDError(503, "Service now available."))
         }
     };
 

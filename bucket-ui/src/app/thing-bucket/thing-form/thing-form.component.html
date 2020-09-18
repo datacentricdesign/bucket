@@ -2,7 +2,8 @@
     <div class="card card-stats">
         <div class="card-header">
             <h1>Create a new Thing</h1>
-            <p>A Thing represents a physical or virtual component collecting data.
+            <p>
+                A Thing represents a physical or virtual component collecting data.
                 For example, a phone which collects acceleration, a website recording
                 number of page views.
             </p>
@@ -54,16 +55,21 @@
                             </p>
                             To generate a public/private set of keys
                             <ul>
-                                <li>Install OpenSSL. On Mac, this tool is already installed. On Windows, you can
-                                    download and install openssl here</li>
                                 <li>
-                                    In the terminal, type in the following command to generate a private key. The private key is saved saved in file ‘private.pem’. You should keep this file secret on your computer and never share it.
+                                    Install OpenSSL. On Mac, this tool is already installed. On Windows, you can
+                                    download and install openssl here
+                                </li>
+                                <li>
+                                    In the terminal, type in the following command to generate a private key. The
+                                    private key is saved saved in file ‘private.pem’. You should keep this file secret
+                                    on your computer and never share it.
                                     <code>
                                         openssl genrsa -out private.pem 4096
                                     </code>
                                 </li>
                                 <li>
-                                    Then, extract the attached public key with the following command. The public key is saved in the file ‘public.pem’
+                                    Then, extract the attached public key with the following command. The public key is
+                                    saved in the file ‘public.pem’
                                     <code>
                                         openssl rsa -in private.pem -outform PEM -pubout -out public.pem
                                     </code>
@@ -81,7 +87,7 @@
         </div>
         <div class="card-footer ">
             <hr>
-            <button id="createThingButton" type="submit" class="btn btn-info" [disabled]="!thingForm.form.valid">
+            <button id="createThingButton" type="submit" class="btn btn-info" [disabled]="!thingForm.form.valid || (dpi !== undefined && !dpi.form.valid)">
                 <div class="button-spinning">
                     Create
                 </div>

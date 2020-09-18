@@ -17,6 +17,8 @@ import { PropertyTypeRouter } from './thing/property/propertyType/PropertyTypeRo
 import { mqttInit } from './thing/mqtt/MQTTServer';
 import { introspectToken } from "./thing/middlewares/introspectToken";
 import PropertyController from "./thing/property/PropertyController";
+import { DPiRouter } from "./thing/dpi/DPiRouter";
+import DPiController from "./thing/dpi/DPiController";
 
 Log.info("Bucket starting...")
 
@@ -73,7 +75,18 @@ function startAPI() {
     app.get(config.http.baseUrl + "/properties",
         [introspectToken(['dcd:properties', 'dcd:consents'])],
         PropertyController.getProperties);
-    
+
+    /**
+    * @api {delete} /dpi/health Health status
+    * @apiGroup DPi
+    * @apiDescription Health status of the DPi Generator (available or not available)
+    *
+    * @apiVersion 0.1.0
+    **/
+    DPiRouter.get(
+        "types/dpi/health",
+        [introspectToken(['dcd:things'])],
+        DPiController.healthStatus);
 
     app.use(config.http.baseUrl + "/docs", express.static('dist/public/docs'))
 

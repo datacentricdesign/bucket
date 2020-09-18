@@ -23,6 +23,9 @@ export class ThingComponent implements OnInit {
     @ViewChild(RaspberryPiThingComponent) dpi: RaspberryPiThingComponent;
     dpiFound: boolean
 
+    // Is DPi generator available
+    dpiGenerator = false
+
     private apiURL: string
 
     thing$: Observable<Thing>;
@@ -96,9 +99,14 @@ export class ThingComponent implements OnInit {
         });
 
         this.thingService.getGrafanaId(this.id).then( (result:any) => {
-            console.log(result)
             this.grafanaId = result.grafanaId
+        }).catch( (error) => {
+            if (error.error && error.error.hint === "Service unavailable.") {
+                console.warn('Grafana is not available')
+                this.grafanaId = -1
+            }
         })
+
     }
 
     async checkMQTTStatusAndIpAddress() {
@@ -158,26 +166,7 @@ export class ThingComponent implements OnInit {
         button.disabled = true
         const spinner = document.getElementById("spinnerCreateRPi") as HTMLElement
         spinner.style.display = 'inline-block'
-        const dpi = this.dpi.raspberryPi
-
-        // Prepare the body with network blocks if full settings
-        const body: any = {
-            first_user_name: dpi.first_user_name,
-            first_user_password: dpi.first_user_password,
-            target_hostname: dpi.target_hostname,
-            enable_SSH: dpi.enable_SSH
-        }
-
-        if (dpi.home_ESSID && dpi.home_password) {
-            body.home_ESSID = dpi.home_ESSID;
-            body.home_password = dpi.home_password;
-        }
-
-        if (dpi.wpa_ESSID && dpi.wpa_password && dpi.wpa_country) {
-            body.wpa_ESSID = dpi.wpa_ESSID;
-            body.wpa_password = dpi.wpa_password;
-            body.wpa_country = dpi.wpa_country;
-        }
+        const body = this.dpi.getValues()
 
         // Call the bucket api
         let headers = new HttpHeaders().set('Accept', 'application/json')

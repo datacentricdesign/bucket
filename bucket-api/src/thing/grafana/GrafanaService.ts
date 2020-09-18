@@ -39,17 +39,13 @@ export class GrafanaService {
     try {
       // Make sure the user gave consent by checking if there is a grafana id for this personId
       const grafanaId = await this.getGrafanaId(personId)
-      console.log(grafanaId)
       // create (if not exists) a person folder, id person, name My dashboards
       const folderId = await this.createPersonFolder(personId)
-      console.log(folderId)
       // lock permission for this user only, as editor
-      const resultPermission = await this.setPersonFolderPermission(personId, grafanaId)
-      // console.log(resultPermission)
+      await this.setPersonFolderPermission(personId, grafanaId)
       // create a dashboard inside the user folder, with Thing name, thing id
       const thing: Thing = await ThingController.thingService.getOneThingById(thingId)
-      const resultDashboard = await this.createThingDashboard(personId, thing, folderId)
-      // console.log(resultDashboard)
+      await this.createThingDashboard(personId, thing, folderId)
     } catch (error) {
       return Promise.reject(error)
     }
@@ -84,7 +80,6 @@ export class GrafanaService {
 
   async getGrafanaId(personId: string) {
     const url = config.grafana.apiURL.href + '/users/lookup?loginOrEmail=' + personId.replace('dcd:persons:', '')
-    console.log(url)
     const headers = {
       Authorization: 'Basic ' + btoa(config.grafana.user + ':' + config.grafana.pass)
     }
@@ -94,10 +89,12 @@ export class GrafanaService {
         method: 'GET'
       });
       const json = await result.json()
-      console.log(json)
       return Promise.resolve(json.id)
     }
     catch (error) {
+      if (error.errno === 'ECONNREFUSED') {
+        return Promise.reject(new DCDError(404, 'Service unavailable.'))
+      }
       return Promise.reject(error);
     }
   }

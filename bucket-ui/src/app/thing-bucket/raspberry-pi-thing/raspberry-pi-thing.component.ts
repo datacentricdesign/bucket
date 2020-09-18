@@ -3,6 +3,8 @@ import { ThingService, Download } from '../services/thing.service';
 import * as moment from 'moment'
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ConfirmedValidator } from './confirmed.validator';
 
 @Component({
   selector: 'app-raspberry-pi-thing',
@@ -30,6 +32,7 @@ export class RaspberryPiThingComponent implements OnInit {
   raspberryPi: any = {
     first_user_name: '',
     first_user_password: '',
+    first_user_password_confirm: '',
     target_hostname: '',
     home_ESSID: '',
     home_password: '',
@@ -39,12 +42,47 @@ export class RaspberryPiThingComponent implements OnInit {
     enable_SSH: true
   }
 
-  constructor(private thingService: ThingService,
-    private toastr: ToastrService) { }
+  dpiGenerator = false
+
+  form: FormGroup = new FormGroup({});
+
+  constructor(
+    private thingService: ThingService,
+    private toastr: ToastrService,
+    private fb: FormBuilder) {
+    this.form = fb.group({
+      first_user_name: ['', [Validators.required]],
+      first_user_password: ['', [Validators.required]],
+      first_user_password_confirm: ['', []],
+      target_hostname: ['', []],
+      enable_SSH: [true, []],
+      home_ESSID: ['', []],
+      home_password: ['', []],
+      home_password_confirm: ['', []],
+      wpa_ESSID: ['eduroam', []],
+      wpa_password: ['', []],
+      wpa_password_confirm: ['', []],
+      wpa_country: ['', []]
+    }, {
+      validators: [
+        ConfirmedValidator('first_user_password', 'first_user_password_confirm'),
+        ConfirmedValidator('home_password', 'home_password_confirm'),
+        ConfirmedValidator('wpa_password', 'wpa_password_confirm')
+      ]
+    })
+  }
 
   async ngOnInit(): Promise<void> {
-    this.suggestHostname()
-    this.refreshData()
+    this.thingService.getDPiHealth().then(() => {
+      this.dpiGenerator = true
+      this.suggestHostname()
+      this.refreshData()
+    }).catch((error) => {
+    })
+  }
+
+  get f() {
+    return this.form.controls;
   }
 
   async refreshData() {
@@ -84,11 +122,11 @@ export class RaspberryPiThingComponent implements OnInit {
   }
 
   suggestHostname(): void {
-    this.raspberryPi.target_hostname = this.thingName.toLowerCase().trim().split(' ').join('-');
+    this.form.controls["target_hostname"].setValue(this.thingName.toLowerCase().trim().split(' ').join('-'));
   }
 
   selectCountryCode() {
-    this.raspberryPi.wpa_country = (document.getElementById('wpa_country') as HTMLSelectElement).value;
+    // this.form.controls["wpa_country"].setValue((document.getElementById('wpa_country') as HTMLSelectElement).value);
   }
 
   cancel() {
@@ -113,23 +151,6 @@ export class RaspberryPiThingComponent implements OnInit {
     const spinner = document.getElementById("spinnerDownloadImage") as HTMLElement
     spinner.style.display = 'inline-block'
     this.download$ = this.thingService.dpiDownload(this.thingId)
-    
-    // .then((blob) => {
-    //   // const a = document.createElement('a')
-    //   // const objectUrl = URL.createObjectURL(blob)
-    //   // a.href = objectUrl
-    //   // a.download = this.thingId.replace('dcd:things:', '') + '.zip';
-    //   // a.click();
-    //   // URL.revokeObjectURL(objectUrl);
-    //   saveAs(blob, 'dpi_image_' + this.thingId.replace('dcd:things:', '') + '.zip')
-    //   button.disabled = false
-    //   spinner.style.display = 'none'
-    // }).catch((error) => {
-    //   console.warn('status', error.status);
-    //   this.toast(error.status, 'error', 'nc-cloud-download');
-    //   button.disabled = false
-    //   spinner.style.display = 'none'
-    // })
   }
 
   onFoundChange() {
@@ -148,6 +169,31 @@ export class RaspberryPiThingComponent implements OnInit {
         positionClass: "toast-top-center"
       }
     );
+  }
+
+  getValues() {
+    const dpi = this.form.controls
+
+    // Prepare the body with network blocks if full settings
+    const body: any = {
+      first_user_name: dpi["first_user_name"].value,
+      first_user_password: dpi["first_user_password"].value,
+      target_hostname: dpi["target_hostname"].value,
+      enable_SSH: dpi["enable_SSH"].value
+    }
+
+    if (dpi["home_ESSID"].value && dpi["home_password"].value) {
+      body.home_ESSID = dpi["home_ESSID"].value;
+      body.home_password = dpi["home_password"].value;
+    }
+
+    if (dpi["wpa_ESSID"].value && dpi["wpa_password"].value && dpi["wpa_country"].value) {
+      body.wpa_ESSID = dpi["wpa_ESSID"].value;
+      body.wpa_password = dpi["wpa_password"].value;
+      body.wpa_country = dpi["wpa_country"].value;
+    }
+    
+    return body
   }
 
 }

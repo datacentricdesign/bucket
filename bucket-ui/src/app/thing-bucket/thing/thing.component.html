@@ -18,7 +18,7 @@
 
     </h1>
     <p>{{thing.description}}</p>
-    <button *ngIf="grafanaId !== 0" type="button" (click)="visualiseWithGrafana(thing.id)" class="btn btn-success">Visualise with Grafana</button>
+    <button *ngIf="grafanaId > 0" type="button" (click)="visualiseWithGrafana(thing.id)" class="btn btn-success">Visualise with Grafana</button>
     <a *ngIf="grafanaId === 0" href="{{grafanaURL}}" target="_blank">Give permission to visualise your data with Grafana</a>
 
     <h2>Properties</h2>

@@ -315,6 +315,13 @@ export class ThingService {
     return this.http.get(url, { headers }).toPromise()
   }
 
+  getDPiHealth() {
+    let url = this.apiURL + '/types/dpi/health'
+    let headers = new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.get(url, { headers }).toPromise()
+  }
+
 }
 
 export function download(
