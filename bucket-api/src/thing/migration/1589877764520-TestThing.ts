@@ -1,6 +1,3 @@
-import { Log } from "../../Logger";
-Log.init("Bucket Migration")
-
 import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
 import { Thing } from "../Thing";
 import { v4 as uuidv4 } from 'uuid';

@@ -1,6 +1,3 @@
-import { Log } from "../../Logger";
-Log.init("Bucket Migration")
-
 import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
 import { PropertyType } from "../property/propertyType/PropertyType";
 
