@@ -1,4 +1,5 @@
 import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
+import { Log } from "../../Logger";
 import { PropertyType } from "../property/propertyType/PropertyType";
 
 export class TypesMQTT1589877780000 implements MigrationInterface {
