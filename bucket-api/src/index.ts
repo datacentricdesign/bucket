@@ -83,8 +83,7 @@ function startAPI() {
     *
     * @apiVersion 0.1.0
     **/
-    DPiRouter.get(
-        "types/dpi/health",
+    DPiRouter.get(config.http.baseUrl + "/types/dpi/health",
         [introspectToken(['dcd:things'])],
         DPiController.healthStatus);
 
