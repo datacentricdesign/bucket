@@ -8,6 +8,22 @@ import { DCDError } from "@datacentricdesign/types";
 
 export class DPiController {
 
+    static healthStatus = async (req: Request, res: Response, next: NextFunction) => {
+        console.log("dpi status")
+        const url = config.env.dpiUrl + '/health'
+        const options = {
+            method: 'GET'
+        }
+        try {
+            const result = await fetch(url, options);
+            const json = await result.json()
+            res.status(200).send(json)
+        }
+        catch (error) {
+            return res.status(503).send(new DCDError(503, "Service now available."))
+        }
+    };
+
     static getOneDPIImage = async (req: Request, res: Response) => {
         const url = config.env.dpiUrl + '/' + req.params.thingId.replace('dcd:things:', '')
         const thingId = req.params.thingId
@@ -68,20 +84,6 @@ export class DPiController {
             res.status(200).json(text)
         } catch (error) {
             return next(error)
-        }
-    };
-
-    static healthStatus = async (req: Request, res: Response, next: NextFunction) => {
-        const url = config.env.dpiUrl + '/health'
-        const options = {
-            method: 'GET'
-        }
-        try {
-            await fetch(url, options);
-            res.status(200).send()
-        }
-        catch (error) {
-            return res.status(503).send(new DCDError(503, "Service now available."))
         }
     };
 

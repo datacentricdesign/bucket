@@ -42,7 +42,7 @@ export class RaspberryPiThingComponent implements OnInit {
     enable_SSH: true
   }
 
-  dpiGenerator = false
+  dpiGenerator: any = {error: "Service unavailable"}
 
   form: FormGroup = new FormGroup({});
 
@@ -73,11 +73,12 @@ export class RaspberryPiThingComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.thingService.getDPiHealth().then(() => {
-      this.dpiGenerator = true
+    this.thingService.getDPiHealth().then((result) => {
+      this.dpiGenerator = result
       this.suggestHostname()
       this.refreshData()
     }).catch((error) => {
+      
     })
   }
 

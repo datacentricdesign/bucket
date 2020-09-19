@@ -316,7 +316,7 @@ export class ThingService {
   }
 
   getDPiHealth() {
-    let url = this.apiURL + '/types/dpi/health'
+    let url = this.apiURL + '/things/types/dpi/health'
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
     return this.http.get(url, { headers }).toPromise()

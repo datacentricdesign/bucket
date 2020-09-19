@@ -1,4 +1,10 @@
-<div *ngIf="dpiGenerator">
+<div *ngIf="!dpiGenerator.error">
+    <div *ngIf="dpiGenerator.pending>5" class="alert alert-warning" role="alert" style="color: black;">
+        <b>Notice:</b> The DPi Generator is currently demanded. Thank you for your patience.
+    </div>
+    <div *ngIf="dpiGenerator.pending>10" class="alert alert-danger" role="alert" style="color: black;">
+        <b>Notice:</b> The DPi Generator is currently highly demanded. Thank you for your patience.
+    </div>
     <div *ngIf="found">
         <div *ngIf="image">
             <p>
@@ -486,7 +492,7 @@
     </div>
 </div>
 
-<div *ngIf="!dpiGenerator">
+<div *ngIf="dpiGenerator.error">
     <div class="alert alert-danger" role="alert">
         The DPi Generator is currently unavailable.
     </div>
