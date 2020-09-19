@@ -104,8 +104,18 @@
                 </div>
                 <div class="form-group">
                     <label for="first_user_password">Raspberry Pi password (at least 8 characters)</label>
-                    <input formControlName="first_user_password" type="password" class="form-control"
-                        id="first_user_password" required minlength="8" name="first_user_password">
+                    <div class="input-group">
+                        <input formControlName="first_user_password" [type]="fieldTextRPiType ? 'text' : 'password'"
+                            class="form-control" id="first_user_password" name="first_user_password" required
+                            minlength="8" />
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fa"
+                                    [ngClass]="{ 'fa-eye-slash': !fieldTextRPiType, 'fa-eye': fieldTextRPiType }"
+                                    (click)="toggleFieldTextRPiType()"></i>
+                            </span>
+                        </div>
+                    </div>
                     <div *ngIf="f.first_user_password.touched && f.first_user_password.invalid"
                         class="alert alert-danger">
                         <div *ngIf="f.first_user_password.errors.required">
@@ -174,13 +184,22 @@
                 </div>
                 <div class="form-group">
                     <label for="home_password">Home Network Password</label>
-                    <input formControlName="home_password" type="password" class="form-control" id="home_password"
-                        name="home_password">
+                    <div class="input-group">
+                        <input formControlName="home_password" [type]="fieldTextHomeType ? 'text' : 'password'"
+                            class="form-control" id="home_password" name="home_password">
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fa"
+                                    [ngClass]="{ 'fa-eye-slash': !fieldTextHomeType, 'fa-eye': fieldTextHomeType }"
+                                    (click)="toggleFieldTextHomeType()"></i>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="home_password_confirm">Confirm your Home Network password</label>
                     <input formControlName="home_password_confirm" type="password" class="form-control"
-                        id="home_password_confirm" name="home_password_confirm">
+                        id="home_password_confirm" name="home_password_confirm" />
                     <div *ngIf="f.home_password_confirm.touched && f.home_password_confirm.invalid"
                         class="alert alert-danger">
                         <div *ngIf="f.home_password_confirm.errors.confirmedValidator">
@@ -208,8 +227,17 @@
                 </div>
                 <div class="form-group">
                     <label for="wpa_password">WPA Network Password</label>
-                    <input formControlName="wpa_password" type="password" class="form-control" id="wpa_password"
-                        name="wpa_password" minlength="8" maxlength="63">
+                    <div class="input-group">
+                        <input formControlName="wpa_password" [type]="fieldTextWPAType ? 'text' : 'password'"
+                            class="form-control" id="wpa_password" name="wpa_password" minlength="8" maxlength="63" />
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fa"
+                                    [ngClass]="{ 'fa-eye-slash': !fieldTextWPAType, 'fa-eye': fieldTextWPAType }"
+                                    (click)="toggleFieldTextWPAType()"></i>
+                            </span>
+                        </div>
+                    </div>
                     <div *ngIf="f.wpa_password.touched && f.wpa_password.invalid" class="alert alert-danger">
                         <div *ngIf="f.wpa_password.errors.minlength || f.wpa_password.errors.maxlength">
                             Your WPA password must include between 8 and 63 characters.
@@ -219,7 +247,7 @@
                 <div class="form-group">
                     <label for="wpa_password_confirm">Confirm your WPA Network password</label>
                     <input formControlName="wpa_password_confirm" type="password" class="form-control"
-                        id="wpa_password_confirm" name="wpa_password_confirm">
+                        id="wpa_password_confirm" name="wpa_password_confirm" />
                     <div *ngIf="f.wpa_password_confirm.touched && f.wpa_password_confirm.invalid"
                         class="alert alert-danger">
                         <div *ngIf="f.wpa_password_confirm.errors.confirmedValidator">

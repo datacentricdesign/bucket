@@ -45,6 +45,9 @@ export class RaspberryPiThingComponent implements OnInit {
   dpiGenerator: any = {error: "Service unavailable"}
 
   form: FormGroup = new FormGroup({});
+  fieldTextRPiType: boolean;
+  fieldTextHomeType: boolean;
+  fieldTextWPAType: boolean;
 
   constructor(
     private thingService: ThingService,
@@ -191,6 +194,18 @@ export class RaspberryPiThingComponent implements OnInit {
     }
     
     return body
+  }
+
+  toggleFieldTextRPiType() {
+    this.fieldTextRPiType = !this.fieldTextRPiType;
+  }
+
+  toggleFieldTextHomeType() {
+    this.fieldTextHomeType = !this.fieldTextHomeType;
+  }
+
+  toggleFieldTextWPAType() {
+    this.fieldTextWPAType = !this.fieldTextWPAType;
   }
 
 }
