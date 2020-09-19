@@ -17,6 +17,7 @@ import { mqttInit } from './thing/mqtt/MQTTServer';
 import { introspectToken } from "./thing/middlewares/introspectToken";
 import PropertyController from "./thing/property/PropertyController";
 import DPiController from "./thing/dpi/DPiController";
+import { PropertyTypeRouter } from "./thing/property/propertyType/PropertyTypeRouter";
 
 Log.info("Bucket starting...")
 
@@ -67,7 +68,7 @@ function startAPI() {
     **/
     app.use(config.http.baseUrl + "/things/types/dpi/health", DPiController.healthStatus);
 
-    // app.use(config.http.baseUrl + "/types", PropertyTypeRouter);
+    app.use(config.http.baseUrl + "/types", PropertyTypeRouter);
 
     /**
      * @api {get} /properties List
