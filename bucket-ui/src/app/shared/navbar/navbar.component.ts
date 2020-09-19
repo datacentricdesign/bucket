@@ -42,7 +42,6 @@ export class NavbarComponent implements OnInit {
     });
     if (this.oauthService.hasValidAccessToken() && this.oauthService.hasValidIdToken()) {
       const claim:any = this.oauthService.getIdentityClaims()
-      console.log(claim)
       this.userProfile = {
         name: claim.name,
         email: claim.email

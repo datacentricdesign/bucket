@@ -126,10 +126,6 @@ export class RaspberryPiThingComponent implements OnInit {
     this.form.controls["target_hostname"].setValue(this.thingName.toLowerCase().trim().split(' ').join('-'));
   }
 
-  selectCountryCode() {
-    // this.form.controls["wpa_country"].setValue((document.getElementById('wpa_country') as HTMLSelectElement).value);
-  }
-
   cancel() {
     const button = document.getElementById("cancelGeneration") as HTMLButtonElement
     button.disabled = true

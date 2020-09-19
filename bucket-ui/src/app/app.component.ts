@@ -18,14 +18,13 @@ export class AppComponent {
     this.oauthService.events
       .pipe(filter(e => e.type === 'token_received'))
       .subscribe(_ => {
-        console.debug('state', this.oauthService.state);
         this.oauthService.loadUserProfile();
         window.location.href = './things/dashboard'
       });
 
     // Display all events
     this.oauthService.events.subscribe(e => {
-      console.debug('oauth/oidc event', e);
+      // console.debug('oauth/oidc event', e);
     });
   }
 

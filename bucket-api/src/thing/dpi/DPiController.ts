@@ -9,7 +9,6 @@ import { DCDError } from "@datacentricdesign/types";
 export class DPiController {
 
     static healthStatus = async (req: Request, res: Response, next: NextFunction) => {
-        console.log("dpi status")
         const url = config.env.dpiUrl + '/health'
         const options = {
             method: 'GET'

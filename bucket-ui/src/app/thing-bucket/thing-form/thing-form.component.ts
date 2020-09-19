@@ -60,7 +60,6 @@ export class ThingFormComponent implements OnInit {
       body.dpi = this.dpi.getValues()
     }
 
-    console.log(body)
     let headers = new HttpHeaders().set('Accept', 'application/json')
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
     this.http.post(this.apiURL + "/things", body, { headers }).subscribe((data: any) => {

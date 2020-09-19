@@ -146,8 +146,6 @@ export class GrafanaService {
       // "overwrite": false,
     }
 
-    // console.log(JSON.stringify(dashboard))
-
     try {
       const result = await fetch(config.grafana.apiURL.href + '/dashboards/db', {
         headers: this.grafanaHeaders,
@@ -164,19 +162,14 @@ export class GrafanaService {
   createPropertyPanel(thing: Thing, property: Property, gridPos) {
     const dim = property.type.dimensions
     let onlyNumbers = true
-    console.log(property)
     for (let i = 0; i < dim.length; i++) {
-      console.log(dim[i].type)
       onlyNumbers = onlyNumbers && dim[i].type === 'number'
     }
     if (onlyNumbers) { // only numirical values
-      console.log("### only numbers")
       return this.panelChart(thing, property, gridPos)
     } else if (dim.length > 1) { // mix of types
-      console.log("### mix type")
       return this.panelTable(thing, property, gridPos)
     } else {    // 1 non numerical dimension, show last value
-      console.log("### 1 non numerical")
       return this.panelSingleValue(thing, property, gridPos)
     }
   }
