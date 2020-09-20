@@ -257,9 +257,9 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
                 name: 'Domain Name System',
                 description: 'The network names of the Thing',
                 dimensions: [
-                    { id: 'hostname', name: 'Local hostname', description: 'The machine hostname', unit: '', type: 'string' },
-                    { id: 'local-dns', name: 'Local domain', description: 'The local domain name (usually [hostname].local)', unit: '', type: 'string' },
-                    { id: 'fqdn', name: '', description: 'The Fully Qualified Domain Name, accessible from the Internet external networks.', unit: '', type: 'string' }
+                    { id: 'dns-hostname', name: 'Local hostname', description: 'The machine hostname', unit: '', type: 'string' },
+                    { id: 'dns-local', name: 'Local domain', description: 'The local domain name (usually [hostname].local)', unit: '', type: 'string' },
+                    { id: 'dns-fqdn', name: 'FQDN', description: 'The Fully Qualified Domain Name, accessible from the Internet external networks.', unit: '', type: 'string' }
                 ]
             }
         ]
