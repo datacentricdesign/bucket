@@ -512,6 +512,12 @@
                         <option value="ZM">Zambia</option>
                         <option value="ZW">Zimbabwe</option>
                     </select>
+                    <div *ngIf="f.wpa_password.touched && f.wpa_country.invalid"
+                        class="alert alert-danger">
+                        <div *ngIf="f.wpa_country.errors.conditionalRequirementValidator">
+                            Your must set the country in which you connect to a enterprise network.
+                        </div>
+                    </div>
                 </div>
 
             </details>

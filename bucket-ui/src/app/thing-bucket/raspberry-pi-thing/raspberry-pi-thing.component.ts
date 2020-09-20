@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfirmedValidator } from './confirmed.validator';
+import { ConditionalRequirementValidator } from './conditional-requirement.validator';
 
 @Component({
   selector: 'app-raspberry-pi-thing',
@@ -70,7 +71,8 @@ export class RaspberryPiThingComponent implements OnInit {
       validators: [
         ConfirmedValidator('first_user_password', 'first_user_password_confirm'),
         ConfirmedValidator('home_password', 'home_password_confirm'),
-        ConfirmedValidator('wpa_password', 'wpa_password_confirm')
+        ConfirmedValidator('wpa_password', 'wpa_password_confirm'),
+        ConditionalRequirementValidator('wpa_password', 'wpa_country')
       ]
     })
   }
@@ -192,7 +194,7 @@ export class RaspberryPiThingComponent implements OnInit {
       body.wpa_password = dpi["wpa_password"].value;
       body.wpa_country = dpi["wpa_country"].value;
     }
-    
+    console.log(body)
     return body
   }
 

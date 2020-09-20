@@ -115,7 +115,7 @@ export class PolicyService {
       subjects: [subjectId],
       resources: PolicyService.entityToResource(resourceId)
     }
-    Log.debug(policy)
+    Log.debug(JSON.stringify(policy))
     return this.updateKetoPolicy(policy)
   }
 
