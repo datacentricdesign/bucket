@@ -251,6 +251,16 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
                     { id: 'external-ip-address', name: 'External IP', description: 'External IP', unit: '', type: 'string' },
                     { id: 'external-ip-address-type', name: 'Type External IP', description: 'Type External IP', unit: '', type: 'number' }
                 ]
+            },
+            {
+                id: 'DNS',
+                name: 'Domain Name System',
+                description: 'The network names of the Thing',
+                dimensions: [
+                    { id: 'hostname', name: 'Local hostname', description: 'The machine hostname', unit: '', type: 'string' },
+                    { id: 'local-dns', name: 'Local domain', description: 'The local domain name (usually [hostname].local)', unit: '', type: 'string' },
+                    { id: 'fqdn', name: '', description: 'The Fully Qualified Domain Name, accessible from the Internet external networks.', unit: '', type: 'string' }
+                ]
             }
         ]
 
