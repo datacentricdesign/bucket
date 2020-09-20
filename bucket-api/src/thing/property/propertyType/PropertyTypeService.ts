@@ -22,7 +22,10 @@ export class PropertyTypeService {
         const propertyTypeRepository = getRepository(PropertyType);
         return propertyTypeRepository.find({
             cache: true,
-            relations: ['dimensions']
+            relations: ['dimensions'],
+            order: {
+                name: "ASC"
+            }
         });
     }
 
