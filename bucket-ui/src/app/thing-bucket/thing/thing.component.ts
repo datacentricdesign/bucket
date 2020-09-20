@@ -121,6 +121,7 @@ export class ThingComponent implements OnInit {
                 this.ipAddress = result[0]
             } else if (this.thing.properties[i].type.id === 'DNS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
+                console.log(result)
                 this.dns = result[0]
             }
         }

@@ -15,7 +15,7 @@
                 (IPv{{ipAddress[2]}})
             </li>
             <li *ngIf="dns.length > 0">
-                Hostname: {{dns[1]}} (Local: {{dns[2]}} / FQDN: {{dns[3]}})
+                Hostname: {{dns[1]}} (Local: <a href="http://{{dns[2]}}" target="_blank">{{dns[2]}}</a> / FQDN: <a href="http://{{dns[3]}}" target="_blank">{{dns[3]}}</a>)
             </li>
         </ul>
 

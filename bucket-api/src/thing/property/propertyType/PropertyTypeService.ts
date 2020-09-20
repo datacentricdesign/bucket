@@ -22,10 +22,12 @@ export class PropertyTypeService {
         const propertyTypeRepository = getRepository(PropertyType);
         return propertyTypeRepository.find({
             cache: true,
-            relations: ['dimensions'],
-            order: {
-                name: "ASC"
-            }
+            relations: ['dimensions']
+            // TODO before making this sort, dimension should have a index 1, 2, 3 ... so that after sorting they keep the same sequence
+            // ,
+            // order: {
+            //     name: "ASC"
+            // }
         });
     }
 
