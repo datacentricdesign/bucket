@@ -77,6 +77,9 @@ export class ThingComponent implements OnInit {
         this.typeDetails = ''
         this.dpiFound = false
         this._Activatedroute.paramMap.subscribe(params => {
+            this.mqttStatus = []
+            this.ipAddress = []
+            this.dns = []
             this.id = params.get('id');
             let headers = new HttpHeaders().set('Accept', 'application/json')
                 .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
