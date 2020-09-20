@@ -5,8 +5,11 @@ import * as fs from 'fs'
 import { Log } from "../../Logger";
 import { AuthController } from "../http/AuthController";
 import { DCDError } from "@datacentricdesign/types";
+import { DPiService } from "./DPiService";
 
 export class DPiController {
+
+    static dpiService = new DPiService()
 
     static healthStatus = async (req: Request, res: Response, next: NextFunction) => {
         const url = config.env.dpiUrl + '/health'
@@ -37,7 +40,7 @@ export class DPiController {
             } else if (json.code === 0 && req.query.download === 'true') {
                 const dpiId = thingId.replace('dcd:things:', '')
 
-                const downloadURL = "http://dpi.io.tudelft.nl:8082/dpi/" + dpiId + "?download=true"
+                const downloadURL = config.env.dpiUrl + '/' + dpiId + "?download=true"
                 const result = await fetch(downloadURL);
                 await new Promise((resolve, reject) => {
                     result.body.pipe(res);
@@ -61,26 +64,9 @@ export class DPiController {
     };
 
     static generateNewDPIImage = async (req: Request, res: Response, next: NextFunction) => {
-        const dpi = req.body
-        const url = config.env.dpiUrl + '/'
-        dpi.id = req.params.thingId
-
-        const keys = await AuthController.authService.generateKeys(req.params.thingId)
-
-        dpi.enable_SSH = dpi.enable_SSH ? '1' : '0'
-        dpi.private_key = keys.privateKey
-
-        const options = {
-            method: 'POST',
-            body: JSON.stringify(dpi),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
         try {
-            const result = await fetch(url, options);
-            const text = await result.text()
-            res.status(200).json(text)
+            const text = await DPiController.dpiService.generateDPiImage(req.body, req.params.thingId)
+            res.send(text)
         } catch (error) {
             return next(error)
         }

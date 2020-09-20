@@ -14,6 +14,9 @@
                 <i class="nc-icon nc-world-2"></i>External IP: {{ipAddress[4]}}
                 (IPv{{ipAddress[2]}})
             </li>
+            <li *ngIf="dns.length > 0">
+                Hostname: {{dns[1]}} (Local: {{dns[2]}} / FQDN: {{dns[3]}})
+            </li>
         </ul>
 
     </h1>

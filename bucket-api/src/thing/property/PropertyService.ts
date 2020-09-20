@@ -150,6 +150,24 @@ export class PropertyService {
     }
 
     /**
+     * List the Properties of a Thing, of a given type
+     * @param {string} thingId
+     **/
+    async getPropertiesOfAThingByType(thingId: string, typeId: string, valueOptions?: ValueOptions): Promise<Property[]> {
+        // Get properties from the database
+        const propertyRepository = getRepository(Property);
+        let properties = await propertyRepository
+            .createQueryBuilder("property")
+            .innerJoinAndSelect("property.thing", "thing")
+            .innerJoinAndSelect("property.type", "type")
+            .innerJoinAndSelect("type.dimensions", "dimensions")
+            .where("thing.id = :thingId AND type.id = :typeId")
+            .setParameters({ thingId: thingId, typeId: typeId })
+            .getMany();
+        return properties
+    }
+
+    /**
      * List Properties by Type Id.
      * @param {string} propertyId
      * returns {Property[]}

@@ -36,8 +36,9 @@ export class ThingComponent implements OnInit {
     name: string
     thing: Thing
 
-    mqttStatus: Array<any>
-    ipAddress: Array<any>
+    mqttStatus: any[]
+    ipAddress: any[]
+    dns: any[]
 
     typeDetails: string
 
@@ -69,6 +70,7 @@ export class ThingComponent implements OnInit {
         this.grafanaURL = appService.settings.grafanaURL
         this.mqttStatus = []
         this.ipAddress = []
+        this.dns = []
     }
 
     ngOnInit() {
@@ -81,7 +83,7 @@ export class ThingComponent implements OnInit {
             this.thing$ = this.http.get<Thing>(this.apiURL + "/things/" + this.id, { headers }).pipe(
                 map((data: Thing) => {
                     this.thing = data
-                    this.checkMQTTStatusAndIpAddress()
+                    this.checkNetwork()
                     this.titleService.setTitle(this.thing.name);
                     return data;
                 }), catchError(error => {
@@ -109,7 +111,7 @@ export class ThingComponent implements OnInit {
 
     }
 
-    async checkMQTTStatusAndIpAddress() {
+    async checkNetwork() {
         for (let i = 0; i < this.thing.properties.length; i++) {
             if (this.thing.properties[i].type.id === 'MQTT_STATUS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
@@ -117,6 +119,9 @@ export class ThingComponent implements OnInit {
             } else if (this.thing.properties[i].type.id === 'IP_ADDRESS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
                 this.ipAddress = result[0]
+            } else if (this.thing.properties[i].type.id === 'DNS') {
+                const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
+                this.dns = result[0]
             }
         }
     }

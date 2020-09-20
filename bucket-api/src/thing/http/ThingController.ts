@@ -10,6 +10,7 @@ import fetch from "node-fetch";
 import { PolicyService } from "../services/PolicyService";
 import { AuthService } from "../services/AuthService";
 import { AuthController } from "./AuthController";
+import DPiController from "../dpi/DPiController";
 
 export class ThingController {
 
@@ -68,21 +69,7 @@ export class ThingController {
             }
 
             if (thing.type === 'RASPBERRYPI' && dpi !== undefined) {
-                const keys = await AuthController.authService.generateKeys(thing.id)
-                const url = config.env.dpiUrl + '/'
-                dpi.id = thing.id
-                dpi.enable_SSH = dpi.enable_SSH ? '1' : '0'
-                dpi.private_key = keys.privateKey
-                
-                const options = {
-                    method: 'POST',
-                    body: JSON.stringify(dpi),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-                const result = await fetch(url, options);
-                const text = await result.text()
+                await DPiController.dpiService.generateDPiImage(dpi, thing.id)
             }
 
             // If all ok, send 201 response

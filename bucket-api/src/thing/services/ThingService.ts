@@ -50,13 +50,6 @@ export class ThingService {
                 await thingRepository.save(thing);
                 await AuthController.policyService.grant(thing.personId, thing.id, 'owner');
                 await AuthController.policyService.grant(thing.id, thing.id, 'subject');
-                // Trying to create a Grafana Dashboard if the user connected his/her account
-                // try {
-                //     const grafanaId = await GrafanaController.grafanaService.getGrafanaId(thing.personId)
-                //     await GrafanaController.grafanaService.createThing(thing.personId, thing.id)
-                // } catch(error) {
-                //     // there is no grafana id
-                // }
                 return thing;
             }
             // unknown error to report
