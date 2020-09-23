@@ -30,19 +30,6 @@ export class RaspberryPiThingComponent implements OnInit {
   started_at: string
   updated_at: string
 
-  raspberryPi: any = {
-    first_user_name: '',
-    first_user_password: '',
-    first_user_password_confirm: '',
-    target_hostname: '',
-    home_ESSID: '',
-    home_password: '',
-    wpa_ESSID: 'eduroam',
-    wpa_password: '',
-    wpa_country: '',
-    enable_SSH: true
-  }
-
   dpiGenerator: any = {error: "Service unavailable"}
 
   form: FormGroup = new FormGroup({});

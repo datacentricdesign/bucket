@@ -106,6 +106,7 @@ export class ThingComponent implements OnInit {
         this.thingService.getGrafanaId(this.id).then( (result:any) => {
             this.grafanaId = result.grafanaId
         }).catch( (error) => {
+            console.log(error)
             if (error.error && error.error.hint === "Service unavailable.") {
                 console.warn('Grafana is not available')
                 this.grafanaId = -1
@@ -115,12 +116,15 @@ export class ThingComponent implements OnInit {
     }
 
     async checkNetwork() {
+        console.log("check network")
         for (let i = 0; i < this.thing.properties.length; i++) {
             if (this.thing.properties[i].type.id === 'MQTT_STATUS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
+                console.log(result)
                 this.mqttStatus = result[0]
             } else if (this.thing.properties[i].type.id === 'IP_ADDRESS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
+                console.log(result)
                 this.ipAddress = result[0]
             } else if (this.thing.properties[i].type.id === 'DNS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
