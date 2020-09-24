@@ -200,7 +200,6 @@ export class GrafanaService {
         },
         "overrides": []
       },
-      "id": 6,
       "options": {
         "showHeader": true
       },
