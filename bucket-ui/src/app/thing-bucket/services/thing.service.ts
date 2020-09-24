@@ -214,15 +214,6 @@ export class ThingService {
       .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
 
     return this.http.get(url, { headers }).toPromise()
-    // .subscribe(
-    //   result => {
-    //     return Promise.resolve(result)
-    //   },
-    //   err => {
-    //     console.warn('status', err.status);
-    //     return Promise.reject(error)
-    //   }
-    // );
   }
 
   dpCount(timeExpressionFrom, timeInterval?): Promise<any> {

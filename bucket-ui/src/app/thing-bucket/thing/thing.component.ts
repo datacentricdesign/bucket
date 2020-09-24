@@ -56,7 +56,7 @@ export class ThingComponent implements OnInit {
         pem: ''
     }
 
-    grafanaId: number = 0
+    grafanaId: number = -1
     grafanaURL: string
 
     constructor(private _Activatedroute: ActivatedRoute,
@@ -108,7 +108,7 @@ export class ThingComponent implements OnInit {
         }).catch( (error) => {
             if (error.error && error.error._hint === "Service unavailable.") {
                 console.warn('Grafana is not available')
-                this.grafanaId = -1
+                this.grafanaId = -2
             }
         })
 
