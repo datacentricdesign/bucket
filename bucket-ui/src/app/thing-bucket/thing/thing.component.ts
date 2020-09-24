@@ -56,7 +56,7 @@ export class ThingComponent implements OnInit {
         pem: ''
     }
 
-    grafanaId: number = -1
+    grafanaId: number = 0
     grafanaURL: string
 
     constructor(private _Activatedroute: ActivatedRoute,
