@@ -106,8 +106,7 @@ export class ThingComponent implements OnInit {
         this.thingService.getGrafanaId(this.id).then( (result:any) => {
             this.grafanaId = result.grafanaId
         }).catch( (error) => {
-            console.log(error)
-            if (error.error && error.error.hint === "Service unavailable.") {
+            if (error.error && error.error._hint === "Service unavailable.") {
                 console.warn('Grafana is not available')
                 this.grafanaId = -1
             }

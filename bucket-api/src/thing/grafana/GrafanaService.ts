@@ -92,8 +92,8 @@ export class GrafanaService {
       return Promise.resolve(json.id)
     }
     catch (error) {
-      console.error(error)
-      if (error.errno === 'ECONNREFUSED') {
+      console.error(error.code)
+      if (error.code === 'ECONNREFUSED') {
         return Promise.reject(new DCDError(503, 'Service unavailable.'))
       }
       return Promise.reject(error);

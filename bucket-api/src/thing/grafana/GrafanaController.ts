@@ -14,6 +14,9 @@ export class GrafanaController {
             res.status(200).send({grafanaId: grafanaId})
         }
         catch (error) {
+            if (error._hint === "Service unavailable.") {
+                return res.status(503).send(error)
+            }
             return next(error)
         }
     };

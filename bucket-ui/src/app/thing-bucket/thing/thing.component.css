@@ -25,7 +25,7 @@
   background-color: 'none';
 }
 
-.statusConnected {
+.statusConnected, .statusPing {
   animation: blinking 1s infinite;
 }
 
