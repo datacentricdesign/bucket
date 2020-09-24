@@ -39,7 +39,7 @@ export class ThingFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (!this.dpi.dpiGenerator) {
+    if (this.model.type === 'RASPBERRYPI' && !this.dpi.dpiGenerator) {
       return this.toast("The DPi generator is not available at the moment.", "danger", "nc-alert-circle-i")
     }
 
