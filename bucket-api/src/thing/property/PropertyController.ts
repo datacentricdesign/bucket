@@ -306,18 +306,22 @@ function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel: b
     let first = true;
     csvStr.split('\n').forEach(line => {
         if ((!first || !hasLabel) && line !== '') {
-            const val: any[] = line.split(',')
-            val[0] = Number(val[0])
-            for (let i = 1; i < val.length; i++) {
-                switch (dimensions[i - 1].type) {
-                    case 'number': val[i] = Number(val[i]);
-                        break;
-                    case 'boolean': val[i] = Boolean(val[i]);
-                        break;
-                    default: // string, keep as it is
+            try {
+                const val: any[] = line.split(',')
+                val[0] = Number(val[0])
+                for (let i = 1; i < val.length; i++) {
+                    switch (dimensions[i - 1].type) {
+                        case 'number': val[i] = Number(val[i]);
+                            break;
+                        case 'boolean': val[i] = Boolean(val[i]);
+                            break;
+                        default: // string, keep as it is
+                    }
                 }
+                values.push(val)
+            } catch (error) {
+                console.error(error)
             }
-            values.push(val)
         }
         if (first) {
             first = false
