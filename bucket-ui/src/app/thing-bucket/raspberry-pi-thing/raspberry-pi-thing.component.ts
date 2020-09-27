@@ -1,7 +1,6 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { ThingService, Download } from '../services/thing.service';
 import * as moment from 'moment'
-import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfirmedValidator } from './confirmed.validator';
@@ -39,7 +38,6 @@ export class RaspberryPiThingComponent implements OnInit {
 
   constructor(
     private thingService: ThingService,
-    private toastr: ToastrService,
     private fb: FormBuilder) {
     this.form = fb.group({
       first_user_name: ['', [Validators.required]],
@@ -129,9 +127,14 @@ export class RaspberryPiThingComponent implements OnInit {
   }
 
   delete() {
-    this.thingService.dpiDelete(this.thingId).then(() => {
-      window.location.reload()
-    })
+    this.thingService.dpiDelete(this.thingId)
+      .then(() => {
+        window.location.reload()
+      })
+      .catch((error) => {
+          this.thingService.toast(error)
+      })
+
   }
 
   download() {
@@ -144,20 +147,6 @@ export class RaspberryPiThingComponent implements OnInit {
 
   onFoundChange() {
     this.foundEvent.emit(this.found);
-  }
-
-  toast(message: string, type: string, icon: string) {
-    this.toastr.info(
-      '<span data-notify="icon" class="nc-icon ' + icon + '"></span><span data-notify="message">' + message + '</span>',
-      "",
-      {
-        timeOut: 4000,
-        closeButton: true,
-        enableHtml: true,
-        toastClass: "alert alert-" + type + " alert-with-icon",
-        positionClass: "toast-top-center"
-      }
-    );
   }
 
   getValues() {

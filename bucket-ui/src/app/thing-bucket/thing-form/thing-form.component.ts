@@ -1,10 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { DTOThing } from '@datacentricdesign/types';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AppService } from 'app/app.service';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { DTOThing, Thing } from '@datacentricdesign/types';
 import { RaspberryPiThingComponent } from '../raspberry-pi-thing/raspberry-pi-thing.component';
-import { ToastrService } from 'ngx-toastr';
+import { ThingService } from '../services/thing.service';
 
 @Component({
   selector: 'app-thing-form',
@@ -22,8 +19,6 @@ export class ThingFormComponent implements OnInit {
 
   submitted = false;
 
-  private apiURL: string
-
   model: DTOThing = {
     name: 'My Test Thing',
     description: 'A Thing to test!',
@@ -31,16 +26,14 @@ export class ThingFormComponent implements OnInit {
     pem: ''
   }
 
-  constructor(private http: HttpClient,
-    private appService: AppService,
-    private oauthService: OAuthService,
-    private toastr: ToastrService) {
-    this.apiURL = this.appService.settings.apiURL;
+  constructor(private thingService: ThingService) { }
+
+  ngOnInit(): void {
   }
 
   onSubmit() {
     if (this.model.type === 'RASPBERRYPI' && !this.dpi.dpiGenerator) {
-      return this.toast("The DPi generator is not available at the moment.", "danger", "nc-alert-circle-i")
+      return this.thingService.toast("The DPi generator is not available at the moment.", "danger", "nc-alert-circle-i")
     }
 
     const button = document.getElementById("createThingButton") as HTMLButtonElement
@@ -60,28 +53,13 @@ export class ThingFormComponent implements OnInit {
       body.dpi = this.dpi.getValues()
     }
 
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-    this.http.post(this.apiURL + "/things", body, { headers }).subscribe((data: any) => {
-      window.location.href = './things/' + data.id;
-    });
+    this.thingService.createThing(body)
+      .then((data: Thing) => {
+        window.location.href = './things/' + data.id;
+      })
+      .catch((error) => {
+        this.thingService.toast(error)
+      })
   }
 
-
-  ngOnInit(): void {
-  }
-
-  toast(message: string, type: string, icon: string) {
-    this.toastr.error(
-      '<span data-notify="icon" class="nc-icon ' + icon + '"></span><span data-notify="message">' + message + '</span>',
-      "",
-      {
-        timeOut: 4000,
-        closeButton: true,
-        enableHtml: true,
-        toastClass: "alert alert-" + type + " alert-with-icon",
-        positionClass: "toast-top-center"
-      }
-    );
-  }
 }

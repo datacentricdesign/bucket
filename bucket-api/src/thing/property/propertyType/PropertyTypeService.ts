@@ -4,6 +4,7 @@ import { getRepository, DeleteResult, getConnection } from "typeorm";
 import { Property } from "../Property";
 import { PropertyType } from "./PropertyType";
 import { DCDError } from "@datacentricdesign/types";
+import { types } from "util";
 
 export class PropertyTypeService {
 
@@ -23,12 +24,8 @@ export class PropertyTypeService {
         return propertyTypeRepository.find({
             cache: true,
             relations: ['dimensions']
-            // TODO before making this sort, dimension should have a index 1, 2, 3 ... so that after sorting they keep the same sequence
-            // ,
-            // order: {
-            //     name: "ASC"
-            // }
-        });
+        })
+
     }
 
     /**

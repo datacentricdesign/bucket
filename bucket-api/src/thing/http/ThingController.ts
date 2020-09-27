@@ -20,18 +20,18 @@ export class ThingController {
         res.send({ status: "OK" });
     };
 
-    static getThingsOfAPerson = async (req: Request, res: Response) => {
+    static getThingsOfAPerson = async (req: Request, res: Response, next: NextFunction) => {
         // Get things from Service
         try {
             const things: Thing[] = await ThingController.thingService.getThingsOfAPerson(req.context.userId)
             // Send the things object
             res.send(things);
         } catch (error) {
-            res.status(404).send(error);
+            return next(error)
         }
     };
 
-    static getOneThingById = async (req: Request, res: Response) => {
+    static getOneThingById = async (req: Request, res: Response, next: NextFunction) => {
         // Get the ID from the url
         const thingId: string = req.params.thingId;
         try {
@@ -39,7 +39,7 @@ export class ThingController {
             const thing: Thing = await ThingController.thingService.getOneThingById(thingId)
             res.send(thing);
         } catch (error) {
-            res.status(404).send("Thing not found");
+            return next(new DCDError(404, "Thing not found"))
         }
     };
 
@@ -57,12 +57,13 @@ export class ThingController {
         // Validade if the parameters are ok
         const errors = await validate(thing);
         if (errors.length > 0) {
-            return res.status(400).send(errors);
+            return next(new DCDError(400, errors.toString()))
         }
 
         try {
             const createdThing = await ThingController.thingService.createNewThing(thing)
-            if (pem !== undefined) {
+            if (pem !== undefined && typeof(pem) === 'string') {
+                pem.trim()
                 const error = checkPEM(pem)
                 if (error !== undefined) return next(error)
                 await ThingController.thingService.editThingPEM(thing.id, pem)
@@ -79,7 +80,7 @@ export class ThingController {
         }
     };
 
-    static editThing = async (req: Request, res: Response) => {
+    static editThing = async (req: Request, res: Response, next: NextFunction) => {
         // Get the ID from the url
         const thingId = req.params.thingId;
         // Get values from the body
@@ -89,8 +90,7 @@ export class ThingController {
             thing = await ThingController.thingService.getOneThingById(thingId)
         } catch (error) {
             // If not found, send a 404 response
-            res.status(404).send("Thing not found");
-            return;
+            return next(new DCDError(404, "Thing not found"))
         }
 
         // Validate the new values on model
@@ -98,16 +98,14 @@ export class ThingController {
         thing.description = description;
         const errors = await validate(thing);
         if (errors.length > 0) {
-            res.status(400).send(errors);
-            return;
+            return next(new DCDError(400, errors.toString()))
         }
 
         // Try to save
         try {
             await ThingController.thingService.editOneThing(thing)
-        } catch (e) {
-            res.status(500).send("failed updating thing");
-            return;
+        } catch (error) {
+            return next(new DCDError(500, "Failed to update thing"))
         }
         //After all send a 204 (no content, but accepted) response
         res.status(204).send();
@@ -118,6 +116,10 @@ export class ThingController {
         const thingId = req.params.thingId;
         // Get pem from body
         const pem = req.body.pem;
+        if (pem !== undefined && typeof(pem) !== 'string') {
+            return next(new DCDError(400, "Missing PEM key."))
+        }
+        pem.trim()
         const error = checkPEM(pem)
         if (error !== undefined) return next(error)
         // Call the Service
@@ -168,3 +170,7 @@ function checkPEM(pem: string) {
         return new DCDError(400, 'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"')
     }
 }
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }

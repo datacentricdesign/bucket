@@ -48,7 +48,11 @@ export class Log {
       mkdirSync(config.hostDataFolder + '/logs')
     } catch (error) {
       if (error && error.errno !== -17) {
-        return Log.error(error)
+        try {
+          return Log.error(error)
+        }  catch (error) {
+          console.error(error)
+        }
       }
     }
 

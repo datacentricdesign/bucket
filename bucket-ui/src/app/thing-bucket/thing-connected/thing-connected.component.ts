@@ -1,12 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AppService } from 'app/app.service';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ThingService } from 'app/thing-bucket/services/thing.service';
 import { Thing } from '@datacentricdesign/types';
-import { ActivatedRoute } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 
 import * as moment from 'moment';
 
@@ -17,29 +11,31 @@ import * as moment from 'moment';
 })
 export class ThingConnectedComponent implements OnInit {
 
-  apiURL: string
+  @ViewChild('connected-things-panel') connectedThingsPanelDiv : HTMLDivElement
 
-  things: any;
+  things: any
 
-  constructor(private _Activatedroute: ActivatedRoute, private http: HttpClient, private appService: AppService, private oauthService: OAuthService, private thingService: ThingService) {
-    this.apiURL = appService.settings.apiURL;
-  }
+  constructor(private thingService: ThingService) { }
 
-  ngOnInit(): void {
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+  ngOnInit(): void { }
 
-    this.http.get<Thing[]>(this.apiURL + "/things", { headers }).subscribe((data: Thing[]) => {
-      if (data.length > 0) {
-        this.checkMQTTStatus(data).then((connectedThings) => {
-          this.things = connectedThings
-        })
-      } else {
-        // if there is no things yet, we skip the statistics all together
-        document.getElementById('connected-things-panel').style.display = 'none';
-      }
-
-    });
+  afterViewInit(): void {
+    this.thingService.find()
+      .then((data: Thing[]) => {
+        if (data.length > 0) {
+          this.checkMQTTStatus(data)
+            .then((connectedThings) => {
+              this.things = connectedThings
+              console.log(this.things)
+              if (this.things.length === 0) {
+                this.connectedThingsPanelDiv.style.display = 'block';
+              }
+            })
+        }
+      })
+      .catch(error => {
+        this.thingService.toast(error)
+      })
   }
 
   async checkMQTTStatus(allThings: any): Promise<any> {

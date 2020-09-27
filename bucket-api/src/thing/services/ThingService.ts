@@ -84,6 +84,10 @@ export class ThingService {
             .setParameters({ thingId: thingId })
             .getOne();
 
+        for (let i=0;i<thing.properties.length;i++) {
+            thing.properties[i].type.dimensions = thing.properties[i].type.dimensions.reverse()
+        }
+
         return thing
     }
 

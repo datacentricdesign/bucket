@@ -22,11 +22,13 @@ export class DPiController {
             res.status(200).send(json)
         }
         catch (error) {
-            return res.status(503).send(new DCDError(503, "Service now available."))
+            const dcdError = new DCDError(503, "Service now available.")
+            dcdError._statusCode = 503
+            return next(dcdError)
         }
     };
 
-    static getOneDPIImage = async (req: Request, res: Response) => {
+    static getOneDPIImage = async (req: Request, res: Response, next: NextFunction) => {
         const url = config.env.dpiUrl + '/' + req.params.thingId.replace('dcd:things:', '')
         const thingId = req.params.thingId
         const options = {
@@ -37,15 +39,17 @@ export class DPiController {
             const json = await result.json()
             if (json.errorCode !== undefined) {
                 res.status(json.errorCode).json(json)
+                const dcdError = new DCDError(json.errorCode, json)
+                dcdError._statusCode = json.errorCode
+                return next(dcdError)
             } else if (json.code === 0 && req.query.download === 'true') {
                 const dpiId = thingId.replace('dcd:things:', '')
-
                 const downloadURL = config.env.dpiUrl + '/' + dpiId + "?download=true"
                 const result = await fetch(downloadURL);
                 await new Promise((resolve, reject) => {
                     result.body.pipe(res);
-                    result.body.on("error", (err) => {
-                        reject(err);
+                    result.body.on("error", (error) => {
+                        reject(error);
                     });
                     res.on("finish", function () {
                         resolve();
@@ -57,9 +61,9 @@ export class DPiController {
         }
         catch (error) {
             if (error.errorCode === 404) {
-                return res.status(404).send(error)
+                return next(new DCDError(404, error))
             }
-            return res.status(500).send(error)
+            return next(error)
         }
     };
 
@@ -82,7 +86,7 @@ export class DPiController {
             res.status(204).send()
         }
         catch (error) {
-            return res.status(500).send(error)
+            return next(error)
         }
     };
 
@@ -96,7 +100,7 @@ export class DPiController {
             res.status(204).send()
         }
         catch (error) {
-            return res.status(500).send(error)
+            return next(error)
         }
     };
 }

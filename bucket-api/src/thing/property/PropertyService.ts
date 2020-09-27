@@ -142,6 +142,8 @@ export class PropertyService {
             .setParameters({ propertyId: propertyId, thingId: thingId })
             .getOne();
 
+        property.type.dimensions = property.type.dimensions.reverse()
+
         if (property !== undefined && valueOptions != undefined) {
             Log.debug(valueOptions.from)
             return this.readValuesFromInfluxDB(property, valueOptions)
@@ -272,12 +274,12 @@ export class PropertyService {
                     fields: fields,
                     timestamp: ts
                 };
+
                 points.push(point);
             }
         }
-        return this.influx.writePoints(points, { precision: 'ms' });
+        return this.influx.writePoints(points, { precision: 'ms' })
     }
-
 
     /**
      * @param {Property} property

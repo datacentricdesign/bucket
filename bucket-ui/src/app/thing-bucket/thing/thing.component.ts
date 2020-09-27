@@ -11,6 +11,7 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { Title } from '@angular/platform-browser';
 import { ThingService } from '../services/thing.service';
 import { RaspberryPiThingComponent } from '../raspberry-pi-thing/raspberry-pi-thing.component';
+import { SpinnerButtonComponent } from 'app/thing-bucket/spinner-button/spinner-button.component';
 
 @Component({
     selector: 'thing-cmp',
@@ -21,6 +22,10 @@ import { RaspberryPiThingComponent } from '../raspberry-pi-thing/raspberry-pi-th
 export class ThingComponent implements OnInit {
 
     @ViewChild(RaspberryPiThingComponent) dpi: RaspberryPiThingComponent;
+    @ViewChild('rpiCreateBt') rpiCreateBt: SpinnerButtonComponent;
+    @ViewChild('nameEditBt') nameEditBt: SpinnerButtonComponent;
+    @ViewChild('descEditBt') descEditBt: SpinnerButtonComponent;
+    @ViewChild('updatePEMBt') updatePEMBt: SpinnerButtonComponent;
     dpiFound: boolean
 
     // Is DPi generator available
@@ -76,6 +81,16 @@ export class ThingComponent implements OnInit {
     ngOnInit() {
         this.typeDetails = ''
         this.dpiFound = false
+
+        this._Activatedroute.queryParams
+            .subscribe(params => {
+                if (params.success !== undefined) {
+                    this.thingService.toast(params.success, "success")
+                } else if (params.error !== undefined) {
+                    this.thingService.toast(params.error, "danger")
+                }
+            });
+
         this._Activatedroute.paramMap.subscribe(params => {
             this.mqttStatus = []
             this.ipAddress = []
@@ -103,21 +118,22 @@ export class ThingComponent implements OnInit {
             )
         });
 
-        this.thingService.getGrafanaId(this.id).then( (result:any) => {
-            if (result.grafanaId !== undefined) {
-                this.grafanaId = result.grafanaId
-            }
-        }).catch( (error) => {
-            if (error.error && error.error._hint === "Service unavailable.") {
-                console.warn('Grafana is not available')
-                this.grafanaId = -1
-            }
-        })
+        this.thingService.getGrafanaId(this.id)
+            .then((result: any) => {
+                if (result.grafanaId !== undefined) {
+                    this.grafanaId = result.grafanaId
+                }
+            })
+            .catch((error) => {
+                if (error.error && error.error._hint === "Service unavailable.") {
+                    console.warn('Grafana is not available')
+                    this.grafanaId = -1
+                }
+            })
 
     }
 
     async checkNetwork() {
-        console.log("check network")
         for (let i = 0; i < this.thing.properties.length; i++) {
             if (this.thing.properties[i].type.id === 'MQTT_STATUS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
@@ -136,27 +152,75 @@ export class ThingComponent implements OnInit {
     }
 
     onSubmit() {
-        let headers = new HttpHeaders().set('Accept', 'application/json')
-            .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-        this.http.post(this.apiURL + "/things/" + this.id + '/properties', this.model, { headers }).subscribe((data: any) => {
-            window.location.reload(true);
-        });
+        this.thingService.createProperty(this.id, this.model)
+            .then((data) => {
+                window.location.reload();
+            })
+            .catch((error) => {
+                this.thingService.toast(error)
+            })
     }
 
     editName() {
         this.thingService.edit(this.id, { name: this.updateThing.name })
+            .then(() => {
+                // TODO replace the reload with inside changes, missing the sidebar update
+                // this.thingService.toast("Name updated.", "success")
+                // this.thing.name = this.updateThing.name
+                // this.updateThing.name = ""
+                window.location.href = './things/' + this.id + '?success=Updated+Name.';
+            })
+            .catch(error => {
+                this.thingService.toast(error)
+            })
+            .finally(() => this.nameEditBt.release())
+
     }
 
     editDescription() {
         this.thingService.edit(this.id, { description: this.updateThing.description })
+            .then(() => {
+                this.thingService.toast("Description updated.", "success")
+                this.thing.description = this.updateThing.description
+                this.updateThing.description = ""
+            })
+            .catch(error => {
+                this.thingService.toast(error)
+            })
+            .finally(() => this.descEditBt.release())
     }
 
     updatePEM() {
         this.thingService.updatePEM(this.id, this.updateThing.pem)
+            .then(() => {
+                this.thingService.toast("PEM updated.", "success")
+                this.updateThing.pem = ""
+            })
+            .catch((error) => {
+                this.thingService.toast(error)
+            })
+            .finally(() => this.updatePEMBt.release())
     }
 
     delete() {
         this.thingService.delete(this.id)
+            .then(() => {
+                window.location.href = './things/dashboard?success=Deleted+Thing.';
+            })
+            .catch((error) => {
+                this.thingService.toast(error)
+            })
+    }
+
+    copyId() {
+        const range = document.createRange();
+        range.selectNode(document.getElementById("id-thing-to-copy"));
+        window.getSelection().removeAllRanges(); // clear current selection
+        window.getSelection().addRange(range); // to select text
+        document.execCommand("copy");
+        window.getSelection().removeAllRanges();// to deselect
+        document.execCommand('copy')
+        this.thingService.toast("Thing ID copied to clipboad.", "success", "nc-single-copy-04")
     }
 
     selectType(type: PropertyType) {
@@ -175,25 +239,17 @@ export class ThingComponent implements OnInit {
     }
 
     onRaspberryPiSubmit() {
-        // Block the create button and start spinning
-        const button = document.getElementById("createRPiButton") as HTMLButtonElement
-        button.disabled = true
-        const spinner = document.getElementById("spinnerCreateRPi") as HTMLElement
-        spinner.style.display = 'inline-block'
-        const body = this.dpi.getValues()
-
         // Call the bucket api
-        let headers = new HttpHeaders().set('Accept', 'application/json')
-            .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-        this.http.post(this.apiURL + "/things/" + this.id + '/types/dpi', body, { headers }).subscribe((data: any) => {
-            // On callback, refresh, there should be a status to fetch from Bucket
-            this.dpi.refreshData()
-            // Unlock the button / stop spinner (although the button should be hidden if the build started)
-            const button = document.getElementById("createRPiButton") as HTMLButtonElement
-            button.disabled = true
-            const spinner = document.getElementById("spinnerCreateRPi") as HTMLElement
-            spinner.style.display = 'inline-block'
-        });
+        this.thingService.dpiCreate(this.id, this.dpi.getValues())
+            .then(() => {
+                // On callback, refresh, there should be a status to fetch from Bucket
+                this.dpi.refreshData()
+                // Unlock the button / stop spinner (although the button should be hidden if the build started)
+                this.rpiCreateBt.release()
+            })
+            .catch((error) => {
+                this.thingService.toast(error)
+            })
     }
 
     dpiEventHander($event: any) {
@@ -201,9 +257,17 @@ export class ThingComponent implements OnInit {
     }
 
     async visualiseWithGrafana(thingId: string) {
-        await this.thingService.createGrafanaThing(thingId).then( (result) => {
-            window.location.href = this.grafanaURL + '/d/' + thingId.replace('dcd:things:','');
-        })
+        await this.thingService.createGrafanaThing(thingId)
+            .then((result) => {
+                // Create a link and click on it (opening a new tab to Grafana)
+                const a = document.createElement('a')
+                a.href = this.grafanaURL + '/d/' + thingId.replace('dcd:things:', '')
+                a.target = '_blank';
+                a.click();
+            })
+            .catch((error) => {
+                this.thingService.toast(error)
+            })
     }
 
 }

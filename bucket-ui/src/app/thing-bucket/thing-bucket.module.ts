@@ -19,6 +19,7 @@ import { ExploreComponent } from './explore/explore.component';
 import { ThingFormComponent } from './thing-form/thing-form.component';
 import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thing.component';
 import { SAVER, getSaver } from './services/saver.provider';
+import { SpinnerButtonComponent } from './spinner-button/spinner-button.component';
 
 @NgModule({
   imports: [
@@ -26,9 +27,8 @@ import { SAVER, getSaver } from './services/saver.provider';
     FormsModule,
     NgbModule,
     ReactiveFormsModule,
-    SharedModule,
     ThingBucketRouterModule,
-    AutocompleteLibModule
+    AutocompleteLibModule,
   ],
   declarations: [
     DashboardComponent,
@@ -39,7 +39,8 @@ import { SAVER, getSaver } from './services/saver.provider';
     ThingFormComponent,
     ThingStatsComponent,
     RaspberryPiThingComponent,
-    ExploreComponent
+    ExploreComponent,
+    SpinnerButtonComponent
   ],
   providers: [
     ThingService,
