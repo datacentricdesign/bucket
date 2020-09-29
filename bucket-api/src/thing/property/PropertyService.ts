@@ -142,8 +142,6 @@ export class PropertyService {
             .setParameters({ propertyId: propertyId, thingId: thingId })
             .getOne();
 
-        property.type.dimensions = property.type.dimensions.reverse()
-
         if (property !== undefined && valueOptions != undefined) {
             Log.debug(valueOptions.from)
             return this.readValuesFromInfluxDB(property, valueOptions)
