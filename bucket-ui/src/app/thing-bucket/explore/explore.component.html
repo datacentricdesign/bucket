@@ -17,7 +17,7 @@
                 Type
             </th>
         </thead>
-        <tbody  *ngIf="properties$ | async as propertiess">
+        <tbody  *ngIf="properties$ | async as properties">
             <tr *ngFor="let property of properties; let iProperty = index">
                 <td>
                     {{property.name}}

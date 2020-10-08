@@ -158,6 +158,7 @@ export class PolicyService {
    */
   async listConsents(type:string, id: string) {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/exact/policies?' + type + '=' + id
+    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'GET'
@@ -165,7 +166,9 @@ export class PolicyService {
     try {
       const res = await fetch(url, options);
       if (res.ok) {
-        return Promise.resolve(res.json());
+        const result = await res.json()
+        console.log(result)
+        return Promise.resolve(result);
       }
       return Promise.reject(new DCDError(4031, 'Request was not allowed'));
     }

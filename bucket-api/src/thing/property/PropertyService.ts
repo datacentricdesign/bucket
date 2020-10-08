@@ -101,28 +101,33 @@ export class PropertyService {
 
     /**
      * List all accessible Properties.
-     * @param {string} personId
+     * @param {string} subjectId person, thing or group id ()
+     * @param {string} audienceId person, thing or group id
      **/
-    async getProperties(subject: string): Promise<Property[]> {
+    async getProperties(actor: string, subject: string, audienceId: string): Promise<Property[]> {
         // Get the list of all consent concerning the current subject
         const consents = await AuthController.policyService.listConsents('subject', subject)
-        Log.debug(consents)
-        let resources = []
-        for (let i = 0; i < consents.length; i++) {
-            if (consents[i].effect === 'allow') {
-                resources = resources.concat(consents[i].resources)
+        if (consents) {
+            Log.debug(consents)
+            let resources = []
+            for (let i = 0; i < consents.length; i++) {
+                if (consents[i].effect === 'allow') {
+                    resources = resources.concat(consents[i].resources)
+                }
             }
+            // Get properties from the database
+            const propertyRepository = getRepository(Property);
+            let properties = await propertyRepository
+                .createQueryBuilder("property")
+                .innerJoinAndSelect("property.type", "type")
+                .innerJoinAndSelect("type.dimensions", "dimensions")
+                .where("property.id = ANY (:values)")
+                .setParameters({ values: resources })
+                .getMany();
+        
+            return properties
         }
-        // Get properties from the database
-        const propertyRepository = getRepository(Property);
-        let properties = await propertyRepository
-            .createQueryBuilder("property")
-            .innerJoinAndSelect("property.type", "type")
-            .innerJoinAndSelect("type.dimensions", "dimensions")
-            .where("property.id = ANY (:values)")
-            .setParameters({ values: resources })
-            .getMany();
-        return properties
+        return []
     }
 
     /**
