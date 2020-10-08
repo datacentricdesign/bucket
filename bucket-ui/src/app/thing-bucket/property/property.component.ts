@@ -281,7 +281,7 @@ export class PropertyComponent implements OnInit {
     const files: FileList = event.target.files
     if (files.length === 1) {
       const file = files.item(0)
-      if (file.type === 'text/csv') {
+      if (file.type === 'text/csv' || (file.type === 'application/vnd.ms-excel' && file.name.endsWith('.csv')) ) {
         // We expect 1 column per dimension + time
         const expectedNumColumns = this.property.type.dimensions.length + 1
         let countWrongNumColum = 0
