@@ -305,7 +305,7 @@ export class PropertyComponent implements OnInit {
         }
         this.uploadModel.fileToUpload = file;
       } else {
-        this.thingService.toast("The file to upload should be a CSV file. Provided file type: " + file.type)
+        this.thingService.toast("The file to upload should be a CSV file. Provided file type: " + file.type + " (" + file.name + ")")
       }
     }
   }
