@@ -38,5 +38,5 @@ export class Property implements IProperty {
     @CreateDateColumn()
     createdAt: Date;
 
-    sharedWith: string[];
+    sharedWith?: string[];
 }
