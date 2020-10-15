@@ -110,9 +110,19 @@
                 <div class="card-body">
                     <div>
                         <div class="form-group">
-                            <label for="subjects">Person id</label>
-                            <input type="text" class="form-control" id="subjects" name="subjects"
-                                [(ngModel)]="grantModel.subjects" #subjects="ngModel">
+                            <label for="subjects">Subject id</label>
+                            <div class="input-group">
+                                    <input type="text" class="form-control" id="subjects" name="subjects"
+                                        [(ngModel)]="grantModel.subjects" #subjects="ngModel">
+                                <div class="input-group-append">
+                                    <select class="input-group-text" class="form-control" id="subject_type" name="subject_type">
+                                        <option value="dcd:persons" selected="selected">Person</option>
+                                        <option value="dcd:groups">Group</option>
+                                        <option value="dcd:things">Thing</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <app-spinner-button #grantBt type="info" content="Grant"
                                 [disabled]="grantModel.subjects===''" (spinnerBtClick)="grant()">
                             </app-spinner-button>
@@ -139,7 +149,7 @@
                         <table class="table">
                             <thead class=" text-primary">
                                 <th>
-                                    Persons
+                                    Subjects
                                 </th>
                                 <th>
                                     Access
@@ -149,10 +159,10 @@
                             <tbody *ngIf="consents$ | async as consents">
                                 <tr *ngFor="let consent of consents; let iConsent = index">
                                     <td>
-                                        {{consent.subjects}}
+                                        {{consent.formatedSubjects}}
                                     </td>
                                     <td>
-                                        {{consent.actions}}
+                                        {{consent.formatedActions}}
                                     </td>
                                     <td>
                                         <button (click)="revoke(consent.id)" class="btn btn-warning">Revoke</button>
@@ -175,7 +185,8 @@
                     </h3>
                     <p>
                         ID: <span id="id-property-to-copy">{{property.id}}</span>
-                        <i class="nc-icon nc-single-copy-04" (click)="copyId()" style="margin-left: 20px;cursor: pointer;"></i>
+                        <i class="nc-icon nc-single-copy-04" (click)="copyId()"
+                            style="margin-left: 20px;cursor: pointer;"></i>
                     </p>
                 </div>
                 <div class="card-body">

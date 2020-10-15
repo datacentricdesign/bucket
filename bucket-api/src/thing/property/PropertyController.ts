@@ -33,25 +33,26 @@ export class PropertyController {
         }
     }
 
-    static getPropertiesOfAThing = async (req: Request, res: Response, next: NextFunction) => {
-        // Get the ID from the url
-        const thingId: string = req.params.thingId;
-        // Get things from Service
-        try {
-            const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(thingId)
-            // Send the things object
-            res.send(properties);
-        } catch (error) {
-            return next(new DCDError(404, error))
-        }
-    };
 
     static getProperties = async (req: Request, res: Response, next: NextFunction) => {
-        Log.debug(req.context.userId)
+        const sharedWith: string = req.query.sharedWith as string
+        const subject: string = req.params.thingId ? req.params.thingId : req.context.userId
+        const actor: string = req.context.userId
+        // Get properties from Service
         try {
-            const properties: Property[] = await PropertyController.propertyService.getProperties(req.context.userId)
-            res.send(properties)
+            if (sharedWith !== undefined) {
+                const properties: Property[] = await PropertyController.propertyService.getProperties(actor, subject, sharedWith)
+                return res.send(properties)
+            } else if (actor == subject) {
+                const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(subject)
+                // Send the things object
+                res.send(properties);
+            }
         } catch (error) {
+            console.log(error)
+            if (error.errorCode !== 500) {
+                return next(error)
+            }
             return next(new DCDError(404, error))
         }
     };

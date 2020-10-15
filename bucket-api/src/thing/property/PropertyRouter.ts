@@ -5,7 +5,7 @@ import { checkPolicy } from "../middlewares/checkPolicy";
 
 import PropertyController from "./PropertyController";
 
-export const PropertyRouter = Router({mergeParams: true});
+export const PropertyRouter = Router({ mergeParams: true });
 
 
 /**
@@ -21,8 +21,9 @@ export const PropertyRouter = Router({mergeParams: true});
 **/
 PropertyRouter.get(
      "/",
-     [introspectToken(['dcd:properties']), checkPolicy('list')],
-     PropertyController.getPropertiesOfAThing);
+     [introspectToken(['dcd:properties']), checkPolicy('read')],
+     PropertyController.getProperties);
+
 
 /**
      * @api {get} /things/:thingId/properties/:propertyId Read
@@ -41,8 +42,7 @@ PropertyRouter.get(
 PropertyRouter.get(
      "/:propertyId",
      [introspectToken(['dcd:properties']), checkPolicy('read')],
-     PropertyController.getOnePropertyById
-);
+     PropertyController.getOnePropertyById);
 
 /**
      * @api {post} /things/:thingId/properties Create

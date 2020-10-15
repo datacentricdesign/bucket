@@ -59,7 +59,7 @@ export class PolicyService {
    **/
   async revoke(subjectId: string, resourceId: string, roleName: string): Promise<any> {
     try {
-      const policyId:string = await this.getRoleId(subjectId, resourceId, roleName);
+      const policyId: string = await this.getRoleId(subjectId, resourceId, roleName);
       // There is an existing policy, let's update
       return this.createPolicy(subjectId, resourceId, roleName, 'deny', policyId);
     }
@@ -83,10 +83,10 @@ export class PolicyService {
         }
       })
       return role.id;
-    } catch(error) {
+    } catch (error) {
       throw new DCDError(4041, 'Role not found for ' + subjectId +
-      ', ' + resourceId +
-      ' and ' + roleName)
+        ', ' + resourceId +
+        ' and ' + roleName)
     }
   }
 
@@ -104,7 +104,7 @@ export class PolicyService {
 
     try {
       await roleRepository.save(newRole);
-    } catch(error) {
+    } catch (error) {
       return Promise.reject(error)
     }
 
@@ -119,20 +119,22 @@ export class PolicyService {
     return this.updateKetoPolicy(policy)
   }
 
-  async deletePolicy(subjectId:string, resourceId:string, roleName:string) {
+  async deletePolicy(subjectId: string, resourceId: string, roleName: string) {
     try {
-      const roleId:string = await this.getRoleId(subjectId, resourceId, roleName)
+      const roleId: string = await this.getRoleId(subjectId, resourceId, roleName)
       // There is an existing policy, let's update
       const roleRepository = getRepository(Role);
       await roleRepository.delete(roleId);
       // Use the role id to retrieve and delete associated Keto's policy
       return this.deleteKetoPolicy(roleId)
-    } catch(error) {
+    } catch (error) {
       return Promise.reject(error); // Otherwise, something went wrong
     }
   }
 
   async check(acp: any) {
+    console.log("checking ")
+    console.log(acp)
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/regex/allowed'
     const options = {
       headers: this.ketoHeaders,
@@ -156,8 +158,9 @@ export class PolicyService {
    * @param type subject, resource, action
    * @param  id the id of the concerned subject, resource or action
    */
-  async listConsents(type:string, id: string) {
-    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/exact/policies?' + type + '=' + id
+  async listConsents(type: string, id: string, flavor = 'exact') {
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies?' + type + '=' + id
+    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'GET'
@@ -165,9 +168,45 @@ export class PolicyService {
     try {
       const res = await fetch(url, options);
       if (res.ok) {
-        return Promise.resolve(res.json());
+        const result = await res.json()
+        console.log(result)
+        return Promise.resolve(result);
       }
       return Promise.reject(new DCDError(4031, 'Request was not allowed'));
+    }
+    catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  async checkGroupMembership(member: string, groupId: string, flavor = 'exact') {
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/roles?member=' + member
+    try {
+      const res = await fetch(url, { headers: this.ketoHeaders, method: 'GET' });
+      const groups = await res.json();
+      for (let i = 0; i < groups.length; i++) {
+        if (groups[i].id === groupId) {
+          return Promise.resolve()
+        }
+      }
+      console.log("not a member...")
+      return Promise.reject(new DCDError(4030, member + ' is not member of the group ' + groupId + '.' ))
+    }
+    catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  async listGroupMembership(member: string, flavor = 'exact') {
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/roles?member=' + member
+    try {
+      const res = await fetch(url, { headers: this.ketoHeaders, method: 'GET' });
+      const result_json = await res.json();
+      let groups = []
+      for (let i = 0; i < result_json.length; i++) {
+        groups.push(result_json[i].id)
+      }
+      return groups
     }
     catch (error) {
       return Promise.reject(error);
@@ -179,7 +218,7 @@ export class PolicyService {
    * @param policy
    * @returns {Promise<Response>}
    */
-  async updateKetoPolicy(policy: any, flavor:string = 'regex'): Promise<Response> {
+  async updateKetoPolicy(policy: any, flavor: string = 'regex'): Promise<Response> {
     try {
       const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies', {
         headers: this.ketoHeaders,
@@ -193,7 +232,7 @@ export class PolicyService {
     }
   }
 
-  async deleteKetoPolicy(policyId: string, flavor:string = 'regex') {
+  async deleteKetoPolicy(policyId: string, flavor: string = 'regex') {
     try {
       const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies/' + policyId, {
         headers: this.ketoHeaders,
@@ -208,34 +247,34 @@ export class PolicyService {
 
 
   static roleToActions(role: string) {
-  switch (role) {
-    case 'user':
-      return ['dcd:actions:create', 'dcd:actions:list']
-    case 'reader':
-      return ['dcd:actions:read', 'dcd:actions:list']
-    case 'owner':
-      return [
-        'dcd:actions:create',
-        'dcd:actions:list',
-        'dcd:actions:read',
-        'dcd:actions:update',
-        'dcd:actions:delete',
-        'dcd:actions:grant',
-        'dcd:actions:revoke'
-      ]
-    case 'subject':
-      return [
-        'dcd:actions:create',
-        'dcd:actions:read',
-        'dcd:actions:update',
-        'dcd:actions:log',
-        'dcd:actions:reply']
-    default:
-      return []
+    switch (role) {
+      case 'user':
+        return ['dcd:actions:create', 'dcd:actions:list']
+      case 'reader':
+        return ['dcd:actions:read', 'dcd:actions:list']
+      case 'owner':
+        return [
+          'dcd:actions:create',
+          'dcd:actions:list',
+          'dcd:actions:read',
+          'dcd:actions:update',
+          'dcd:actions:delete',
+          'dcd:actions:grant',
+          'dcd:actions:revoke'
+        ]
+      case 'subject':
+        return [
+          'dcd:actions:create',
+          'dcd:actions:read',
+          'dcd:actions:update',
+          'dcd:actions:log',
+          'dcd:actions:reply']
+      default:
+        return []
+    }
   }
-}
 
-  static entityToResource(thingId:string) {
+  static entityToResource(thingId: string) {
     if (thingId === 'dcd') {
       return ['dcd:things']
     }

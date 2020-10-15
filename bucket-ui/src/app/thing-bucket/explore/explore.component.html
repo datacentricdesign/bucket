@@ -1,7 +1,7 @@
-<h1>Explore</h1>
+<h1>Shared Properties</h1>
 
 <p>
-    Here you can explore all properties that are shared with you.
+    Here you can find all properties that are shared with you.
 </p>
 
 <div class="table-responsive">
@@ -17,7 +17,7 @@
                 Type
             </th>
         </thead>
-        <tbody  *ngIf="properties$ | async as propertiess">
+        <tbody  *ngIf="properties$ | async as properties">
             <tr *ngFor="let property of properties; let iProperty = index">
                 <td>
                     {{property.name}}

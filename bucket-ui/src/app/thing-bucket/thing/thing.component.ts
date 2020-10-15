@@ -35,6 +35,7 @@ export class ThingComponent implements OnInit {
 
     thing$: Observable<Thing>;
     types$: Observable<PropertyType[]>;
+    propertyAccess$: Observable<any>;
 
     id: string;
     description: string
@@ -116,6 +117,19 @@ export class ThingComponent implements OnInit {
                     return throwError('Types not found!');
                 })
             )
+
+
+            this.propertyAccess$ = this.http.get<any>(this.apiURL + "/things/" + this.id + "/properties?sharedWith=*", { headers }).pipe(
+                map((data: any) => {
+                    console.log(data)
+                  if (data !== undefined) {
+                    return data;
+                  }
+                  return []
+                }), catchError(error => {
+                  return throwError('Consents not found!');
+                })
+              )
         });
 
         this.thingService.getGrafanaId(this.id)

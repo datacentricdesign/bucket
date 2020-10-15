@@ -107,8 +107,28 @@ export class PropertyComponent implements OnInit {
 
       this.consents$ = this.http.get<any>(this.apiURL + "/things/" + this.thingId + '/properties/' + this.id + '/consents', { headers }).pipe(
         map((data: any) => {
-          this.consents = data
-          return data;
+          if (data !== undefined) {
+            for (let i=0;i<data.length;i++) {
+              data[i].formatedActions = []
+              for (let j=0;j<data[i].actions.length;j++) {
+                data[i].formatedActions.push(data[i].actions[j].replace("dcd:", "Can "))
+              }
+              data[i].formatedSubjects = []
+              for (let j=0;j<data[i].subjects.length;j++) {
+                if (data[i].subjects[j].startsWith('dcd:persons:')) {
+                  data[i].formatedSubjects.push(data[i].subjects[j].replace("dcd:persons:", "") + ' (Person)')
+                } else if (data[i].subjects[j].startsWith('dcd:groups:')) {
+                  data[i].formatedSubjects.push(data[i].subjects[j].replace("dcd:groups:", "") + ' (Group)')
+                } else if (data[i].subjects[j].startsWith('dcd:things:')) {
+                  data[i].formatedSubjects.push(data[i].subjects[j].replace("dcd:things:", "") + ' (Thing)')
+                }
+              }
+            }
+            this.consents = data
+            console.log(this.consents)
+            return data;
+          }
+          return []
         }), catchError(error => {
           return throwError('Consents not found!');
         })
@@ -183,10 +203,17 @@ export class PropertyComponent implements OnInit {
   }
 
   grant() {
+    let subjects = this.grantModel.subjects.split(';')
+    let typeSubject = (document.getElementById("subject_type") as HTMLSelectElement).value
+    for (let i=0;i<subjects.length;i++) {
+      if (!subjects[i].startsWith('dcd:')) {
+        subjects[i] = typeSubject + ':' + subjects[i]
+      }
+    }
     this.thingService.grant(
       this.thingId,
       this.id,
-      this.grantModel.subjects.split(';'),
+      subjects,
       this.grantModel.actions.split(';'))
       .then(() => {
         // TODO replace the reload with inside changes, missing the sidebar update

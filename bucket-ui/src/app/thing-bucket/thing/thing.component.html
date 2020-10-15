@@ -212,6 +212,54 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="nc-icon nc-glasses-2"></i>
+                        Property Accesses
+                    </h3>
+                    <p>
+                        Here is the list of properties theat this Thing can access, beyond its own properties.
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class=" text-primary">
+                                <th>
+                                    Property
+                                </th>
+                                <th>
+                                    From Thing
+                                </th>
+                                <th>
+                                    Shared with
+                                </th>
+                            </thead>
+                            <tbody *ngIf="propertyAccess$ | async as accesses">
+                                <tr *ngFor="let access of accesses; let iAccess = index">
+                                    <td style="vertical-align: top;">
+                                        <i class="nc-icon nc-sound-wave"></i>&nbsp;{{access.name}}<br>
+                                        <span style="font-size:x-small" >{{access.id}}</span>
+                                    </td>
+                                    <td>
+                                        <i class="nc-icon nc-app"></i>&nbsp;{{access.thing.name}}<br>
+                                        <span style="font-size:x-small" >{{access.thing.id}}</span><br>
+                                        <i class="nc-icon nc-single-02"></i>&nbsp;Owned by {{access.thing.personId}}
+                                    </td>
+                                    <td>
+                                        {{access.sharedWith}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-6=12">

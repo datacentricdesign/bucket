@@ -37,4 +37,6 @@ export class Property implements IProperty {
     @Column()
     @CreateDateColumn()
     createdAt: Date;
+
+    sharedWith: string[];
 }
