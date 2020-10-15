@@ -49,6 +49,10 @@ export class PropertyController {
                 res.send(properties);
             }
         } catch (error) {
+            console.log(error)
+            if (error.errorCode !== 500) {
+                return next(error)
+            }
             return next(new DCDError(404, error))
         }
     };

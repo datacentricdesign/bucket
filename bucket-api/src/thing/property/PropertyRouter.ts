@@ -21,7 +21,7 @@ export const PropertyRouter = Router({ mergeParams: true });
 **/
 PropertyRouter.get(
      "/",
-     [introspectToken(['dcd:properties']), checkPolicy('list')],
+     [introspectToken(['dcd:properties']), checkPolicy('read')],
      PropertyController.getProperties);
 
 

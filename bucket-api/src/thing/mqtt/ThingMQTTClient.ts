@@ -55,7 +55,7 @@ function onMQTTConnect() {
  */
 
 const propertyCreateRegEx = new RegExp('\/things\/.*\/properties\/create')
-const propertyUpdateRegEx = new RegExp('\/things\/.*\/properties\/.*\/update')
+const propertyUpdateRegEx = new RegExp('\/things\/.*\/properties\/.*')
 const thingReadRegEx = new RegExp('\/things\/.*\/read')
 const thingLogsRegEx = new RegExp('\/things\/.*\/log')
 const thingDataRegEx = new RegExp('\/things\/.*\/reply')

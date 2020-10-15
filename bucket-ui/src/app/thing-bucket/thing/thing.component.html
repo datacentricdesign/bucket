@@ -232,16 +232,25 @@
                                     Property
                                 </th>
                                 <th>
+                                    From Thing
+                                </th>
+                                <th>
                                     Shared with
                                 </th>
                             </thead>
                             <tbody *ngIf="propertyAccess$ | async as accesses">
                                 <tr *ngFor="let access of accesses; let iAccess = index">
-                                    <td>
-                                        {{access}}
+                                    <td style="vertical-align: top;">
+                                        <i class="nc-icon nc-sound-wave"></i>&nbsp;{{access.name}}<br>
+                                        <span style="font-size:x-small" >{{access.id}}</span>
                                     </td>
                                     <td>
-                                        
+                                        <i class="nc-icon nc-app"></i>&nbsp;{{access.thing.name}}<br>
+                                        <span style="font-size:x-small" >{{access.thing.id}}</span><br>
+                                        <i class="nc-icon nc-single-02"></i>&nbsp;Owned by {{access.thing.personId}}
+                                    </td>
+                                    <td>
+                                        {{access.sharedWith}}
                                     </td>
                                 </tr>
                             </tbody>

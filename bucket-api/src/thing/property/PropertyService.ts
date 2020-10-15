@@ -18,6 +18,7 @@ import { ThingService } from "../services/ThingService";
 import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
 import ThingController from "../http/ThingController";
+import { PolicyService } from "../services/PolicyService";
 
 export class PropertyService {
 
@@ -105,29 +106,65 @@ export class PropertyService {
      * @param {string} audienceId person, thing or group id
      **/
     async getProperties(actor: string, subject: string, audienceId: string): Promise<Property[]> {
-        // Get the list of all consent concerning the current subject
-        const consents = await AuthController.policyService.listConsents('subject', subject)
-        if (consents) {
-            Log.debug(consents)
-            let resources = []
-            for (let i = 0; i < consents.length; i++) {
-                if (consents[i].effect === 'allow') {
-                    resources = resources.concat(consents[i].resources)
-                }
+        let groups = []
+        if (audienceId === '*') {
+            console.log("subject: " + subject)
+            groups = await AuthController.policyService.listGroupMembership(subject)
+        } else {
+            try {
+                await AuthController.policyService.checkGroupMembership(subject, audienceId)
+                groups.push(audienceId)
+            } catch (error) {
+                return Promise.reject(error)
             }
-            // Get properties from the database
-            const propertyRepository = getRepository(Property);
-            let properties = await propertyRepository
-                .createQueryBuilder("property")
-                .innerJoinAndSelect("property.type", "type")
-                .innerJoinAndSelect("type.dimensions", "dimensions")
-                .where("property.id = ANY (:values)")
-                .setParameters({ values: resources })
-                .getMany();
-        
-            return properties
         }
-        return []
+
+        // Get the list of all consent concerning the current subject
+        let consents = []
+        for (let i=0;i<groups.length;i++) {
+            console.log("consent for group: " + groups[i])
+            const result = await AuthController.policyService.listConsents('subject', groups[i])
+            console.log("result consent group: ")
+            console.log(result)
+            if (result.errorCode === undefined) {
+                consents = consents.concat(result)
+            }
+        }
+        
+        Log.debug(consents)
+        let resources = []
+        let resourcesOrigin = {}
+        for (let i = 0; i < consents.length; i++) {
+            if (consents[i].effect === 'allow') {
+                for (let j = 0; j < consents[i].resources.length; j++) {
+                    let resource = consents[i].resources[j]
+                    if (resourcesOrigin[resource] !== undefined) {
+                        resourcesOrigin[resource] = resourcesOrigin[resource].concat(consents[i].subjects)
+                    } else {
+                        resourcesOrigin[resource] = consents[i].subjects
+                    }
+                }
+                resources = resources.concat(consents[i].resources)
+            }
+        }
+        console.log("resource origin")
+        console.log(resourcesOrigin)
+        // Get properties from the database
+        const propertyRepository = getRepository(Property);
+        let properties = await propertyRepository
+            .createQueryBuilder("property")
+            .innerJoinAndSelect("property.type", "type")
+            .innerJoinAndSelect("property.thing", "thing")
+            .innerJoinAndSelect("type.dimensions", "dimensions")
+            .where("property.id = ANY (:values)")
+            .setParameters({ values: resources })
+            .getMany();
+
+        for (let i=0;i<properties.length;i++) {
+            properties[i].sharedWith = resourcesOrigin[properties[i].id]
+        }
+
+        return properties
     }
 
     /**

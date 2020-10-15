@@ -118,7 +118,8 @@ export class ThingComponent implements OnInit {
                 })
             )
 
-            this.propertyAccess$ = this.http.get<any>(this.apiURL + "/things/" + this.id + "/properties?sharedWith=dcd:group:test" , { headers }).pipe(
+
+            this.propertyAccess$ = this.http.get<any>(this.apiURL + "/things/" + this.id + "/properties?sharedWith=*", { headers }).pipe(
                 map((data: any) => {
                     console.log(data)
                   if (data !== undefined) {
