@@ -3,5 +3,9 @@
     "version": "0.1.0",
     "description": "Bucket REST API documentation",
     "title": "Bucket REST API",
-    "url" : "https://dwd.tudelft.nl/bucket/api"
+    "url" : "https://dwd.tudelft.nl/bucket/api",
+    "header": {
+      "title":"Introduction",
+      "filename": "docs/header.md"
+    }
   }
