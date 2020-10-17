@@ -170,7 +170,3 @@ function checkPEM(pem: string) {
         return new DCDError(400, 'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"')
     }
 }
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }

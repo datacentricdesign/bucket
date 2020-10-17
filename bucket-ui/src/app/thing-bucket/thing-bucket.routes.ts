@@ -5,7 +5,7 @@ import { ThingComponent } from './thing/thing.component';
 import { AuthGuard } from '../shared/auth/auth.guard';
 import { ThingBucketComponent } from './thing-bucket.component';
 import { PropertyComponent } from './property/property.component';
-import { ExploreComponent } from './explore/explore.component';
+import { SharedPropertiesComponent } from './shared-properties/shared-properties.component';
 
 export const ThingBucketRoutes: Routes = [
     {
@@ -18,8 +18,8 @@ export const ThingBucketRoutes: Routes = [
             component: DashboardComponent
           },
           {
-            path: 'explore',
-            component: ExploreComponent
+            path: 'shared-properties',
+            component: SharedPropertiesComponent
           },
           {
             path: ':id',

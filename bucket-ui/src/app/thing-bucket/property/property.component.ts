@@ -100,7 +100,6 @@ export class PropertyComponent implements OnInit {
           this.buildUploadExample()
           return data;
         }), catchError(error => {
-          console.log(error)
           return throwError('Property not found!');
         })
       )
@@ -125,7 +124,6 @@ export class PropertyComponent implements OnInit {
               }
             }
             this.consents = data
-            console.log(this.consents)
             return data;
           }
           return []

@@ -138,7 +138,7 @@ export class ThingService {
         })
     }
 
-    async countDataPoints(personId, from, timeInterval): Promise<any> {
+    async countDataPoints(personId: string, from: string, timeInterval: string): Promise<any> {
         const things = await this.getThingsOfAPerson(personId);
         for (let i = 0; i < things.length; i++) {
             const thing = things[i]

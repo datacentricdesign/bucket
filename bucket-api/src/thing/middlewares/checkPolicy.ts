@@ -30,8 +30,6 @@ export const checkPolicy = (action: string) => {
  * @return {string}
  */
 function buildACPResource(req: Request): string {
-    console.log('build acp resource')
-    console.log(req.baseUrl)
     let acpResource = ''
     if (req.params.thingId !== undefined) {
         acpResource += req.params.thingId

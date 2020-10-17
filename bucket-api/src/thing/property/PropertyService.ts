@@ -105,10 +105,9 @@ export class PropertyService {
      * @param {string} subjectId person, thing or group id ()
      * @param {string} audienceId person, thing or group id
      **/
-    async getProperties(actor: string, subject: string, audienceId: string): Promise<Property[]> {
+    async getProperties(actor: string, subject: string, audienceId: string, from: string, timeInterval: string): Promise<Property[]> {
         let groups = []
         if (audienceId === '*') {
-            console.log("subject: " + subject)
             groups = await AuthController.policyService.listGroupMembership(subject)
         } else {
             try {
@@ -121,17 +120,13 @@ export class PropertyService {
 
         // Get the list of all consent concerning the current subject
         let consents = []
-        for (let i=0;i<groups.length;i++) {
-            console.log("consent for group: " + groups[i])
+        for (let i = 0; i < groups.length; i++) {
             const result = await AuthController.policyService.listConsents('subject', groups[i])
-            console.log("result consent group: ")
-            console.log(result)
             if (result.errorCode === undefined) {
                 consents = consents.concat(result)
             }
         }
-        
-        Log.debug(consents)
+
         let resources = []
         let resourcesOrigin = {}
         for (let i = 0; i < consents.length; i++) {
@@ -147,8 +142,7 @@ export class PropertyService {
                 resources = resources.concat(consents[i].resources)
             }
         }
-        console.log("resource origin")
-        console.log(resourcesOrigin)
+
         // Get properties from the database
         const propertyRepository = getRepository(Property);
         let properties = await propertyRepository
@@ -160,8 +154,11 @@ export class PropertyService {
             .setParameters({ values: resources })
             .getMany();
 
-        for (let i=0;i<properties.length;i++) {
+        for (let i = 0; i < properties.length; i++) {
             properties[i].sharedWith = resourcesOrigin[properties[i].id]
+            if (from !== undefined && timeInterval !== undefined) {
+                properties[i].values = await this.countDataPoints(properties[i].thing.id, properties[i].id, properties[i].type.id, from, timeInterval)
+            }
         }
 
         return properties
@@ -373,8 +370,9 @@ export class PropertyService {
             })
     }
 
-    async countDataPoints(thingId: string, propertyId: string, typeId: string = undefined, from: string, timeInterval): Promise<any> {
+    async countDataPoints(thingId: string, propertyId: string, typeId: string = undefined, from: string, timeInterval: string): Promise<any> {
         let measurement = typeId
+        console.log(from)
         if (measurement === undefined) {
             const property = await this.getOnePropertyById(thingId, propertyId);
             measurement = property.type.id

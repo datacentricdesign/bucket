@@ -4,10 +4,18 @@ import { ThingService } from 'app/thing-bucket/services/thing.service';
 
 import * as moment from 'moment'
 
+class Period {
+  id: string;
+  duration: string;
+  nameDuration: string;
+  interval: string;
+  nameInterval: string;
+  timeFormat: string;
+}
+
 @Component({
   selector: 'app-thing-stats',
-  templateUrl: './thing-stats.component.html',
-  styleUrls: ['./thing-stats.component.css']
+  templateUrl: './thing-stats.component.html'
 })
 export class ThingStatsComponent implements OnInit {
 
@@ -63,19 +71,31 @@ export class ThingStatsComponent implements OnInit {
     "rgb(209,154,209)",
   ]
 
+  public periods: Map<string,Period> = new Map<string,Period>()
+  public selectedPeriod: Period
+  public dpChart: Chart
+  
   public canvas: any;
   public ctx;
   public chartColor;
   public chartTypes;
   public chartHours;
 
-  constructor(private thingService: ThingService) { }
+  constructor(private thingService: ThingService) {
+    this.periods.set('1-past-day', {id: 'past-day', duration: 'now()-1d', nameDuration: 'last 24h', interval: '1h', nameInterval: 'per hour', timeFormat: 'HH:mm'})
+    this.periods.set('2-past-week', {id: 'past-week', duration: 'now()-1w', nameDuration: 'last 7 days', interval: '1d', nameInterval: 'per day', timeFormat: 'DD/MM'})
+    this.periods.set('3-past-month', {id: 'past-month', duration: 'now()-30d', nameDuration: 'last 30 days ', interval: '1d', nameInterval: 'per day', timeFormat: 'DD/MM'})
+    this.periods.set('4-past-3months', {id: 'past-3months', duration: 'now()-90d', nameDuration: 'last 3 months', interval: '1w', nameInterval: 'per week', timeFormat: 'DD/MM'})
+    this.periods.set('5-past-3months', {id: 'past-6months', duration: 'now()-180d', nameDuration: 'last 6 months', interval: '1w', nameInterval: 'per week', timeFormat: 'DD/MM'})
+    this.periods.set('6-past-year', {id: 'past-year', duration: 'now()-52w', nameDuration: 'last 12 months', interval: '1w', nameInterval: 'per week', timeFormat: 'DD/MM'})
+    this.selectedPeriod = this.periods.get('1-past-day')
+  }
 
   async ngOnInit(): Promise<void> {
     const thingsAll = await this.thingService.dpCount('now()-52w')
     if (thingsAll.length > 0) {
       this.buildChartTypes(thingsAll)
-      const things1d = await this.thingService.dpCount('now()-1d', '1h')
+      const things1d = await this.thingService.dpCount(this.selectedPeriod.duration, this.selectedPeriod.interval)
       this.buildDataPointsChart(things1d)
     } else {
       // if there is no things yet, we skip the statistics all together
@@ -83,6 +103,14 @@ export class ThingStatsComponent implements OnInit {
     }
   }
 
+
+
+  async selectPeriod(period) {
+    this.selectedPeriod = period
+    const thingsDataPoints = await this.thingService.dpCount(this.selectedPeriod.duration, this.selectedPeriod.interval)
+    this.buildDataPointsChart(thingsDataPoints)
+  }
+  
   buildChartTypes(things) {
     this.canvas = document.getElementById("chartTypes");
     const types: any = {}
@@ -179,10 +207,8 @@ export class ThingStatsComponent implements OnInit {
   }
 
   async buildDataPointsChart(things) {
-
-    var dpCanvas = document.getElementById("dpChart");
     let datasets = []
-    let labels = [];
+    let labels = []
 
     let legend = ''
 
@@ -194,7 +220,7 @@ export class ThingStatsComponent implements OnInit {
         let labelTime = []
         for (let k = 0; k < values.length; k++) {
           let sum = 0
-          if (labels.length === 0) labelTime.push(moment(values[k][0]).format('HH:mm'))
+          if (labels.length === 0) labelTime.push(moment(values[k][0]).format(this.selectedPeriod.timeFormat))
           for (let l = 1; l < values[k].length; l++) {
             sum += values[k][l]
           }
@@ -208,7 +234,7 @@ export class ThingStatsComponent implements OnInit {
           data: points,
           fill: false,
           borderColor: color,
-          backgroundColor: 'transparent',
+          backgroundColor: color,
           pointBorderColor: color,
           pointRadius: 3,
           pointHoverRadius: 3,
@@ -217,6 +243,7 @@ export class ThingStatsComponent implements OnInit {
         colorIndex++
       }
     }
+
 
     var dpCount = {
       labels: labels,
@@ -227,11 +254,24 @@ export class ThingStatsComponent implements OnInit {
       legend: {
         display: false,
         position: 'top'
+      },
+      scales: {
+        xAxes: [{
+          stacked: true,
+        }],
+        yAxes: [{
+          stacked: true
+        }]
       }
     };
 
-    var lineChart = new Chart(dpCanvas, {
-      type: 'line',
+    const dpCanvas = document.getElementById("dpChart")
+    dpCanvas.innerHTML = ''
+    if (this.dpChart !== undefined) {
+      this.dpChart.destroy()
+    }
+    this.dpChart = new Chart(dpCanvas, {
+      type: 'bar',
       hover: false,
       data: dpCount,
       options: chartOptions

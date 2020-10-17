@@ -38,10 +38,15 @@ export class PropertyController {
         const sharedWith: string = req.query.sharedWith as string
         const subject: string = req.params.thingId ? req.params.thingId : req.context.userId
         const actor: string = req.context.userId
+
+        // optionals
+        const from = req.query.from;
+        const timeInterval = req.query.timeInterval;
+
         // Get properties from Service
         try {
             if (sharedWith !== undefined) {
-                const properties: Property[] = await PropertyController.propertyService.getProperties(actor, subject, sharedWith)
+                const properties: Property[] = await PropertyController.propertyService.getProperties(actor, subject, sharedWith, from, timeInterval)
                 return res.send(properties)
             } else if (actor == subject) {
                 const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(subject)
@@ -49,13 +54,13 @@ export class PropertyController {
                 res.send(properties);
             }
         } catch (error) {
-            console.log(error)
             if (error.errorCode !== 500) {
                 return next(error)
             }
             return next(new DCDError(404, error))
         }
     };
+    
 
     static getOnePropertyById = async (req: Request, res: Response, next: NextFunction) => {
         // Get the ID from the url

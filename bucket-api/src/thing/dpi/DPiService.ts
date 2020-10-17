@@ -47,7 +47,6 @@ export class DPiService {
             netProp = properties[0]
         }
         netProp.values = [[Date.now(), hostname, hostname + '.local', '']]
-        console.log(netProp)
         await PropertyController.propertyService.updatePropertyValues(netProp)
     }
 }

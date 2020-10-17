@@ -26,7 +26,6 @@ export class ThingConnectedComponent implements OnInit {
           this.checkMQTTStatus(data)
             .then((connectedThings) => {
               this.things = connectedThings
-              console.log(this.things)
               if (this.things.length === 0) {
                 this.connectedThingsPanelDiv.style.display = 'block';
               }

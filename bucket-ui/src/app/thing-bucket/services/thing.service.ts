@@ -139,6 +139,15 @@ export class ThingService {
     return this.http.get(url, { headers }).toPromise()
   }
 
+  async sharedProperties(sharedWith: string = '*', timeExpressionFrom: string, timeInterval?: string): Promise<any> {
+    let url = this.apiURL + '/properties?sharedWith=' + sharedWith
+    if (timeExpressionFrom !== undefined && timeInterval !== undefined) {
+      url += '&from=' + timeExpressionFrom + '&timeInterval=' + timeInterval
+    }
+    const headers = this.getHeader()
+    return this.http.get(url, { headers }).toPromise()
+  }
+
   async getPropertyTypes(): Promise<PropertyType[]> {
     if (this.propertyTypes) return Promise.resolve(this.propertyTypes)
 
@@ -230,9 +239,9 @@ export class ThingService {
 
   toast(payload: any, type: string = "danger", icon: string = "nc-alert-circle-i") {
     let message = ""
-    if (typeof(payload) === "string") {
+    if (typeof (payload) === "string") {
       message = payload
-    } else if (payload.error !== undefined && typeof(payload.error) !== "string") {
+    } else if (payload.error !== undefined && typeof (payload.error) !== "string") {
       message = payload.error.name + " -- " + payload.error.message
       if (payload.error.requirement) message += "<br>Requirement: " + payload.error.requirement
       if (payload.error.hint) message += "<br>Hint: " + payload.error.hint

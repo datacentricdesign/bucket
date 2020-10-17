@@ -15,7 +15,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ThingService } from './services/thing.service';
 import { SharedModule } from 'app/shared/shared.module';
-import { ExploreComponent } from './explore/explore.component';
+import { SharedPropertiesComponent } from './shared-properties/shared-properties.component';
+import { SharedPropertiesStatsComponent } from './shared-properties-stats/shared-properties-stats.component';
 import { ThingFormComponent } from './thing-form/thing-form.component';
 import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thing.component';
 import { SAVER, getSaver } from './services/saver.provider';
@@ -37,9 +38,9 @@ import { SpinnerButtonComponent } from './spinner-button/spinner-button.componen
     ThingConnectedComponent,
     ThingStatsComponent,
     ThingFormComponent,
-    ThingStatsComponent,
     RaspberryPiThingComponent,
-    ExploreComponent,
+    SharedPropertiesComponent,
+    SharedPropertiesStatsComponent,
     SpinnerButtonComponent
   ],
   providers: [

@@ -53,7 +53,6 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
   }
 
   let topicArray = packet.topic.substr(1).split('/')
-  console.log(topicArray)
   let action = 'dcd:actions:read'
   if (topicArray.length > 0 && (topicArray[topicArray.length-1] === 'log' || topicArray[topicArray.length-1] === 'reply')) {
     action = 'dcd:actions:' + topicArray.pop()
@@ -77,8 +76,6 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
     const error = new DCDError(4031, 'Subscription denied to ' + packet.topic)
     Log.error(errorResult)
     Log.debug(JSON.stringify(error))
-    console.log("'# # # # # # # failed: checking consents # # # # # # # # #")
-    console.log(resource)
     if (resource.includes(":properties:dcd:")) {
       const consents = await AuthController.policyService.listConsents("resource", 'dcd:' + resource.split(":properties:dcd:")[1])
       for (let i=0;i<consents.length;i++) {
@@ -86,11 +83,9 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
         for (let j=0;j<consent.subjects.length;j++) {
           try {
             await AuthController.policyService.checkGroupMembership(acp.subject, consent.subjects[j])
-            console.log("found!!")
             return callback(null, packet)
           } catch(error) {
             console.log(error)
-            console.log("not found!!")
           }
         }
       }

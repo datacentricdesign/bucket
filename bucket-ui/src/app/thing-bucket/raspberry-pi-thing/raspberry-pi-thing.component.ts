@@ -170,7 +170,6 @@ export class RaspberryPiThingComponent implements OnInit {
       body.wpa_password = dpi["wpa_password"].value;
       body.wpa_country = dpi["wpa_country"].value;
     }
-    console.log(body)
     return body
   }
 

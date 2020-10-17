@@ -133,8 +133,6 @@ export class PolicyService {
   }
 
   async check(acp: any) {
-    console.log("checking ")
-    console.log(acp)
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/regex/allowed'
     const options = {
       headers: this.ketoHeaders,
@@ -160,7 +158,6 @@ export class PolicyService {
    */
   async listConsents(type: string, id: string, flavor = 'exact') {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies?' + type + '=' + id
-    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'GET'
@@ -168,8 +165,10 @@ export class PolicyService {
     try {
       const res = await fetch(url, options);
       if (res.ok) {
-        const result = await res.json()
-        console.log(result)
+        let result = await res.json()
+        if (result === null) {
+          result = []
+        }
         return Promise.resolve(result);
       }
       return Promise.reject(new DCDError(4031, 'Request was not allowed'));
@@ -189,7 +188,6 @@ export class PolicyService {
           return Promise.resolve()
         }
       }
-      console.log("not a member...")
       return Promise.reject(new DCDError(4030, member + ' is not member of the group ' + groupId + '.' ))
     }
     catch (error) {

@@ -15,9 +15,9 @@ export interface RouteInfo {
 }
 
 const dashboardRoute = { path: '/things/dashboard', title: 'Dashboard', icon: 'nc-layout-11', class: '' }
-const exploreRoute = { path: '/things/explore', title: 'Shared Properties', icon: 'nc-share-66', class: '' }
+const sharedPropertiesRoute = { path: '/things/shared-properties', title: 'Shared Properties', icon: 'nc-share-66', class: '' }
 
-export const ROUTES: RouteInfo[] = [dashboardRoute, exploreRoute];
+export const ROUTES: RouteInfo[] = [dashboardRoute, sharedPropertiesRoute];
 
 @Component({
     moduleId: module.id,
@@ -56,7 +56,6 @@ export class SidebarComponent implements OnInit {
     }
 
     updateThing(id: string, name: string) {
-        console.log("changing name")
         for (let i=0;i<this.menuItems.length;i++) {
             if (this.menuItems[i].path === id) {
                 this.menuItems[i].title = name
