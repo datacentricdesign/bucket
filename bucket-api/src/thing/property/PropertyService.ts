@@ -372,7 +372,6 @@ export class PropertyService {
 
     async countDataPoints(thingId: string, propertyId: string, typeId: string = undefined, from: string, timeInterval: string): Promise<any> {
         let measurement = typeId
-        console.log(from)
         if (measurement === undefined) {
             const property = await this.getOnePropertyById(thingId, propertyId);
             measurement = property.type.id

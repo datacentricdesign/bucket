@@ -146,8 +146,9 @@ export class ThingController {
 
     static countDataPoints = async (req: Request, res: Response, next: NextFunction) => {
         // Get the property ID from the url
-        const from = req.query.from.toString();
-        const timeInterval = req.query.timeInterval.toString();
+        const from = req.query.from as string;
+        const timeInterval = req.query.timeInterval as string
+        
         // Call the Service
         try {
             const result = await ThingController.thingService.countDataPoints(req.context.userId, from, timeInterval)
