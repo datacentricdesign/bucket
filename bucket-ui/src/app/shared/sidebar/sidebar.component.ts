@@ -21,7 +21,7 @@ export const ROUTES: RouteInfo[] = [dashboardRoute, sharedPropertiesRoute];
 
 @Component({
     moduleId: module.id,
-    selector: 'sidebar-cmp',
+    selector: 'app-sidebar-cmp',
     templateUrl: 'sidebar.component.html',
     styleUrls: ['sidebar.component.css']
 })
@@ -34,7 +34,7 @@ export class SidebarComponent implements OnInit {
 
     ngOnInit() {
         this.menuItems = ROUTES.filter(menuItem => menuItem);
-        
+
         this.thingService.find()
             .then((things: any) => {
                 this.thingsToMenu(things)
@@ -50,13 +50,16 @@ export class SidebarComponent implements OnInit {
             this.menuItems.push({ path: t.id, title: t.name, type: 'thing', icon: 'nc-app', class: '' })
             for (let indexP = 0; indexP < t.properties.length; indexP++) {
                 const p = t.properties[indexP]
-                this.menuItems.push({ path: t.id + '/properties/' + p.id, type: 'property', title: p.name, icon: 'nc-sound-wave', class: '' })
+                this.menuItems.push({
+                    path: t.id + '/properties/' + p.id, type: 'property',
+                    title: p.name, icon: 'nc-sound-wave', class: ''
+                })
             }
         }
     }
 
     updateThing(id: string, name: string) {
-        for (let i=0;i<this.menuItems.length;i++) {
+        for (let i = 0; i < this.menuItems.length; i++) {
             if (this.menuItems[i].path === id) {
                 this.menuItems[i].title = name
             }

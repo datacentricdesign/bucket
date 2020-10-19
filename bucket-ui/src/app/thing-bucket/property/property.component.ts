@@ -53,8 +53,8 @@ export class PropertyComponent implements OnInit {
     fileToUpload: File = null
   }
 
-  uploadCSVExampleLabels = ""
-  uploadCSVExampleValues = ""
+  uploadCSVExampleLabels = ''
+  uploadCSVExampleValues = ''
 
   updateProperty: DTOProperty = {
     name: '',
@@ -82,18 +82,18 @@ export class PropertyComponent implements OnInit {
     this._Activatedroute.queryParams
       .subscribe(params => {
         if (params.success !== undefined) {
-          this.thingService.toast(params.success, "success")
+          this.thingService.toast(params.success, 'success')
         } else if (params.error !== undefined) {
-          this.thingService.toast(params.error, "danger")
+          this.thingService.toast(params.error, 'danger')
         }
       });
 
     this._Activatedroute.paramMap.subscribe(params => {
       this.thingId = params.get('id');
       this.id = params.get('propertyId');
-      let headers = new HttpHeaders().set('Accept', 'application/json')
+      const headers = new HttpHeaders().set('Accept', 'application/json')
         .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-      this.property$ = this.http.get<Property>(this.apiURL + "/things/" + this.thingId + '/properties/' + this.id, { headers }).pipe(
+      this.property$ = this.http.get<Property>(this.apiURL + '/things/' + this.thingId + '/properties/' + this.id, { headers }).pipe(
         map((data: Property) => {
           this.property = data
           this.titleService.setTitle(this.property.name);
@@ -104,22 +104,23 @@ export class PropertyComponent implements OnInit {
         })
       )
 
-      this.consents$ = this.http.get<any>(this.apiURL + "/things/" + this.thingId + '/properties/' + this.id + '/consents', { headers }).pipe(
+      const url = this.apiURL + '/things/' + this.thingId + '/properties/' + this.id + '/consents'
+      this.consents$ = this.http.get<any>(url, { headers }).pipe(
         map((data: any) => {
           if (data !== undefined) {
-            for (let i=0;i<data.length;i++) {
+            for (let i = 0; i < data.length; i++) {
               data[i].formatedActions = []
-              for (let j=0;j<data[i].actions.length;j++) {
-                data[i].formatedActions.push(data[i].actions[j].replace("dcd:", "Can "))
+              for (let j = 0; j < data[i].actions.length; j++) {
+                data[i].formatedActions.push(data[i].actions[j].replace('dcd:', 'Can '))
               }
               data[i].formatedSubjects = []
-              for (let j=0;j<data[i].subjects.length;j++) {
+              for (let j = 0; j < data[i].subjects.length; j++) {
                 if (data[i].subjects[j].startsWith('dcd:persons:')) {
-                  data[i].formatedSubjects.push(data[i].subjects[j].replace("dcd:persons:", "") + ' (Person)')
+                  data[i].formatedSubjects.push(data[i].subjects[j].replace('dcd:persons:', '') + ' (Person)')
                 } else if (data[i].subjects[j].startsWith('dcd:groups:')) {
-                  data[i].formatedSubjects.push(data[i].subjects[j].replace("dcd:groups:", "") + ' (Group)')
+                  data[i].formatedSubjects.push(data[i].subjects[j].replace('dcd:groups:', '') + ' (Group)')
                 } else if (data[i].subjects[j].startsWith('dcd:things:')) {
-                  data[i].formatedSubjects.push(data[i].subjects[j].replace("dcd:things:", "") + ' (Thing)')
+                  data[i].formatedSubjects.push(data[i].subjects[j].replace('dcd:things:', '') + ' (Thing)')
                 }
               }
             }
@@ -138,9 +139,9 @@ export class PropertyComponent implements OnInit {
     this.thingService.editProperty(this.thingId, this.id, { name: this.updateProperty.name })
       .then(() => {
         // TODO replace the reload with inside changes, missing the sidebar update
-        // this.thingService.toast("Name updated.", "success")
+        // this.thingService.toast('Name updated.', 'success')
         // this.property.name = this.updateProperty.name
-        // this.updateProperty.name = ""
+        // this.updateProperty.name = ''
         window.location.href = './things/' + this.thingId + '/properties/' + this.id + '?success=Updated+Name.';
       })
       .catch(error => {
@@ -153,9 +154,9 @@ export class PropertyComponent implements OnInit {
   editDescription() {
     this.thingService.editProperty(this.thingId, this.id, { description: this.updateProperty.description })
       .then(() => {
-        this.thingService.toast("Description updated.", "success")
+        this.thingService.toast('Description updated.', 'success')
         this.property.description = this.updateProperty.description
-        this.updateProperty.description = ""
+        this.updateProperty.description = ''
       })
       .catch(error => {
         this.thingService.toast(error)
@@ -176,8 +177,8 @@ export class PropertyComponent implements OnInit {
 
   download() {
     const options: ValueOptions = {
-      from: moment(this.downloadModel.from, "YYYY-MM-DD").unix() * 1000,
-      to: moment(this.downloadModel.to, "YYYY-MM-DD").unix() * 1000 + 86400000,
+      from: moment(this.downloadModel.from, 'YYYY-MM-DD').unix() * 1000,
+      to: moment(this.downloadModel.to, 'YYYY-MM-DD').unix() * 1000 + 86400000,
       timeInterval: this.downloadModel.timeInterval,
       fctInterval: this.downloadModel.fctInterval,
       fill: this.downloadModel.fill
@@ -201,9 +202,9 @@ export class PropertyComponent implements OnInit {
   }
 
   grant() {
-    let subjects = this.grantModel.subjects.split(';')
-    let typeSubject = (document.getElementById("subject_type") as HTMLSelectElement).value
-    for (let i=0;i<subjects.length;i++) {
+    const subjects = this.grantModel.subjects.split(';')
+    const typeSubject = (document.getElementById('subject_type') as HTMLSelectElement).value
+    for (let i = 0; i < subjects.length; i++) {
       if (!subjects[i].startsWith('dcd:')) {
         subjects[i] = typeSubject + ':' + subjects[i]
       }
@@ -215,10 +216,10 @@ export class PropertyComponent implements OnInit {
       this.grantModel.actions.split(';'))
       .then(() => {
         // TODO replace the reload with inside changes, missing the sidebar update
-        // this.thingService.toast("Name updated.", "success")
+        // this.thingService.toast('Name updated.', 'success')
         // this.thing.name = this.updateThing.name
-        // this.updateThing.name = ""
-        window.location.href = './things/' + this.thingId + "/properties/" + this.id + '?success=Granted+Permision.';
+        // this.updateThing.name = ''
+        window.location.href = './things/' + this.thingId + '/properties/' + this.id + '?success=Granted+Permision.';
       })
       .catch((error) => {
         this.grantBt.release()
@@ -229,7 +230,7 @@ export class PropertyComponent implements OnInit {
   revoke(consentId: string) {
     this.thingService.revoke(this.thingId, this.id, consentId)
       .then(() => {
-        window.location.href = './things/' + this.thingId + "/properties/" + this.id + '?success=Revoked+Permision.';
+        window.location.href = './things/' + this.thingId + '/properties/' + this.id + '?success=Revoked+Permision.';
       })
       .catch((error) => {
         this.thingService.toast(error)
@@ -243,9 +244,9 @@ export class PropertyComponent implements OnInit {
       example += ',"' + dim[i].name + '"'
     }
     this.uploadCSVExampleLabels = example
-    example = "time"
+    example = 'time'
     for (let i = 0; i < dim.length; i++) {
-      example += "," + dim[i].type
+      example += ',' + dim[i].type
     }
     this.uploadCSVExampleValues = example
   }
@@ -279,8 +280,8 @@ export class PropertyComponent implements OnInit {
   uploadCSVData() {
     this.thingService.csvFileUpload(this.thingId, this.id, this.uploadModel.fileToUpload, this.uploadModel.hasLabel)
       .then((result) => {
-        this.thingService.toast("Data Uploaded", 'success', 'nc-cloud-upload-94');
-        (document.getElementById("csvFileToUpload") as HTMLInputElement).value = ""
+        this.thingService.toast('Data Uploaded', 'success', 'nc-cloud-upload-94');
+        (document.getElementById('csvFileToUpload') as HTMLInputElement).value = ''
         this.uploadModel.fileToUpload = undefined
       })
       .catch(error => {
@@ -292,32 +293,32 @@ export class PropertyComponent implements OnInit {
   }
 
   copyId() {
-    var range = document.createRange();
-    range.selectNode(document.getElementById("id-property-to-copy"));
+    const range = document.createRange();
+    range.selectNode(document.getElementById('id-property-to-copy'));
     window.getSelection().removeAllRanges(); // clear current selection
     window.getSelection().addRange(range); // to select text
-    document.execCommand("copy");
-    window.getSelection().removeAllRanges();// to deselect
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges(); // to deselect
     document.execCommand('copy')
-    this.thingService.toast("Property ID copied to clipboad.", "success", "nc-single-copy-04")
+    this.thingService.toast('Property ID copied to clipboad.', 'success', 'nc-single-copy-04')
   }
 
   handleFileInput(event: any) {
     const files: FileList = event.target.files
     if (files.length === 1) {
       const file = files.item(0)
-      if (file.type === 'text/csv' || (file.type === 'application/vnd.ms-excel' && file.name.endsWith('.csv')) ) {
+      if (file.type === 'text/csv' || (file.type === 'application/vnd.ms-excel' && file.name.endsWith('.csv'))) {
         // We expect 1 column per dimension + time
         const expectedNumColumns = this.property.type.dimensions.length + 1
         let countWrongNumColum = 0
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.readAsText(file);
         reader.onload = (data) => {
-          let csvData = reader.result;
-          let csvRecordsArray = (csvData as string).split(/\r\n|\n/);
+          const csvData = reader.result;
+          const csvRecordsArray = (csvData as string).split(/\r\n|\n/);
           for (let i = 0; i < csvRecordsArray.length; i++) {
-            if (csvRecordsArray[i] !== "") {
-              let rowdata = csvRecordsArray[i].match(/(“[^”]*”)|[^,]+/g);
+            if (csvRecordsArray[i] !== '') {
+              const rowdata = csvRecordsArray[i].match(/(“[^”]*”)|[^,]+/g);
               if (rowdata.length !== expectedNumColumns) {
                 countWrongNumColum++
               }
@@ -325,12 +326,12 @@ export class PropertyComponent implements OnInit {
           }
 
           if (countWrongNumColum !== 0) {
-            return this.thingService.toast(countWrongNumColum + " records add a wrong number of fields. Your records should start with the UNIX timestamp, followed by the the values the property dimensions.")
+            return this.thingService.toast(countWrongNumColum + ' records add a wrong number of fields. Your records should start with the UNIX timestamp, followed by the the values the property dimensions.')
           }
         }
         this.uploadModel.fileToUpload = file;
       } else {
-        this.thingService.toast("The file to upload should be a CSV file. Provided file type: " + file.type + " (" + file.name + ")")
+        this.thingService.toast('The file to upload should be a CSV file. Provided file type: ' + file.type + ' (' + file.name + ')')
       }
     }
   }

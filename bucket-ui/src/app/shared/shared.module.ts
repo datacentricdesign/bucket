@@ -10,10 +10,10 @@ import { AuthGuard } from './auth/auth.guard';
   ],
   providers: [],
   declarations: [
-    
+
   ],
   exports: [
-    
+
   ]
 })
 export class SharedModule {

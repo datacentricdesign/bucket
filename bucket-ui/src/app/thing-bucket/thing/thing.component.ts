@@ -14,7 +14,7 @@ import { RaspberryPiThingComponent } from '../raspberry-pi-thing/raspberry-pi-th
 import { SpinnerButtonComponent } from 'app/thing-bucket/spinner-button/spinner-button.component';
 
 @Component({
-    selector: 'thing-cmp',
+    selector: 'app-thing-cmp',
     moduleId: module.id,
     templateUrl: 'thing.component.html',
     styleUrls: ['thing.component.css']
@@ -62,7 +62,7 @@ export class ThingComponent implements OnInit {
         pem: ''
     }
 
-    grafanaId: number = 0
+    grafanaId = 0
     grafanaURL: string
 
     constructor(private _Activatedroute: ActivatedRoute,
@@ -86,9 +86,9 @@ export class ThingComponent implements OnInit {
         this._Activatedroute.queryParams
             .subscribe(params => {
                 if (params.success !== undefined) {
-                    this.thingService.toast(params.success, "success")
+                    this.thingService.toast(params.success, 'success')
                 } else if (params.error !== undefined) {
-                    this.thingService.toast(params.error, "danger")
+                    this.thingService.toast(params.error, 'danger')
                 }
             });
 
@@ -97,9 +97,9 @@ export class ThingComponent implements OnInit {
             this.ipAddress = []
             this.dns = []
             this.id = params.get('id');
-            let headers = new HttpHeaders().set('Accept', 'application/json')
+            const headers = new HttpHeaders().set('Accept', 'application/json')
                 .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-            this.thing$ = this.http.get<Thing>(this.apiURL + "/things/" + this.id, { headers }).pipe(
+            this.thing$ = this.http.get<Thing>(this.apiURL + '/things/' + this.id, { headers }).pipe(
                 map((data: Thing) => {
                     this.thing = data
                     this.checkNetwork()
@@ -109,7 +109,7 @@ export class ThingComponent implements OnInit {
                     return throwError('Thing not found!');
                 })
             )
-            this.types$ = this.http.get<PropertyType[]>(this.apiURL + "/types", { headers }).pipe(
+            this.types$ = this.http.get<PropertyType[]>(this.apiURL + '/types', { headers }).pipe(
                 map((data: PropertyType[]) => {
                     this.types = data;
                     return data;
@@ -119,16 +119,16 @@ export class ThingComponent implements OnInit {
             )
 
 
-            this.propertyAccess$ = this.http.get<any>(this.apiURL + "/things/" + this.id + "/properties?sharedWith=*", { headers }).pipe(
+            this.propertyAccess$ = this.http.get<any>(this.apiURL + '/things/' + this.id + '/properties?sharedWith=*', { headers }).pipe(
                 map((data: any) => {
-                  if (data !== undefined) {
-                    return data;
-                  }
-                  return []
+                    if (data !== undefined) {
+                        return data;
+                    }
+                    return []
                 }), catchError(error => {
-                  return throwError('Consents not found!');
+                    return throwError('Consents not found!');
                 })
-              )
+            )
         });
 
         this.thingService.getGrafanaId(this.id)
@@ -138,7 +138,7 @@ export class ThingComponent implements OnInit {
                 }
             })
             .catch((error) => {
-                if (error.error && error.error._hint === "Service unavailable.") {
+                if (error.error && error.error._hint === 'Service unavailable.') {
                     console.warn('Grafana is not available')
                     this.grafanaId = -1
                 }
@@ -175,9 +175,9 @@ export class ThingComponent implements OnInit {
         this.thingService.edit(this.id, { name: this.updateThing.name })
             .then(() => {
                 // TODO replace the reload with inside changes, missing the sidebar update
-                // this.thingService.toast("Name updated.", "success")
+                // this.thingService.toast('Name updated.', 'success')
                 // this.thing.name = this.updateThing.name
-                // this.updateThing.name = ""
+                // this.updateThing.name = ''
                 window.location.href = './things/' + this.id + '?success=Updated+Name.';
             })
             .catch(error => {
@@ -190,9 +190,9 @@ export class ThingComponent implements OnInit {
     editDescription() {
         this.thingService.edit(this.id, { description: this.updateThing.description })
             .then(() => {
-                this.thingService.toast("Description updated.", "success")
+                this.thingService.toast('Description updated.', 'success')
                 this.thing.description = this.updateThing.description
-                this.updateThing.description = ""
+                this.updateThing.description = ''
             })
             .catch(error => {
                 this.thingService.toast(error)
@@ -203,8 +203,8 @@ export class ThingComponent implements OnInit {
     updatePEM() {
         this.thingService.updatePEM(this.id, this.updateThing.pem)
             .then(() => {
-                this.thingService.toast("PEM updated.", "success")
-                this.updateThing.pem = ""
+                this.thingService.toast('PEM updated.', 'success')
+                this.updateThing.pem = ''
             })
             .catch((error) => {
                 this.thingService.toast(error)
@@ -224,13 +224,13 @@ export class ThingComponent implements OnInit {
 
     copyId() {
         const range = document.createRange();
-        range.selectNode(document.getElementById("id-thing-to-copy"));
+        range.selectNode(document.getElementById('id-thing-to-copy'));
         window.getSelection().removeAllRanges(); // clear current selection
         window.getSelection().addRange(range); // to select text
-        document.execCommand("copy");
-        window.getSelection().removeAllRanges();// to deselect
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges(); // to deselect
         document.execCommand('copy')
-        this.thingService.toast("Thing ID copied to clipboad.", "success", "nc-single-copy-04")
+        this.thingService.toast('Thing ID copied to clipboad.', 'success', 'nc-single-copy-04')
     }
 
     selectType(type: PropertyType) {
@@ -238,10 +238,14 @@ export class ThingComponent implements OnInit {
         this.model.name = type.name
         this.model.description = type.description
         let details = type.description + '<ul>'
-        for (let dim in type.dimensions) {
+        for (const dim of Object.keys(type.dimensions)) {
             details += '<li>' + type.dimensions[dim].name
-            if (type.dimensions[dim].unit !== '') details += ' (' + type.dimensions[dim].unit + ')'
-            if (type.dimensions[dim].description !== '') details += ': ' + type.dimensions[dim].description
+            if (type.dimensions[dim].unit !== '') {
+                details += ' (' + type.dimensions[dim].unit + ')'
+            }
+            if (type.dimensions[dim].description !== '') {
+                details += ': ' + type.dimensions[dim].description
+            }
             details += '</li>'
         }
         details += '</ul>'

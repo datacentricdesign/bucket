@@ -33,12 +33,12 @@ export class ThingFormComponent implements OnInit {
 
   onSubmit() {
     if (this.model.type === 'RASPBERRYPI' && !this.dpi.dpiGenerator) {
-      return this.thingService.toast("The DPi generator is not available at the moment.", "danger", "nc-alert-circle-i")
+      return this.thingService.toast('The DPi generator is not available at the moment.', 'danger', 'nc-alert-circle-i')
     }
 
-    const button = document.getElementById("createThingButton") as HTMLButtonElement
+    const button = document.getElementById('createThingButton') as HTMLButtonElement
     button.disabled = true
-    const spinner = document.getElementById("spinnerCreateThing") as HTMLElement
+    const spinner = document.getElementById('spinnerCreateThing') as HTMLElement
     spinner.style.display = 'inline-block'
 
     const body: any = {

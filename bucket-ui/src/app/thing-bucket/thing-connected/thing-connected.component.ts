@@ -11,7 +11,7 @@ import * as moment from 'moment';
 })
 export class ThingConnectedComponent implements OnInit {
 
-  @ViewChild('connected-things-panel') connectedThingsPanelDiv : HTMLDivElement
+  @ViewChild('connected-things-panel') connectedThingsPanelDiv: HTMLDivElement
 
   things: any
 

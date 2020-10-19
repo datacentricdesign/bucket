@@ -14,10 +14,10 @@ export class SpinnerButtonComponent implements OnInit {
 
   @Output() spinnerBtClick = new EventEmitter<string>();
 
-  spinning: boolean = false
+  spinning = false
   localDisabled = false
 
-  @ViewChild('spinnerBt') bt: HTMLButtonElement 
+  @ViewChild('spinnerBt') bt: HTMLButtonElement
   // @ViewChild('spinnerAnimation') spinner: HTMLElement
 
   constructor() { }
@@ -45,7 +45,7 @@ export class SpinnerButtonComponent implements OnInit {
 
   onClick() {
     this.lockAndSpin()
-    this.spinnerBtClick.emit("click")
+    this.spinnerBtClick.emit('click')
   }
 
 }

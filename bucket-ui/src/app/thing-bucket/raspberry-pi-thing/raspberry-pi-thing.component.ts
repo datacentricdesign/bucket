@@ -19,17 +19,17 @@ export class RaspberryPiThingComponent implements OnInit {
 
   download$: Observable<Download>
 
-  found: boolean = false;
-  image: boolean = false;
-  status: string = '-';
-  statusColor: string = 'progress-bar-info'
+  found = false;
+  image = false;
+  status = '-';
+  statusColor = 'progress-bar-info'
   stage: number
   stages: number
   progress: string
   started_at: string
   updated_at: string
 
-  dpiGenerator: any = {error: "Service unavailable"}
+  dpiGenerator: any = { error: 'Service unavailable' }
 
   form: FormGroup = new FormGroup({});
   fieldTextRPiType: boolean;
@@ -68,7 +68,7 @@ export class RaspberryPiThingComponent implements OnInit {
       this.suggestHostname()
       this.refreshData()
     }).catch((error) => {
-      
+
     })
   }
 
@@ -113,13 +113,13 @@ export class RaspberryPiThingComponent implements OnInit {
   }
 
   suggestHostname(): void {
-    this.form.controls["target_hostname"].setValue(this.thingName.toLowerCase().trim().split(' ').join('-'));
+    this.form.controls['target_hostname'].setValue(this.thingName.toLowerCase().trim().split(' ').join('-'));
   }
 
   cancel() {
-    const button = document.getElementById("cancelGeneration") as HTMLButtonElement
+    const button = document.getElementById('cancelGeneration') as HTMLButtonElement
     button.disabled = true
-    const spinner = document.getElementById("spinnerCancelGeneration") as HTMLElement
+    const spinner = document.getElementById('spinnerCancelGeneration') as HTMLElement
     spinner.style.display = 'inline-block'
     this.thingService.dpiCancel(this.thingId).then(() => {
       window.location.reload()
@@ -132,15 +132,15 @@ export class RaspberryPiThingComponent implements OnInit {
         window.location.reload()
       })
       .catch((error) => {
-          this.thingService.toast(error)
+        this.thingService.toast(error)
       })
 
   }
 
   download() {
-    const button = document.getElementById("downloadImage") as HTMLButtonElement
+    const button = document.getElementById('downloadImage') as HTMLButtonElement
     button.disabled = true
-    const spinner = document.getElementById("spinnerDownloadImage") as HTMLElement
+    const spinner = document.getElementById('spinnerDownloadImage') as HTMLElement
     spinner.style.display = 'inline-block'
     this.download$ = this.thingService.dpiDownload(this.thingId)
   }
@@ -154,21 +154,21 @@ export class RaspberryPiThingComponent implements OnInit {
 
     // Prepare the body with network blocks if full settings
     const body: any = {
-      first_user_name: dpi["first_user_name"].value,
-      first_user_password: dpi["first_user_password"].value,
-      target_hostname: dpi["target_hostname"].value,
-      enable_SSH: dpi["enable_SSH"].value
+      first_user_name: dpi['first_user_name'].value,
+      first_user_password: dpi['first_user_password'].value,
+      target_hostname: dpi['target_hostname'].value,
+      enable_SSH: dpi['enable_SSH'].value
     }
 
-    if (dpi["home_ESSID"].value && dpi["home_password"].value) {
-      body.home_ESSID = dpi["home_ESSID"].value;
-      body.home_password = dpi["home_password"].value;
+    if (dpi['home_ESSID'].value && dpi['home_password'].value) {
+      body.home_ESSID = dpi['home_ESSID'].value;
+      body.home_password = dpi['home_password'].value;
     }
 
-    if (dpi["wpa_ESSID"].value && dpi["wpa_password"].value && dpi["wpa_country"].value) {
-      body.wpa_ESSID = dpi["wpa_ESSID"].value;
-      body.wpa_password = dpi["wpa_password"].value;
-      body.wpa_country = dpi["wpa_country"].value;
+    if (dpi['wpa_ESSID'].value && dpi['wpa_password'].value && dpi['wpa_country'].value) {
+      body.wpa_ESSID = dpi['wpa_ESSID'].value;
+      body.wpa_password = dpi['wpa_password'].value;
+      body.wpa_country = dpi['wpa_country'].value;
     }
     return body
   }

@@ -8,10 +8,10 @@ import { ThingService } from '../services/thing.service';
 import { Property } from '@datacentricdesign/types';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { Period } from '../shared-properties-stats/shared-properties-stats.component'
+import { Period } from '../thing-stats/chart-elements';
 
 @Component({
-  selector: 'shared-properties',
+  selector: 'app-shared-properties',
   templateUrl: './shared-properties.component.html'
 })
 export class SharedPropertiesComponent implements OnInit {
@@ -24,7 +24,6 @@ export class SharedPropertiesComponent implements OnInit {
   }
 
   ngOnInit() {
-    
   }
 
   async changePeriodHandler($event: Period) {

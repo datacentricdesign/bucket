@@ -4,7 +4,7 @@ import Chart from 'chart.js';
 import { ThingService } from '../services/thing.service';
 
 @Component({
-    selector: 'dashboard-cmp',
+    selector: 'app-dashboard-cmp',
     moduleId: module.id,
     templateUrl: 'dashboard.component.html'
 })
@@ -18,11 +18,11 @@ export class DashboardComponent implements OnInit {
         this.route.queryParams
             .subscribe(params => {
                 if (params.success !== undefined) {
-                    this.thingService.toast(params.success, "success")
+                    this.thingService.toast(params.success, 'success')
                 } else if (params.error !== undefined) {
-                    this.thingService.toast(params.error, "danger")
+                    this.thingService.toast(params.error, 'danger')
                 }
             }
-        );
+            );
     }
 }

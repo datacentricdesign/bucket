@@ -12,7 +12,7 @@ interface UserProfile {
 
 @Component({
   moduleId: module.id,
-  selector: 'navbar-cmp',
+  selector: 'app-navbar-cmp',
   templateUrl: 'navbar.component.html'
 })
 
@@ -25,9 +25,13 @@ export class NavbarComponent implements OnInit {
   public userProfile: UserProfile;
 
   public isCollapsed = true;
-  @ViewChild("navbar-cmp", { static: false }) button;
+  @ViewChild('app-navbar-cmp', { static: false }) button;
 
-  constructor(location: Location, private renderer: Renderer2, private element: ElementRef, private router: Router,private oauthService: OAuthService) {
+  constructor(location: Location,
+    private renderer: Renderer2,
+    private element: ElementRef,
+    private router: Router,
+    private oauthService: OAuthService) {
     this.location = location;
     this.nativeElement = element.nativeElement;
     this.sidebarVisible = false;
@@ -35,13 +39,13 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit() {
     this.listTitles = ROUTES.filter(listTitle => listTitle);
-    var navbar: HTMLElement = this.element.nativeElement;
+    const navbar: HTMLElement = this.element.nativeElement;
     this.toggleButton = navbar.getElementsByClassName('navbar-toggle')[0];
     this.router.events.subscribe((event) => {
       this.sidebarClose();
     });
     if (this.oauthService.hasValidAccessToken() && this.oauthService.hasValidIdToken()) {
-      const claim:any = this.oauthService.getIdentityClaims()
+      const claim: any = this.oauthService.getIdentityClaims()
       this.userProfile = {
         name: claim.name,
         email: claim.email
@@ -49,11 +53,11 @@ export class NavbarComponent implements OnInit {
     }
   }
   getTitle() {
-    var titlee = this.location.prepareExternalUrl(this.location.path());
+    let titlee = this.location.prepareExternalUrl(this.location.path());
     if (titlee.charAt(0) === '#') {
       titlee = titlee.slice(1);
     }
-    for (var item = 0; item < this.listTitles.length; item++) {
+    for (let item = 0; item < this.listTitles.length; item++) {
       if (this.listTitles[item].path === titlee) {
         return this.listTitles[item].title;
       }
@@ -111,7 +115,7 @@ export class NavbarComponent implements OnInit {
   }
 
   editProfile() {
-    var win = window.open('https://dwd.tudelft.nl/profile', '_blank');
+    const win = window.open('https://dwd.tudelft.nl/profile', '_blank');
     win.focus();
   }
 }

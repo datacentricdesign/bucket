@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { authCodeFlowConfig } from './auth-code-flow.config';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   constructor(private router: Router, private oauthService: OAuthService) {
     this.configureCodeFlow();
@@ -28,7 +28,7 @@ export class AppComponent {
     });
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
   }
 
   private configureCodeFlow() {

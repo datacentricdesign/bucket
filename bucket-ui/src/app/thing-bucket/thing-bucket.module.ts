@@ -9,7 +9,6 @@ import { ThingComponent } from './thing/thing.component';
 import { PropertyComponent } from './property/property.component';
 import { ThingConnectedComponent } from './thing-connected/thing-connected.component';
 import { ThingStatsComponent } from './thing-stats/thing-stats.component';
-import {AutocompleteLibModule} from 'angular-ng-autocomplete';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -28,8 +27,7 @@ import { SpinnerButtonComponent } from './spinner-button/spinner-button.componen
     FormsModule,
     NgbModule,
     ReactiveFormsModule,
-    ThingBucketRouterModule,
-    AutocompleteLibModule,
+    ThingBucketRouterModule
   ],
   declarations: [
     DashboardComponent,

@@ -9,7 +9,7 @@ import { authCodeFlowConfig } from 'app/auth-code-flow.config';
   styleUrls: ['./landing-page.component.css']
 })
 export class LandingPageComponent implements OnInit {
-  loginFailed: boolean = false;
+  loginFailed = false;
   userProfile: object;
   login: false;
 
@@ -51,7 +51,7 @@ export class LandingPageComponent implements OnInit {
 
     this.oauthService
       .refreshToken()
-      .then(info => console.debug('refresh ok', info))
+      .then(info => {})
       .catch(err => console.error('refresh error', err));
 
   }
