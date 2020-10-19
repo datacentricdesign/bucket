@@ -40,8 +40,8 @@ export class PropertyController {
         const actor: string = req.context.userId
 
         // optionals
-        const from = req.query.from.toString();
-        const timeInterval = req.query.timeInterval.toString();
+        const from = req.query.from as string;
+        const timeInterval = req.query.timeInterval as string;
 
         // Get properties from Service
         try {
