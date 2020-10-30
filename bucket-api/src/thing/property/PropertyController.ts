@@ -266,6 +266,7 @@ export class PropertyController {
         // Call the Service
         try {
             const result = await AuthController.policyService.updateKetoPolicy(acp, 'exact')
+            console.log(await result.json())
             res.status(201).send(result);
         } catch (error) {
             next(error)
@@ -291,7 +292,9 @@ export class PropertyController {
         const resource = propertyId
         // Call the Service
         try {
+            console.log(resource)
             const consents = await AuthController.policyService.listConsents('resource', resource)
+            console.log(consents)
             // After all send a 200 (no content, but accepted) response
             res.status(200).send(consents);
         } catch (error) {

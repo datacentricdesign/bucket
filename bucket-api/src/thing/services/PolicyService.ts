@@ -158,6 +158,7 @@ export class PolicyService {
    */
   async listConsents(type: string, id: string, flavor = 'exact') {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies?' + type + '=' + id
+    console.log(url)
     const options = {
       headers: this.ketoHeaders,
       method: 'GET'
@@ -166,6 +167,7 @@ export class PolicyService {
       const res = await fetch(url, options);
       if (res.ok) {
         let result = await res.json()
+        console.log(result)
         if (result === null) {
           result = []
         }
@@ -217,12 +219,16 @@ export class PolicyService {
    * @returns {Promise<Response>}
    */
   async updateKetoPolicy(policy: any, flavor: string = 'regex'): Promise<Response> {
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies'
+    console.log(url)
     try {
-      const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies', {
+      const result = await fetch(url, {
         headers: this.ketoHeaders,
         method: 'PUT',
         body: JSON.stringify(policy)
       });
+      console.log("update")
+      console.log(result)
       return Promise.resolve(result);
     }
     catch (error) {

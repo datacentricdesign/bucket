@@ -16,6 +16,7 @@ interface Client extends Aedes.Client {
 }
 
 const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, packet: PublishPacket, callback: Function) => {
+  Log.debug('publish')
   if (client.context.userId === config.mqtt.client.username) {
     return callback(null)
   }
