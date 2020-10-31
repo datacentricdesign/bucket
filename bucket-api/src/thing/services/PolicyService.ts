@@ -157,8 +157,7 @@ export class PolicyService {
    * @param  id the id of the concerned subject, resource or action
    */
   async listConsents(type: string, id: string, flavor = 'exact') {
-    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies?' + type + '=' + id
-    console.log(url)
+    const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies?limit=100000&' + type + '=' + id
     const options = {
       headers: this.ketoHeaders,
       method: 'GET'
@@ -167,7 +166,6 @@ export class PolicyService {
       const res = await fetch(url, options);
       if (res.ok) {
         let result = await res.json()
-        console.log(result)
         if (result === null) {
           result = []
         }
@@ -227,8 +225,6 @@ export class PolicyService {
         method: 'PUT',
         body: JSON.stringify(policy)
       });
-      console.log("update")
-      console.log(result)
       return Promise.resolve(result);
     }
     catch (error) {
