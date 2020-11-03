@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/datacentricdesign/bucket/develop/bucket-ui/src/assets/img/bucket-logo.svg" width="200">
+
 # [Bucket](https://datacentricdesign.org/tools/bucket)
 
 A bucket of data, in the cloud.
