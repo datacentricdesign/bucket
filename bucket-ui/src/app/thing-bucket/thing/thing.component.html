@@ -93,7 +93,7 @@
                             <div class="form-group" *ngIf="types$ | async as types else loadingTypes">
                                 <label for="type">Type</label>
                                 <select class="form-control" id="type" (change)="selectType($event.target.value);" required [(ngModel)]="model.type" name="type">
-                                    <option *ngFor="let type of types" [value]="type">{{type.name}}</option>
+                                    <option *ngFor="let type of types" [value]="type.id">{{type.name}}</option>
                                 </select>
                                 <div id="typeDetails"></div>
                             </div>

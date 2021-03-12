@@ -233,7 +233,14 @@ export class ThingComponent implements OnInit {
         this.thingService.toast('Thing ID copied to clipboad.', 'success', 'nc-single-copy-04')
     }
 
-    selectType(type: PropertyType) {
+    selectType(typeId: string) {
+        let type: PropertyType
+        for (let i=0;i<this.types.length;i++) {
+            if (this.types[i].id == typeId) {
+                type = this.types[i]
+                break;
+            }
+        }
         this.model.typeId = type.id
         this.model.name = type.name
         this.model.description = type.description
