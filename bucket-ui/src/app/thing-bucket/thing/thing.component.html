@@ -92,8 +92,8 @@
                         <div style="max-width: 500px;">
                             <div class="form-group" *ngIf="types$ | async as types else loadingTypes">
                                 <label for="type">Type</label>
-                                <select class="form-control" id="type" required [(ngModel)]="model.type" name="type">
-                                    <option *ngFor="let type of types" (click)="selectType(type)">{{type.name}}</option>
+                                <select class="form-control" id="type" (change)="selectType($event.target.value);" required [(ngModel)]="model.type" name="type">
+                                    <option *ngFor="let type of types" value="{{type}}">{{type.name}}</option>
                                 </select>
                                 <div id="typeDetails"></div>
                             </div>
