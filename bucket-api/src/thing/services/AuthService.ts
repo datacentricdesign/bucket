@@ -1,6 +1,6 @@
 import * as jwkToBuffer from 'jwk-to-pem'
 import * as jwt from 'jsonwebtoken'
-import { pem2jwk } from 'pem-jwk'
+import { JWK } from 'node-jose'
 import { v4 as uuidv4 } from 'uuid';
 
 import fetch from 'node-fetch'
@@ -184,7 +184,13 @@ export class AuthService {
     }
 
     setPEM(setId: string, pem: string) {
-        return this.setJWK(setId, pem2jwk(pem))
+        const keystore = JWK.createKeyStore();
+        return keystore.add(pem, 'pem').
+            then((result: JWK.Key) => {
+                return this.setJWK(setId, result.toJSON())
+            }).catch( error => {
+                return Promise.reject(error)
+            });
     }
 
     checkJWT(acp: any, entity: string) {
