@@ -1,0 +1,17 @@
+<p>
+    The Strava thing helps you bring your Strava activities in your Bucket. There is no automatic sync, you choose when you want to sync.
+</p>
+<div *ngIf="thingId !== undefined">
+    <button id="downloadImage" type="button" (click)="sync()" class="btn btn-info">
+        <div class="button-spinning">
+            Sync Strava Activities
+        </div>
+        <div id="spinnerDownloadImage" style="display:none" class="spinner">
+            <div class="rect1"></div>
+            <div class="rect2"></div>
+            <div class="rect3"></div>
+            <div class="rect4"></div>
+            <div class="rect5"></div>
+        </div>
+    </button>
+</div>

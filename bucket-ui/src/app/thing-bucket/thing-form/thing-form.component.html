@@ -81,6 +81,10 @@
                     <div *ngIf="model.type==='RASPBERRYPI'">
                         <app-raspberry-pi-thing [thingName]="model.name"></app-raspberry-pi-thing>
                     </div>
+
+                    <div *ngIf="model.type==='STRAVA'">
+                        <app-strava-thing [thingName]="model.name"></app-strava-thing>
+                    </div>
                 </div>
             </div>
 

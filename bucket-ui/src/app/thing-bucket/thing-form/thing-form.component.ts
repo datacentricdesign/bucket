@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { DTOThing, Thing } from '@datacentricdesign/types';
 import { RaspberryPiThingComponent } from '../raspberry-pi-thing/raspberry-pi-thing.component';
 import { ThingService } from '../services/thing.service';
+import { StravaThingComponent } from '../strava-thing/strava-thing.component';
 
 @Component({
   selector: 'app-thing-form',
@@ -11,10 +12,12 @@ import { ThingService } from '../services/thing.service';
 export class ThingFormComponent implements OnInit {
 
   @ViewChild(RaspberryPiThingComponent) dpi: RaspberryPiThingComponent;
+  @ViewChild(StravaThingComponent) strava: StravaThingComponent;
 
   types = [
     { id: 'GENERIC', name: 'Generic' },
-    { id: 'RASPBERRYPI', name: 'Raspberry Pi' }
+    { id: 'RASPBERRYPI', name: 'Raspberry Pi' },
+    { id: 'STRAVA', name: 'Strava' }
   ];
 
   submitted = false;

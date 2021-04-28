@@ -11,6 +11,7 @@ import { PolicyService } from "../services/PolicyService";
 import { AuthService } from "../services/AuthService";
 import { AuthController } from "./AuthController";
 import DPiController from "../dpi/DPiController";
+import StravaController from "../strava/StravaController";
 
 export class ThingController {
 
@@ -71,6 +72,10 @@ export class ThingController {
 
             if (thing.type === 'RASPBERRYPI' && dpi !== undefined) {
                 await DPiController.dpiService.generateDPiImage(dpi, thing.id)
+            }
+
+            if (thing.type === 'STRAVA') {
+                await StravaController.stravaService.createProperties(thing.id)
             }
 
             // If all ok, send 201 response
