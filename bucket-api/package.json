@@ -9,7 +9,8 @@
     "typeorm:cli": "node ./node_modules/typeorm/cli -f ./dist/config/ormMigrationWrap.js",
     "migration:run": "npm run typeorm:cli migration:run",
     "prod": "npm run doc && ts-node ./src/index.ts",
-    "doc": "apidoc -i src/ -o dist/public/docs/"
+    "doc": "apidoc -i src/ -o dist/public/docs/",
+    "lint": "eslint . --ext .ts"
   },
   "repository": {
     "type": "git",
@@ -71,6 +72,9 @@
     "@types/pem-jwk": "1.5.0",
     "@types/simple-oauth2": "4.1.0",
     "@types/uuid": "8.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "eslint": "^7.25.0",
     "ts-node": "8.10.2",
     "ts-node-dev": "1.0.0-pre.56",
     "typescript": "3.9.7"
