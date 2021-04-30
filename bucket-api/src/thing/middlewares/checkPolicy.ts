@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { DCDError } from "@datacentricdesign/types";
-import { envConfig } from "../../config/envConfig";
 import { AuthController } from "../http/AuthController";
 import { Access } from "../services/PolicyService";
+import { DCDRequest } from "../../config";
 
 /**
  * Check Access Control Policy with Keto, based on subject
@@ -10,7 +10,7 @@ import { Access } from "../services/PolicyService";
  * @param action
  */
 export const checkPolicy = (action: string) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const acpResource = buildACPResource(req)
         const acp: Access = {
             resource: acpResource,
@@ -30,7 +30,7 @@ export const checkPolicy = (action: string) => {
  * @param req
  * @return {string}
  */
-function buildACPResource(req: Request): string {
+function buildACPResource(req: DCDRequest): string {
     let acpResource = ''
     if (req.params.thingId !== undefined) {
         acpResource += req.params.thingId

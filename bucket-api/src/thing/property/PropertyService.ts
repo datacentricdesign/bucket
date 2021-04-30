@@ -14,6 +14,7 @@ import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
 import ThingController from "../http/ThingController";
+import { PropertyType } from "./propertyType/PropertyType";
 
 export class PropertyService {
 
@@ -81,7 +82,7 @@ export class PropertyService {
      * List the Properties of a Thing.
      * @param {string} thingId
      **/
-    async getPropertiesOfAThing(thingId: string, valueOptions?: ValueOptions): Promise<Property[]> {
+    async getPropertiesOfAThing(thingId: string): Promise<Property[]> {
         // Get properties from the database
         const propertyRepository = getRepository(Property);
         return await propertyRepository
@@ -118,15 +119,17 @@ export class PropertyService {
             try {
                 const result = await AuthController.policyService.listConsents('subject', groups[i])
                 consents = consents.concat(result)
-            } catch(error) {}
+            } catch (error) {
+                // Nothing to do
+            }
         }
 
         let resources = []
-        let resourcesOrigin = {}
+        const resourcesOrigin = {}
         for (let i = 0; i < consents.length; i++) {
             if (consents[i].effect === 'allow') {
                 for (let j = 0; j < consents[i].resources.length; j++) {
-                    let resource = consents[i].resources[j]
+                    const resource = consents[i].resources[j]
                     if (resourcesOrigin[resource] !== undefined) {
                         resourcesOrigin[resource] = resourcesOrigin[resource].concat(consents[i].subjects)
                     } else {
@@ -139,7 +142,7 @@ export class PropertyService {
 
         // Get properties from the database
         const propertyRepository = getRepository(Property);
-        let properties = await propertyRepository
+        const properties = await propertyRepository
             .createQueryBuilder("property")
             .innerJoinAndSelect("property.type", "type")
             .innerJoinAndSelect("property.thing", "thing")
@@ -163,10 +166,10 @@ export class PropertyService {
      * @param {string} propertyId
      * returns {Property}
      **/
-    async getOnePropertyById(thingId: string, propertyId: string, valueOptions?: ValueOptions) {
+    async getOnePropertyById(thingId: string, propertyId: string, valueOptions?: ValueOptions): Promise<Property> {
         // Get property from the database
         const propertyRepository = getRepository(Property);
-        let property = await propertyRepository
+        const property = await propertyRepository
             .createQueryBuilder("property")
             .innerJoinAndSelect("property.thing", "thing")
             .innerJoinAndSelect("property.type", "type")
@@ -186,10 +189,10 @@ export class PropertyService {
      * List the Properties of a Thing, of a given type
      * @param {string} thingId
      **/
-    async getPropertiesOfAThingByType(thingId: string, typeId: string, valueOptions?: ValueOptions): Promise<Property[]> {
+    async getPropertiesOfAThingByType(thingId: string, typeId: string): Promise<Property[]> {
         // Get properties from the database
         const propertyRepository = getRepository(Property);
-        let properties = await propertyRepository
+        const properties = await propertyRepository
             .createQueryBuilder("property")
             .innerJoinAndSelect("property.thing", "thing")
             .innerJoinAndSelect("property.type", "type")
@@ -208,7 +211,7 @@ export class PropertyService {
     async getPropertiesByTypeId(thingId: string, typeId: string): Promise<Property[]> {
         // Get properties from the database
         const propertyRepository = getRepository(Property);
-        let properties = await propertyRepository
+        const properties = await propertyRepository
             .createQueryBuilder("property")
             .innerJoinAndSelect("property.thing", "thing")
             .innerJoinAndSelect("property.type", "type")
@@ -225,7 +228,7 @@ export class PropertyService {
      * @param property
      * returns Promise
      **/
-    editOneProperty(property: Property) {
+    editOneProperty(property: Property): Promise<Property> {
         const propertyRepository = getRepository(Property);
         return propertyRepository.save(property);
     }
@@ -235,15 +238,15 @@ export class PropertyService {
      * @param property
      * returns Promise
      **/
-    async updatePropertyValues(property: Property) {
+    async updatePropertyValues(property: Property): Promise<void> {
         if (property.type === undefined) {
             property.type = await this.getPropertyType(property.id)
         }
         return this.valuesToInfluxDB(property)
     }
 
-    async getPropertyType(propertyId: string) {
-        if (!this.cachedTypes.hasOwnProperty(propertyId)) {
+    async getPropertyType(propertyId: string): Promise<PropertyType> {
+        if (!Object.prototype.hasOwnProperty.call(this.cachedTypes, propertyId)) {
             const propertyRepository = getRepository(Property)
             const property: Property = await propertyRepository
                 .createQueryBuilder("property")
@@ -264,7 +267,7 @@ export class PropertyService {
      */
     async deleteOneProperty(thingId: string, propertyId: string): Promise<DeleteResult> {
         const propertyRepository = getRepository(Property);
-        let property: Property = await this.getOnePropertyById(thingId, propertyId);
+        const property: Property = await this.getOnePropertyById(thingId, propertyId);
         if (property === undefined) {
             throw new DCDError(404, 'Property to delete ' + propertyId + ' could not be not found for Thing ' + thingId + '.')
         }
@@ -274,11 +277,11 @@ export class PropertyService {
     /**
      * @param {Property} property
      */
-    private valuesToInfluxDB(property: Property) {
+    private valuesToInfluxDB(property: Property): Promise<void> {
         const points = [];
         const dimensions = property.type.dimensions;
-        for (let index in property.values) {
-            let ts: any;
+        for (let index = 0; index < property.values.length; index++) {
+            let ts: number;
             const values: Array<string | number> = property.values[index]
             if (values.length - 1 === dimensions.length ||
                 values.length === dimensions.length) {
@@ -324,7 +327,7 @@ export class PropertyService {
     private readValuesFromInfluxDB(property: Property, opt: ValueOptions): Promise<Property> {
         Log.debug(opt)
         let query = `SELECT "time"`
-        for (let index in property.type.dimensions) {
+        for (let index=0;index<property.type.dimensions.length;index++) {
             if (opt.timeInterval !== undefined) {
                 query += `, ${opt.fctInterval}("${property.type.dimensions[index].name}")`
             } else {
@@ -364,7 +367,7 @@ export class PropertyService {
             })
     }
 
-    async countDataPoints(thingId: string, propertyId: string, typeId: string = undefined, from: string, timeInterval: string): Promise<any> {
+    async countDataPoints(thingId: string, propertyId: string, typeId: string = undefined, from: string, timeInterval: string): Promise<Array<Array<string | number>>> {
         let measurement = typeId
         if (measurement === undefined) {
             const property = await this.getOnePropertyById(thingId, propertyId);
@@ -388,7 +391,7 @@ export class PropertyService {
             })
     }
 
-    async lastDataPoints(thingId: string, propertyId: string) {
+    async lastDataPoints(thingId: string, propertyId: string): Promise<Array<Array<string | number>>> {
         const property = await this.getOnePropertyById(thingId, propertyId);
         return this.influx
             .queryRaw(`SELECT * FROM ${property.type.id}  WHERE "propertyId" = '${property.id}' ORDER BY DESC LIMIT 1`, {

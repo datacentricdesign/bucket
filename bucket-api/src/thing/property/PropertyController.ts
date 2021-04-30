@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
 import { Property } from "./Property";
@@ -12,13 +12,14 @@ import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
+import { DCDRequest } from "../../config";
 
 export class PropertyController {
 
     static propertyService = new PropertyService();
 
 
-    static parseValueOptions(req: Request): ValueOptions {
+    static parseValueOptions(req: DCDRequest): ValueOptions {
         if (req.query.from === undefined || req.query.to === undefined) {
             return undefined
         }
@@ -32,7 +33,7 @@ export class PropertyController {
     }
 
 
-    static getProperties = async (req: Request, res: Response, next: NextFunction) => {
+    static getProperties = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const sharedWith: string = req.query.sharedWith as string
         const subject: string = req.params.thingId ? req.params.thingId : req.context.userId
         const actor: string = req.context.userId
@@ -45,22 +46,25 @@ export class PropertyController {
         try {
             if (sharedWith !== undefined) {
                 const properties: Property[] = await PropertyController.propertyService.getProperties(actor, subject, sharedWith, from, timeInterval)
-                return res.send(properties)
+                res.send(properties)
             } else if (actor == subject) {
                 const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(subject)
                 // Send the things object
                 res.send(properties);
+            } else {
+                next(new DCDError(403, "Not permitted"))
             }
         } catch (error) {
             if (error.errorCode !== 500) {
-                return next(error)
+                next(error)
+            } else {
+                next(new DCDError(404, error))
             }
-            return next(new DCDError(404, error))
         }
     };
     
 
-    static getOnePropertyById = async (req: Request, res: Response, next: NextFunction) => {
+    static getOnePropertyById = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the ID from the url
         const thingId: string = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -69,28 +73,24 @@ export class PropertyController {
         // Get the Property from the Service
         const property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId, options)
 
-        if (req.accepts('application/json')) {
-            return res.send(property)
-        } else if (req.accepts('text/csv')) {
-            res.set({ 'Content-Type': 'text/csv' })
-            res.send(PropertyController.toCSV(property))
-        } else {
-            return res.send(property)
-        }
-
         // Double-check the property is actually part of this thing
         if (property === undefined) {
             // If not found, send a 404 response
             return next(new DCDError(404, "Property not found in the thing."))
         }
 
-        return res.send(property);
+        if (req.accepts('text/csv')) {
+            res.set({ 'Content-Type': 'text/csv' })
+            res.send(PropertyController.toCSV(property))
+        } else {
+            res.send(property)
+        }
     };
 
-    static createNewProperty = async (req: Request, res: Response, next: NextFunction) => {
+    static createNewProperty = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get parameters from the body
-        let { name, description, typeId } = req.body;
-        let property: DTOProperty = {};
+        const { name, description, typeId } = req.body;
+        const property: DTOProperty = {};
         property.name = name;
         property.description = description
         property.typeId = typeId
@@ -98,25 +98,25 @@ export class PropertyController {
         // Validade if the parameters are ok
         const errors = await validate(property);
         if (errors.length > 0) {
-            return next(new DCDError(400, errors.toString()))
-        }
-
-        try {
-            const createdProperty = await PropertyController.propertyService.createNewProperty(req.params.thingId, property)
-            // If all ok, send 201 response
-            return res.status(201).send(createdProperty);
-        } catch (error) {
-            return next(error)
+            next(new DCDError(400, errors.toString()))
+        } else {
+            try {
+                const createdProperty = await PropertyController.propertyService.createNewProperty(req.params.thingId, property)
+                // If all ok, send 201 response
+                res.status(201).send(createdProperty);
+            } catch (error) {
+                next(error)
+            }
         }
     };
 
-    static editProperty = async (req: Request, res: Response, next: NextFunction) => {
+    static editProperty = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
         // Get values from the body
         const { name, description } = req.body;
-        let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
+        const property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
         if (property === undefined) {
             // If not found, send a 404 response
             return next(new DCDError(404, "Property not found"))
@@ -140,14 +140,12 @@ export class PropertyController {
         res.status(204).send();
     };
 
-    static updatePropertyValues = async (req: Request, res: Response, next: NextFunction) => {
+    static updatePropertyValues = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         Log.debug('update property values')
         // Get the ID from the url
         const thingId = req.params.thingId
         const propertyId = req.params.propertyId
-        // Get values from the body
-        const { values } = req.body;
-        let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
+        const property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
 
         // Double-check the property is actually part of this thing
         if (property === undefined) {
@@ -160,16 +158,14 @@ export class PropertyController {
             // Get values from the body
             const { values } = req.body;
             property.values = values
-            return saveValuesAndRespond(property, res, next)
+            saveValuesAndRespond(property, res, next)
         } else if (contentType.indexOf('multipart/form-data') === 0) {
             // Look for data in a CSV file
-            return PropertyController.uploadDataFile(property, req, res, next)
+            PropertyController.uploadDataFile(property, req, res, next)
         }
-        // After all send a 204 (no content, but accepted) response
-        res.status(204).send();
     };
 
-    static deleteOneProperty = async (req: Request, res: Response, next: NextFunction) => {
+    static deleteOneProperty = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -183,7 +179,7 @@ export class PropertyController {
         }
     };
 
-    static countDataPoints = async (req: Request, res: Response, next: NextFunction) => {
+    static countDataPoints = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -198,7 +194,7 @@ export class PropertyController {
         }
     };
 
-    static uploadDataFile(property: Property, request, response, next) {
+    static uploadDataFile(property: Property, request: DCDRequest, response: Response, next: NextFunction): void {
         Log.debug("upload data file")
         const hasLabel = request.query.hasLabel === 'true'
         const form = new multiparty.Form()
@@ -221,7 +217,7 @@ export class PropertyController {
         form.parse(request)
     }
 
-    static lastDataPoints = async (req: Request, res: Response, next: NextFunction) => {
+    static lastDataPoints = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
         const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
@@ -234,7 +230,7 @@ export class PropertyController {
         }
     };
 
-    static toCSV(property: Property) {
+    static toCSV(property: Property): string {
         let csv = 'time'
         for (let i = 0; i < property.type.dimensions.length; i++) {
             csv += ',' + property.type.dimensions[i].name
@@ -247,9 +243,8 @@ export class PropertyController {
         return csv
     }
 
-    static grantConsent = async (req: Request, res: Response, next: NextFunction) => {
+    static grantConsent = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
-        const thingId = req.params.thingId;
         const propertyId = req.params.propertyId;
         const body = req.body;
         const id = uuidv4()
@@ -270,7 +265,7 @@ export class PropertyController {
         }
     };
 
-    static revokeConsent = async (req: Request, res: Response, next: NextFunction) => {
+    static revokeConsent = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
         const consentId = req.params.consentId;
         // Call the Service
@@ -283,7 +278,7 @@ export class PropertyController {
         }
     };
 
-    static listConsents = async (req: Request, res: Response, next: NextFunction) => {
+    static listConsents = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
         const propertyId = req.params.propertyId;
         const resource = propertyId
@@ -296,7 +291,7 @@ export class PropertyController {
             next(error)
         }
     };
-};
+}
 
 export default PropertyController;
 
@@ -305,21 +300,17 @@ export default PropertyController;
  * @param csvStr
  * @returns {{id: *, values: Array}}
  */
-function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel: boolean) {
+function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel: boolean): string[][]|number[][] {
     const values = []
     let first = true;
     csvStr.split('\n').forEach(line => {
         if ((!first || !hasLabel) && line !== '') {
             try {
-                const val: any[] = line.split(',')
+                const val: Array<string|number> = line.split(',')
                 val[0] = Number(val[0])
                 for (let i = 1; i < val.length; i++) {
-                    switch (dimensions[i - 1].type) {
-                        case 'number': val[i] = Number(val[i]);
-                            break;
-                        case 'boolean': val[i] = Boolean(val[i]);
-                            break;
-                        default: // string, keep as it is
+                    if (dimensions[i - 1].type === 'number') {
+                        val[i] = Number(val[i]);
                     }
                 }
                 values.push(val)
@@ -337,7 +328,7 @@ function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel: b
 async function saveValuesAndRespond(property: Property, res: Response, next: NextFunction) {
     // Try to save
     try {
-        const result = await PropertyController.propertyService.updatePropertyValues(property)
+        await PropertyController.propertyService.updatePropertyValues(property)
         return res.json()
     } catch (error) {
         Log.error(error)

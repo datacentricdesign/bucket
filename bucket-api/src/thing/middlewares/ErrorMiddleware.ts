@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { DCDError } from '@datacentricdesign/types';
 import { Log } from '../../Logger';
 import config from '../../config';
 
-export default function errorMiddleware(error: DCDError, request: Request, response: Response, next: NextFunction) {
+export default function errorMiddleware(error: DCDError, request: Request, response: Response): void {
     const status = error._statusCode || 500;
     const message = error.message || 'Something went wrong';
     Log.debug(JSON.stringify({
@@ -16,7 +16,7 @@ export default function errorMiddleware(error: DCDError, request: Request, respo
         code: error.errorCode,
     }))
     if (config.env.env === 'development') {
-        return response.status(status).send({
+        response.status(status).send({
             status,
             message,
             name: error.name,
@@ -25,12 +25,13 @@ export default function errorMiddleware(error: DCDError, request: Request, respo
             stack: error.stack,
             code: error.errorCode,
         })
+    } else {
+        response.status(status).send({
+            status,
+            message,
+            name: error.name,
+            hint: error._hint,
+            requirements: error._requirements
+        })
     }
-    response.status(status).send({
-        status,
-        message,
-        name: error.name,
-        hint: error._hint,
-        requirements: error._requirements
-    })
 }

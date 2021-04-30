@@ -1,11 +1,20 @@
 import * as mqtt from 'mqtt'
-import { DTOProperty } from '@datacentricdesign/types'
+import { DTOProperty} from '@datacentricdesign/types'
 import PropertyController from '../property/PropertyController'
-import { MqttClient } from 'mqtt'
+import { ISubscriptionGrant, MqttClient } from 'mqtt'
 import { Property } from '../property/Property'
 import config from '../../config'
 import ThingController from '../http/ThingController'
 import { Log } from '../../Logger'
+
+export interface MQTTClientSettings {
+  keepalive: number,
+  protocolId: string,
+  protocolVersion: number,
+  clientId: string,
+  username: string,
+  password: string
+}
 
 /**
  * This class set up an MQTT client as Bucket MQTT API,
@@ -15,16 +24,16 @@ export class ThingMQTTClient {
 
   private port: number
   private host: string
-  private settings: any
+  private settings: MQTTClientSettings
   private client: MqttClient
 
-  constructor(settings: any) {
-    this.port = settings.port
-    this.host = settings.host
-    this.settings = settings.client
+  constructor(port: number, host: string, settings: MQTTClientSettings) {
+    this.port = port
+    this.host = host
+    this.settings = settings
   }
 
-  connect() {
+  connect(): Promise<void> {
     const url = 'mqtt' + (config.http.secured ? 's' : '') + '://' + this.host + ':' + this.port;
     Log.debug('MQTT connect: ' + url);
     this.client = mqtt.connect(url, this.settings);
@@ -39,7 +48,7 @@ export class ThingMQTTClient {
  */
 function onMQTTConnect() {
   Log.debug('Bucket connected to MQTT: ' + this.client.connected);
-  this.client.subscribe('/things/#', (error: Error, result: any) => {
+  this.client.subscribe('/things/#', (error: Error, result: ISubscriptionGrant[]) => {
     if (error) {
       Log.error('Error while subscribing to MQTT: ' + JSON.stringify(error));
     } else {
@@ -59,12 +68,17 @@ const thingReadRegEx = new RegExp('/things/.*/read')
 const thingLogsRegEx = new RegExp('/things/.*/log')
 const thingDataRegEx = new RegExp('/things/.*/reply')
 
+interface MQTTMessage {
+  requestId?: string,
+  property?: Property
+}
+
 /**
  * @param topic
  * @param message
  */
 function onMQTTMessage(topic: string, message: string) {
-  let jsonMessage: any;
+  let jsonMessage: MQTTMessage;
   try {
     jsonMessage = JSON.parse(message);
   } catch (error) {
@@ -76,7 +90,8 @@ function onMQTTMessage(topic: string, message: string) {
 
   // Update property /things/:thingId/properties/:propertyId/update
   if (propertyUpdateRegEx.test(topic)) {
-    if (jsonMessage.property !== undefined && jsonMessage.property.id === topicArray[4]) {
+    const property = <Property> jsonMessage.property
+    if (jsonMessage.property !== undefined && property.id === topicArray[4]) {
       return updatePropertyValues(thingId, jsonMessage.requestId, jsonMessage.property, this.client)
     } else {
       return this.client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: 'Missing or malformed property to update its values', requestId: jsonMessage.requestId }))
@@ -106,7 +121,7 @@ function onMQTTMessage(topic: string, message: string) {
   Log.debug("No implementation of " + topic)
 }
 
-async function createProperty(thingId: string, requestId: string, dtoProperty: DTOProperty, client: MqttClient) {
+async function createProperty(thingId: string, requestId: string, dtoProperty: DTOProperty, client: MqttClient): Promise<void> {
   Log.debug('create property')
   Log.debug(dtoProperty)
   try {
@@ -114,26 +129,26 @@ async function createProperty(thingId: string, requestId: string, dtoProperty: D
     client.publish('/things/' + thingId + '/reply', JSON.stringify({ property: property, requestId: requestId }))
   } catch (error) {
     client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: error, requestId: requestId }))
-  };
-}
-
-async function updatePropertyValues(thingId: string, requestId: string, property: any, client: MqttClient) {
-  property.thing = { id: thingId }
-  try {
-    const result = await PropertyController.propertyService.updatePropertyValues(property)
-    return client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'debug', 'message': 'Property value updated', code: 0, requestId: requestId }))
-  } catch (error) {
-    Log.error(error)
-    return client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: error, requestId: requestId }))
   }
 }
 
-async function readThing(thingId: string, requestId: string, client: MqttClient) {
+async function updatePropertyValues(thingId: string, requestId: string, property: Property, client: MqttClient): Promise<void> {
+  property.thing.id = thingId
   try {
-    const result = await ThingController.thingService.getOneThingById(thingId)
-    return client.publish('/things/' + thingId + '/reply', JSON.stringify({ thing: result, requestId: requestId }))
+    await PropertyController.propertyService.updatePropertyValues(property)
+    client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'debug', 'message': 'Property value updated', code: 0, requestId: requestId }))
   } catch (error) {
     Log.error(error)
-    return client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: error, requestId: requestId }))
+    client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: error, requestId: requestId }))
+  }
+}
+
+async function readThing(thingId: string, requestId: string, client: MqttClient): Promise<void> {
+  try {
+    const result = await ThingController.thingService.getOneThingById(thingId)
+    client.publish('/things/' + thingId + '/reply', JSON.stringify({ thing: result, requestId: requestId }))
+  } catch (error) {
+    Log.error(error)
+    client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: error, requestId: requestId }))
   }
 }

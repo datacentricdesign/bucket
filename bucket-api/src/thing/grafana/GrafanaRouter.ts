@@ -2,7 +2,6 @@ import { Router } from "express";
 
 import GrafanaController from "./GrafanaController";
 import { introspectToken } from "../middlewares/introspectToken";
-import { checkPolicy } from "../middlewares/checkPolicy";
 
 export const GrafanaRouter = Router({mergeParams: true});
 

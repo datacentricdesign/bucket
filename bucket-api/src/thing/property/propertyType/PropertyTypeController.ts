@@ -1,14 +1,15 @@
-import {Request, Response, NextFunction} from "express";
+import {Response, NextFunction} from "express";
 
 import { PropertyType } from "./PropertyType";
 import { PropertyTypeService } from "./PropertyTypeService";
 import { Dimension } from "../dimension/Dimension";
+import { DCDRequest } from "../../../config";
 
 export class PropertyTypeController {
 
     static propertyTypeService = new PropertyTypeService();
 
-    static getPropertyTypes = async (req: Request, res: Response): Promise<void> => {
+    static getPropertyTypes = async (req: DCDRequest, res: Response): Promise<void> => {
         // Get things from Service
         try {
             const propertyTypes: PropertyType[] = await PropertyTypeController.propertyTypeService.getPropertyTypes()
@@ -19,7 +20,7 @@ export class PropertyTypeController {
         }
     };
 
-    static getOnePropertyTypeById = async (req: Request, res: Response): Promise<void> => {
+    static getOnePropertyTypeById = async (req: DCDRequest, res: Response): Promise<void> => {
         // Get the ID from the url
         const propertyTypeId = req.params.propertyTypeId;
         try {
@@ -31,7 +32,7 @@ export class PropertyTypeController {
         }
     };
 
-    static createOnePropertyType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    static createOnePropertyType = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const { id, name, description, dimensions } = req.body;
         const propertyType = new PropertyType();
         propertyType.id = id

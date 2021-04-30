@@ -21,10 +21,10 @@ export class Property implements IProperty {
 
     typeId?: string;
 
-    @ManyToOne(type => PropertyType, propertyType => propertyType)
+    @ManyToOne(() => PropertyType, propertyType => propertyType)
     type: PropertyType;
 
-    @ManyToOne(type => Thing, thing => thing.id)
+    @ManyToOne(() => Thing, thing => thing.id)
     @JoinColumn({name:"thingId"})
     thing: IThing;
 

@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import config from "../../config";
+import { Response, NextFunction } from "express";
+import config, { DCDRequest } from "../../config";
 import fetch from "node-fetch";
 import { DCDError } from "@datacentricdesign/types";
 import { DPiService } from "./DPiService";
@@ -8,7 +8,7 @@ export class DPiController {
 
     static dpiService = new DPiService()
 
-    static healthStatus = async (req: Request, res: Response, next: NextFunction) => {
+    static healthStatus = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const url = config.env.dpiUrl + '/health'
         const options = {
             method: 'GET'
@@ -25,7 +25,7 @@ export class DPiController {
         }
     };
 
-    static getOneDPIImage = async (req: Request, res: Response, next: NextFunction) => {
+    static getOneDPIImage = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const url = config.env.dpiUrl + '/' + req.params.thingId.replace('dcd:things:', '')
         const thingId = req.params.thingId
         const options = {
@@ -64,7 +64,7 @@ export class DPiController {
         }
     };
 
-    static generateNewDPIImage = async (req: Request, res: Response, next: NextFunction) => {
+    static generateNewDPIImage = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         try {
             const text = await DPiController.dpiService.generateDPiImage(req.body, req.params.thingId)
             res.send(text)
@@ -73,30 +73,28 @@ export class DPiController {
         }
     };
 
-    static cancelDPiImageGeneration = async (req: Request, res: Response, next: NextFunction) => {
+    static cancelDPiImageGeneration = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const url = config.env.dpiUrl + '/' + req.params.thingId.replace('dcd:things:', '') + '/cancel'
         const options = {
             method: 'GET'
         }
         try {
-            const result = await fetch(url, options);
+            await fetch(url, options);
             res.status(204).send()
-        }
-        catch (error) {
+        } catch (error) {
             return next(error)
         }
     };
 
-    static deleteDPiImage = async (req: Request, res: Response, next: NextFunction) => {
+    static deleteDPiImage = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const url = config.env.dpiUrl + '/' + req.params.thingId.replace('dcd:things:', '')
         const options = {
             method: 'DELETE'
         }
         try {
-            const result = await fetch(url, options);
+            await fetch(url, options);
             res.status(204).send()
-        }
-        catch (error) {
+        } catch (error) {
             return next(error)
         }
     };

@@ -1,14 +1,12 @@
-import { Request, Response, Router, NextFunction } from "express";
-import config from "../../config";
-import fetch from "node-fetch";
-import { Log } from "../../Logger";
+import { Response, NextFunction } from "express";
+import { DCDRequest } from "../../config";
 import { GrafanaService } from "./GrafanaService";
 
 export class GrafanaController {
 
     static grafanaService = new GrafanaService();
 
-    static getGrafanaUserId = async (req: Request, res: Response, next: NextFunction) => {
+    static getGrafanaUserId = async (req: DCDRequest, res: Response, next: NextFunction): Promise<Response|void> => {
         try {
             const grafanaId = await GrafanaController.grafanaService.getGrafanaId(req.context.userId)
             res.status(200).send({grafanaId: grafanaId})
@@ -21,7 +19,7 @@ export class GrafanaController {
         }
     };
 
-    static createGrafanaDashboard = async (req: Request, res: Response, next: NextFunction) => {
+    static createGrafanaDashboard = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         const thingId = req.params.thingId
         try {
             await GrafanaController.grafanaService.createThing(req.context.userId, thingId)

@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import PropertyController from "../property/PropertyController";
 import { Property } from "../property/Property";
 import { AuthController } from "../http/AuthController";
-import { KeySet } from "./AuthService";
+import { JWKParams, KeySet } from "./AuthService";
 
 export interface Token {
     aud: string,
@@ -124,7 +124,7 @@ export class ThingService {
      * @returns {Promise<Object>}
      */
     generateKeys(thingId: string): Promise<KeySet> {
-        const jwkParams = {
+        const jwkParams: JWKParams = {
             kid: uuidv4(),
             alg: 'RS256',
             use: 'sig'

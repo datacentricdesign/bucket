@@ -1,26 +1,21 @@
-import { Request, Response, Router, NextFunction } from "express";
-import { getRepository, DeleteResult } from "typeorm";
+import { Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
 import { Thing } from "../Thing";
 import { ThingService } from "../services/ThingService"
 import { DCDError } from "@datacentricdesign/types";
-import config from "../../config";
-import fetch from "node-fetch";
-import { PolicyService } from "../services/PolicyService";
-import { AuthService } from "../services/AuthService";
-import { AuthController } from "./AuthController";
 import DPiController from "../dpi/DPiController";
+import { DCDRequest } from "../../config";
 
 export class ThingController {
 
     static thingService = new ThingService();
 
-    static apiHealth = async (req: Request, res: Response) => {
+    static apiHealth = async (req: DCDRequest, res: Response): Promise<void> => {
         res.send({ status: "OK" });
     };
 
-    static getThingsOfAPerson = async (req: Request, res: Response, next: NextFunction) => {
+    static getThingsOfAPerson = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get things from Service
         try {
             const things: Thing[] = await ThingController.thingService.getThingsOfAPerson(req.context.userId)
@@ -31,7 +26,7 @@ export class ThingController {
         }
     };
 
-    static getOneThingById = async (req: Request, res: Response, next: NextFunction) => {
+    static getOneThingById = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the ID from the url
         const thingId: string = req.params.thingId;
         try {
@@ -43,10 +38,10 @@ export class ThingController {
         }
     };
 
-    static createNewThing = async (req: Request, res: Response, next: NextFunction) => {
+    static createNewThing = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get parameters from the body
-        let { name, description, type, pem, dpi } = req.body;
-        let thing = new Thing();
+        const { name, description, type, pem, dpi } = req.body;
+        const thing = new Thing();
         thing.name = name;
         thing.description = description
         thing.type = type
@@ -74,13 +69,13 @@ export class ThingController {
             }
 
             // If all ok, send 201 response
-            return res.status(201).send(createdThing);
+            res.status(201).send(createdThing);
         } catch (error) {
-            return next(error)
+            next(error)
         }
     };
 
-    static editThing = async (req: Request, res: Response, next: NextFunction) => {
+    static editThing = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the ID from the url
         const thingId = req.params.thingId;
         // Get values from the body
@@ -111,7 +106,7 @@ export class ThingController {
         res.status(204).send();
     };
 
-    static editThingPEM = async (req: Request, res: Response, next: NextFunction) => {
+    static editThingPEM = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the thing ID from the url
         const thingId = req.params.thingId;
         // Get pem from body
@@ -131,7 +126,7 @@ export class ThingController {
             })
     }
 
-    static deleteOneThing = async (req: Request, res: Response, next: NextFunction) => {
+    static deleteOneThing = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the thing ID from the url
         const thingId = req.params.thingId;
         // Call the Service
@@ -144,7 +139,7 @@ export class ThingController {
         }
     };
 
-    static countDataPoints = async (req: Request, res: Response, next: NextFunction) => {
+    static countDataPoints = async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
         // Get the property ID from the url
         const from = req.query.from as string;
         const timeInterval = req.query.timeInterval as string
@@ -158,7 +153,7 @@ export class ThingController {
         }
     };
 
-};
+}
 
 export default ThingController;
 

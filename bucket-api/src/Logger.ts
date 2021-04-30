@@ -3,18 +3,20 @@ import { Logger, ILogObject } from "tslog";
 import { appendFileSync, mkdirSync } from "fs";
 import * as moment from 'moment'
 
+type LogFunction = (...args: unknown[]) => ILogObject;
+
 export class Log {
 
   static logger: Logger;
-  static silly: Function;
-  static debug: Function;
-  static trace: Function;
-  static info: Function;
-  static warn: Function;
-  static error: Function;
-  static fatal: Function;
+  static silly: LogFunction
+  static debug: LogFunction;
+  static trace: LogFunction;
+  static info: LogFunction;
+  static warn: LogFunction;
+  static error: LogFunction;
+  static fatal: LogFunction;
 
-  static init(name: string) {
+  static init(name: string): void {
 
     if (config.env.env === 'development') {
       Log.logger = new Logger({ name: name, type: 'pretty' });
@@ -49,7 +51,7 @@ export class Log {
     } catch (error) {
       if (error && error.errno !== -17) {
         try {
-          return Log.error(error)
+          Log.error(error)
         }  catch (error) {
           console.error(error)
         }

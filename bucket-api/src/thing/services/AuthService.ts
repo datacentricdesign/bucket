@@ -19,6 +19,34 @@ export interface KeySet {
     privateKey: string
 }
 
+export interface TokenIntrospection {
+    active?: boolean,
+    aud?: string[],
+    client_id?: string,
+    exp?: number,
+    ext?: Record<string, never>,
+    iat?: number,
+    iss?: string,
+    nbf?: number,
+    obfuscated_subject?: string,
+    scope?: string,
+    sub?: string,
+    token_type?: string,
+    token_use?: string,
+    username?: string
+}
+
+export interface TokenIntrospectionJWT {
+    aud?: string,
+    exp?: number,
+}
+
+export interface JWKParams {
+    kid: string,
+    alg: string,
+    use: string
+}
+
 /**
  * This class handle Authentication and Authorisation processes
  */
@@ -61,7 +89,7 @@ export class AuthService {
      * @param {Array<string>} requiredScope
      * @return {Promise<any>}
      */
-    introspect(token: Token, requiredScope: string[] = []) {
+    introspect(token: string, requiredScope: string[] = []): Promise<TokenIntrospection> {
         const body = { token: token }
         // const body = { token: token, scope: requiredScope.join(" ") };
         const url = config.oauth2.oAuth2IntrospectURL
@@ -72,17 +100,24 @@ export class AuthService {
             body,
             'application/x-www-form-urlencoded'
         )
-            .then(body => {
+            .then((body: TokenIntrospection) => {
                 if (!body.active) {
                     return Promise.reject(
-                        new DCDError(4031, 'The bearer token is not active')
+                        new DCDError(4031, 'The bearer token is not active.')
                     )
                 }
                 if (body.token_type && body.token_type !== 'access_token') {
                     return Promise.reject(
-                        new DCDError(4031, 'The bearer token is not an access token')
+                        new DCDError(4031, 'The bearer token is not an access token.')
                     )
                 }
+
+                if (!requiredScope.every((scope) => body.scope.includes(scope))) {
+                    return Promise.reject(
+                        new DCDError(4031, 'The bearer token does not have the required scope.')
+                    )
+                }
+
                 return Promise.resolve(body)
             })
             .catch(error => {
@@ -112,7 +147,7 @@ export class AuthService {
        * @returns {Promise<Object>}
        */
     generateKeys(thingId: string): Promise<KeySet> {
-        const jwkParams = {
+        const jwkParams: JWKParams = {
             kid: uuidv4(),
             alg: 'RS256',
             use: 'sig'
@@ -128,7 +163,7 @@ export class AuthService {
      * @param body
      * @returns {Promise}
      */
-    generateJWK(set: string, body: any): Promise<KeySet> {
+    generateJWK(set: string, body: JWKParams): Promise<KeySet> {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + set
         return this.authorisedRequest('POST', url, body)
             .then(result => {
@@ -188,18 +223,18 @@ export class AuthService {
             })
     }
 
-    setPEM(setId: string, pem: string) {
+    setPEM(setId: string, pem: string): Promise<string> {
         const keystore = JWK.createKeyStore();
         return keystore.add(pem, 'pem').
             then((result: JWK.Key) => {
-                return this.setJWK(setId, <JWK.Key> result.toJSON())
-            }).catch( error => {
+                return this.setJWK(setId, <JWK.Key>result.toJSON())
+            }).catch(error => {
                 return Promise.reject(error)
             });
     }
 
     checkJWT(acp: Access, entity: string): Promise<void> {
-        if (!this.jwtTokenMap.hasOwnProperty(entity)) {
+        if (!Object.prototype.hasOwnProperty.call(this.jwtTokenMap, entity)) {
             return this.refresh()
                 .then(() => {
                     return this.getJWK(entity)
@@ -214,7 +249,7 @@ export class AuthService {
                     return Promise.reject(error)
                 })
         }
-        const introspectionToken: any = jwt.verify(acp.token, this.jwtTokenMap[entity])
+        const introspectionToken: TokenIntrospectionJWT = <TokenIntrospectionJWT> jwt.verify(acp.token, this.jwtTokenMap[entity])
         const currentTime = Math.floor(new Date().getMilliseconds() / 1000)
 
         if (
@@ -234,10 +269,10 @@ export class AuthService {
      * @param token 
      * @param entity 
      */
-    checkJWTAuth(token: string, thingId: string): Promise<void> {
+    checkJWTAuth(token: string, thingId: string): Promise<Token> {
         Log.debug("\ncheck JWT auth\n")
         // Public keys are cached by thingId, we check if this one is cached
-        if (!this.jwtTokenMap.hasOwnProperty(thingId)) {
+        if (!Object.prototype.hasOwnProperty.call(this.jwtTokenMap, thingId)) {
             // Not found, let's get it from keto
             return this.refresh()
                 .then(() => {
@@ -255,30 +290,28 @@ export class AuthService {
                 })
         }
 
-        return Promise.resolve(jwt.verify(
-            token.toString(),
-            this.jwtTokenMap[thingId],
-            {},
-            (error: Error, introspectionToken: Token) => {
-                if (error) {
-                    Log.error(error)
-                    return Promise.reject(error)
-                }
-                const currentTime = Math.floor(new Date().getMilliseconds() / 1000)
+        return new Promise((resolve, reject) => {
+            jwt.verify(token.toString(), this.jwtTokenMap[thingId], {},
+                (error: Error, introspectionToken: Token) => {
+                    if (error) {
+                        Log.error(error)
+                        return reject(error)
+                    }
+                    const currentTime = Math.floor(new Date().getMilliseconds() / 1000)
 
-                Log.debug(introspectionToken)
-                if (
-                    introspectionToken.aud !== undefined &&
-                    introspectionToken.aud === config.http.url &&
-                    introspectionToken.exp !== undefined &&
-                    introspectionToken.exp > currentTime
-                ) {
-                    return Promise.resolve(introspectionToken)
-                } else {
-                    return Promise.reject(new DCDError(403, 'Token expired'))
-                }
-            }
-        ))
+                    Log.debug(introspectionToken)
+                    if (
+                        introspectionToken.aud !== undefined &&
+                        introspectionToken.aud === config.http.url &&
+                        introspectionToken.exp !== undefined &&
+                        introspectionToken.exp > currentTime
+                    ) {
+                        return resolve(introspectionToken)
+                    } else {
+                        return reject(new DCDError(403, 'Token expired'))
+                    }
+                })
+        })
     }
 
     refresh(): Promise<void> {
@@ -314,7 +347,7 @@ export class AuthService {
      * @param {String} type (default: application/json)
      * @returns {Promise}
      */
-    async authorisedRequest(method: string, url: string, body: object = null, type = 'application/json'): Promise<any> {
+    async authorisedRequest(method: string, url: string, body = null, type = 'application/json'): Promise<Record<string,unknown>> {
         const options: RequestInit = {
             headers: {
                 Authorization: this.getBearer(),

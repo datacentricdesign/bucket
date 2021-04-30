@@ -1,7 +1,6 @@
 import 'dotenv/config';
-import { URL } from 'url'
 
-export const mqttConfig: any = {
+export const mqttConfig = {
     host: process.env.MQTT_HOST || 'mqtt',
     port: process.env.MQTT_PORT !== undefined ? parseInt(process.env.MQTT_PORT) : 1883,
     client: {

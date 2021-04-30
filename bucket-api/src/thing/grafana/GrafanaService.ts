@@ -1,16 +1,119 @@
-import { httpConfig } from "../../config/httpConfig"
 import { DCDError } from "@datacentricdesign/types"
 
 import fetch, { Response } from 'node-fetch';
 import config from "../../config";
-import { json } from "express";
-import { rejects } from "assert";
 import { Property } from "../property/Property";
 import { Thing } from "../Thing";
 import ThingController from "../http/ThingController";
 import * as btoa from 'btoa';
 
+export interface Target {
+  property: Property,
+  refId: string,
+  thing: Thing
+}
 
+export interface YAxe {
+  format: string,
+  label: string,
+  logBase: number,
+  max: number,
+  min: number,
+  show: boolean
+}
+
+export interface Step {
+  color: string,
+  value: number
+}
+
+export interface GridPos {
+  x:number,
+  y:number,
+  h:number,
+  w:number
+}
+
+export interface Panel {
+  description?: string,
+  bars?: boolean,
+  dashLength?: number,
+  dashes?: boolean,
+  datasource?: string,
+  fieldConfig?: {
+    defaults: {
+      custom?: Record<string, unknown>,
+      mappings?: [],
+      thresholds?: {
+        mode: string,
+        steps: Step[]
+      }
+    },
+    overrides: []
+  },
+  options?: {
+    showHeader?: boolean,
+    colorMode?: string,
+    graphMode?: string,
+    justifyMode?: string,
+    orientation?: string,
+    reduceOptions?: {
+      calcs: string[],
+      fields: string,
+      values: boolean
+    },
+    textMode?: string
+  },
+  fill?: number,
+  fillGradient?: number,
+  hiddenSeries?: boolean,
+  legend?: {
+    avg: boolean,
+    current: boolean,
+    max: boolean,
+    min: boolean,
+    show: boolean,
+    total: boolean,
+    values: boolean
+  },
+  lines?: boolean,
+  linewidth?: number,
+  nullPointMode?: string,
+  percentage?: boolean,
+  pluginVersion?: string,
+  pointradius?: 2,
+  points?: boolean,
+  renderer?: string,
+  seriesOverrides?: [],
+  spaceLength?: number,
+  stack?: boolean,
+  steppedLine?: boolean,
+  targets?: Target[],
+  thresholds?: [],
+  timeFrom?: string,
+  timeRegions?: [],
+  timeShift?: string,
+  title?: string,
+  tooltip?: {
+    shared: boolean,
+    sort: number,
+    value_type: string
+  },
+  type?: string,
+  xaxis?: {
+    buckets: string,
+    mode: string,
+    name: string,
+    show: boolean,
+    values: []
+  },
+  yaxes?: YAxe[],
+  yaxis?: {
+    align: boolean,
+    alignLevel: number
+  },
+  gridPos: GridPos
+}
 
 /**
  * Manage sync with Grafana
@@ -24,18 +127,11 @@ export class GrafanaService {
   }
 
   /**
-   *
-   */
-  constructor() {
-
-  }
-
-  /**
    * @param {string} personId
    * @param {string} thingId
    * returns Promise
    **/
-  async createThing(personId: string, thingId: string) {
+  async createThing(personId: string, thingId: string): Promise<Response> {
     try {
       // Make sure the user gave consent by checking if there is a grafana id for this personId
       const grafanaId = await this.getGrafanaId(personId)
@@ -51,8 +147,9 @@ export class GrafanaService {
     }
   }
 
-  async createPersonFolder(personId) {
+  async createPersonFolder(personId:string): Promise<string> {
     try {
+      // Check if there is already a folder for this person id
       const folderUID = personId.replace('dcd:persons:', '')
       const resultGet = await fetch(config.grafana.apiURL.href + '/folders/' + folderUID, {
         headers: this.grafanaHeaders,
@@ -62,6 +159,7 @@ export class GrafanaService {
       if (jsonFolder.id !== undefined) {
         return jsonFolder.id
       }
+      // Otherwise the folder need to be created
       const resultPost = await fetch(config.grafana.apiURL.href + '/folders', {
         headers: this.grafanaHeaders,
         body: JSON.stringify({ uid: personId.replace('dcd:persons:', ''), title: personId.replace('dcd:persons:', '') }),
@@ -71,14 +169,14 @@ export class GrafanaService {
       if (newJsonFolder.id !== undefined) {
         return newJsonFolder.id
       }
-      return Promise.resolve(resultPost);
+      return Promise.reject(resultPost);
     }
     catch (error) {
       return Promise.reject(error);
     }
   }
 
-  async getGrafanaId(personId: string) {
+  async getGrafanaId(personId: string): Promise<string> {
     const url = config.grafana.apiURL.href + '/users/lookup?loginOrEmail=' + personId.replace('dcd:persons:', '')
     const headers = {
       Authorization: 'Basic ' + btoa(config.grafana.user + ':' + config.grafana.pass)
@@ -99,7 +197,7 @@ export class GrafanaService {
     }
   }
 
-  async setPersonFolderPermission(personId: string, grafanaId: number) {
+  async setPersonFolderPermission(personId: string, grafanaId: string): Promise<Response> {
     try {
       const result = await fetch(config.grafana.apiURL.href + '/folders/' + personId.replace('dcd:persons:', '') + '/permissions', {
         headers: this.grafanaHeaders,
@@ -120,9 +218,9 @@ export class GrafanaService {
     }
   }
 
-  async createThingDashboard(personId: string, thing: Thing, folderId: number) {
+  async createThingDashboard(personId: string, thing: Thing, folderId: string): Promise<Response> {
     const panels = []
-    let x = 0
+    const x = 0
     let y = 0
     const h = 6
     const w = 24
@@ -159,7 +257,7 @@ export class GrafanaService {
     }
   }
 
-  createPropertyPanel(thing: Thing, property: Property, gridPos) {
+  createPropertyPanel(thing: Thing, property: Property, gridPos: GridPos): Panel {
     const dim = property.type.dimensions
     let onlyNumbers = true
     for (let i = 0; i < dim.length; i++) {
@@ -174,8 +272,8 @@ export class GrafanaService {
     }
   }
 
-  panelTable(thing: Thing, property: Property, gridPos) {
-    const panel = {
+  panelTable(thing: Thing, property: Property, gridPos: GridPos): Panel {
+    return {
       "datasource": "Bucket",
       "fieldConfig": {
         "defaults": {
@@ -214,11 +312,10 @@ export class GrafanaService {
       "type": "table",
       "gridPos": gridPos
     }
-    return panel
   }
 
-  panelChart(thing, property, gridPos) {
-    const panel = {
+  panelChart(thing: Thing, property: Property, gridPos: GridPos): Panel {
+    return {
       "bars": false,
       "dashLength": 10,
       "dashes": false,
@@ -302,11 +399,10 @@ export class GrafanaService {
       },
       "gridPos": gridPos
     }
-    return panel
   }
 
-  panelSingleValue(thing, property, gridPos) {
-    const panel = {
+  panelSingleValue(thing: Thing, property: Property, gridPos: GridPos): Panel {
+    return {
       "datasource": "Bucket",
       "description": property.description,
       "options": {
@@ -335,7 +431,6 @@ export class GrafanaService {
       "type": "stat",
       "gridPos": gridPos
     }
-    return panel
   }
 
 }

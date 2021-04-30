@@ -1,4 +1,4 @@
-import * as Aedes from 'aedes'
+import { AuthenticateError, AuthenticateHandler, AuthErrorCode, AuthorizePublishHandler, AuthorizeSubscribeHandler, Client, Server } from 'aedes'
 import { Subscription, PublishPacket } from 'aedes'
 import * as fs from 'fs'
 import * as tls from 'tls'
@@ -12,17 +12,21 @@ import { Property } from '../property/Property'
 import { Log } from '../../Logger'
 import { Access } from '../services/PolicyService'
 
-interface Client extends Aedes.Client {
+interface DCDClient extends Client {
   context: Context
 }
 
-const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, packet: PublishPacket, callback: Function) => {
+type AuthPublishCallback = (error?: Error | null) => void;
+type AuthSubscribeCallback = (error: Error | null, subscription?: Subscription | null) => void;
+type AuthCallback = (error: AuthenticateError, success: boolean | null) => void;
+
+const authorizePublish: AuthorizePublishHandler = async (client: DCDClient, packet: PublishPacket, callback: AuthPublishCallback) => {
   Log.debug('publish')
   if (client.context.userId === config.mqtt.client.username) {
     return callback(null)
   }
 
-  let topicArray = packet.topic.substr(1).split('/')
+  const topicArray = packet.topic.substr(1).split('/')
   let action = 'dcd:actions:update'
   if (topicArray.length > 0 && topicArray.length > 0 && (topicArray[topicArray.length-1] === 'log' || topicArray[topicArray.length-1] === 'reply')) {
     action = 'dcd:actions:' + topicArray.pop()
@@ -49,12 +53,12 @@ const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, p
   }
 }
 
-const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Client, packet: Subscription, callback: Function) => {
+const authorizeSubscribe: AuthorizeSubscribeHandler = async (client: DCDClient, packet: Subscription, callback: AuthSubscribeCallback) => {
   if (client.context.userId === config.mqtt.client.username) {
     return callback(null, packet)
   }
 
-  let topicArray = packet.topic.substr(1).split('/')
+  const topicArray = packet.topic.substr(1).split('/')
   let action = 'dcd:actions:read'
   if (topicArray.length > 0 && (topicArray[topicArray.length-1] === 'log' || topicArray[topicArray.length-1] === 'reply')) {
     action = 'dcd:actions:' + topicArray.pop()
@@ -97,7 +101,7 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
   }
 }
 
-const authenticate: Aedes.AuthenticateHandler = (client: Client, username: string, password: Buffer, callback: Function) => {
+const authenticate: AuthenticateHandler = (client: DCDClient, username: string, password: Buffer, callback: AuthCallback) => {
   Log.debug('authenticate with credentials: ' + username)
   if (username === config.mqtt.client.username) {
     Log.debug('DCD client mqtt')
@@ -111,7 +115,10 @@ const authenticate: Aedes.AuthenticateHandler = (client: Client, username: strin
   }
 
   if (password === undefined) {
-    return callback(new DCDError(403, 'Missing token in the password field.'), false)
+    const error = <AuthenticateError> new Error('Missing token in the password field.')
+    error.returnCode = AuthErrorCode.BAD_USERNAME_OR_PASSWORD
+    callback(error, null)
+    return callback(error, false)
   }
   AuthController.authService.checkJWTAuth(password.toString(), username)
     .then(() => {
@@ -121,14 +128,16 @@ const authenticate: Aedes.AuthenticateHandler = (client: Client, username: strin
       callback(null, true)
     })
     .catch((error: DCDError) => {
+      const mqttError = <AuthenticateError> new Error(error.message)
+      mqttError.returnCode = AuthErrorCode.BAD_USERNAME_OR_PASSWORD
       Log.error(error)
-      callback(error, false)
+      callback(mqttError, false)
     })
 }
 
-const aedes = Aedes({ authenticate, authorizePublish, authorizeSubscribe })
+const aedes = Server({ authenticate, authorizePublish, authorizeSubscribe })
 
-let server: any
+let server: tls.Server|net.Server
 
 if (config.http.secured) {
   Log.debug('Starting mqtts server over SSL...')
@@ -142,17 +151,17 @@ if (config.http.secured) {
   server = net.createServer(aedes.handle)
 }
 
-export const mqttInit = () => {
+export const mqttInit = (): void => {
   server.listen(config.mqtt.port, function () {
     Log.info('MQTT server listening on port ', config.mqtt.port)
-    const mqttClient = new ThingMQTTClient(config.mqtt)
+    const mqttClient = new ThingMQTTClient(config.mqtt.port, config.mqtt.host, config.mqtt.client)
     return mqttClient.connect()
   })
 }
 
-aedes.on('clientReady', (client: Client) => {
+aedes.on('clientReady', (client: DCDClient) => {
   Log.debug('New connection: ' + client.id)
-  updateStatusProperty(client as Client, "Connected")
+  updateStatusProperty(client as DCDClient, "Connected")
 })
 
 aedes.on('subscribe', (result) => {
@@ -164,15 +173,15 @@ aedes.on('closed', () => {
 })
 
 aedes.on('ping', (packet, client) => {
-  updateStatusProperty(client as Client, "Ping")
+  updateStatusProperty(client as DCDClient, "Ping")
 })
 
 aedes.on('clientDisconnect', (client) => {
   Log.debug('clientDisconnect')
-  updateStatusProperty(client as Client, "Disconnected")
+  updateStatusProperty(client as DCDClient, "Disconnected")
 })
 
-function updateStatusProperty(client: Client, status: string) {
+function updateStatusProperty(client: DCDClient, status: string) {
   Log.debug('update status property...')
   if (client.context.userId.startsWith('dcd:things:')) {
     findOrCreateMQTTStatusProperty(client.context.userId)
