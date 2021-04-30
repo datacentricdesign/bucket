@@ -1,12 +1,10 @@
 import {
     Entity,
-    PrimaryGeneratedColumn,
     Column,
-    Unique,
     CreateDateColumn,
     UpdateDateColumn, OneToMany, PrimaryColumn, JoinColumn
 } from "typeorm";
-import {Length, IsNotEmpty, IsEmpty} from "class-validator";
+import {IsNotEmpty} from "class-validator";
 import { Property } from "./property/Property"
 import {Thing as IThing, Property as IProperty} from "@datacentricdesign/types";
 /**

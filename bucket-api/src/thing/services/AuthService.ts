@@ -9,10 +9,15 @@ import * as qs from 'querystring'
 import * as SimpleOauth from 'simple-oauth2'
 import { DCDError } from '@datacentricdesign/types'
 import { Token } from './ThingService'
-import { PolicyService } from './PolicyService'
+import { Access, PolicyService } from './PolicyService'
 import config from '../../config'
 import { URL } from 'url'
 import { Log } from '../../Logger'
+
+export interface KeySet {
+    algorithm: string,
+    privateKey: string
+}
 
 /**
  * This class handle Authentication and Authorisation processes
@@ -106,7 +111,7 @@ export class AuthService {
        * @param {string} thingId
        * @returns {Promise<Object>}
        */
-    generateKeys(thingId) {
+    generateKeys(thingId: string): Promise<KeySet> {
         const jwkParams = {
             kid: uuidv4(),
             alg: 'RS256',
@@ -123,7 +128,7 @@ export class AuthService {
      * @param body
      * @returns {Promise}
      */
-    generateJWK(set: string, body: any) {
+    generateJWK(set: string, body: any): Promise<KeySet> {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + set
         return this.authorisedRequest('POST', url, body)
             .then(result => {
@@ -134,7 +139,7 @@ export class AuthService {
                 const privateKey = jwkToBuffer(jwk, { private: true })
                 // Convert the JWK into a public key
                 this.jwtTokenMap[set] = jwkToBuffer(jwk)
-                const keySet = {
+                const keySet: KeySet = {
                     algorithm: jwk.alg,
                     privateKey: privateKey
                 }
@@ -151,7 +156,7 @@ export class AuthService {
      * @param {string} setId
      * @returns {Promise<string|DCDError>}
      */
-    getJWK(setId: string) {
+    getJWK(setId: string): Promise<string> {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
         return this.authorisedRequest('GET', url)
             .then(result => {
@@ -166,7 +171,7 @@ export class AuthService {
             })
     }
 
-    async setJWK(setId: string, jwk: any) {
+    async setJWK(setId: string, jwk: JWK.Key): Promise<string> {
         const url = config.oauth2.oAuth2HydraAdminURL + '/keys/' + setId
         return this.refresh()
             .then(() => {
@@ -187,13 +192,13 @@ export class AuthService {
         const keystore = JWK.createKeyStore();
         return keystore.add(pem, 'pem').
             then((result: JWK.Key) => {
-                return this.setJWK(setId, result.toJSON())
+                return this.setJWK(setId, <JWK.Key> result.toJSON())
             }).catch( error => {
                 return Promise.reject(error)
             });
     }
 
-    checkJWT(acp: any, entity: string) {
+    checkJWT(acp: Access, entity: string): Promise<void> {
         if (!this.jwtTokenMap.hasOwnProperty(entity)) {
             return this.refresh()
                 .then(() => {
@@ -229,7 +234,7 @@ export class AuthService {
      * @param token 
      * @param entity 
      */
-    checkJWTAuth(token: string, thingId: string) {
+    checkJWTAuth(token: string, thingId: string): Promise<void> {
         Log.debug("\ncheck JWT auth\n")
         // Public keys are cached by thingId, we check if this one is cached
         if (!this.jwtTokenMap.hasOwnProperty(thingId)) {
@@ -237,11 +242,11 @@ export class AuthService {
             return this.refresh()
                 .then(() => {
                     return this.getJWK(thingId)
-                        .then((publicKey) => {
+                        .then(() => {
                             // Now that we have the JWK, let's rerun the function
                             return this.checkJWTAuth(token, thingId)
                         })
-                        .catch((error) => {
+                        .catch(() => {
                             return Promise.reject(new DCDError(404, 'Unknown key set'))
                         })
                 })
@@ -250,7 +255,7 @@ export class AuthService {
                 })
         }
 
-        return jwt.verify(
+        return Promise.resolve(jwt.verify(
             token.toString(),
             this.jwtTokenMap[thingId],
             {},
@@ -273,10 +278,10 @@ export class AuthService {
                     return Promise.reject(new DCDError(403, 'Token expired'))
                 }
             }
-        )
+        ))
     }
 
-    refresh() {
+    refresh(): Promise<void> {
         if (this.token) {
             if (this.token.expired()) {
                 return this.requestNewToken()
@@ -286,7 +291,7 @@ export class AuthService {
         return this.requestNewToken()
     }
 
-    requestNewToken() {
+    requestNewToken(): Promise<void> {
         return this.oauth2.getToken({ scope: config.oauth2.oAuth2Scope })
             .then(result => {
                 this.token = this.oauth2.createToken(result)
@@ -297,7 +302,7 @@ export class AuthService {
             })
     }
 
-    getBearer() {
+    getBearer(): string {
         return 'bearer ' + qs.escape(this.token.token.access_token)
     }
 
@@ -309,7 +314,7 @@ export class AuthService {
      * @param {String} type (default: application/json)
      * @returns {Promise}
      */
-    async authorisedRequest(method: string, url: string, body: object = null, type: string = 'application/json'): Promise<any> {
+    async authorisedRequest(method: string, url: string, body: object = null, type = 'application/json'): Promise<any> {
         const options: RequestInit = {
             headers: {
                 Authorization: this.getBearer(),

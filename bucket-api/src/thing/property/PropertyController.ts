@@ -1,5 +1,4 @@
-import { Request, Response, Router, NextFunction } from "express";
-import { getRepository, DeleteResult } from "typeorm";
+import { Request, Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
 import { Property } from "./Property";
@@ -13,7 +12,6 @@ import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
-import { nextTick } from "process";
 
 export class PropertyController {
 

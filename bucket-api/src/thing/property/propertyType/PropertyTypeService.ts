@@ -1,19 +1,10 @@
 
-import { getRepository, DeleteResult, getConnection } from "typeorm";
+import { getRepository, DeleteResult } from "typeorm";
 
-import { Property } from "../Property";
 import { PropertyType } from "./PropertyType";
 import { DCDError } from "@datacentricdesign/types";
-import { types } from "util";
 
 export class PropertyTypeService {
-
-    /**
-     *
-     * @constructor
-     */
-    constructor() {
-    }
 
     /**
      * List existing property types.
@@ -61,9 +52,8 @@ export class PropertyTypeService {
          */
     async deleteOnePropertyTypeById(propertyTypeId: string): Promise<DeleteResult> {
         const propertyTypeRepository = getRepository(PropertyType);
-        let propertyType: PropertyType;
         try {
-            propertyType = await propertyTypeRepository.findOneOrFail(propertyTypeId);
+            await propertyTypeRepository.findOneOrFail(propertyTypeId);
         } catch (error) {
             throw new DCDError(404, 'PropertyType to delete ' + propertyTypeId + ' could not be not found.')
         }

@@ -8,11 +8,11 @@ import { v4 as uuidv4 } from 'uuid';
 import PropertyController from "../property/PropertyController";
 import { Property } from "../property/Property";
 import { AuthController } from "../http/AuthController";
-import GrafanaController from "../grafana/GrafanaController";
+import { KeySet } from "./AuthService";
 
 export interface Token {
     aud: string,
-    exp: Number
+    exp: number
 }
 
 export class ThingService {
@@ -72,10 +72,10 @@ export class ThingService {
      * @param {string} thingId
      * returns {Thing}
      **/
-    async getOneThingById(thingId: string) {
+    async getOneThingById(thingId: string): Promise<Thing> {
         // Get things from the database
         const thingRepository = getRepository(Thing);
-        let thing = await thingRepository
+        return await thingRepository
             .createQueryBuilder("thing")
             .leftJoinAndSelect("thing.properties", "properties")
             .leftJoinAndSelect("properties.type", "type")
@@ -83,8 +83,6 @@ export class ThingService {
             .where("thing.id = :thingId")
             .setParameters({ thingId: thingId })
             .getOne();
-
-        return thing
     }
 
     /**
@@ -92,12 +90,12 @@ export class ThingService {
      * @param thingId
      * returns Promise
      **/
-    editOneThing(thing: Thing) {
+    editOneThing(thing: Thing): Promise<Thing> {
         const thingRepository = getRepository(Thing);
         return thingRepository.save(thing);
     }
 
-    editThingPEM(thingId: string, pem: string) {
+    editThingPEM(thingId: string, pem: string): Promise<string> {
         return AuthController.authService.setPEM(thingId, pem)
     }
 
@@ -108,10 +106,8 @@ export class ThingService {
      */
     async deleteOneThing(thingId: string): Promise<DeleteResult> {
         const thingRepository = getRepository(Thing);
-        const propertyRepository = getRepository(Property);
-        let thing: Thing;
         try {
-            thing = await thingRepository.findOneOrFail(thingId);
+            await thingRepository.findOneOrFail(thingId);
         } catch (error) {
             throw new DCDError(404, 'Thing to delete ' + thingId + ' could not be not found.')
         }
@@ -127,7 +123,7 @@ export class ThingService {
      * @param {string} thingId
      * @returns {Promise<Object>}
      */
-    generateKeys(thingId: string) {
+    generateKeys(thingId: string): Promise<KeySet> {
         const jwkParams = {
             kid: uuidv4(),
             alg: 'RS256',
@@ -138,7 +134,7 @@ export class ThingService {
         })
     }
 
-    async countDataPoints(personId: string, from: string, timeInterval: string): Promise<any> {
+    async countDataPoints(personId: string, from: string, timeInterval: string): Promise<Thing[]> {
         const things = await this.getThingsOfAPerson(personId);
         for (let i = 0; i < things.length; i++) {
             const thing = things[i]

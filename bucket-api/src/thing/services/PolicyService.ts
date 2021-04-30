@@ -9,6 +9,21 @@ import { v4 as uuidv4 } from 'uuid';
 import config from "../../config";
 import { Log } from "../../Logger";
 
+export interface Policy {
+  id: string,
+  effect: string,
+  actions: string[],
+  subjects: string[],
+  resources: string[]
+}
+
+export interface Access {
+  token?: string,
+  resource: string,
+  action: string,
+  subject: string
+}
+
 /**
  * Manage access policies
  */
@@ -35,7 +50,7 @@ export class PolicyService {
    * @param {string} roleName
    * returns Promise
    **/
-  async grant(subjectId: string, resourceId: string, roleName: string) {
+  async grant(subjectId: string, resourceId: string, roleName: string): Promise<Response> {
     try {
       const policyId = await this.getRoleId(subjectId, resourceId, roleName);
       // There is an existing policy, let's update
@@ -57,7 +72,7 @@ export class PolicyService {
    * @param {string} roleName
    * returns Promise
    **/
-  async revoke(subjectId: string, resourceId: string, roleName: string): Promise<any> {
+  async revoke(subjectId: string, resourceId: string, roleName: string): Promise<Response> {
     try {
       const policyId: string = await this.getRoleId(subjectId, resourceId, roleName);
       // There is an existing policy, let's update
@@ -91,7 +106,7 @@ export class PolicyService {
   }
 
 
-  async createPolicy(subjectId: string, resourceId: string, roleName: string, effect = 'allow', id?: string) {
+  async createPolicy(subjectId: string, resourceId: string, roleName: string, effect = 'allow', id?: string): Promise<Response> {
     Log.debug("creating policy...")
     const policyId: string = id !== undefined ? id : uuidv4()
     const roleRepository = getRepository(Role);
@@ -108,7 +123,7 @@ export class PolicyService {
       return Promise.reject(error)
     }
 
-    const policy = {
+    const policy: Policy = {
       id: policyId,
       effect: effect,
       actions: PolicyService.roleToActions(roleName),
@@ -119,7 +134,7 @@ export class PolicyService {
     return this.updateKetoPolicy(policy)
   }
 
-  async deletePolicy(subjectId: string, resourceId: string, roleName: string) {
+  async deletePolicy(subjectId: string, resourceId: string, roleName: string): Promise<Response> {
     try {
       const roleId: string = await this.getRoleId(subjectId, resourceId, roleName)
       // There is an existing policy, let's update
@@ -132,7 +147,7 @@ export class PolicyService {
     }
   }
 
-  async check(acp: any) {
+  async check(acp: Access): Promise<void> {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/regex/allowed'
     const options = {
       headers: this.ketoHeaders,
@@ -156,7 +171,7 @@ export class PolicyService {
    * @param type subject, resource, action
    * @param  id the id of the concerned subject, resource or action
    */
-  async listConsents(type: string, id: string, flavor = 'exact') {
+  async listConsents(type: string, id: string, flavor = 'exact'): Promise<Policy[]> {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies?limit=100000&' + type + '=' + id
     const options = {
       headers: this.ketoHeaders,
@@ -178,7 +193,7 @@ export class PolicyService {
     }
   }
 
-  async checkGroupMembership(member: string, groupId: string, flavor = 'exact') {
+  async checkGroupMembership(member: string, groupId: string, flavor = 'exact'): Promise<void> {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/roles?member=' + member
     try {
       const res = await fetch(url, { headers: this.ketoHeaders, method: 'GET' });
@@ -195,12 +210,12 @@ export class PolicyService {
     }
   }
 
-  async listGroupMembership(member: string, flavor = 'exact') {
+  async listGroupMembership(member: string, flavor = 'exact'): Promise<string[]> {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/roles?member=' + member
     try {
       const res = await fetch(url, { headers: this.ketoHeaders, method: 'GET' });
       const result_json = await res.json();
-      let groups = []
+      const groups = []
       for (let i = 0; i < result_json.length; i++) {
         groups.push(result_json[i].id)
       }
@@ -216,7 +231,7 @@ export class PolicyService {
    * @param policy
    * @returns {Promise<Response>}
    */
-  async updateKetoPolicy(policy: any, flavor: string = 'regex'): Promise<Response> {
+  async updateKetoPolicy(policy: Policy, flavor = 'regex'): Promise<Response> {
     const url = config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies'
     console.log(url)
     try {
@@ -232,7 +247,7 @@ export class PolicyService {
     }
   }
 
-  async deleteKetoPolicy(policyId: string, flavor: string = 'regex') {
+  async deleteKetoPolicy(policyId: string, flavor = 'regex'): Promise<Response> {
     try {
       const result = await fetch(config.oauth2.acpURL.origin + '/engines/acp/ory/' + flavor + '/policies/' + policyId, {
         headers: this.ketoHeaders,
@@ -246,7 +261,7 @@ export class PolicyService {
   }
 
 
-  static roleToActions(role: string) {
+  static roleToActions(role: string): string[] {
     switch (role) {
       case 'user':
         return ['dcd:actions:create', 'dcd:actions:list']
@@ -274,7 +289,7 @@ export class PolicyService {
     }
   }
 
-  static entityToResource(thingId: string) {
+  static entityToResource(thingId: string): string[] {
     if (thingId === 'dcd') {
       return ['dcd:things']
     }

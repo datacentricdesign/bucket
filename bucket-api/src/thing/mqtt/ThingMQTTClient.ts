@@ -1,6 +1,5 @@
 import * as mqtt from 'mqtt'
-import { DCDError, DTOProperty } from '@datacentricdesign/types'
-import { PropertyService } from '../property/PropertyService'
+import { DTOProperty } from '@datacentricdesign/types'
 import PropertyController from '../property/PropertyController'
 import { MqttClient } from 'mqtt'
 import { Property } from '../property/Property'
@@ -54,11 +53,11 @@ function onMQTTConnect() {
  * = = = = = = = = = = = MQTT API = = = = = = = = = = =
  */
 
-const propertyCreateRegEx = new RegExp('\/things\/.*\/properties\/create')
-const propertyUpdateRegEx = new RegExp('\/things\/.*\/properties\/.*')
-const thingReadRegEx = new RegExp('\/things\/.*\/read')
-const thingLogsRegEx = new RegExp('\/things\/.*\/log')
-const thingDataRegEx = new RegExp('\/things\/.*\/reply')
+const propertyCreateRegEx = new RegExp('/things/.*/properties/create')
+const propertyUpdateRegEx = new RegExp('/things/.*/properties/.*')
+const thingReadRegEx = new RegExp('/things/.*/read')
+const thingLogsRegEx = new RegExp('/things/.*/log')
+const thingDataRegEx = new RegExp('/things/.*/reply')
 
 /**
  * @param topic

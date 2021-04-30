@@ -1,9 +1,7 @@
 import {
     Entity,
-    Column,
     PrimaryColumn,
 } from "typeorm";
-import {IsNotEmpty} from "class-validator";
 
 import {Role as IRole} from "@datacentricdesign/types";
 

@@ -1,30 +1,25 @@
 
-import { getRepository, DeleteResult, SelectQueryBuilder } from "typeorm";
+import { getRepository, DeleteResult } from "typeorm";
 
-import { Thing } from "../Thing";
 import { Property } from "./Property";
-import { PropertyType } from "./propertyType/PropertyType";
 
 import { PropertyTypeService } from "./propertyType/PropertyTypeService"
 
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from 'uuid';
-import { envConfig } from "../../config/envConfig";
 import { InfluxDB } from "influx";
 import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
-import { ThingService } from "../services/ThingService";
 import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
 import ThingController from "../http/ThingController";
-import { PolicyService } from "../services/PolicyService";
 
 export class PropertyService {
 
     static propertyTypeService = new PropertyTypeService();
     private influx: InfluxDB
-    private ready: boolean = false
+    private ready = false
     private cachedTypes = {}
 
     /**
@@ -35,7 +30,7 @@ export class PropertyService {
         this.init(1000)
     }
 
-    async init(delayMs: number) {
+    async init(delayMs: number): Promise<void> {
         // Connect to the time series database
         this.influx = new InfluxDB(config.influxdb)
         this.influx.getDatabaseNames()
@@ -89,7 +84,7 @@ export class PropertyService {
     async getPropertiesOfAThing(thingId: string, valueOptions?: ValueOptions): Promise<Property[]> {
         // Get properties from the database
         const propertyRepository = getRepository(Property);
-        let properties = await propertyRepository
+        return await propertyRepository
             .createQueryBuilder("property")
             .innerJoinAndSelect("property.thing", "thing")
             .innerJoinAndSelect("property.type", "type")
@@ -97,7 +92,6 @@ export class PropertyService {
             .where("thing.id = :thingId")
             .setParameters({ thingId: thingId })
             .getMany();
-        return properties
     }
 
     /**
@@ -121,10 +115,10 @@ export class PropertyService {
         // Get the list of all consent concerning the current subject
         let consents = []
         for (let i = 0; i < groups.length; i++) {
-            const result = await AuthController.policyService.listConsents('subject', groups[i])
-            if (result.errorCode === undefined) {
+            try {
+                const result = await AuthController.policyService.listConsents('subject', groups[i])
                 consents = consents.concat(result)
-            }
+            } catch(error) {}
         }
 
         let resources = []

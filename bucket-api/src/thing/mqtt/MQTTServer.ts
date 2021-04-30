@@ -10,6 +10,7 @@ import { AuthController } from '../http/AuthController'
 import PropertyController from '../property/PropertyController'
 import { Property } from '../property/Property'
 import { Log } from '../../Logger'
+import { Access } from '../services/PolicyService'
 
 interface Client extends Aedes.Client {
   context: Context
@@ -32,7 +33,7 @@ const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, p
     resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
   }
 
-  const acp = {
+  const acp: Access = {
     action: action,
     resource: resource,
     subject: client.context.userId
@@ -64,7 +65,7 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
     resource = resource.replace('dcd:things:dcd:things:', 'dcd:things:')
   }
 
-  const acp = {
+  const acp: Access = {
     action: action,
     resource: resource,
     subject: client.context.userId

@@ -1,9 +1,6 @@
-import { Request, Response, Router, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import config from "../../config";
 import fetch from "node-fetch";
-import * as fs from 'fs'
-import { Log } from "../../Logger";
-import { AuthController } from "../http/AuthController";
 import { DCDError } from "@datacentricdesign/types";
 import { DPiService } from "./DPiService";
 
@@ -52,7 +49,7 @@ export class DPiController {
                         reject(error);
                     });
                     res.on("finish", function () {
-                        resolve();
+                        resolve({});
                     });
                 });
             } else {

@@ -1,6 +1,6 @@
 import config from "./config";
 import { Logger, ILogObject } from "tslog";
-import { appendFileSync, mkdir, mkdirSync } from "fs";
+import { appendFileSync, mkdirSync } from "fs";
 import * as moment from 'moment'
 
 export class Log {

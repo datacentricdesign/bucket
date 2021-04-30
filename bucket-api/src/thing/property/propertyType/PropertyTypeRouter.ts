@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import { introspectToken } from "../../middlewares/introspectToken";
-import { checkPolicy } from "../../middlewares/checkPolicy";
 
 import PropertyTypeController from "./PropertyTypeController";
 

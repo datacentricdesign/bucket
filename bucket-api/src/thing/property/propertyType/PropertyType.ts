@@ -2,14 +2,12 @@ import {
     Entity,
     Column,
     PrimaryColumn,
-    OneToMany,
-    JoinColumn,
     ManyToMany,
     JoinTable
 } from "typeorm";
 import { Dimension } from "../dimension/Dimension";
 
-import {PropertyType as IPropertyType, Dimension as IDimension} from "@datacentricdesign/types"
+import {PropertyType as IPropertyType} from "@datacentricdesign/types"
 
 
 @Entity()

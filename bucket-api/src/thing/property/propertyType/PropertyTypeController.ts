@@ -1,18 +1,14 @@
-import {Request, Response, Router, NextFunction} from "express";
-import {getRepository, DeleteResult} from "typeorm";
-import {validate} from "class-validator";
+import {Request, Response, NextFunction} from "express";
 
-import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { PropertyType } from "./PropertyType";
 import { PropertyTypeService } from "./PropertyTypeService";
-import { nextTick } from "process";
 import { Dimension } from "../dimension/Dimension";
 
 export class PropertyTypeController {
 
     static propertyTypeService = new PropertyTypeService();
 
-    static getPropertyTypes = async (req: Request, res: Response) => {
+    static getPropertyTypes = async (req: Request, res: Response): Promise<void> => {
         // Get things from Service
         try {
             const propertyTypes: PropertyType[] = await PropertyTypeController.propertyTypeService.getPropertyTypes()
@@ -23,7 +19,7 @@ export class PropertyTypeController {
         }
     };
 
-    static getOnePropertyTypeById = async (req: Request, res: Response) => {
+    static getOnePropertyTypeById = async (req: Request, res: Response): Promise<void> => {
         // Get the ID from the url
         const propertyTypeId = req.params.propertyTypeId;
         try {
@@ -35,9 +31,9 @@ export class PropertyTypeController {
         }
     };
 
-    static createOnePropertyType = async (req: Request, res: Response, next: NextFunction) => {
-        let { id, name, description, dimensions } = req.body;
-        let propertyType = new PropertyType();
+    static createOnePropertyType = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const { id, name, description, dimensions } = req.body;
+        const propertyType = new PropertyType();
         propertyType.id = id
         propertyType.name = name;
         propertyType.description = description
@@ -61,7 +57,7 @@ export class PropertyTypeController {
         }
     };
 
-    static deleteOnePropertyTypeById = async (req: Request, res: Response, next: NextFunction) => {
+    static deleteOnePropertyTypeById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         // Get the thing ID from the url
         const propertyTypeId = req.params.propertyTypeId;
         // Call the Service
@@ -73,7 +69,6 @@ export class PropertyTypeController {
             next(error)
         }
     };
-
-};
+}
 
 export default PropertyTypeController;
