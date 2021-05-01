@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 cd bucket-api
-lint-staged
+npx lint-staged
