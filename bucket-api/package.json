@@ -10,7 +10,8 @@
     "migration:run": "npm run typeorm:cli migration:run",
     "prod": "npm run doc && ts-node ./src/index.ts",
     "doc": "apidoc -i src/ -o dist/public/docs/",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
@@ -75,6 +76,9 @@
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
     "eslint": "^7.25.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-prettier": "3.4.0",
+    "prettier": "2.2.1",
     "ts-node": "8.10.2",
     "ts-node-dev": "1.0.0-pre.56",
     "typescript": "3.9.7"

@@ -1,14 +1,13 @@
 import config from "./config";
 import { Logger, ILogObject } from "tslog";
 import { appendFileSync, mkdirSync } from "fs";
-import * as moment from 'moment'
+import * as moment from "moment";
 
 type LogFunction = (...args: unknown[]) => ILogObject;
 
 export class Log {
-
   static logger: Logger;
-  static silly: LogFunction
+  static silly: LogFunction;
   static debug: LogFunction;
   static trace: LogFunction;
   static info: LogFunction;
@@ -17,11 +16,10 @@ export class Log {
   static fatal: LogFunction;
 
   static init(name: string): void {
-
-    if (config.env.env === 'development') {
-      Log.logger = new Logger({ name: name, type: 'pretty' });
+    if (config.env.env === "development") {
+      Log.logger = new Logger({ name: name, type: "pretty" });
     } else {
-      Log.logger = new Logger({ name: name, type: 'hidden' });
+      Log.logger = new Logger({ name: name, type: "hidden" });
     }
 
     Log.logger.attachTransport(
@@ -37,34 +35,39 @@ export class Log {
       "debug"
     );
 
-    Log.silly = Log.logger.silly.bind(Log.logger)
-    Log.debug = Log.logger.debug.bind(Log.logger)
-    Log.trace = Log.logger.trace.bind(Log.logger)
-    Log.info = Log.logger.info.bind(Log.logger)
-    Log.warn = Log.logger.warn.bind(Log.logger)
-    Log.error = Log.logger.error.bind(Log.logger)
-    Log.fatal = Log.logger.fatal.bind(Log.logger)
+    Log.silly = Log.logger.silly.bind(Log.logger);
+    Log.debug = Log.logger.debug.bind(Log.logger);
+    Log.trace = Log.logger.trace.bind(Log.logger);
+    Log.info = Log.logger.info.bind(Log.logger);
+    Log.warn = Log.logger.warn.bind(Log.logger);
+    Log.error = Log.logger.error.bind(Log.logger);
+    Log.fatal = Log.logger.fatal.bind(Log.logger);
 
     // Make sure there is a subfolder to store images and logs
     try {
-      mkdirSync(config.hostDataFolder + '/logs')
+      mkdirSync(config.hostDataFolder + "/logs");
     } catch (error) {
       if (error && error.errno !== -17) {
         try {
-          Log.error(error)
-        }  catch (error) {
-          console.error(error)
+          Log.error(error);
+        } catch (error) {
+          console.error(error);
         }
       }
     }
-
   }
 }
 
 function logToTransport(logObject: ILogObject) {
   try {
-    appendFileSync(config.hostDataFolder + '/logs/' + moment(new Date()).format('YYYY-MM-DD_HH') + '.log', JSON.stringify(logObject) + "\n");
-  } catch(error) {
-    console.log(error)
+    appendFileSync(
+      config.hostDataFolder +
+        "/logs/" +
+        moment(new Date()).format("YYYY-MM-DD_HH") +
+        ".log",
+      JSON.stringify(logObject) + "\n"
+    );
+  } catch (error) {
+    console.log(error);
   }
 }

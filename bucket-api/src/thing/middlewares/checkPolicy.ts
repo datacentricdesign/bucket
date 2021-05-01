@@ -10,18 +10,22 @@ import { DCDRequest } from "../../config";
  * @param action
  */
 export const checkPolicy = (action: string) => {
-    return async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
-        const acpResource = buildACPResource(req)
-        const acp: Access = {
-            resource: acpResource,
-            action: 'dcd:actions:' + action,
-            subject: req.context.userId
-        }
-        AuthController.policyService
-            .check(acp)
-            .then(() => next())
-            .catch((error: DCDError) => next(error))
-    }
+  return async (
+    req: DCDRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const acpResource = buildACPResource(req);
+    const acp: Access = {
+      resource: acpResource,
+      action: "dcd:actions:" + action,
+      subject: req.context.userId,
+    };
+    AuthController.policyService
+      .check(acp)
+      .then(() => next())
+      .catch((error: DCDError) => next(error));
+  };
 };
 
 /**
@@ -31,19 +35,18 @@ export const checkPolicy = (action: string) => {
  * @return {string}
  */
 function buildACPResource(req: DCDRequest): string {
-    let acpResource = ''
-    if (req.params.thingId !== undefined) {
-        acpResource += req.params.thingId
-    }
-    if (req.baseUrl.endsWith('/properties')) {
-        acpResource += ':properties'
-    }
-    if (req.params.propertyId !== undefined) {
-        acpResource += ':' + req.params.propertyId.replace('dcd:','')
-    }
-    if (req.params.consentId !== undefined) {
-        acpResource += ':' + req.params.consentId.replace('dcd:','')
-    }
-    return acpResource
+  let acpResource = "";
+  if (req.params.thingId !== undefined) {
+    acpResource += req.params.thingId;
+  }
+  if (req.baseUrl.endsWith("/properties")) {
+    acpResource += ":properties";
+  }
+  if (req.params.propertyId !== undefined) {
+    acpResource += ":" + req.params.propertyId.replace("dcd:", "");
+  }
+  if (req.params.consentId !== undefined) {
+    acpResource += ":" + req.params.consentId.replace("dcd:", "");
+  }
+  return acpResource;
 }
-
