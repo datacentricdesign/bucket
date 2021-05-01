@@ -6,12 +6,12 @@ import { ThingRouter } from "./thing/http/ThingRouter";
 
 import { createConnection } from "typeorm";
 
-import * as express from "express";
-import * as bodyParser from "body-parser";
-import * as cookieParser from "cookie-parser";
-import * as helmet from "helmet";
-import * as cors from "cors";
-import errorMiddleware from "./thing/middlewares/ErrorMiddleware";
+import * as express from "express"
+import * as bodyParser from "body-parser"
+import * as cookieParser from "cookie-parser"
+import * as helmet from "helmet"
+import * as cors from "cors"
+import errorMiddleware from "./thing/middlewares/ErrorMiddleware"
 
 import { mqttInit } from "./thing/mqtt/MQTTServer";
 import { introspectToken } from "./thing/middlewares/introspectToken";
