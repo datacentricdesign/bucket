@@ -1,13 +1,13 @@
-import { getRepository, DeleteResult, getConnection } from "typeorm";
+import { getRepository, getConnection } from "typeorm";
 
 import { Thing } from "../Thing";
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
-import PropertyController from "../property/PropertyController";
 import { Property } from "../property/Property";
-import { AuthController } from "../http/AuthController";
-import { JWKParams, KeySet } from "./AuthService";
+import { AuthService, JWKParams, KeySet } from "./AuthService";
+import { PolicyService } from "./PolicyService";
+import { PropertyService } from "../property/PropertyService";
 
 export interface Token {
   aud: string;
@@ -15,6 +15,30 @@ export interface Token {
 }
 
 export class ThingService {
+  private static instance: ThingService;
+
+  public static getInstance(): ThingService {
+    if (ThingService.instance === undefined) {
+      ThingService.instance = new ThingService();
+    }
+    return ThingService.instance;
+  }
+
+  private policyService: PolicyService;
+  private authService: AuthService;
+  private propertyService: PropertyService;
+
+  /**
+   *
+   */
+  constructor() {
+    this.policyService = PolicyService.getInstance();
+    this.authService = AuthService.getInstance();
+    PropertyService.getInstance(this).then(
+      (service) => (this.propertyService = service)
+    );
+  }
+
   /**
    * Create a new Thing.
    *
@@ -46,12 +70,8 @@ export class ThingService {
       // Read negative, the Thing does not exist yet
       if (findError.name === "EntityNotFound") {
         await thingRepository.save(thing);
-        await AuthController.policyService.grant(
-          thing.personId,
-          thing.id,
-          "owner"
-        );
-        await AuthController.policyService.grant(thing.id, thing.id, "subject");
+        await this.policyService.grant(thing.personId, thing.id, "owner");
+        await this.policyService.grant(thing.id, thing.id, "subject");
         return thing;
       }
       // unknown error to report
@@ -101,7 +121,7 @@ export class ThingService {
   }
 
   editThingPEM(thingId: string, pem: string): Promise<string> {
-    return AuthController.authService.setPEM(thingId, pem);
+    return this.authService.setPEM(thingId, pem);
   }
 
   /**
@@ -109,7 +129,7 @@ export class ThingService {
    * @param thingId
    * @return {Promise}
    */
-  async deleteOneThing(thingId: string): Promise<DeleteResult> {
+  async deleteOneThing(thingId: string): Promise<void> {
     const thingRepository = getRepository(Thing);
     try {
       await thingRepository.findOneOrFail(thingId);
@@ -125,7 +145,14 @@ export class ThingService {
       .from(Property)
       .where("thing.id = :thingId", { thingId })
       .execute();
-    return thingRepository.delete(thingId);
+    return thingRepository
+      .delete(thingId)
+      .then(() => {
+        return Promise.resolve();
+      })
+      .catch((error) => {
+        return Promise.reject(error);
+      });
   }
 
   /**
@@ -139,8 +166,8 @@ export class ThingService {
       alg: "RS256",
       use: "sig",
     };
-    return AuthController.authService.refresh().then(() => {
-      return AuthController.authService.generateJWK(thingId, jwkParams);
+    return this.authService.refresh().then(() => {
+      return this.authService.generateJWK(thingId, jwkParams);
     });
   }
 
@@ -154,7 +181,7 @@ export class ThingService {
       const thing = things[i];
       for (let j = 0; j < thing.properties.length; j++) {
         const property: Property = thing.properties[j];
-        const result = await PropertyController.propertyService.countDataPoints(
+        const result = await this.propertyService.countDataPoints(
           thing.id,
           property.id,
           property.type.id,

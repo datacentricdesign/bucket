@@ -1,62 +1,81 @@
 import { Router } from "express";
 
-import DPiController from "./DPiController";
 import { introspectToken } from "../middlewares/introspectToken";
 import { checkPolicy } from "../middlewares/checkPolicy";
+import { DPiController } from "./DPiController";
 
-export const DPiRouter = Router({ mergeParams: true });
+export class DPiRouter {
+  private router: Router;
+  private controller: DPiController;
 
-/**
- * @api {get} /
- * @apiGroup DPi
- * @apiDescription Get DPi Image
- *
- * @apiVersion 0.0.1
- **/
-DPiRouter.get(
-  "/",
-  [introspectToken(["dcd:things"])],
-  DPiController.getOneDPIImage
-);
+  constructor() {
+    this.router = Router({ mergeParams: true });
+    this.controller = new DPiController();
+    this.setRoutes();
+  }
 
-/**
- * @api {post} /
- * @apiGroup DPi
- * @apiDescription Generate a new DPi Image
- *
- * @apiVersion 0.1.0
- *
- * @apiParam (Body) {DTODPi} details of the DPi image
- * @apiHeader {String} Content-type application/json
- **/
-DPiRouter.post(
-  "/",
-  [introspectToken(["dcd:things"]), checkPolicy("update")],
-  DPiController.generateNewDPIImage
-);
+  getRouter(): Router {
+    return this.router;
+  }
 
-/**
- * @api {delete} /dpi/:dpiId Delete
- * @apiGroup DPi
- * @apiDescription Delete DPi Image
- *
- * @apiVersion 0.1.0
- **/
-DPiRouter.delete(
-  "/",
-  [introspectToken(["dcd:things"]), checkPolicy("update")],
-  DPiController.deleteDPiImage
-);
+  getController(): DPiController {
+    return this.controller;
+  }
 
-/**
- * @api {delete} /dpi/:dpiId Cancel
- * @apiGroup DPi
- * @apiDescription Cancel DPi Image Generation
- *
- * @apiVersion 0.1.0
- **/
-DPiRouter.get(
-  "/cancel",
-  [introspectToken(["dcd:things"]), checkPolicy("update")],
-  DPiController.cancelDPiImageGeneration
-);
+  setRoutes(): void {
+    /**
+     * @api {get} /
+     * @apiGroup DPi
+     * @apiDescription Get DPi Image
+     *
+     * @apiVersion 0.0.1
+     **/
+    this.router.get(
+      "/",
+      [introspectToken(["dcd:things"])],
+      this.controller.getOneDPIImage
+    );
+
+    /**
+     * @api {post} /
+     * @apiGroup DPi
+     * @apiDescription Generate a new DPi Image
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiParam (Body) {DTODPi} details of the DPi image
+     * @apiHeader {String} Content-type application/json
+     **/
+    this.router.post(
+      "/",
+      [introspectToken(["dcd:things"]), checkPolicy("update")],
+      this.controller.generateNewDPIImage
+    );
+
+    /**
+     * @api {delete} /dpi/:dpiId Delete
+     * @apiGroup DPi
+     * @apiDescription Delete DPi Image
+     *
+     * @apiVersion 0.1.0
+     **/
+    this.router.delete(
+      "/",
+      [introspectToken(["dcd:things"]), checkPolicy("update")],
+      this.controller.deleteDPiImage
+    );
+
+    /**
+     * @api {delete} /dpi/:dpiId Cancel
+     * @apiGroup DPi
+     * @apiDescription Cancel DPi Image Generation
+     *
+     * @apiVersion 0.1.0
+     **/
+    this.router.get(
+      "/cancel",
+      [introspectToken(["dcd:things"]), checkPolicy("update")],
+      this.controller.cancelDPiImageGeneration
+    );
+  }
+}

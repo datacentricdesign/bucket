@@ -51,12 +51,23 @@ export interface JWKParams {
  * This class handle Authentication and Authorisation processes
  */
 export class AuthService {
-  oauth2: SimpleOauth.ClientCredentials;
-  token = null;
-  jwtTokenMap = [];
-  private static policyService = new PolicyService();
+  private oauth2: SimpleOauth.ClientCredentials;
+  private token = null;
+  private jwtTokenMap = [];
+  private policyService: PolicyService;
+
+  private static instance: AuthService;
+
+  public static getInstance(): AuthService {
+    if (AuthService.instance === undefined) {
+      AuthService.instance = new AuthService();
+    }
+    return AuthService.instance;
+  }
 
   constructor() {
+    this.policyService = PolicyService.getInstance();
+
     const header = {
       Accept: "application/json",
     };
@@ -267,7 +278,7 @@ export class AuthService {
       introspectionToken.exp !== undefined &&
       introspectionToken.exp > currentTime
     ) {
-      return AuthService.policyService.check(acp);
+      return this.policyService.check(acp);
     } else {
       return Promise.reject(new DCDError(403, "Token expired"));
     }

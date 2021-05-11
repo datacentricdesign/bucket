@@ -2,7 +2,8 @@ import fetch from "node-fetch";
 import config from "../../config";
 import { AuthController } from "../http/AuthController";
 import { Property } from "../property/Property";
-import PropertyController from "../property/PropertyController";
+import { PropertyService } from "../property/PropertyService";
+import { Thing } from "../Thing";
 
 export interface DPI {
   id: string;
@@ -12,16 +13,33 @@ export interface DPI {
 }
 
 export class DPiService {
-  async generateDPiImage(dpi: DPI, thingId: string): Promise<string> {
+  private static instance: DPiService;
+
+  public static getInstance(): DPiService {
+    if (DPiService.instance === undefined) {
+      DPiService.instance = new DPiService();
+    }
+    return DPiService.instance;
+  }
+
+  private propertyService: PropertyService;
+
+  constructor() {
+    PropertyService.getInstance(this).then(
+      (service) => (this.propertyService = service)
+    );
+  }
+
+  async generateDPiImage(dpi: DPI, thing: Thing): Promise<string> {
     const url = config.env.dpiUrl + "/";
 
-    const keys = await AuthController.authService.generateKeys(thingId);
+    const keys = await AuthController.authService.generateKeys(thing.id);
 
-    dpi.id = thingId;
+    dpi.id = thing.id;
     dpi.enable_SSH = dpi.enable_SSH ? "1" : "0";
     dpi.private_key = keys.privateKey;
 
-    this.createOrUpdateHostnameProperty(thingId, dpi.target_hostname);
+    this.createOrUpdateHostnameProperty(thing, dpi.target_hostname);
 
     const options = {
       method: "POST",
@@ -41,25 +59,22 @@ export class DPiService {
    * @param hostname
    */
   async createOrUpdateHostnameProperty(
-    thingId: string,
+    thing: Thing,
     hostname: string
   ): Promise<void> {
-    const properties = await PropertyController.propertyService.getPropertiesOfAThingByType(
-      thingId,
+    const properties = await this.propertyService.getPropertiesOfAThingByType(
+      thing.id,
       "DNS"
     );
     let netProp: Property;
     if (properties.length === 0) {
-      netProp = await PropertyController.propertyService.createNewProperty(
-        thingId,
-        {
-          typeId: "DNS",
-        }
-      );
+      netProp = await this.propertyService.createNewProperty(thing, {
+        typeId: "DNS",
+      });
     } else {
       netProp = properties[0];
     }
     netProp.values = [[Date.now(), hostname, hostname + ".local", ""]];
-    await PropertyController.propertyService.updatePropertyValues(netProp);
+    await this.propertyService.updatePropertyValues(netProp);
   }
 }

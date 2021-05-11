@@ -9,12 +9,14 @@ import { v4 as uuidv4 } from "uuid";
 import config from "../../config";
 import { Log } from "../../Logger";
 
-export interface Policy {
+export interface AccessControlPolicy {
   id: string;
+  description?: string;
   effect: string;
   actions: string[];
   subjects: string[];
   resources: string[];
+  conditions?: Record<string, unknown>;
 }
 
 export interface Access {
@@ -28,6 +30,15 @@ export interface Access {
  * Manage access policies
  */
 export class PolicyService {
+  private static instance: PolicyService;
+
+  public static getInstance(): PolicyService {
+    if (PolicyService.instance === undefined) {
+      PolicyService.instance = new PolicyService();
+    }
+    return PolicyService.instance;
+  }
+
   private ketoHeaders = {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -43,7 +54,7 @@ export class PolicyService {
   }
 
   /**
-   * Grant a role on a resource entity to a subject entity
+   * Grant a role on a resource entity to a subject entity.
    * @param {string} subjectId
    * @param {string} resourceId
    * @param {string} roleName
@@ -53,7 +64,7 @@ export class PolicyService {
     subjectId: string,
     resourceId: string,
     roleName: string
-  ): Promise<Response> {
+  ): Promise<AccessControlPolicy> {
     try {
       const policyId = await this.getRoleId(subjectId, resourceId, roleName);
       // There is an existing policy, let's update
@@ -74,7 +85,7 @@ export class PolicyService {
   }
 
   /**
-   * Revoke a role on a resource entity to a subject entity
+   * Revoke a role on a resource entity to a subject entity.
    * @param {string} subjectId
    * @param {string} resourceId
    * @param {string} roleName
@@ -84,7 +95,7 @@ export class PolicyService {
     subjectId: string,
     resourceId: string,
     roleName: string
-  ): Promise<Response> {
+  ): Promise<AccessControlPolicy> {
     try {
       const policyId: string = await this.getRoleId(
         subjectId,
@@ -108,6 +119,13 @@ export class PolicyService {
     }
   }
 
+  /**
+   * Provides the role id for a given triple subject/resource/role.
+   * @param subjectId
+   * @param resourceId
+   * @param roleName
+   * @returns
+   */
   async getRoleId(
     subjectId: string,
     resourceId: string,
@@ -122,16 +140,18 @@ export class PolicyService {
           role: roleName,
         },
       });
-      return role.id;
+      return Promise.resolve(role.id);
     } catch (error) {
-      throw new DCDError(
-        4041,
-        "Role not found for " +
-          subjectId +
-          ", " +
-          resourceId +
-          " and " +
-          roleName
+      return Promise.reject(
+        new DCDError(
+          4041,
+          "Role not found for " +
+            subjectId +
+            ", " +
+            resourceId +
+            " and " +
+            roleName
+        )
       );
     }
   }
@@ -142,7 +162,7 @@ export class PolicyService {
     roleName: string,
     effect = "allow",
     id?: string
-  ): Promise<Response> {
+  ): Promise<AccessControlPolicy> {
     Log.debug("creating policy...");
     const policyId: string = id !== undefined ? id : uuidv4();
     const roleRepository = getRepository(Role);
@@ -154,19 +174,19 @@ export class PolicyService {
     };
 
     try {
-      await roleRepository.save(newRole);
+      const result = await roleRepository.save(newRole);
+      Log.info(result);
     } catch (error) {
       return Promise.reject(error);
     }
 
-    const policy: Policy = {
+    const policy: AccessControlPolicy = {
       id: policyId,
       effect: effect,
       actions: PolicyService.roleToActions(roleName),
       subjects: [subjectId],
       resources: PolicyService.entityToResource(resourceId),
     };
-    Log.debug(JSON.stringify(policy));
     return this.updateKetoPolicy(policy);
   }
 
@@ -215,10 +235,10 @@ export class PolicyService {
    * @param  id the id of the concerned subject, resource or action
    */
   async listConsents(
-    type: string,
+    type: "resource" | "subject" | "action",
     id: string,
-    flavor = "exact"
-  ): Promise<Policy[]> {
+    flavor: "exact" | "regex" = "exact"
+  ): Promise<AccessControlPolicy[]> {
     const url =
       config.oauth2.acpURL.origin +
       "/engines/acp/ory/" +
@@ -240,7 +260,13 @@ export class PolicyService {
         }
         return Promise.resolve(result);
       }
-      return Promise.reject(new DCDError(4031, "Request was not allowed"));
+      if (res.status === 403) {
+        return Promise.reject(new DCDError(4031, "Request was not allowed."));
+      } else if (res.status === 404) {
+        return Promise.reject(new DCDError(404, "Resource not found."));
+      } else {
+        return Promise.reject(new DCDError(res.status, "Server error."));
+      }
     } catch (error) {
       return Promise.reject(error);
     }
@@ -310,17 +336,20 @@ export class PolicyService {
    * @param policy
    * @returns {Promise<Response>}
    */
-  async updateKetoPolicy(policy: Policy, flavor = "regex"): Promise<Response> {
+  async updateKetoPolicy(
+    policy: AccessControlPolicy,
+    flavor = "regex"
+  ): Promise<AccessControlPolicy> {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
-    console.log(url);
     try {
       const result = await fetch(url, {
         headers: this.ketoHeaders,
         method: "PUT",
         body: JSON.stringify(policy),
       });
-      return Promise.resolve(result);
+      const json = <AccessControlPolicy>await result.json();
+      return Promise.resolve(json);
     } catch (error) {
       return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
     }

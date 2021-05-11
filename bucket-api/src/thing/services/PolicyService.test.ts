@@ -1,12 +1,66 @@
-import { validateEnv } from "../../config";
-validateEnv();
-
 import { expect } from "chai";
-import { PolicyService } from "./PolicyService";
+import { AccessControlPolicy, PolicyService } from "./PolicyService";
+import { v4 as uuidv4 } from "uuid";
+import { DCDError } from "@datacentricdesign/types";
+import { Log } from "../../Logger";
 
-describe("Policy Service - Role to Actions", function () {
-  it("empty role", function () {
+let policyService: PolicyService;
+let thingId: string;
+let personId: string;
+let createdACP: AccessControlPolicy;
+
+describe("Policy Service", function () {
+  before(async function () {
+    policyService = PolicyService.getInstance();
+    // Test values
+    thingId = "dcd:things:" + uuidv4();
+    personId = "dcd:persons:test@test.com";
+  });
+
+  it("Role to Actions - empty role", function () {
     const result = PolicyService.roleToActions("");
     expect(result.length).equal(0);
+  });
+
+  it("Grant", function (done: Mocha.Done) {
+    policyService
+      .grant(personId, thingId, "owner")
+      .then((acp: AccessControlPolicy) => {
+        createdACP = acp;
+        expect(acp.subjects[0]).to.equal(personId);
+        done();
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
+  });
+
+  it("Get Role Id", function (done: Mocha.Done) {
+    policyService
+      .getRoleId(personId, thingId, "owner")
+      .then((roleId: string) => {
+        Log.info(roleId);
+        expect(roleId).to.equal(createdACP.id);
+        done();
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
+  });
+
+  it("Revoke", function (done: Mocha.Done) {
+    policyService
+      .revoke(personId, thingId, "owner")
+      .then((acp: AccessControlPolicy) => {
+        expect(acp.subjects[0]).to.equal(personId);
+        expect(acp.effect).to.equal("deny");
+        done();
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
   });
 });

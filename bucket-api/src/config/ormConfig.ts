@@ -1,15 +1,16 @@
 import "dotenv/config";
+import "reflect-metadata";
 import { ConnectionOptions } from "typeorm";
 
 export const ORMConfig: ConnectionOptions = {
   type: "postgres",
-  host: process.env.POSTGRES_HOST,
-  port: Number(process.env.POSTGRES_PORT),
-  username: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
+  host: process.env.BUCKET_POSTGRES_HOST,
+  port: Number(process.env.BUCKET_POSTGRES_PORT),
+  username: process.env.BUCKET_POSTGRES_USER,
+  password: process.env.BUCKET_POSTGRES_PASSWORD,
+  database: process.env.BUCKET_POSTGRES_DB,
   synchronize: true,
-  logging: process.env.POSTGRES_LOGGING === "true",
+  logging: process.env.BUCKET_POSTGRES_LOGGING === "true",
   entities: [
     "./src/thing/Thing.ts",
     "./src/thing/role/Role.ts",

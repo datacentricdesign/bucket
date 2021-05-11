@@ -3,15 +3,19 @@ import { DCDRequest } from "../../config";
 import { GrafanaService } from "./GrafanaService";
 
 export class GrafanaController {
-  static grafanaService = new GrafanaService();
+  private grafanaService: GrafanaService;
 
-  static getGrafanaUserId = async (
+  constructor() {
+    this.grafanaService = new GrafanaService();
+  }
+
+  getGrafanaUserId = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<Response | void> => {
     try {
-      const grafanaId = await GrafanaController.grafanaService.getGrafanaId(
+      const grafanaId = await this.grafanaService.getGrafanaId(
         req.context.userId
       );
       res.status(200).send({ grafanaId: grafanaId });
@@ -23,22 +27,17 @@ export class GrafanaController {
     }
   };
 
-  static createGrafanaDashboard = async (
+  createGrafanaDashboard = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     const thingId = req.params.thingId;
     try {
-      await GrafanaController.grafanaService.createThing(
-        req.context.userId,
-        thingId
-      );
+      await this.grafanaService.createThing(req.context.userId, thingId);
       res.status(204).send();
     } catch (error) {
       return next(error);
     }
   };
 }
-
-export default GrafanaController;

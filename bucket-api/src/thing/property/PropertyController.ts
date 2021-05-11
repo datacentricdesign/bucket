@@ -13,11 +13,20 @@ import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
 import { DCDRequest } from "../../config";
+import { ThingService } from "../services/ThingService";
 
 export class PropertyController {
-  static propertyService = new PropertyService();
+  private propertyService: PropertyService;
+  private thingService: ThingService;
 
-  static parseValueOptions(req: DCDRequest): ValueOptions {
+  constructor() {
+    PropertyService.getInstance(this).then(
+      (service) => (this.propertyService = service)
+    );
+    this.thingService = ThingService.getInstance();
+  }
+
+  parseValueOptions(req: DCDRequest): ValueOptions {
     if (req.query.from === undefined || req.query.to === undefined) {
       return undefined;
     }
@@ -36,7 +45,7 @@ export class PropertyController {
     };
   }
 
-  static getProperties = async (
+  getProperties = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -54,7 +63,7 @@ export class PropertyController {
     // Get properties from Service
     try {
       if (sharedWith !== undefined) {
-        const properties: Property[] = await PropertyController.propertyService.getProperties(
+        const properties: Property[] = await this.propertyService.getProperties(
           actor,
           subject,
           sharedWith,
@@ -63,7 +72,7 @@ export class PropertyController {
         );
         res.send(properties);
       } else if (actor == subject) {
-        const properties: Property[] = await PropertyController.propertyService.getPropertiesOfAThing(
+        const properties: Property[] = await this.propertyService.getPropertiesOfAThing(
           subject
         );
         // Send the things object
@@ -80,7 +89,7 @@ export class PropertyController {
     }
   };
 
-  static getOnePropertyById = async (
+  getOnePropertyById = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -88,10 +97,10 @@ export class PropertyController {
     // Get the ID from the url
     const thingId: string = req.params.thingId;
     const propertyId = req.params.propertyId;
-    const options = PropertyController.parseValueOptions(req);
+    const options = this.parseValueOptions(req);
 
     // Get the Property from the Service
-    const property: Property = await PropertyController.propertyService.getOnePropertyById(
+    const property: Property = await this.propertyService.getOnePropertyById(
       thingId,
       propertyId,
       options
@@ -105,13 +114,13 @@ export class PropertyController {
 
     if (req.accepts("text/csv")) {
       res.set({ "Content-Type": "text/csv" });
-      res.send(PropertyController.toCSV(property));
+      res.send(this.toCSV(property));
     } else {
       res.send(property);
     }
   };
 
-  static createNewProperty = async (
+  createNewProperty = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -128,9 +137,11 @@ export class PropertyController {
     if (errors.length > 0) {
       next(new DCDError(400, errors.toString()));
     } else {
+      // Retrieve thing details from thingId
+      const thing = await this.thingService.getOneThingById(req.params.thingId);
       try {
-        const createdProperty = await PropertyController.propertyService.createNewProperty(
-          req.params.thingId,
+        const createdProperty = await this.propertyService.createNewProperty(
+          thing,
           property
         );
         // If all ok, send 201 response
@@ -141,7 +152,7 @@ export class PropertyController {
     }
   };
 
-  static editProperty = async (
+  editProperty = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -151,7 +162,7 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Get values from the body
     const { name, description } = req.body;
-    const property: Property = await PropertyController.propertyService.getOnePropertyById(
+    const property: Property = await this.propertyService.getOnePropertyById(
       thingId,
       propertyId
     );
@@ -170,7 +181,7 @@ export class PropertyController {
 
     // Try to save
     try {
-      await PropertyController.propertyService.editOneProperty(property);
+      await this.propertyService.editOneProperty(property);
     } catch (e) {
       return next(new DCDError(500, "failed updating property"));
     }
@@ -178,7 +189,7 @@ export class PropertyController {
     res.status(204).send();
   };
 
-  static updatePropertyValues = async (
+  updatePropertyValues = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -187,7 +198,7 @@ export class PropertyController {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
-    const property: Property = await PropertyController.propertyService.getOnePropertyById(
+    const property: Property = await this.propertyService.getOnePropertyById(
       thingId,
       propertyId
     );
@@ -206,11 +217,11 @@ export class PropertyController {
       saveValuesAndRespond(property, res, next);
     } else if (contentType.indexOf("multipart/form-data") === 0) {
       // Look for data in a CSV file
-      PropertyController.uploadDataFile(property, req, res, next);
+      this.uploadDataFile(property, req, res, next);
     }
   };
 
-  static deleteOneProperty = async (
+  deleteOneProperty = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -220,10 +231,7 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Call the Service
     try {
-      await PropertyController.propertyService.deleteOneProperty(
-        thingId,
-        propertyId
-      );
+      await this.propertyService.deleteOneProperty(thingId, propertyId);
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
@@ -231,7 +239,7 @@ export class PropertyController {
     }
   };
 
-  static countDataPoints = async (
+  countDataPoints = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -243,7 +251,7 @@ export class PropertyController {
     const timeInterval = req.query.timeInterval as string;
     // Call the Service
     try {
-      const result = await PropertyController.propertyService.countDataPoints(
+      const result = await this.propertyService.countDataPoints(
         thingId,
         propertyId,
         undefined,
@@ -256,7 +264,7 @@ export class PropertyController {
     }
   };
 
-  static uploadDataFile(
+  uploadDataFile(
     property: Property,
     request: DCDRequest,
     response: Response,
@@ -288,7 +296,7 @@ export class PropertyController {
     form.parse(request);
   }
 
-  static lastDataPoints = async (
+  lastDataPoints = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -298,7 +306,7 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Call the Service
     try {
-      const result = await PropertyController.propertyService.lastDataPoints(
+      const result = await this.propertyService.lastDataPoints(
         thingId,
         propertyId
       );
@@ -308,7 +316,7 @@ export class PropertyController {
     }
   };
 
-  static toCSV(property: Property): string {
+  toCSV(property: Property): string {
     let csv = "time";
     for (let i = 0; i < property.type.dimensions.length; i++) {
       csv += "," + property.type.dimensions[i].name;
@@ -321,7 +329,7 @@ export class PropertyController {
     return csv;
   }
 
-  static grantConsent = async (
+  grantConsent = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -350,7 +358,7 @@ export class PropertyController {
     }
   };
 
-  static revokeConsent = async (
+  revokeConsent = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -367,7 +375,7 @@ export class PropertyController {
     }
   };
 
-  static listConsents = async (
+  listConsents = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -388,8 +396,6 @@ export class PropertyController {
     }
   };
 }
-
-export default PropertyController;
 
 /**
  * @param property
@@ -415,7 +421,7 @@ function csvStrToValueArray(
         }
         values.push(val);
       } catch (error) {
-        console.error(error);
+        Log.error(error);
       }
     }
     if (first) {
@@ -432,7 +438,7 @@ async function saveValuesAndRespond(
 ) {
   // Try to save
   try {
-    await PropertyController.propertyService.updatePropertyValues(property);
+    await this.propertyService.updatePropertyValues(property);
     return res.json();
   } catch (error) {
     Log.error(error);

@@ -7,45 +7,95 @@ import { PropertyTypeService } from "./propertyType/PropertyTypeService";
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
-import { InfluxDB } from "influx";
+import {
+  FluxTableMetaData,
+  InfluxDB,
+  Point,
+} from "@influxdata/influxdb-client";
+import { SetupAPI } from "@influxdata/influxdb-client-apis";
+
 import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
-import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
-import ThingController from "../http/ThingController";
 import { PropertyType } from "./propertyType/PropertyType";
+import { PolicyService } from "../services/PolicyService";
+import { Thing } from "../Thing";
 
 export class PropertyService {
-  static propertyTypeService = new PropertyTypeService();
   private influx: InfluxDB;
+  private url: string;
+  private org: string;
+  private bucket: string;
+  private token: string;
   private ready = false;
-  private cachedTypes = {};
+  private cachedTypes: Map<string, PropertyType>;
+
+  // private thingService: ThingService;
+  private policyService: PolicyService;
+  private propertyTypeService: PropertyTypeService;
+
+  private static instance: PropertyService;
+  private static consumers: unknown[] = [];
+
+  public static async getInstance(
+    consumer: unknown,
+    delayMs = 1000
+  ): Promise<PropertyService> {
+    if (PropertyService.instance === undefined) {
+      PropertyService.instance = new PropertyService();
+      await PropertyService.instance.init(delayMs);
+    }
+    PropertyService.consumers.push(consumer);
+    return PropertyService.instance;
+  }
 
   /**
-   *
+   * If delayMs is defined, the constructor init InfluxDB,
+   * otherwise it only instantiate the service
    * @constructor
    */
   constructor() {
-    this.init(1000);
+    this.policyService = PolicyService.getInstance();
+    this.propertyTypeService = PropertyTypeService.getInstance();
+    this.cachedTypes = new Map<string, PropertyType>();
+  }
+
+  isReady(): boolean {
+    return this.ready;
   }
 
   async init(delayMs: number): Promise<void> {
+    Log.debug("PropertyService > Init...");
     // Connect to the time series database
     this.influx = new InfluxDB(config.influxdb);
-    this.influx
-      .getDatabaseNames()
-      // Double check the timeseries db exists
-      .then(async (names) => {
-        Log.info("Connected to InfluxDb");
-        if (names.indexOf(config.influxdb.database) > -1) {
-          await this.influx.createDatabase(config.influxdb.database);
-          this.ready = true;
+    this.url = config.influxdb.url;
+    this.token = config.influxdb.token;
+    this.org = config.influxdb.org;
+    this.bucket = config.influxdb.bucket;
+
+    const setupApi = new SetupAPI(this.influx);
+    return setupApi
+      .getSetup()
+      .then(async ({ allowed }) => {
+        if (allowed) {
+          await setupApi.postSetup({
+            body: {
+              org: this.org,
+              bucket: this.bucket,
+              username: config.influxdb.username,
+              password: config.influxdb.password,
+              token: this.token,
+            },
+          });
+          Log.info(`InfluxDB '${this.url}' is now onboarded.`);
+        } else {
+          Log.info(`InfluxDB '${this.url}' has been already onboarded.`);
         }
         this.ready = true;
         return Promise.resolve();
       })
       .catch((error) => {
-        Log.error(JSON.stringify(error));
+        Log.error(error);
         Log.info("Retrying to connect to InfluxDB in " + delayMs + " ms.");
         delay(delayMs).then(() => {
           this.init(delayMs * 1.5);
@@ -53,26 +103,59 @@ export class PropertyService {
       });
   }
 
+  static async release(consumer: unknown): Promise<void> {
+    let itemsProcessed = 0;
+    let itemsRemoved = 0;
+    return new Promise((resolve, reject) => {
+      if (PropertyService.consumers.length === 0) {
+        return reject();
+      }
+      PropertyService.consumers.forEach((item, index, array) => {
+        itemsProcessed++;
+        if (item === consumer) {
+          array.splice(index, 1);
+          itemsRemoved++;
+        }
+        if (itemsProcessed === array.length + itemsRemoved) {
+          if (array.length === 0) {
+            PropertyService.instance = undefined;
+          }
+          if (itemsRemoved !== 0) {
+            return resolve();
+          } else {
+            return reject();
+          }
+        }
+      });
+    });
+  }
+
+  getCache(): Map<string, PropertyType> {
+    return this.cachedTypes;
+  }
+
   /**
    * Create a new Property.
    **/
   async createNewProperty(
-    thingId: string,
+    thing: Thing,
     dtoProperty: DTOProperty
   ): Promise<Property> {
+    Log.debug("Create new property...");
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     // Check if property type id is provided
     if (dtoProperty.typeId === undefined || dtoProperty.typeId === "") {
       return Promise.reject(new DCDError(4003, "Add field typeId."));
     }
     const property: Property = new Property();
     // Retrieve the property type
-    property.type = await PropertyService.propertyTypeService.getOnePropertyTypeById(
+    property.type = await this.propertyTypeService.getOnePropertyTypeById(
       dtoProperty.typeId
     );
-    // Retrieve thing details from thingId
-    property.thing = await ThingController.thingService.getOneThingById(
-      thingId
-    );
+    property.thing = thing;
     // If no name was provided, then use the generic type's
     property.name =
       dtoProperty.name === undefined || dtoProperty.name === ""
@@ -96,6 +179,10 @@ export class PropertyService {
    * @param {string} thingId
    **/
   async getPropertiesOfAThing(thingId: string): Promise<Property[]> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     // Get properties from the database
     const propertyRepository = getRepository(Property);
     return await propertyRepository
@@ -120,15 +207,16 @@ export class PropertyService {
     from: string,
     timeInterval: string
   ): Promise<Property[]> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     let groups = [];
     if (audienceId === "*") {
-      groups = await AuthController.policyService.listGroupMembership(subject);
+      groups = await this.policyService.listGroupMembership(subject);
     } else {
       try {
-        await AuthController.policyService.checkGroupMembership(
-          subject,
-          audienceId
-        );
+        await this.policyService.checkGroupMembership(subject, audienceId);
         groups.push(audienceId);
       } catch (error) {
         return Promise.reject(error);
@@ -139,7 +227,7 @@ export class PropertyService {
     let consents = [];
     for (let i = 0; i < groups.length; i++) {
       try {
-        const result = await AuthController.policyService.listConsents(
+        const result = await this.policyService.listConsents(
           "subject",
           groups[i]
         );
@@ -204,6 +292,10 @@ export class PropertyService {
     propertyId: string,
     valueOptions?: ValueOptions
   ): Promise<Property> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     // Get property from the database
     const propertyRepository = getRepository(Property);
     const property = await propertyRepository
@@ -230,6 +322,10 @@ export class PropertyService {
     thingId: string,
     typeId: string
   ): Promise<Property[]> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     // Get properties from the database
     const propertyRepository = getRepository(Property);
     const properties = await propertyRepository
@@ -240,29 +336,6 @@ export class PropertyService {
       .where("thing.id = :thingId AND type.id = :typeId")
       .setParameters({ thingId: thingId, typeId: typeId })
       .getMany();
-    return properties;
-  }
-
-  /**
-   * List Properties by Type Id.
-   * @param {string} propertyId
-   * returns {Property[]}
-   **/
-  async getPropertiesByTypeId(
-    thingId: string,
-    typeId: string
-  ): Promise<Property[]> {
-    // Get properties from the database
-    const propertyRepository = getRepository(Property);
-    const properties = await propertyRepository
-      .createQueryBuilder("property")
-      .innerJoinAndSelect("property.thing", "thing")
-      .innerJoinAndSelect("property.type", "type")
-      .innerJoinAndSelect("type.dimensions", "dimensions")
-      .where("thing.id = :thingId AND type.id = :typeId")
-      .setParameters({ thingId: thingId, typeId: typeId })
-      .getMany();
-
     return properties;
   }
 
@@ -272,6 +345,10 @@ export class PropertyService {
    * returns Promise
    **/
   editOneProperty(property: Property): Promise<Property> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     const propertyRepository = getRepository(Property);
     return propertyRepository.save(property);
   }
@@ -282,6 +359,10 @@ export class PropertyService {
    * returns Promise
    **/
   async updatePropertyValues(property: Property): Promise<void> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     if (property.type === undefined) {
       property.type = await this.getPropertyType(property.id);
     }
@@ -289,7 +370,11 @@ export class PropertyService {
   }
 
   async getPropertyType(propertyId: string): Promise<PropertyType> {
-    if (!Object.prototype.hasOwnProperty.call(this.cachedTypes, propertyId)) {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
+    if (!this.cachedTypes.has(propertyId)) {
       const propertyRepository = getRepository(Property);
       const property: Property = await propertyRepository
         .createQueryBuilder("property")
@@ -298,9 +383,9 @@ export class PropertyService {
         .where("property.id = :propertyId")
         .setParameters({ propertyId: propertyId })
         .getOne();
-      this.cachedTypes[propertyId] = property.type;
+      this.cachedTypes.set(property.id, property.type);
     }
-    return this.cachedTypes[propertyId];
+    return this.cachedTypes.get(propertyId);
   }
 
   /**
@@ -312,6 +397,10 @@ export class PropertyService {
     thingId: string,
     propertyId: string
   ): Promise<DeleteResult> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     const propertyRepository = getRepository(Property);
     const property: Property = await this.getOnePropertyById(
       thingId,
@@ -334,6 +423,10 @@ export class PropertyService {
    * @param {Property} property
    */
   private valuesToInfluxDB(property: Property): Promise<void> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     const points = [];
     const dimensions = property.type.dimensions;
     for (let index = 0; index < property.values.length; index++) {
@@ -353,27 +446,33 @@ export class PropertyService {
               : values[0];
         }
 
-        const fields = {};
+        const point = new Point(property.type.id)
+          .tag("propertyId", property.id)
+          .tag("thingId", property.thing.id)
+          .tag("personId", property.thing.personId);
+
         for (let i = 1; i < values.length; i++) {
           const name = dimensions[i - 1].name;
-          fields[name] = values[i];
+          switch (dimensions[i - 1].type) {
+            case "string":
+              point.stringField(name, values[i]);
+              break;
+            case "number":
+              point.floatField(name, values[i]);
+              break;
+            case "boolean":
+              point.booleanField(name, values[i]);
+              break;
+          }
+          point.timestamp(ts);
+          points.push(point);
         }
 
-        const point = {
-          measurement: property.type.id,
-          tags: {
-            propertyId: property.id,
-            thingId: property.thing.id,
-            personId: property.thing.personId,
-          },
-          fields: fields,
-          timestamp: ts,
-        };
-
-        points.push(point);
+        const writeApi = this.influx.getWriteApi(this.org, this.bucket, "ms");
+        writeApi.writePoints(points);
+        return writeApi.close();
       }
     }
-    return this.influx.writePoints(points, { precision: "ms" });
   }
 
   /**
@@ -389,46 +488,84 @@ export class PropertyService {
     property: Property,
     opt: ValueOptions
   ): Promise<Property> {
-    Log.debug(opt);
-    let query = `SELECT "time"`;
-    for (let index = 0; index < property.type.dimensions.length; index++) {
-      if (opt.timeInterval !== undefined) {
-        query += `, ${opt.fctInterval}("${property.type.dimensions[index].name}")`;
-      } else {
-        query += `, "${property.type.dimensions[index].name}" `;
-      }
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
-    query += ` FROM "${property.type.id}"`;
+    // Log.debug(opt);
+    // let query = `SELECT "time"`;
+    // for (let index = 0; index < property.type.dimensions.length; index++) {
+    //   if (opt.timeInterval !== undefined) {
+    //     query += `, ${opt.fctInterval}("${property.type.dimensions[index].name}")`;
+    //   } else {
+    //     query += `, "${property.type.dimensions[index].name}" `;
+    //   }
+    // }
+    // query += ` FROM "${property.type.id}"`;
+
+    // if (opt.from !== undefined && opt.to !== undefined) {
+    //   const start = new Date(opt.from).toISOString();
+    //   const end = new Date(opt.to).toISOString();
+    //   query += ` WHERE time >= '${start}' AND time <= '${end}' AND "thingId" = '${property.thing.id}' AND "propertyId" = '${property.id}'`;
+    // }
+
+    // if (opt.timeInterval !== undefined) {
+    //   query += ` GROUP BY time(${opt.timeInterval}) fill(${opt.fill})`;
+    // }
+
+    // Log.debug(query);
+
+    const queryApi = new InfluxDB({
+      url: this.url,
+      token: this.token,
+    }).getQueryApi(this.org);
+    let fluxQuery = `from(bucket:"${this.bucket}") `;
 
     if (opt.from !== undefined && opt.to !== undefined) {
       const start = new Date(opt.from).toISOString();
       const end = new Date(opt.to).toISOString();
-      query += ` WHERE time >= '${start}' AND time <= '${end}' AND "thingId" = '${property.thing.id}' AND "propertyId" = '${property.id}'`;
+      fluxQuery += `|> range(start: ${start}, stop: ${end})`;
     }
 
-    if (opt.timeInterval !== undefined) {
-      query += ` GROUP BY time(${opt.timeInterval}) fill(${opt.fill})`;
-    }
+    fluxQuery += ` |> filter(fn: (r) => (r._measurement == "${property.type.id}") 
+                                        and (r.propertyId == "${property.id}")
+                                        and (r.thingId == "${property.thing.id}")`;
 
-    Log.debug(query);
-
-    return this.influx
-      .queryRaw(query, {
-        precision: "ms",
-        database: config.influxdb.database,
-      })
-      .then((data) => {
-        if (
-          data.results.length > 0 &&
-          data.results[0].series !== undefined &&
-          data.results[0].series.length > 0
-        ) {
-          property.values = data.results[0].series[0].values;
-        } else {
-          property.values = [];
-        }
-        return Promise.resolve(property);
+    return new Promise((resolve, reject) => {
+      queryApi.queryRows(fluxQuery, {
+        next(row: string[], tableMeta: FluxTableMetaData) {
+          const o = tableMeta.toObject(row);
+          // Log.debug(JSON.stringify(o, null, 2))
+          Log.debug(o);
+        },
+        error(error: Error) {
+          Log.error(error);
+          Log.debug("\nFinished ERROR");
+          return reject();
+        },
+        complete() {
+          Log.debug("\nFinished SUCCESS");
+          return resolve(property);
+        },
       });
+    });
+
+    // .queryRaw(query, {
+    //   precision: "ms",
+    //   database: config.influxdb.database,
+    // })
+    // .then((data) => {
+    //   if (
+    //     data.results.length > 0 &&
+    //     data.results[0].series !== undefined &&
+    //     data.results[0].series.length > 0
+    //   ) {
+    //     property.values = data.results[0].series[0].values;
+    //   } else {
+    //     property.values = [];
+    //   }
+    //   return Promise.resolve(property);
+    // });
   }
 
   async countDataPoints(
@@ -438,6 +575,10 @@ export class PropertyService {
     from: string,
     timeInterval: string
   ): Promise<Array<Array<string | number>>> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     let measurement = typeId;
     if (measurement === undefined) {
       const property = await this.getOnePropertyById(thingId, propertyId);
@@ -447,39 +588,46 @@ export class PropertyService {
     let query = `SELECT COUNT(*) FROM ${measurement} WHERE time > ${from} AND "propertyId" = '${propertyId}'`;
     if (timeInterval !== undefined) query += ` GROUP BY time(${timeInterval})`;
 
-    return this.influx
-      .queryRaw(query, {
-        precision: "ms",
-        database: config.influxdb.database,
-      })
-      .then((data) => {
-        if (data.results[0].series === undefined) return Promise.resolve([]);
-        return Promise.resolve(data.results[0].series[0].values);
-      })
-      .catch((error) => {
-        return error;
-      });
+    return Promise.reject(query);
+    // return this.influx
+    //   .queryRaw(query, {
+    //     precision: "ms",
+    //     database: config.influxdb.database,
+    //   })
+    //   .then((data) => {
+    //     if (data.results[0].series === undefined) return Promise.resolve([]);
+    //     return Promise.resolve(data.results[0].series[0].values);
+    //   })
+    //   .catch((error) => {
+    //     return error;
+    //   });
   }
 
   async lastDataPoints(
     thingId: string,
     propertyId: string
   ): Promise<Array<Array<string | number>>> {
+    // Check if the service is ready
+    if (!this.ready) {
+      return Promise.reject(new DCDError(503, "Property Service not ready."));
+    }
     const property = await this.getOnePropertyById(thingId, propertyId);
-    return this.influx
-      .queryRaw(
-        `SELECT * FROM ${property.type.id}  WHERE "propertyId" = '${property.id}' ORDER BY DESC LIMIT 1`,
-        {
-          precision: "ms",
-          database: config.influxdb.database,
-        }
-      )
-      .then((data) => {
-        return Promise.resolve(data.results[0].series[0].values);
-      })
-      .catch((error) => {
-        return error;
-      });
+    // return this.influx
+    //   .queryRaw(
+    //     `SELECT * FROM ${property.type.id}  WHERE "propertyId" = '${property.id}' ORDER BY DESC LIMIT 1`,
+    //     {
+    //       precision: "ms",
+    //       database: config.influxdb.database,
+    //     }
+    //   )
+    //   .then((data) => {
+    //     return Promise.resolve(data.results[0].series[0].values);
+    //   })
+    //   .catch((error) => {
+    //     return error;
+    //   });
+
+    return Promise.reject(property);
   }
 }
 

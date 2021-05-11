@@ -1,18 +1,10 @@
 import "dotenv/config";
 
 export const influxdbConfig = {
-  host: process.env.INFLUXDB_HOST,
-  database: process.env.INFLUXDB_DB,
-  // schema: [
-  //   {
-  //     measurement: 'response_times',
-  //     fields: {
-  //       path: Influx.FieldType.STRING,
-  //       duration: Influx.FieldType.INTEGER
-  //     },
-  //     tags: [
-  //       'host'
-  //     ]
-  //   }
-  // ]
+  url: process.env.BUCKET_INFLUXDB_URL,
+  token: process.env.BUCKET_INFLUXDB_TOKEN,
+  org: process.env.BUCKET_INFLUXDB_ORG,
+  bucket: process.env.BUCKET_INFLUXDB_BUCKET,
+  username: process.env.BUCKET_INFLUXDB_USER,
+  password: process.env.BUCKET_INFLUXDB_PASS,
 };

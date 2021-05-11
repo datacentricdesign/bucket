@@ -11,7 +11,7 @@ import { grafanaConfig } from "./grafanaConfig";
 import { Context } from "@datacentricdesign/types";
 import { Request } from "express";
 
-export function validateEnv() {
+export function validateEnv(): void {
   cleanEnv(process.env, {
     // Host folder where to store the data
     HOST_DATA_FOLDER: str(),
@@ -28,7 +28,9 @@ export function validateEnv() {
     BUCKET_POSTGRES_LOGGING: bool(),
     // Influx Settings
     BUCKET_INFLUXDB_HOST: str(),
-    BUCKET_INFLUXDB_DB: str(),
+    BUCKET_INFLUXDB_BUCKET: str(),
+    BUCKET_INFLUXDB_USER: str(),
+    BUCKET_INFLUXDB_PASS: str(),
     // HTTP Settings
     HTTP_HOST: str(),
     HTTP_PORT: port(),

@@ -4,24 +4,30 @@ import { validate } from "class-validator";
 import { Thing } from "../Thing";
 import { ThingService } from "../services/ThingService";
 import { DCDError } from "@datacentricdesign/types";
-import DPiController from "../dpi/DPiController";
 import { DCDRequest } from "../../config";
+import { DPiService } from "../dpi/DPiService";
 
 export class ThingController {
-  static thingService = new ThingService();
+  private thingService: ThingService;
+  private dpiService: DPiService;
 
-  static apiHealth = async (req: DCDRequest, res: Response): Promise<void> => {
+  constructor() {
+    this.thingService = ThingService.getInstance();
+    this.dpiService = DPiService.getInstance();
+  }
+
+  apiHealth = async (req: DCDRequest, res: Response): Promise<void> => {
     res.send({ status: "OK" });
   };
 
-  static getThingsOfAPerson = async (
+  getThingsOfAPerson = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     // Get things from Service
     try {
-      const things: Thing[] = await ThingController.thingService.getThingsOfAPerson(
+      const things: Thing[] = await this.thingService.getThingsOfAPerson(
         req.context.userId
       );
       // Send the things object
@@ -31,7 +37,7 @@ export class ThingController {
     }
   };
 
-  static getOneThingById = async (
+  getOneThingById = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -40,16 +46,14 @@ export class ThingController {
     const thingId: string = req.params.thingId;
     try {
       // Get the Thing from the Service
-      const thing: Thing = await ThingController.thingService.getOneThingById(
-        thingId
-      );
+      const thing: Thing = await this.thingService.getOneThingById(thingId);
       res.send(thing);
     } catch (error) {
       return next(new DCDError(404, "Thing not found"));
     }
   };
 
-  static createNewThing = async (
+  createNewThing = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -71,18 +75,16 @@ export class ThingController {
     }
 
     try {
-      const createdThing = await ThingController.thingService.createNewThing(
-        thing
-      );
+      const createdThing = await this.thingService.createNewThing(thing);
       if (pem !== undefined && typeof pem === "string") {
         pem.trim();
         const error = checkPEM(pem);
         if (error !== undefined) return next(error);
-        await ThingController.thingService.editThingPEM(thing.id, pem);
+        await this.thingService.editThingPEM(thing.id, pem);
       }
 
       if (thing.type === "RASPBERRYPI" && dpi !== undefined) {
-        await DPiController.dpiService.generateDPiImage(dpi, thing.id);
+        await this.dpiService.generateDPiImage(dpi, thing);
       }
 
       // If all ok, send 201 response
@@ -92,7 +94,7 @@ export class ThingController {
     }
   };
 
-  static editThing = async (
+  editThing = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -103,7 +105,7 @@ export class ThingController {
     const { name, description } = req.body;
     let thing: Thing;
     try {
-      thing = await ThingController.thingService.getOneThingById(thingId);
+      thing = await this.thingService.getOneThingById(thingId);
     } catch (error) {
       // If not found, send a 404 response
       return next(new DCDError(404, "Thing not found"));
@@ -119,7 +121,7 @@ export class ThingController {
 
     // Try to save
     try {
-      await ThingController.thingService.editOneThing(thing);
+      await this.thingService.editOneThing(thing);
     } catch (error) {
       return next(new DCDError(500, "Failed to update thing"));
     }
@@ -127,7 +129,7 @@ export class ThingController {
     res.status(204).send();
   };
 
-  static editThingPEM = async (
+  editThingPEM = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -143,7 +145,7 @@ export class ThingController {
     const error = checkPEM(pem);
     if (error !== undefined) return next(error);
     // Call the Service
-    ThingController.thingService
+    this.thingService
       .editThingPEM(thingId, pem)
       .then(() => {
         res.status(204).send();
@@ -153,7 +155,7 @@ export class ThingController {
       });
   };
 
-  static deleteOneThing = async (
+  deleteOneThing = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -162,7 +164,7 @@ export class ThingController {
     const thingId = req.params.thingId;
     // Call the Service
     try {
-      await ThingController.thingService.deleteOneThing(thingId);
+      await this.thingService.deleteOneThing(thingId);
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
@@ -170,7 +172,7 @@ export class ThingController {
     }
   };
 
-  static countDataPoints = async (
+  countDataPoints = async (
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -181,7 +183,7 @@ export class ThingController {
 
     // Call the Service
     try {
-      const result = await ThingController.thingService.countDataPoints(
+      const result = await this.thingService.countDataPoints(
         req.context.userId,
         from,
         timeInterval
@@ -192,8 +194,6 @@ export class ThingController {
     }
   };
 }
-
-export default ThingController;
 
 function checkPEM(pem: string) {
   if (pem === undefined) {

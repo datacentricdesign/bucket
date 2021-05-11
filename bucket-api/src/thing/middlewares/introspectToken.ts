@@ -2,7 +2,6 @@ import { Response, NextFunction } from "express";
 import { DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { DCDRequest } from "../../config";
-import { Token } from "simple-oauth2";
 import { TokenIntrospection } from "../services/AuthService";
 
 /**
@@ -32,25 +31,27 @@ export const introspectToken = (requiredScope: string[]) => {
     }
 
     try {
-      const token = extractToken(req);
+      const tokenStr = extractToken(req);
       return AuthController.authService
         .refresh()
         .then(() => {
           if (
-            token.split(".").length === 3 &&
+            tokenStr.split(".").length === 3 &&
             req.params.thingId !== undefined
           ) {
             return AuthController.authService
-              .checkJWTAuth(token, req.params.thingId)
-              .then((token: Token) => {
-                const user = {
-                  token: token,
+              .checkJWTAuth(tokenStr, req.params.thingId)
+              .then(() => {
+                const user: TokenIntrospection = {
                   sub: req.params.thingId,
                 };
                 return Promise.resolve(user);
               });
           } else {
-            return AuthController.authService.introspect(token, requiredScope);
+            return AuthController.authService.introspect(
+              tokenStr,
+              requiredScope
+            );
           }
         })
         .then((user: TokenIntrospection) => {

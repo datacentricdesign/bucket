@@ -2,215 +2,242 @@ import { Router } from "express";
 
 import { introspectToken } from "../middlewares/introspectToken";
 import { checkPolicy } from "../middlewares/checkPolicy";
+import { PropertyController } from "./PropertyController";
 
-import PropertyController from "./PropertyController";
+export class PropertyRouter {
+  private router: Router;
+  private controller: PropertyController;
 
-export const PropertyRouter = Router({ mergeParams: true });
+  constructor() {
+    this.router = Router({ mergeParams: true });
+    this.controller = new PropertyController();
+    this.setRoutes();
+  }
 
-/**
- * @api {get} /things/:thingId/properties List
- * @apiGroup Property
- * @apiDescription Get Properties of a Thing.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiSuccess {Property[]} properties The retrieved Properties
- **/
-PropertyRouter.get(
-  "/",
-  [introspectToken(["dcd:properties"]), checkPolicy("read")],
-  PropertyController.getProperties
-);
+  getRouter(): Router {
+    return this.router;
+  }
 
-/**
- * @api {get} /things/:thingId/properties/:propertyId Read
- * @apiGroup Property
- * @apiDescription Get one Property.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property to read.
- * @apiParam {String} propertyId Id of the Property to read.
- *
- * @apiSuccess {Property} property The retrieved Property
- **/
-PropertyRouter.get(
-  "/:propertyId",
-  [introspectToken(["dcd:properties"]), checkPolicy("read")],
-  PropertyController.getOnePropertyById
-);
+  getController(): PropertyController {
+    return this.controller;
+  }
 
-/**
- * @api {post} /things/:thingId/properties Create
- * @apiGroup Property
- * @apiDescription Create a Property.
- *
- * @apiVersion 0.1.0
- *
- * @apiParam {String} thingId Id of the Thing to which we add the Property.
- *
- * @apiParam (Body) {Property} property Property to create as JSON.
- * @apiParamExample {json} property:
- *     {
- *       "name": "My Property",
- *       "description": "A description of my property.",
- *       "type": "PROPERTY_TYPE"
- *     }
- *
- * @apiHeader {String} Content-type application/json
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiSuccess {object} interaction The created Property
- */
-PropertyRouter.post(
-  "/",
-  [introspectToken([]), checkPolicy("create")],
-  PropertyController.createNewProperty
-);
+  setRoutes(): void {
+    /**
+     * @api {get} /things/:thingId/properties List
+     * @apiGroup Property
+     * @apiDescription Get Properties of a Thing.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiSuccess {Property[]} properties The retrieved Properties
+     **/
+    this.router.get(
+      "/",
+      [introspectToken(["dcd:properties"]), checkPolicy("read")],
+      this.controller.getProperties
+    );
 
-/**
- * @api {patch} /things/:thingId/properties/:propertyId Update
- * @apiGroup Property
- * @apiDescription Edit one Property to change its name or description.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property to update.
- * @apiParam {String} propertyId Id of the Property to update.
- *
- * @apiParam (Body) {Property} property Property to create as JSON.
- * @apiParamExample {json} property:
- *     {
- *       "name": "A new Property name",
- *       "description": "A new description of my property."
- *     }
- **/
-PropertyRouter.patch(
-  "/:propertyId",
-  [introspectToken(["dcd:properties"]), checkPolicy("update")],
-  PropertyController.editProperty
-);
+    /**
+     * @api {get} /things/:thingId/properties/:propertyId Read
+     * @apiGroup Property
+     * @apiDescription Get one Property.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property to read.
+     * @apiParam {String} propertyId Id of the Property to read.
+     *
+     * @apiSuccess {Property} property The retrieved Property
+     **/
+    this.router.get(
+      "/:propertyId",
+      [introspectToken(["dcd:properties"]), checkPolicy("read")],
+      this.controller.getOnePropertyById
+    );
 
-/**
- * @api {put} /things/:thingId/properties/:propertyId Update Values
- * @apiGroup Property
- * @apiDescription Update values of a Property.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property to update.
- * @apiParam {String} propertyId Id of the Property to update.
- *
- * @apiParam (Body) {Property} property with attribute 'values', an array of array [ [timestamp, val1, val2, val3], [timestamp, val1, val2, val3], ....]
- * @apiParamExample {json} property:
- *     {
- *       "values": [[1591868318000,0,1,2],[1591868318200,3,1,1]],
- *     }
- **/
-PropertyRouter.put(
-  "/:propertyId",
-  [introspectToken(["dcd:properties"]), checkPolicy("update")],
-  PropertyController.updatePropertyValues
-);
+    /**
+     * @api {post} /things/:thingId/properties Create
+     * @apiGroup Property
+     * @apiDescription Create a Property.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiParam {String} thingId Id of the Thing to which we add the Property.
+     *
+     * @apiParam (Body) {Property} property Property to create as JSON.
+     * @apiParamExample {json} property:
+     *     {
+     *       "name": "My Property",
+     *       "description": "A description of my property.",
+     *       "type": "PROPERTY_TYPE"
+     *     }
+     *
+     * @apiHeader {String} Content-type application/json
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiSuccess {object} interaction The created Property
+     */
+    this.router.post(
+      "/",
+      [introspectToken([]), checkPolicy("create")],
+      this.controller.createNewProperty
+    );
 
-/**
- * @api {delete} /things/:thingId/properties/:propertyId Delete
- * @apiGroup Property
- * @apiDescription Delete one Property.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property to delete.
- * @apiParam {String} propertyId Id of the Property to delete.
- **/
-PropertyRouter.delete(
-  "/:propertyId",
-  [introspectToken(["dcd:properties"]), checkPolicy("delete")],
-  PropertyController.deleteOneProperty
-);
+    /**
+     * @api {patch} /things/:thingId/properties/:propertyId Update
+     * @apiGroup Property
+     * @apiDescription Edit one Property to change its name or description.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property to update.
+     * @apiParam {String} propertyId Id of the Property to update.
+     *
+     * @apiParam (Body) {Property} property Property to create as JSON.
+     * @apiParamExample {json} property:
+     *     {
+     *       "name": "A new Property name",
+     *       "description": "A new description of my property."
+     *     }
+     **/
+    this.router.patch(
+      "/:propertyId",
+      [introspectToken(["dcd:properties"]), checkPolicy("update")],
+      this.controller.editProperty
+    );
 
-PropertyRouter.get(
-  "/:propertyId/count",
-  [introspectToken(["dcd:properties"]), checkPolicy("read")],
-  PropertyController.countDataPoints
-);
+    /**
+     * @api {put} /things/:thingId/properties/:propertyId Update Values
+     * @apiGroup Property
+     * @apiDescription Update values of a Property.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property to update.
+     * @apiParam {String} propertyId Id of the Property to update.
+     *
+     * @apiParam (Body) {Property} property with attribute 'values', an array of array [ [timestamp, val1, val2, val3], [timestamp, val1, val2, val3], ....]
+     * @apiParamExample {json} property:
+     *     {
+     *       "values": [[1591868318000,0,1,2],[1591868318200,3,1,1]],
+     *     }
+     **/
+    this.router.put(
+      "/:propertyId",
+      [introspectToken(["dcd:properties"]), checkPolicy("update")],
+      this.controller.updatePropertyValues
+    );
 
-PropertyRouter.get(
-  "/:propertyId/last",
-  [introspectToken(["dcd:properties"]), checkPolicy("read")],
-  PropertyController.lastDataPoints
-);
+    /**
+     * @api {delete} /things/:thingId/properties/:propertyId Delete
+     * @apiGroup Property
+     * @apiDescription Delete one Property.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property to delete.
+     * @apiParam {String} propertyId Id of the Property to delete.
+     **/
+    this.router.delete(
+      "/:propertyId",
+      [introspectToken(["dcd:properties"]), checkPolicy("delete")],
+      this.controller.deleteOneProperty
+    );
 
-/**
- * @api {get} /things/:thingId/properties/:propertyId/consents List consents
- * @apiGroup Property
- * @apiDescription List consents granted for one Property. Only property owner can access this list.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property.
- * @apiParam {String} propertyId Id of the Property to list consents from.
- **/
-PropertyRouter.get(
-  "/:propertyId/consents",
-  [introspectToken(["dcd:properties", "dcd:consents"]), checkPolicy("list")],
-  PropertyController.listConsents
-);
+    this.router.get(
+      "/:propertyId/count",
+      [introspectToken(["dcd:properties"]), checkPolicy("read")],
+      this.controller.countDataPoints
+    );
 
-/**
- * @api {delete} /things/:thingId/properties/:propertyId/consents Revoke a consent
- * @apiGroup Property
- * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
- *
- * @apiVersion 0.1.0
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property.
- * @apiParam {String} propertyId Id of the Property.
- * @apiParam {String} consentId Id of the Consent to delete.
- **/
-PropertyRouter.delete(
-  "/:propertyId/consents/:consentId",
-  [introspectToken(["dcd:properties", "dcd:consents"]), checkPolicy("delete")],
-  PropertyController.revokeConsent
-);
+    this.router.get(
+      "/:propertyId/last",
+      [introspectToken(["dcd:properties"]), checkPolicy("read")],
+      this.controller.lastDataPoints
+    );
 
-/**
- * @api {post} /things/:thingId/properties/:propertyId/consents Grant a consent
- * @apiGroup Property
- * @apiDescription Grant a consent for one Property. Only property owner can access this list.
- *
- * @apiVersion 0.1.0
- *
- * @apiParam (Body) {Consent} consent Consent to grant as JSON.
- * @apiParamExample {json} consent:
- *     {
- *       "subjects": ["dcd:persons:4baec95d-98cf-44a5-9c4d-08ef0d734d07", "dcd:team:4baec95d-98cf-44a5-9c4d-08ef0d734d07"],
- *       "actions": ["dcd:read"]
- *     }
- *
- * @apiHeader {String} Content-type application/json
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiParam {String} thingId Id of the Thing containing the Property.
- * @apiParam {String} propertyId Id of the Property.
- **/
-PropertyRouter.post(
-  "/:propertyId/consents",
-  [introspectToken(["dcd:properties", "dcd:consents"]), checkPolicy("create")],
-  PropertyController.grantConsent
-);
+    /**
+     * @api {get} /things/:thingId/properties/:propertyId/consents List consents
+     * @apiGroup Property
+     * @apiDescription List consents granted for one Property. Only property owner can access this list.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property.
+     * @apiParam {String} propertyId Id of the Property to list consents from.
+     **/
+    this.router.get(
+      "/:propertyId/consents",
+      [
+        introspectToken(["dcd:properties", "dcd:consents"]),
+        checkPolicy("list"),
+      ],
+      this.controller.listConsents
+    );
+
+    /**
+     * @api {delete} /things/:thingId/properties/:propertyId/consents Revoke a consent
+     * @apiGroup Property
+     * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property.
+     * @apiParam {String} propertyId Id of the Property.
+     * @apiParam {String} consentId Id of the Consent to delete.
+     **/
+    this.router.delete(
+      "/:propertyId/consents/:consentId",
+      [
+        introspectToken(["dcd:properties", "dcd:consents"]),
+        checkPolicy("delete"),
+      ],
+      this.controller.revokeConsent
+    );
+
+    /**
+     * @api {post} /things/:thingId/properties/:propertyId/consents Grant a consent
+     * @apiGroup Property
+     * @apiDescription Grant a consent for one Property. Only property owner can access this list.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiParam (Body) {Consent} consent Consent to grant as JSON.
+     * @apiParamExample {json} consent:
+     *     {
+     *       "subjects": ["dcd:persons:4baec95d-98cf-44a5-9c4d-08ef0d734d07", "dcd:team:4baec95d-98cf-44a5-9c4d-08ef0d734d07"],
+     *       "actions": ["dcd:read"]
+     *     }
+     *
+     * @apiHeader {String} Content-type application/json
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property.
+     * @apiParam {String} propertyId Id of the Property.
+     **/
+    this.router.post(
+      "/:propertyId/consents",
+      [
+        introspectToken(["dcd:properties", "dcd:consents"]),
+        checkPolicy("create"),
+      ],
+      this.controller.grantConsent
+    );
+  }
+}

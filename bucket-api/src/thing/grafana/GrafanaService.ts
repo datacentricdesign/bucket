@@ -4,8 +4,8 @@ import fetch, { Response } from "node-fetch";
 import config from "../../config";
 import { Property } from "../property/Property";
 import { Thing } from "../Thing";
-import ThingController from "../http/ThingController";
 import * as btoa from "btoa";
+import { ThingService } from "../services/ThingService";
 
 export interface Target {
   property: Property;
@@ -125,6 +125,12 @@ export class GrafanaService {
     Authorization: "Bearer " + config.grafana.apiKey,
   };
 
+  private thingService: ThingService;
+
+  constructor() {
+    this.thingService = ThingService.getInstance();
+  }
+
   /**
    * @param {string} personId
    * @param {string} thingId
@@ -139,9 +145,7 @@ export class GrafanaService {
       // lock permission for this user only, as editor
       await this.setPersonFolderPermission(personId, grafanaId);
       // create a dashboard inside the user folder, with Thing name, thing id
-      const thing: Thing = await ThingController.thingService.getOneThingById(
-        thingId
-      );
+      const thing: Thing = await this.thingService.getOneThingById(thingId);
       await this.createThingDashboard(personId, thing, folderId);
     } catch (error) {
       return Promise.reject(error);
