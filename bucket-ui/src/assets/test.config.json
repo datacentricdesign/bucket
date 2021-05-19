@@ -1,0 +1,8 @@
+{
+    "name": "Bucket",
+    "version": "0.0.1",
+    "environment": "test",
+    "basehref": "bucket",
+    "apiURL": "https://dwd-test.tudelft.nl/bucket/api",
+    "grafanaURL": "https://dwd-test.tudelft.nl/grafana"
+}

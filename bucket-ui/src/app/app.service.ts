@@ -9,7 +9,8 @@ export class AppService {
 
   constructor(private http: HttpClient) { }
 
-  configUrl = `assets/${environment.production ? 'prod' : 'dev'}.config.json`;
+
+  configUrl = `assets/${environment.production ? 'prod' : (environment.test ? 'test' : 'dev')}.config.json`;
   private configSettings: any = null;
 
   get settings() {
