@@ -98,7 +98,7 @@ export class BucketMQTTServer {
    */
   async findOrCreateMQTTStatusProperty(thingId: string): Promise<Property> {
     try {
-      const properties = await this.propertyService.getPropertiesByTypeId(
+      const properties = await this.propertyService.getPropertiesOfAThingByType(
         thingId,
         "MQTT_STATUS"
       );
