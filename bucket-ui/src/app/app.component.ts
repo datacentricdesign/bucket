@@ -3,6 +3,7 @@ import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { authCodeFlowConfig } from './auth-code-flow.config';
+import { AppService } from './app.service';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ import { authCodeFlowConfig } from './auth-code-flow.config';
 })
 export class AppComponent implements OnInit {
 
-  constructor(private router: Router, private oauthService: OAuthService) {
+  constructor(private router: Router, private oauthService: OAuthService, private appService: AppService) {
     this.configureCodeFlow();
 
     // Automatically load user profile
@@ -32,7 +33,7 @@ export class AppComponent implements OnInit {
   }
 
   private configureCodeFlow() {
-    this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.configure(<AuthConfig> this.appService.settings.authCodeFlow);
     this.oauthService.requestAccessToken = true;
     this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }

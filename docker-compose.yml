@@ -4,6 +4,8 @@ services:
   bucket-api:
     build:
       context: ./bucket-api
+      args:
+        - START_COMMAND=$BUCKET_API_START_COMMAND
     container_name: bucket-api
     environment:
       - HOST_DATA_FOLDER=$HOST_DATA_FOLDER
@@ -70,6 +72,7 @@ services:
       args:
         - BASE_HREF=$BUCKET_UI_BASE_HREF
         - DEPLOY_URL=$BUCKET_UI_DEPLOY_URL
+        - CONFIGURATION=$BUCKET_UI_CONFIGURATION
     container_name: bucket-ui
     environment:
      - NGINX_HOST=$BUCKET_UI_HOST

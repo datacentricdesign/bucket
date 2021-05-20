@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { ActivatedRoute } from '@angular/router';
-import { authCodeFlowConfig } from 'app/auth-code-flow.config';
+import { AppService } from 'app/app.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -15,7 +15,8 @@ export class LandingPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private oauthService: OAuthService
+    private oauthService: OAuthService,
+    private appService: AppService
   ) {}
 
   ngOnInit(): void {
@@ -29,7 +30,7 @@ export class LandingPageComponent implements OnInit {
 
   async loginCode() {
     // Tweak config for code flow
-    this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.configure(<AuthConfig> this.appService.settings.authCodeFlow);
     await this.oauthService.loadDiscoveryDocument();
     this.oauthService.requestAccessToken = true;
 

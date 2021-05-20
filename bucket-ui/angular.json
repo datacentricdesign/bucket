@@ -28,6 +28,9 @@
             "scripts": []
           },
           "configurations": {
+            "development": {
+
+            },
             "production": {
               "optimization": true,
               "outputHashing": "all",
