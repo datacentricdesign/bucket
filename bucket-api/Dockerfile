@@ -25,4 +25,4 @@ RUN npm install
 # COPY --from=builder /usr/app/dist ./dist
 COPY . .
 # Run the production script
-CMD [ "npm", "run", "${START_COMMAND}" ]
+CMD npm run ${START_COMMAND}
