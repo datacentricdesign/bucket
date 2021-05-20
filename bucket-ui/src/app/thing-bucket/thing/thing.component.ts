@@ -150,13 +150,19 @@ export class ThingComponent implements OnInit {
         for (let i = 0; i < this.thing.properties.length; i++) {
             if (this.thing.properties[i].type.id === 'MQTT_STATUS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
-                this.mqttStatus = result[0]
+                if (result[0] !== undefined) {
+                    this.mqttStatus = result[0]
+                }
             } else if (this.thing.properties[i].type.id === 'IP_ADDRESS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
-                this.ipAddress = result[0]
+                if (result[0] !== undefined) {
+                    this.ipAddress = result[0]
+                }
             } else if (this.thing.properties[i].type.id === 'DNS') {
                 const result = await this.thingService.lastValues(this.thing.id, this.thing.properties[i].id)
-                this.dns = result[0]
+                if (result[0] !== undefined) {
+                    this.dns = result[0]
+                }
             }
         }
     }
