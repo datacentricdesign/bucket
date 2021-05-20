@@ -94,7 +94,7 @@ services:
       - $BUCKET_POSTGRES_PORT:$BUCKET_POSTGRES_PORT
 
   bucket-influxdb:
-    image: influxdb
+    image: influxdb:1.8
     container_name: bucket-influxdb
     volumes:
       - $HOST_DATA_FOLDER/bucket-influxdb:/var/lib/influxdb
