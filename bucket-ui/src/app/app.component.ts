@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { filter } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { authCodeFlowConfig } from './auth-code-flow.config';
 import { AppService } from './app.service';
 
 @Component({
