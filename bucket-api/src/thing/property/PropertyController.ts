@@ -57,7 +57,7 @@ export class PropertyController {
     const actor: string = req.context.userId;
 
     // optionals
-    const from = req.query.from as string;
+    const from = parseInt(req.query.from as string);
     const timeInterval = req.query.timeInterval as string;
 
     // Get properties from Service
@@ -247,17 +247,22 @@ export class PropertyController {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
-    const from = req.query.from as string;
+    const from = parseInt(req.query.from as string);
     const timeInterval = req.query.timeInterval as string;
     // Call the Service
     try {
-      const result = await this.propertyService.countDataPoints(
+      const result = await this.propertyService.getOnePropertyById(
         thingId,
         propertyId,
-        undefined,
-        from,
-        timeInterval
+        {
+          from: from,
+          to: Date.now(),
+          timeInterval: timeInterval,
+          fctInterval: "count",
+          fill: undefined,
+        }
       );
+
       res.status(200).send(result);
     } catch (error) {
       next(error);
@@ -306,11 +311,18 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Call the Service
     try {
-      const result = await this.propertyService.lastDataPoints(
+      const property = await this.propertyService.getOnePropertyById(
         thingId,
-        propertyId
+        propertyId,
+        {
+          from: 0,
+          to: Date.now(),
+          timeInterval: undefined,
+          fctInterval: "last",
+          fill: undefined,
+        }
       );
-      res.status(200).send(result);
+      res.status(200).send(property);
     } catch (error) {
       next(error);
     }

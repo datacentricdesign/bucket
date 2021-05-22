@@ -12,7 +12,7 @@ import {
   InfluxDB,
   Point,
 } from "@influxdata/influxdb-client";
-import { SetupAPI } from "@influxdata/influxdb-client-apis";
+import { DeleteAPI, SetupAPI } from "@influxdata/influxdb-client-apis";
 
 import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
@@ -204,7 +204,7 @@ export class PropertyService {
     actor: string,
     subject: string,
     audienceId: string,
-    from: string,
+    from: number,
     timeInterval: string
   ): Promise<Property[]> {
     // Check if the service is ready
@@ -266,15 +266,19 @@ export class PropertyService {
       .setParameters({ values: resources })
       .getMany();
 
+    const to = Date.now();
     for (let i = 0; i < properties.length; i++) {
       properties[i].sharedWith = resourcesOrigin[properties[i].id];
       if (from !== undefined && timeInterval !== undefined) {
-        properties[i].values = await this.countDataPoints(
-          properties[i].thing.id,
-          properties[i].id,
-          properties[i].type.id,
-          from,
-          timeInterval
+        properties[i].values = await this.readValuesFromInfluxDB(
+          properties[i],
+          {
+            from: from,
+            to: to,
+            timeInterval: timeInterval,
+            fctInterval: "count",
+            fill: undefined,
+          }
         );
       }
     }
@@ -309,7 +313,10 @@ export class PropertyService {
 
     if (property !== undefined && valueOptions != undefined) {
       Log.debug(valueOptions.from);
-      return this.readValuesFromInfluxDB(property, valueOptions);
+      property.values = await this.readValuesFromInfluxDB(
+        property,
+        valueOptions
+      );
     }
     return property;
   }
@@ -393,10 +400,7 @@ export class PropertyService {
    * @param propertyId
    * @return {Promise}
    */
-  async deleteOneProperty(
-    thingId: string,
-    propertyId: string
-  ): Promise<DeleteResult> {
+  async deleteOneProperty(thingId: string, propertyId: string): Promise<void> {
     // Check if the service is ready
     if (!this.ready) {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
@@ -411,12 +415,39 @@ export class PropertyService {
         404,
         "Property to delete " +
           propertyId +
-          " could not be not found for Thing " +
+          " could not be found for Thing " +
           thingId +
           "."
       );
     }
-    return propertyRepository.delete(propertyId);
+    return propertyRepository
+      .delete(propertyId)
+      .then((result: DeleteResult) => {
+        if (result.affected === 1) {
+          return Promise.resolve();
+        }
+        return Promise.reject(
+          new DCDError(
+            500,
+            "Unexpected number of deleted properties: " + result.affected
+          )
+        );
+      })
+      .then(() => {
+        const deleteApi = new DeleteAPI(this.influx);
+        deleteApi.postDelete({
+          body: {
+            start: "1970-01-01T00:00:00Z",
+            stop: new Date().toISOString(),
+            predicate: `thingId="${thingId}" AND propertyId="${propertyId}"`,
+          },
+          org: this.org,
+          bucket: this.bucket,
+        });
+      })
+      .catch((error) => {
+        return Promise.reject(new DCDError(500, error.message));
+      });
   }
 
   /**
@@ -464,15 +495,15 @@ export class PropertyService {
               point.booleanField(name, values[i]);
               break;
           }
-          point.timestamp(ts);
-          points.push(point);
         }
-
-        const writeApi = this.influx.getWriteApi(this.org, this.bucket, "ms");
-        writeApi.writePoints(points);
-        return writeApi.close();
+        point.timestamp(ts);
+        points.push(point);
       }
     }
+
+    const writeApi = this.influx.getWriteApi(this.org, this.bucket, "ms");
+    writeApi.writePoints(points);
+    return writeApi.close();
   }
 
   /**
@@ -487,33 +518,11 @@ export class PropertyService {
   private readValuesFromInfluxDB(
     property: Property,
     opt: ValueOptions
-  ): Promise<Property> {
+  ): Promise<Array<Array<string | number>>> {
     // Check if the service is ready
     if (!this.ready) {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
-    // Log.debug(opt);
-    // let query = `SELECT "time"`;
-    // for (let index = 0; index < property.type.dimensions.length; index++) {
-    //   if (opt.timeInterval !== undefined) {
-    //     query += `, ${opt.fctInterval}("${property.type.dimensions[index].name}")`;
-    //   } else {
-    //     query += `, "${property.type.dimensions[index].name}" `;
-    //   }
-    // }
-    // query += ` FROM "${property.type.id}"`;
-
-    // if (opt.from !== undefined && opt.to !== undefined) {
-    //   const start = new Date(opt.from).toISOString();
-    //   const end = new Date(opt.to).toISOString();
-    //   query += ` WHERE time >= '${start}' AND time <= '${end}' AND "thingId" = '${property.thing.id}' AND "propertyId" = '${property.id}'`;
-    // }
-
-    // if (opt.timeInterval !== undefined) {
-    //   query += ` GROUP BY time(${opt.timeInterval}) fill(${opt.fill})`;
-    // }
-
-    // Log.debug(query);
 
     const queryApi = new InfluxDB({
       url: this.url,
@@ -526,108 +535,48 @@ export class PropertyService {
       const end = new Date(opt.to).toISOString();
       fluxQuery += `|> range(start: ${start}, stop: ${end})`;
     }
+    fluxQuery += ` |> filter(fn: (r) => r["_measurement"] == "${property.type.id}")`;
+    fluxQuery += ` |> filter(fn: (r) => r["propertyId"] == "${property.id}")`;
+    fluxQuery += ` |> filter(fn: (r) => r["thingId"] == "${property.thing.id}")`;
+    fluxQuery += ` |> filter(fn: (r) =>`;
+    for (let index = 0; index < property.type.dimensions.length; index++) {
+      if (index > 0) {
+        fluxQuery += ` or `;
+      }
+      fluxQuery += ` r["_field"] == "${property.type.dimensions[index].name}" `;
+    }
+    fluxQuery += ")";
 
-    fluxQuery += ` |> filter(fn: (r) => (r._measurement == "${property.type.id}") 
-                                        and (r.propertyId == "${property.id}")
-                                        and (r.thingId == "${property.thing.id}")`;
+    if (opt.timeInterval !== undefined) {
+      fluxQuery += ` |> aggregateWindow(every: ${opt.timeInterval}, fn: ${opt.fctInterval}, createEmpty: false)`;
+    }
+
+    fluxQuery += ` |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")`;
 
     return new Promise((resolve, reject) => {
+      const values = [];
       queryApi.queryRows(fluxQuery, {
         next(row: string[], tableMeta: FluxTableMetaData) {
           const o = tableMeta.toObject(row);
-          // Log.debug(JSON.stringify(o, null, 2))
-          Log.debug(o);
+          const val = [Date.parse(o["_time"])];
+          for (
+            let index = 0;
+            index < property.type.dimensions.length;
+            index++
+          ) {
+            val.push(o[property.type.dimensions[index].name]);
+          }
+          values.push(val);
         },
         error(error: Error) {
           Log.error(error);
-          Log.debug("\nFinished ERROR");
           return reject();
         },
         complete() {
-          Log.debug("\nFinished SUCCESS");
-          return resolve(property);
+          return resolve(values);
         },
       });
     });
-
-    // .queryRaw(query, {
-    //   precision: "ms",
-    //   database: config.influxdb.database,
-    // })
-    // .then((data) => {
-    //   if (
-    //     data.results.length > 0 &&
-    //     data.results[0].series !== undefined &&
-    //     data.results[0].series.length > 0
-    //   ) {
-    //     property.values = data.results[0].series[0].values;
-    //   } else {
-    //     property.values = [];
-    //   }
-    //   return Promise.resolve(property);
-    // });
-  }
-
-  async countDataPoints(
-    thingId: string,
-    propertyId: string,
-    typeId: string = undefined,
-    from: string,
-    timeInterval: string
-  ): Promise<Array<Array<string | number>>> {
-    // Check if the service is ready
-    if (!this.ready) {
-      return Promise.reject(new DCDError(503, "Property Service not ready."));
-    }
-    let measurement = typeId;
-    if (measurement === undefined) {
-      const property = await this.getOnePropertyById(thingId, propertyId);
-      measurement = property.type.id;
-    }
-
-    let query = `SELECT COUNT(*) FROM ${measurement} WHERE time > ${from} AND "propertyId" = '${propertyId}'`;
-    if (timeInterval !== undefined) query += ` GROUP BY time(${timeInterval})`;
-
-    return Promise.reject(query);
-    // return this.influx
-    //   .queryRaw(query, {
-    //     precision: "ms",
-    //     database: config.influxdb.database,
-    //   })
-    //   .then((data) => {
-    //     if (data.results[0].series === undefined) return Promise.resolve([]);
-    //     return Promise.resolve(data.results[0].series[0].values);
-    //   })
-    //   .catch((error) => {
-    //     return error;
-    //   });
-  }
-
-  async lastDataPoints(
-    thingId: string,
-    propertyId: string
-  ): Promise<Array<Array<string | number>>> {
-    // Check if the service is ready
-    if (!this.ready) {
-      return Promise.reject(new DCDError(503, "Property Service not ready."));
-    }
-    const property = await this.getOnePropertyById(thingId, propertyId);
-    // return this.influx
-    //   .queryRaw(
-    //     `SELECT * FROM ${property.type.id}  WHERE "propertyId" = '${property.id}' ORDER BY DESC LIMIT 1`,
-    //     {
-    //       precision: "ms",
-    //       database: config.influxdb.database,
-    //     }
-    //   )
-    //   .then((data) => {
-    //     return Promise.resolve(data.results[0].series[0].values);
-    //   })
-    //   .catch((error) => {
-    //     return error;
-    //   });
-
-    return Promise.reject(property);
   }
 }
 

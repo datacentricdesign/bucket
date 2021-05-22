@@ -173,7 +173,7 @@ export class ThingService {
 
   async countDataPoints(
     personId: string,
-    from: string,
+    from: number,
     timeInterval: string
   ): Promise<Thing[]> {
     const things = await this.getThingsOfAPerson(personId);
@@ -181,14 +181,18 @@ export class ThingService {
       const thing = things[i];
       for (let j = 0; j < thing.properties.length; j++) {
         const property: Property = thing.properties[j];
-        const result = await this.propertyService.countDataPoints(
+        const prop = await this.propertyService.getOnePropertyById(
           thing.id,
           property.id,
-          property.type.id,
-          from,
-          timeInterval
+          {
+            from: from,
+            to: Date.now(),
+            timeInterval: timeInterval,
+            fctInterval: "count",
+            fill: undefined,
+          }
         );
-        property.values = result;
+        property.values = prop.values;
       }
     }
     return things;

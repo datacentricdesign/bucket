@@ -144,6 +144,84 @@ describe("Property Service", function () {
       });
   });
 
+  it("It should add values to the property.", function (done: Mocha.Done) {
+    const now = Date.now();
+    createdProperty.values = [
+      [now - 7000, 1.3, 2.2, 3.4],
+      [now - 5000, 1.7, 2.3, 3.0],
+      [now, 1.1, 2.4, 3.1],
+    ];
+    propertyService
+      .updatePropertyValues(createdProperty)
+      .then(() => {
+        done();
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
+  });
+
+  it("It should get values from the property.", function (done: Mocha.Done) {
+    propertyService
+      .getOnePropertyById(createdProperty.thing.id, createdProperty.id, {
+        from: 0,
+        to: Date.now(),
+        timeInterval: undefined,
+        fctInterval: undefined,
+        fill: undefined,
+      })
+      .then((foundProperty) => {
+        Log.info(foundProperty.values);
+        expect(foundProperty.values.length).to.equal(3);
+        done();
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
+  });
+
+  it("It should get value count from the property.", function (done: Mocha.Done) {
+    propertyService
+      .getOnePropertyById(createdProperty.thing.id, createdProperty.id, {
+        from: 0,
+        to: Date.now(),
+        timeInterval: "5s",
+        fctInterval: "count",
+        fill: undefined,
+      })
+      .then((foundProperty) => {
+        Log.info(foundProperty.values);
+        expect(foundProperty.values.length).to.equal(2);
+        done();
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
+  });
+
+  it("It should delete the property.", function (done: Mocha.Done) {
+    propertyService
+      .deleteOneProperty(createdProperty.thing.id, createdProperty.id)
+      .then(() => {
+        propertyService
+          .deleteOneProperty(createdProperty.thing.id, createdProperty.id)
+          .then(() => {
+            done(new Error("Should not be able to delete the second time."));
+          })
+          .catch((error: DCDError) => {
+            expect(error.errorCode).to.equal(404);
+            done();
+          });
+      })
+      .catch((error: DCDError) => {
+        Log.error(error);
+        done(error);
+      });
+  });
+
   after(async function () {
     await thingService.deleteOneThing(createdThing.id);
     // await PropertyService.release(this);

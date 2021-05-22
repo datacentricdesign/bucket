@@ -178,7 +178,7 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get the property ID from the url
-    const from = req.query.from as string;
+    const from = parseInt(req.query.from as string);
     const timeInterval = req.query.timeInterval as string;
 
     // Call the Service
