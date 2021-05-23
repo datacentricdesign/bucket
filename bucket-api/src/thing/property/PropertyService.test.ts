@@ -193,7 +193,7 @@ describe("Property Service", function () {
       })
       .then((foundProperty) => {
         Log.info(foundProperty.values);
-        expect(foundProperty.values.length).to.equal(2);
+        expect(foundProperty.values.length).to.equal(3);
         done();
       })
       .catch((error: DCDError) => {

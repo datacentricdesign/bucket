@@ -134,20 +134,26 @@ export class PropertyController {
 
     // Validade if the parameters are ok
     const errors = await validate(property);
+
     if (errors.length > 0) {
       next(new DCDError(400, errors.toString()));
     } else {
       // Retrieve thing details from thingId
       const thing = await this.thingService.getOneThingById(req.params.thingId);
-      try {
-        const createdProperty = await this.propertyService.createNewProperty(
-          thing,
-          property
-        );
-        // If all ok, send 201 response
-        res.status(201).send(createdProperty);
-      } catch (error) {
-        next(error);
+      if (thing === undefined) {
+        next(new DCDError(400, "Thing not found."));
+      } else {
+        try {
+          const createdProperty = await this.propertyService.createNewProperty(
+            thing,
+            property
+          );
+          // If all ok, send 201 response
+          res.status(201).send(JSON.stringify(createdProperty));
+        } catch (error) {
+          Log.debug(error);
+          next(error);
+        }
       }
     }
   };

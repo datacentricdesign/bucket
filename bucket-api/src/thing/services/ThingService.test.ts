@@ -20,6 +20,7 @@ describe("Thing Service", function () {
   });
 
   it("Create", function (done: Mocha.Done) {
+    this.timeout(10000);
     thingService
       .createNewThing(thing)
       .then((newThing: Thing) => {

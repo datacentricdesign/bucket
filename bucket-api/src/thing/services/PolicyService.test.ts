@@ -23,6 +23,7 @@ describe("Policy Service", function () {
   });
 
   it("Grant", function (done: Mocha.Done) {
+    this.timeout(10000);
     policyService
       .grant(personId, thingId, "owner")
       .then((acp: AccessControlPolicy) => {
@@ -37,6 +38,7 @@ describe("Policy Service", function () {
   });
 
   it("Get Role Id", function (done: Mocha.Done) {
+    this.timeout(10000);
     policyService
       .getRoleId(personId, thingId, "owner")
       .then((roleId: string) => {
@@ -51,6 +53,7 @@ describe("Policy Service", function () {
   });
 
   it("Revoke", function (done: Mocha.Done) {
+    this.timeout(10000);
     policyService
       .revoke(personId, thingId, "owner")
       .then((acp: AccessControlPolicy) => {
