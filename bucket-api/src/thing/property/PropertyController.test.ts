@@ -76,6 +76,39 @@ describe("Property Controller", function () {
       });
   });
 
+  it("It should list properties.", function (done: Mocha.Done) {
+    const request: DCDRequest = httpMocks.createRequest({
+      method: "GET",
+      url: "/things/" + createdThing.id + "/properties",
+      params: {
+        thingId: createdThing.id,
+      },
+    });
+    request.context = {
+      userId: personId,
+    };
+
+    const response = httpMocks.createResponse();
+    const next = sinon.spy();
+
+    propertyController
+      .getProperties(request, response, next)
+      .then(() => {
+        expect(next.notCalled).to.be.true;
+        expect(response.statusCode).to.equal(
+          200,
+          "HTTP response should have http status 200."
+        );
+        const data = response._getJSONData();
+        expect(data.properties.length).to.equal(1);
+        Log.debug(data);
+        done();
+      })
+      .catch((error) => {
+        done(error);
+      });
+  });
+
   after(async function () {
     await thingService.deleteOneThing(createdThing.id);
     // await PropertyService.release(this);

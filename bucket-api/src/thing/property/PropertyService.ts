@@ -18,8 +18,13 @@ import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { Log } from "../../Logger";
 import { PropertyType } from "./propertyType/PropertyType";
-import { PolicyService } from "../services/PolicyService";
+import { AccessControlPolicy, PolicyService } from "../services/PolicyService";
 import { Thing } from "../Thing";
+
+interface SharedProperties {
+  propertyIdArray: string[];
+  resourceOriginMap: Map<string, string[]>;
+}
 
 export class PropertyService {
   private influx: InfluxDB;
@@ -201,7 +206,6 @@ export class PropertyService {
    * @param {string} audienceId person, thing or group id
    **/
   async getProperties(
-    actor: string,
     subject: string,
     audienceId: string,
     from: number,
@@ -211,64 +215,35 @@ export class PropertyService {
     if (!this.ready) {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
-    let groups = [];
-    if (audienceId === "*") {
-      groups = await this.policyService.listGroupMembership(subject);
-    } else {
-      try {
-        await this.policyService.checkGroupMembership(subject, audienceId);
-        groups.push(audienceId);
-      } catch (error) {
-        return Promise.reject(error);
-      }
-    }
+    // Get an array of group names from the specified audience
+    const groups = await this.audienceToGroups(subject, audienceId);
+    // Get all consents from these groups
+    const consents = await this.getConsentsFromGroupArray(groups);
+    // Extract the property id of the consents and their origin (thing they belong to)
+    const {
+      propertyIdArray,
+      resourceOriginMap,
+    } = this.consentToSharedProperties(consents);
+    // Get the properties
+    const properties = await this.getPropertiesFromList(propertyIdArray);
+    // Get the number of values for each dimension, per time interval
+    return this.getSharedPropertyValueCount(
+      properties,
+      resourceOriginMap,
+      from,
+      timeInterval
+    );
+  }
 
-    // Get the list of all consent concerning the current subject
-    let consents = [];
-    for (let i = 0; i < groups.length; i++) {
-      try {
-        const result = await this.policyService.listConsents(
-          "subject",
-          groups[i]
-        );
-        consents = consents.concat(result);
-      } catch (error) {
-        // Nothing to do
-      }
-    }
-
-    let resources = [];
-    const resourcesOrigin = {};
-    for (let i = 0; i < consents.length; i++) {
-      if (consents[i].effect === "allow") {
-        for (let j = 0; j < consents[i].resources.length; j++) {
-          const resource = consents[i].resources[j];
-          if (resourcesOrigin[resource] !== undefined) {
-            resourcesOrigin[resource] = resourcesOrigin[resource].concat(
-              consents[i].subjects
-            );
-          } else {
-            resourcesOrigin[resource] = consents[i].subjects;
-          }
-        }
-        resources = resources.concat(consents[i].resources);
-      }
-    }
-
-    // Get properties from the database
-    const propertyRepository = getRepository(Property);
-    const properties = await propertyRepository
-      .createQueryBuilder("property")
-      .innerJoinAndSelect("property.type", "type")
-      .innerJoinAndSelect("property.thing", "thing")
-      .innerJoinAndSelect("type.dimensions", "dimensions")
-      .where("property.id = ANY (:values)")
-      .setParameters({ values: resources })
-      .getMany();
-
+  private async getSharedPropertyValueCount(
+    properties: Property[],
+    resourceOriginMap: Map<string, string[]>,
+    from?: number,
+    timeInterval?: string
+  ) {
     const to = Date.now();
     for (let i = 0; i < properties.length; i++) {
-      properties[i].sharedWith = resourcesOrigin[properties[i].id];
+      properties[i].sharedWith = resourceOriginMap[properties[i].id];
       if (from !== undefined && timeInterval !== undefined) {
         properties[i].values = await this.readValuesFromInfluxDB(
           properties[i],
@@ -282,8 +257,86 @@ export class PropertyService {
         );
       }
     }
-
     return properties;
+  }
+
+  private async audienceToGroups(
+    subject: string,
+    audienceId: string
+  ): Promise<string[]> {
+    let groups = [];
+    if (audienceId === "*") {
+      groups = await this.policyService.listGroupMembership(subject);
+    } else {
+      try {
+        await this.policyService.checkGroupMembership(subject, audienceId);
+        groups.push(audienceId);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    }
+    return groups;
+  }
+
+  private consentToSharedProperties(
+    consents: AccessControlPolicy[]
+  ): SharedProperties {
+    let propertyIdArray = [];
+    const resourceOriginMap = new Map<string, string[]>();
+    for (let i = 0; i < consents.length; i++) {
+      if (consents[i].effect === "allow") {
+        for (let j = 0; j < consents[i].resources.length; j++) {
+          const resource = consents[i].resources[j];
+          if (resourceOriginMap.has(resource)) {
+            resourceOriginMap.set(
+              resource,
+              resourceOriginMap.get(resource).concat(consents[i].subjects)
+            );
+          } else {
+            resourceOriginMap.set(resource, consents[i].subjects);
+          }
+        }
+        propertyIdArray = propertyIdArray.concat(consents[i].resources);
+      }
+    }
+    return {
+      propertyIdArray,
+      resourceOriginMap,
+    };
+  }
+
+  private async getConsentsFromGroupArray(
+    groups: string[]
+  ): Promise<AccessControlPolicy[]> {
+    // Get the list of all consent concerning the current subject
+    let consents = [];
+    for (let i = 0; i < groups.length; i++) {
+      try {
+        const result = await this.policyService.listConsents(
+          "subject",
+          groups[i]
+        );
+        consents = consents.concat(result);
+      } catch (error) {
+        // Nothing to do
+      }
+    }
+    return consents;
+  }
+
+  private getPropertiesFromList(
+    propertyIdArray: string[]
+  ): Promise<Property[]> {
+    // Get properties from the database
+    const propertyRepository = getRepository(Property);
+    return propertyRepository
+      .createQueryBuilder("property")
+      .innerJoinAndSelect("property.type", "type")
+      .innerJoinAndSelect("property.thing", "thing")
+      .innerJoinAndSelect("type.dimensions", "dimensions")
+      .where("property.id = ANY (:values)")
+      .setParameters({ values: propertyIdArray })
+      .getMany();
   }
 
   /**

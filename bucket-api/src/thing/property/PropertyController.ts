@@ -26,57 +26,41 @@ export class PropertyController {
     this.thingService = ThingService.getInstance();
   }
 
-  parseValueOptions(req: DCDRequest): ValueOptions {
-    if (req.query.from === undefined || req.query.to === undefined) {
-      return undefined;
-    }
-    return {
-      from: Number.parseInt(req.query.from + ""),
-      to: Number.parseInt(req.query.to + ""),
-      timeInterval:
-        req.query.timeInterval !== undefined
-          ? req.query.timeInterval + ""
-          : undefined,
-      fctInterval:
-        req.query.fctInterval !== undefined
-          ? req.query.fctInterval + ""
-          : undefined,
-      fill: req.query.fill !== undefined ? req.query.fill + "" : "none",
-    };
-  }
-
-  getProperties = async (
+  public async getProperties(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
-    const sharedWith: string = req.query.sharedWith as string;
+  ): Promise<void> {
+    // The subject is the targeted thing or the logged in entity
     const subject: string = req.params.thingId
       ? req.params.thingId
       : req.context.userId;
+    // The actor is the logged in entity (from the request context)
     const actor: string = req.context.userId;
 
-    // optionals
+    // optional query params
+    const sharedWith: string = req.query.sharedWith as string;
     const from = parseInt(req.query.from as string);
     const timeInterval = req.query.timeInterval as string;
 
     // Get properties from Service
     try {
       if (sharedWith !== undefined) {
+        // We look for a property SHARED WITH the logged in entity
         const properties: Property[] = await this.propertyService.getProperties(
-          actor,
           subject,
           sharedWith,
           from,
           timeInterval
         );
-        res.send(properties);
-      } else if (actor == subject) {
+        res.send(JSON.stringify({ properties: properties }));
+      } else if (actor === subject) {
+        // We look for a property OWNED with the logged in entity
         const properties: Property[] = await this.propertyService.getPropertiesOfAThing(
           subject
         );
         // Send the things object
-        res.send(properties);
+        res.send(JSON.stringify({ properties: properties }));
       } else {
         next(new DCDError(403, "Not permitted"));
       }
@@ -87,13 +71,50 @@ export class PropertyController {
         next(new DCDError(404, error));
       }
     }
-  };
+  }
 
-  getOnePropertyById = async (
+  public async createNewProperty(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
+    // Get thing id from the params
+    const thingId = req.params.thingId;
+    // Get DTO proprety from the body
+    const { name, description, typeId } = req.body;
+    const dtoProperty: DTOProperty = {
+      name: name,
+      description: description,
+      typeId: typeId,
+    };
+
+    try {
+      // Validade if the parameters are ok
+      const errors = await validate(dtoProperty);
+      if (errors.length > 0) {
+        throw new DCDError(400, errors.toString());
+      }
+      // Retrieve thing details from thingId
+      const thing = await this.thingService.getOneThingById(thingId);
+      if (thing === undefined) {
+        throw new DCDError(404, "Thing not found.");
+      }
+      const createdProperty = await this.propertyService.createNewProperty(
+        thing,
+        dtoProperty
+      );
+      // If all ok, send 201 response
+      res.status(201).send(JSON.stringify(createdProperty));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getOnePropertyById(
+    req: DCDRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     // Get the ID from the url
     const thingId: string = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -116,53 +137,15 @@ export class PropertyController {
       res.set({ "Content-Type": "text/csv" });
       res.send(this.toCSV(property));
     } else {
-      res.send(property);
+      res.send(JSON.stringify(property));
     }
-  };
+  }
 
-  createNewProperty = async (
+  public async editProperty(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
-    // Get parameters from the body
-    const { name, description, typeId } = req.body;
-    const property: DTOProperty = {};
-    property.name = name;
-    property.description = description;
-    property.typeId = typeId;
-
-    // Validade if the parameters are ok
-    const errors = await validate(property);
-
-    if (errors.length > 0) {
-      next(new DCDError(400, errors.toString()));
-    } else {
-      // Retrieve thing details from thingId
-      const thing = await this.thingService.getOneThingById(req.params.thingId);
-      if (thing === undefined) {
-        next(new DCDError(400, "Thing not found."));
-      } else {
-        try {
-          const createdProperty = await this.propertyService.createNewProperty(
-            thing,
-            property
-          );
-          // If all ok, send 201 response
-          res.status(201).send(JSON.stringify(createdProperty));
-        } catch (error) {
-          Log.debug(error);
-          next(error);
-        }
-      }
-    }
-  };
-
-  editProperty = async (
-    req: DCDRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -193,13 +176,13 @@ export class PropertyController {
     }
     // After all send a 204 (no content, but accepted) response
     res.status(204).send();
-  };
+  }
 
-  updatePropertyValues = async (
+  public async updatePropertyValues(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     Log.debug("update property values");
     // Get the ID from the url
     const thingId = req.params.thingId;
@@ -220,18 +203,18 @@ export class PropertyController {
       // Get values from the body
       const { values } = req.body;
       property.values = values;
-      saveValuesAndRespond(property, res, next);
+      this.saveValuesAndRespond(property, res, next);
     } else if (contentType.indexOf("multipart/form-data") === 0) {
       // Look for data in a CSV file
       this.uploadDataFile(property, req, res, next);
     }
-  };
+  }
 
-  deleteOneProperty = async (
+  public async deleteOneProperty(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -243,13 +226,17 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  countDataPoints = async (
+  /**
+   * Returns a property object with 1 row of values for each
+   * time interval, representing the count for each dimension.
+   */
+  public async countDataPoints(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -257,7 +244,7 @@ export class PropertyController {
     const timeInterval = req.query.timeInterval as string;
     // Call the Service
     try {
-      const result = await this.propertyService.getOnePropertyById(
+      const property = await this.propertyService.getOnePropertyById(
         thingId,
         propertyId,
         {
@@ -269,49 +256,17 @@ export class PropertyController {
         }
       );
 
-      res.status(200).send(result);
+      res.status(200).send(JSON.stringify(property));
     } catch (error) {
       next(error);
     }
-  };
-
-  uploadDataFile(
-    property: Property,
-    request: DCDRequest,
-    response: Response,
-    next: NextFunction
-  ): void {
-    Log.debug("upload data file");
-    const hasLabel = request.query.hasLabel === "true";
-    const form = new multiparty.Form();
-    let dataStr = "";
-    // listen on part event for data file
-    form.on("part", (part) => {
-      if (!part.filename) {
-        return;
-      }
-      part.on("data", (buf) => {
-        dataStr += buf.toString();
-      });
-    });
-    form.on("close", () => {
-      property.values = csvStrToValueArray(
-        property.type.dimensions,
-        dataStr,
-        hasLabel
-      );
-      // Log.debug(property.values)
-      saveValuesAndRespond(property, response, next);
-    });
-    form.on("error", next);
-    form.parse(request);
   }
 
-  lastDataPoints = async (
+  public async lastDataPoints(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -332,26 +287,13 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
-
-  toCSV(property: Property): string {
-    let csv = "time";
-    for (let i = 0; i < property.type.dimensions.length; i++) {
-      csv += "," + property.type.dimensions[i].name;
-    }
-    csv += "\n";
-    for (let i = 0; i < property.values.length; i++) {
-      csv += property.values[i].join(",");
-      csv += "\n";
-    }
-    return csv;
   }
 
-  grantConsent = async (
+  public async grantConsent(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const propertyId = req.params.propertyId;
     const body = req.body;
@@ -374,13 +316,13 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  revokeConsent = async (
+  public async revokeConsent(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const consentId = req.params.consentId;
     // Call the Service
@@ -391,13 +333,13 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  listConsents = async (
+  public async listConsents(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const propertyId = req.params.propertyId;
     const resource = propertyId;
@@ -412,54 +354,120 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
-}
+  }
 
-/**
- * @param property
- * @param csvStr
- * @returns {{id: *, values: Array}}
- */
-function csvStrToValueArray(
-  dimensions: Dimension[],
-  csvStr: string,
-  hasLabel: boolean
-): string[][] | number[][] {
-  const values = [];
-  let first = true;
-  csvStr.split("\n").forEach((line) => {
-    if ((!first || !hasLabel) && line !== "") {
-      try {
-        const val: Array<string | number> = line.split(",");
-        val[0] = Number(val[0]);
-        for (let i = 1; i < val.length; i++) {
-          if (dimensions[i - 1].type === "number") {
-            val[i] = Number(val[i]);
-          }
-        }
-        values.push(val);
-      } catch (error) {
-        Log.error(error);
+  private parseValueOptions(req: DCDRequest): ValueOptions {
+    if (req.query.from === undefined || req.query.to === undefined) {
+      return undefined;
+    }
+    return {
+      from: Number.parseInt(req.query.from + ""),
+      to: Number.parseInt(req.query.to + ""),
+      timeInterval:
+        req.query.timeInterval !== undefined
+          ? req.query.timeInterval + ""
+          : undefined,
+      fctInterval:
+        req.query.fctInterval !== undefined
+          ? req.query.fctInterval + ""
+          : undefined,
+      fill: req.query.fill !== undefined ? req.query.fill + "" : "none",
+    };
+  }
+
+  private uploadDataFile(
+    property: Property,
+    request: DCDRequest,
+    response: Response,
+    next: NextFunction
+  ): void {
+    Log.debug("upload data file");
+    const hasLabel = request.query.hasLabel === "true";
+    const form = new multiparty.Form();
+    let dataStr = "";
+    // listen on part event for data file
+    form.on("part", (part) => {
+      if (!part.filename) {
+        return;
       }
-    }
-    if (first) {
-      first = false;
-    }
-  });
-  return values;
-}
+      part.on("data", (buf) => {
+        dataStr += buf.toString();
+      });
+    });
+    form.on("close", () => {
+      property.values = this.csvStrToValueArray(
+        property.type.dimensions,
+        dataStr,
+        hasLabel
+      );
+      // Log.debug(property.values)
+      this.saveValuesAndRespond(property, response, next);
+    });
+    form.on("error", next);
+    form.parse(request);
+  }
 
-async function saveValuesAndRespond(
-  property: Property,
-  res: Response,
-  next: NextFunction
-) {
-  // Try to save
-  try {
-    await this.propertyService.updatePropertyValues(property);
-    return res.json();
-  } catch (error) {
-    Log.error(error);
-    return next(new DCDError(500, "Failed updating property values"));
+  private async saveValuesAndRespond(
+    property: Property,
+    res: Response,
+    next: NextFunction
+  ) {
+    // Try to save
+    try {
+      await this.propertyService.updatePropertyValues(property);
+      return res.json();
+    } catch (error) {
+      Log.error(error);
+      return next(new DCDError(500, "Failed updating property values"));
+    }
+  }
+
+  /**
+   * Convert values of a property into a CSV.
+   */
+  private toCSV(property: Property): string {
+    let csv = "time";
+    for (let i = 0; i < property.type.dimensions.length; i++) {
+      csv += "," + property.type.dimensions[i].name;
+    }
+    csv += "\n";
+    for (let i = 0; i < property.values.length; i++) {
+      csv += property.values[i].join(",");
+      csv += "\n";
+    }
+    return csv;
+  }
+
+  /**
+   * Convert values of a CSV string into a 2D array (property values).
+   * @returns {{id: *, values: Array}}
+   */
+  private csvStrToValueArray(
+    dimensions: Dimension[],
+    csvStr: string,
+    hasLabel: boolean
+  ): string[][] | number[][] {
+    const values = [];
+    let first = true;
+    csvStr.split("\n").forEach((line) => {
+      if ((!first || !hasLabel) && line !== "") {
+        try {
+          const val: Array<string | number> = line.split(",");
+          val[0] = Number(val[0]);
+          for (let i = 1; i < val.length; i++) {
+            if (dimensions[i - 1].type === "number") {
+              val[i] = Number(val[i]);
+            }
+          }
+          values.push(val);
+        } catch (error) {
+          Log.error(error);
+        }
+      }
+      if (first) {
+        first = false;
+      }
+    });
+    return values;
   }
 }

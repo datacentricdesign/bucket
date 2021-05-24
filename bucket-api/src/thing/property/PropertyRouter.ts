@@ -28,16 +28,54 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get Properties of a Thing.
      *
+     * @apiParam {String} thingId Id of the Thing from which we get the properties.
+     *
+     * @apiParam (Query) {Number} [from] The start time (UNIX timestamp) to get the data count for each property.
+     * @apiParam (Query) {String} [timeInterval] The time interval (e.g. 1h for one hour, 5s for five seconds) to split the data count for each property.
+     *
      * @apiVersion 0.1.0
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
-     * @apiSuccess {Property[]} properties The retrieved Properties
+     * @apiSuccess (Success 200) {Property[]} properties List of retrieved Properties
+     *
+     * @apiError {DCDError} 403 Not permitted
      **/
     this.router.get(
       "/",
       [introspectToken(["dcd:properties"]), checkPolicy("read")],
       this.controller.getProperties
+    );
+
+    /**
+     * @api {post} /things/:thingId/properties Create
+     * @apiGroup Property
+     * @apiDescription Create a Property.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiParam {String} thingId Id of the Thing to which we add the Property.
+     *
+     * @apiParam (Body) {DTOProperty} property Property to create as JSON.
+     * @apiParamExample {json} property:
+     *     {
+     *       "name": "My Property",
+     *       "description": "A description of my property.",
+     *       "typeId": "PROPERTY_TYPE"
+     *     }
+     *
+     * @apiHeader {String} Content-type application/json
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiSuccess (Success 201) {Property} The created Property
+     *
+     * @apiError {DCDError} 400 Bad request
+     * @apiError {DCDError} 404 Not found
+     */
+    this.router.post(
+      "/",
+      [introspectToken([]), checkPolicy("create")],
+      this.controller.createNewProperty
     );
 
     /**
@@ -58,34 +96,6 @@ export class PropertyRouter {
       "/:propertyId",
       [introspectToken(["dcd:properties"]), checkPolicy("read")],
       this.controller.getOnePropertyById
-    );
-
-    /**
-     * @api {post} /things/:thingId/properties Create
-     * @apiGroup Property
-     * @apiDescription Create a Property.
-     *
-     * @apiVersion 0.1.0
-     *
-     * @apiParam {String} thingId Id of the Thing to which we add the Property.
-     *
-     * @apiParam (Body) {Property} property Property to create as JSON.
-     * @apiParamExample {json} property:
-     *     {
-     *       "name": "My Property",
-     *       "description": "A description of my property.",
-     *       "type": "PROPERTY_TYPE"
-     *     }
-     *
-     * @apiHeader {String} Content-type application/json
-     * @apiHeader {String} Authorization TOKEN ID
-     *
-     * @apiSuccess {object} interaction The created Property
-     */
-    this.router.post(
-      "/",
-      [introspectToken([]), checkPolicy("create")],
-      this.controller.createNewProperty
     );
 
     /**
