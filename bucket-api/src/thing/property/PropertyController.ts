@@ -1,14 +1,14 @@
 import { Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
-import { Property } from "./Property";
 import { v4 as uuidv4 } from "uuid";
 
 import * as multiparty from "multiparty";
 
+import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
 import { PropertyService } from "./PropertyService";
 
-import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
+import { Property } from "./Property";
 import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
@@ -17,6 +17,7 @@ import { ThingService } from "../services/ThingService";
 
 export class PropertyController {
   private propertyService: PropertyService;
+
   private thingService: ThingService;
 
   constructor() {
@@ -53,14 +54,14 @@ export class PropertyController {
           from,
           timeInterval
         );
-        res.send(JSON.stringify({ properties: properties }));
+        res.send(JSON.stringify({ properties }));
       } else if (actor === subject) {
         // We look for a property OWNED with the logged in entity
         const properties: Property[] = await this.propertyService.getPropertiesOfAThing(
           subject
         );
         // Send the things object
-        res.send(JSON.stringify({ properties: properties }));
+        res.send(JSON.stringify({ properties }));
       } else {
         next(new DCDError(403, "Not permitted"));
       }
@@ -79,13 +80,13 @@ export class PropertyController {
     next: NextFunction
   ): Promise<void> {
     // Get thing id from the params
-    const thingId = req.params.thingId;
+    const { thingId } = req.params;
     // Get DTO proprety from the body
     const { name, description, typeId } = req.body;
     const dtoProperty: DTOProperty = {
-      name: name,
-      description: description,
-      typeId: typeId,
+      name,
+      description,
+      typeId,
     };
 
     try {
@@ -95,7 +96,7 @@ export class PropertyController {
         throw new DCDError(400, errors.toString());
       }
       // Retrieve thing details from thingId
-      const thing = await this.thingService.getOneThingById(thingId);
+      const thing = await ThingService.getOneThingById(thingId);
       if (thing === undefined) {
         throw new DCDError(404, "Thing not found.");
       }
@@ -110,18 +111,18 @@ export class PropertyController {
     }
   }
 
-  public async getOnePropertyById(
+  public static async getOnePropertyById(
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     // Get the ID from the url
-    const thingId: string = req.params.thingId;
-    const propertyId = req.params.propertyId;
-    const options = this.parseValueOptions(req);
+    const { thingId } = req.params;
+    const { propertyId } = req.params;
+    const options = PropertyController.parseValueOptions(req);
 
     // Get the Property from the Service
-    const property: Property = await this.propertyService.getOnePropertyById(
+    const property: Property = await PropertyController.propertyService.getOnePropertyById(
       thingId,
       propertyId,
       options
@@ -135,7 +136,7 @@ export class PropertyController {
 
     if (req.accepts("text/csv")) {
       res.set({ "Content-Type": "text/csv" });
-      res.send(this.toCSV(property));
+      res.send(PropertyController.toCSV(property));
     } else {
       res.send(JSON.stringify(property));
     }
@@ -147,8 +148,8 @@ export class PropertyController {
     next: NextFunction
   ): Promise<void> {
     // Get the ID from the url
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
+    const { thingId } = req.params;
+    const { propertyId } = req.params;
     // Get values from the body
     const { name, description } = req.body;
     const property: Property = await this.propertyService.getOnePropertyById(
@@ -185,8 +186,8 @@ export class PropertyController {
   ): Promise<void> {
     Log.debug("update property values");
     // Get the ID from the url
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
+    const { thingId } = req.params;
+    const { propertyId } = req.params;
     const property: Property = await this.propertyService.getOnePropertyById(
       thingId,
       propertyId
@@ -216,8 +217,8 @@ export class PropertyController {
     next: NextFunction
   ): Promise<void> {
     // Get the property ID from the url
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
+    const { thingId } = req.params;
+    const { propertyId } = req.params;
     // Call the Service
     try {
       await this.propertyService.deleteOneProperty(thingId, propertyId);
@@ -238,8 +239,8 @@ export class PropertyController {
     next: NextFunction
   ): Promise<void> {
     // Get the property ID from the url
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
+    const { thingId } = req.params;
+    const { propertyId } = req.params;
     const from = parseInt(req.query.from as string);
     const timeInterval = req.query.timeInterval as string;
     // Call the Service
@@ -248,9 +249,9 @@ export class PropertyController {
         thingId,
         propertyId,
         {
-          from: from,
+          from,
           to: Date.now(),
-          timeInterval: timeInterval,
+          timeInterval,
           fctInterval: "count",
           fill: undefined,
         }
@@ -268,8 +269,8 @@ export class PropertyController {
     next: NextFunction
   ): Promise<void> {
     // Get the property ID from the url
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
+    const { thingId } = req.params;
+    const { propertyId } = req.params;
     // Call the Service
     try {
       const property = await this.propertyService.getOnePropertyById(
@@ -289,23 +290,23 @@ export class PropertyController {
     }
   }
 
-  public async grantConsent(
+  public static async grantConsent(
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     // Get the property ID from the url
-    const propertyId = req.params.propertyId;
-    const body = req.body;
+    const { propertyId } = req.params;
+    const { body } = req;
     const id = uuidv4();
     const acp = {
       subjects: body.subjects,
       actions: body.actions,
       resources: [propertyId],
       effect: "allow",
-      id: id,
+      id,
     };
-    Log.debug("granting: " + JSON.stringify(acp));
+    Log.debug(`granting: ${JSON.stringify(acp)}`);
     // Call the Service
     try {
       const result = await AuthController.policyService.updateKetoPolicy(
@@ -318,13 +319,13 @@ export class PropertyController {
     }
   }
 
-  public async revokeConsent(
+  public static async revokeConsent(
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     // Get the property ID from the url
-    const consentId = req.params.consentId;
+    const { consentId } = req.params;
     // Call the Service
     try {
       await AuthController.policyService.deleteKetoPolicy(consentId, "exact");
@@ -335,13 +336,13 @@ export class PropertyController {
     }
   }
 
-  public async listConsents(
+  public static async listConsents(
     req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     // Get the property ID from the url
-    const propertyId = req.params.propertyId;
+    const { propertyId } = req.params;
     const resource = propertyId;
     // Call the Service
     try {
@@ -356,22 +357,22 @@ export class PropertyController {
     }
   }
 
-  private parseValueOptions(req: DCDRequest): ValueOptions {
+  private static parseValueOptions(req: DCDRequest): ValueOptions {
     if (req.query.from === undefined || req.query.to === undefined) {
       return undefined;
     }
     return {
-      from: Number.parseInt(req.query.from + ""),
-      to: Number.parseInt(req.query.to + ""),
+      from: Number.parseInt(`${req.query.from}`),
+      to: Number.parseInt(`${req.query.to}`),
       timeInterval:
         req.query.timeInterval !== undefined
-          ? req.query.timeInterval + ""
+          ? `${req.query.timeInterval}`
           : undefined,
       fctInterval:
         req.query.fctInterval !== undefined
-          ? req.query.fctInterval + ""
+          ? `${req.query.fctInterval}`
           : undefined,
-      fill: req.query.fill !== undefined ? req.query.fill + "" : "none",
+      fill: req.query.fill !== undefined ? `${req.query.fill}` : "none",
     };
   }
 
@@ -425,10 +426,10 @@ export class PropertyController {
   /**
    * Convert values of a property into a CSV.
    */
-  private toCSV(property: Property): string {
+  private static toCSV(property: Property): string {
     let csv = "time";
     for (let i = 0; i < property.type.dimensions.length; i++) {
-      csv += "," + property.type.dimensions[i].name;
+      csv += `,${property.type.dimensions[i].name}`;
     }
     csv += "\n";
     for (let i = 0; i < property.values.length; i++) {

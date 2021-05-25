@@ -1,9 +1,9 @@
 import { getRepository, getConnection } from "typeorm";
 
-import { Thing } from "../Thing";
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
+import { Thing } from "../Thing";
 import { Property } from "../property/Property";
 import { AuthService, JWKParams, KeySet } from "./AuthService";
 import { PolicyService } from "./PolicyService";
@@ -25,7 +25,9 @@ export class ThingService {
   }
 
   private policyService: PolicyService;
+
   private authService: AuthService;
+
   private propertyService: PropertyService;
 
   /**
@@ -46,7 +48,7 @@ export class ThingService {
    * @param {Thing} thing
    * @param {boolean} jwt
    * returns Thing
-   **/
+   * */
   async createNewThing(thing: Thing): Promise<Thing> {
     // Check Thing input
     if (thing.name === undefined || thing.name === "") {
@@ -55,16 +57,16 @@ export class ThingService {
     if (thing.type === undefined || thing.type === "") {
       return Promise.reject(new DCDError(4003, "Add field type."));
     }
-    thing.id = "dcd:things:" + uuidv4();
+    thing.id = `dcd:things:${uuidv4()}`;
 
     // Try to retrieve Thing from the database
     const thingRepository = getRepository(Thing);
     try {
       await thingRepository.findOneOrFail(thing.id);
       // Read positive, the Thing already exist
-      return Promise.reject({
+      return await Promise.reject({
         code: 400,
-        message: "Thing " + thing.id + " already exist.",
+        message: `Thing ${thing.id} already exist.`,
       });
     } catch (findError) {
       // Read negative, the Thing does not exist yet
@@ -82,12 +84,12 @@ export class ThingService {
   /**
    * List some Things.
    * @param {string} actorId
-   **/
-  getThingsOfAPerson(personId: string): Promise<Thing[]> {
+   * */
+  static getThingsOfAPerson(personId: string): Promise<Thing[]> {
     // Get things from the database
     const thingRepository = getRepository(Thing);
     return thingRepository.find({
-      where: { personId: personId },
+      where: { personId },
       relations: ["properties", "properties.type"],
     });
   }
@@ -96,17 +98,17 @@ export class ThingService {
    * Read a Thing.
    * @param {string} thingId
    * returns {Thing}
-   **/
-  async getOneThingById(thingId: string): Promise<Thing> {
+   * */
+  static async getOneThingById(thingId: string): Promise<Thing> {
     // Get things from the database
     const thingRepository = getRepository(Thing);
-    return await thingRepository
+    return thingRepository
       .createQueryBuilder("thing")
       .leftJoinAndSelect("thing.properties", "properties")
       .leftJoinAndSelect("properties.type", "type")
       .leftJoinAndSelect("type.dimensions", "dimensions")
       .where("thing.id = :thingId")
-      .setParameters({ thingId: thingId })
+      .setParameters({ thingId })
       .getOne();
   }
 
@@ -114,8 +116,8 @@ export class ThingService {
    * Edit one Thing
    * @param thingId
    * returns Promise
-   **/
-  editOneThing(thing: Thing): Promise<Thing> {
+   * */
+  static editOneThing(thing: Thing): Promise<Thing> {
     const thingRepository = getRepository(Thing);
     return thingRepository.save(thing);
   }
@@ -129,14 +131,14 @@ export class ThingService {
    * @param thingId
    * @return {Promise}
    */
-  async deleteOneThing(thingId: string): Promise<void> {
+  static async deleteOneThing(thingId: string): Promise<void> {
     const thingRepository = getRepository(Thing);
     try {
       await thingRepository.findOneOrFail(thingId);
     } catch (error) {
       throw new DCDError(
         404,
-        "Thing to delete " + thingId + " could not be not found."
+        `Thing to delete ${thingId} could not be not found.`
       );
     }
     await getConnection()
@@ -176,18 +178,16 @@ export class ThingService {
     from: number,
     timeInterval: string
   ): Promise<Thing[]> {
-    const things = await this.getThingsOfAPerson(personId);
-    for (let i = 0; i < things.length; i++) {
-      const thing = things[i];
-      for (let j = 0; j < thing.properties.length; j++) {
-        const property: Property = thing.properties[j];
+    const things = await ThingService.getThingsOfAPerson(personId);
+    for (const thing of things) {
+      for (const property of thing.properties) {
         const prop = await this.propertyService.getOnePropertyById(
           thing.id,
           property.id,
           {
-            from: from,
+            from,
             to: Date.now(),
-            timeInterval: timeInterval,
+            timeInterval,
             fctInterval: "count",
             fill: undefined,
           }

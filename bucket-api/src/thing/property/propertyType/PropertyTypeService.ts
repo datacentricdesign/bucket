@@ -1,7 +1,7 @@
 import { getRepository, DeleteResult } from "typeorm";
 
-import { PropertyType } from "./PropertyType";
 import { DCDError } from "@datacentricdesign/types";
+import { PropertyType } from "./PropertyType";
 
 export class PropertyTypeService {
   private static instance: PropertyTypeService;
@@ -15,8 +15,8 @@ export class PropertyTypeService {
 
   /**
    * List existing property types.
-   **/
-  getPropertyTypes(): Promise<PropertyType[]> {
+   * */
+  static getPropertyTypes(): Promise<PropertyType[]> {
     // Get things from the database
     const propertyTypeRepository = getRepository(PropertyType);
     return propertyTypeRepository.find({
@@ -29,8 +29,8 @@ export class PropertyTypeService {
    * Read a PropertyType.
    * @param {string} typeId
    * returns {PropertyType}
-   **/
-  getOnePropertyTypeById(typeId: string): Promise<PropertyType> {
+   * */
+  static getOnePropertyTypeById(typeId: string): Promise<PropertyType> {
     // Get things from the database
     const propertyTypeRepository = getRepository(PropertyType);
     return propertyTypeRepository.findOneOrFail(typeId, {
@@ -43,8 +43,8 @@ export class PropertyTypeService {
    * Read a PropertyType.
    * @param {PropertyType} propertyType
    * returns {PropertyType}
-   **/
-  async createOnePropertyType(
+   * */
+  static async createOnePropertyType(
     propertyType: PropertyType
   ): Promise<PropertyType> {
     // Get things from the database
@@ -58,7 +58,7 @@ export class PropertyTypeService {
    * @param propertyTypeId
    * @return {Promise}
    */
-  async deleteOnePropertyTypeById(
+  static async deleteOnePropertyTypeById(
     propertyTypeId: string
   ): Promise<DeleteResult> {
     const propertyTypeRepository = getRepository(PropertyType);
@@ -67,7 +67,7 @@ export class PropertyTypeService {
     } catch (error) {
       throw new DCDError(
         404,
-        "PropertyType to delete " + propertyTypeId + " could not be not found."
+        `PropertyType to delete ${propertyTypeId} could not be not found.`
       );
     }
     // await getConnection().createQueryBuilder().delete()

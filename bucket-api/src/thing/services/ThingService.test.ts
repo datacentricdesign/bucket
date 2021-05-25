@@ -43,8 +43,7 @@ describe("Thing Service", function () {
   });
 
   it("Get One Thing by Id", function (done: Mocha.Done) {
-    thingService
-      .getOneThingById(createdThing.id)
+    ThingService.getOneThingById(createdThing.id)
       .then((foundThing: Thing) => {
         expect(foundThing.name).to.equal(thing.name);
         expect(foundThing.description).to.equal(thing.description);
@@ -60,8 +59,7 @@ describe("Thing Service", function () {
   });
 
   it("Get Things of a Person", function (done: Mocha.Done) {
-    thingService
-      .getThingsOfAPerson(createdThing.personId)
+    ThingService.getThingsOfAPerson(createdThing.personId)
       .then((foundThings: Thing[]) => {
         expect(foundThings.length).to.equal(1);
         expect(foundThings[0].id).to.equal(createdThing.id);
@@ -78,8 +76,7 @@ describe("Thing Service", function () {
     const editedDescription = "A new description";
     createdThing.name = editedName;
     createdThing.description = editedDescription;
-    thingService
-      .editOneThing(createdThing)
+    ThingService.editOneThing(createdThing)
       .then((editedThing: Thing) => {
         expect(editedThing.name).to.equal(editedName);
         expect(editedThing.description).to.equal(editedDescription);
@@ -95,8 +92,7 @@ describe("Thing Service", function () {
   });
 
   it("Delete", function (done: Mocha.Done) {
-    thingService
-      .deleteOneThing(thing.id)
+    ThingService.deleteOneThing(thing.id)
       .then(() => {
         done();
       })

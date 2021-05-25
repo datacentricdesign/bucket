@@ -1,25 +1,32 @@
-import config from "./config";
 import { Logger, ILogObject } from "tslog";
 import { appendFileSync, mkdirSync } from "fs";
 import * as moment from "moment";
+import config from "./config";
 
 type LogFunction = (...args: unknown[]) => ILogObject;
 
 export class Log {
   static logger: Logger;
+
   static silly: LogFunction;
+
   static debug: LogFunction;
+
   static trace: LogFunction;
+
   static info: LogFunction;
+
   static warn: LogFunction;
+
   static error: LogFunction;
+
   static fatal: LogFunction;
 
   static init(name: string): void {
     if (config.env.env === "development") {
-      Log.logger = new Logger({ name: name, type: "pretty" });
+      Log.logger = new Logger({ name, type: "pretty" });
     } else {
-      Log.logger = new Logger({ name: name, type: "hidden" });
+      Log.logger = new Logger({ name, type: "hidden" });
     }
 
     Log.logger.attachTransport(
@@ -45,7 +52,7 @@ export class Log {
 
     // Make sure there is a subfolder to store images and logs
     try {
-      mkdirSync(config.hostDataFolder + "/logs");
+      mkdirSync(`${config.hostDataFolder}/logs`);
     } catch (error) {
       if (error && error.errno !== -17) {
         try {
@@ -61,11 +68,10 @@ export class Log {
 function logToTransport(logObject: ILogObject) {
   try {
     appendFileSync(
-      config.hostDataFolder +
-        "/logs/" +
-        moment(new Date()).format("YYYY-MM-DD_HH") +
-        ".log",
-      JSON.stringify(logObject) + "\n"
+      `${config.hostDataFolder}/logs/${moment(new Date()).format(
+        "YYYY-MM-DD_HH"
+      )}.log`,
+      `${JSON.stringify(logObject)}\n`
     );
   } catch (error) {
     console.log(error);

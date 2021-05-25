@@ -1,6 +1,8 @@
 import "dotenv/config";
 
 import { cleanEnv, str, port, bool, url } from "envalid";
+import { Context } from "@datacentricdesign/types";
+import { Request } from "express";
 import { envConfig } from "./envConfig";
 import { ORMConfig } from "./ormConfig";
 import { httpConfig } from "./httpConfig";
@@ -8,8 +10,6 @@ import { authConfig } from "./authConfig";
 import { influxdbConfig } from "./influxdbConfig";
 import { mqttConfig } from "./mqttConfig";
 import { grafanaConfig } from "./grafanaConfig";
-import { Context } from "@datacentricdesign/types";
-import { Request } from "express";
 
 export function validateEnv(): void {
   cleanEnv(process.env, {

@@ -1,27 +1,30 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 
-import config from "./config";
-import { Log } from "./Logger";
-Log.init("Bucket");
-
-import { ThingRouter } from "./thing/http/ThingRouter";
-
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
 import * as helmet from "helmet";
 import * as cors from "cors";
+import { Server } from "http";
+import config from "./config";
+import { Log } from "./Logger";
+
+import { ThingRouter } from "./thing/http/ThingRouter";
+
 import errorMiddleware from "./thing/middlewares/ErrorMiddleware";
 
 import { introspectToken } from "./thing/middlewares/introspectToken";
 import { PropertyTypeRouter } from "./thing/property/propertyType/PropertyTypeRouter";
-import { Server } from "http";
 import { BucketMQTTServer } from "./thing/mqtt/MQTTServer";
+
+Log.init("Bucket");
 
 export class BucketAPI {
   private app: express.Application;
+
   private server: Server;
+
   private mqttServer: BucketMQTTServer;
 
   async start(delayMs: number): Promise<void> {
@@ -39,8 +42,8 @@ export class BucketAPI {
         // Could not connect wait and try again
         .catch((error) => {
           Log.debug(JSON.stringify(error));
-          Log.info("Retrying to connect in " + delayMs + " ms.");
-          delay(delayMs).then(() => {
+          Log.info(`Retrying to connect in ${delayMs} ms.`);
+          BucketAPI.delay(delayMs).then(() => {
             return this.start(delayMs * 1.5);
           });
         })
@@ -60,7 +63,7 @@ export class BucketAPI {
 
     // Set all routes from routes folder
     const thingRouter = new ThingRouter();
-    this.app.use(config.http.baseUrl + "/things", thingRouter.getRouter());
+    this.app.use(`${config.http.baseUrl}/things`, thingRouter.getRouter());
 
     /**
      * @api {delete} /dpi/health Health status
@@ -68,15 +71,15 @@ export class BucketAPI {
      * @apiDescription Health status of the DPi Generator (available or not available)
      *
      * @apiVersion 0.1.0
-     **/
+     * */
     this.app.use(
-      config.http.baseUrl + "/things/types/dpi/health",
+      `${config.http.baseUrl}/things/types/dpi/health`,
       thingRouter.getDPiRouter().getController().healthStatus
     );
 
     const propertyTypeRouter = new PropertyTypeRouter();
     this.app.use(
-      config.http.baseUrl + "/types",
+      `${config.http.baseUrl}/types`,
       propertyTypeRouter.getRouter()
     );
 
@@ -90,15 +93,15 @@ export class BucketAPI {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {Property[]} properties The retrieved Properties
-     **/
+     * */
     this.app.get(
-      config.http.baseUrl + "/properties",
+      `${config.http.baseUrl}/properties`,
       [introspectToken(["dcd:properties", "dcd:consents"])],
       thingRouter.getPropertyRouter().getController().getProperties
     );
 
     this.app.use(
-      config.http.baseUrl + "/docs",
+      `${config.http.baseUrl}/docs`,
       express.static("dist/public/docs")
     );
 
@@ -106,7 +109,7 @@ export class BucketAPI {
 
     // Start listening
     this.server = this.app.listen(config.http.port, () => {
-      Log.info("Server started on port " + config.http.port + "!");
+      Log.info(`Server started on port ${config.http.port}!`);
     });
   }
 
@@ -115,8 +118,8 @@ export class BucketAPI {
       this.server.close();
     }
   }
-}
 
-export function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  static delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 }

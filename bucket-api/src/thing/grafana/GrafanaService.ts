@@ -1,10 +1,10 @@
 import { DCDError } from "@datacentricdesign/types";
 
 import fetch, { Response } from "node-fetch";
+import * as btoa from "btoa";
 import config from "../../config";
 import { Property } from "../property/Property";
 import { Thing } from "../Thing";
-import * as btoa from "btoa";
 import { ThingService } from "../services/ThingService";
 
 export interface Target {
@@ -122,7 +122,7 @@ export class GrafanaService {
   private grafanaHeaders = {
     "Content-Type": "application/json",
     Accept: "application/json",
-    Authorization: "Bearer " + config.grafana.apiKey,
+    Authorization: `Bearer ${config.grafana.apiKey}`,
   };
 
   private thingService: ThingService;
@@ -135,7 +135,7 @@ export class GrafanaService {
    * @param {string} personId
    * @param {string} thingId
    * returns Promise
-   **/
+   * */
   async createThing(personId: string, thingId: string): Promise<Response> {
     try {
       // Make sure the user gave consent by checking if there is a grafana id for this personId
@@ -157,7 +157,7 @@ export class GrafanaService {
       // Check if there is already a folder for this person id
       const folderUID = personId.replace("dcd:persons:", "");
       const resultGet = await fetch(
-        config.grafana.apiURL.href + "/folders/" + folderUID,
+        `${config.grafana.apiURL.href}/folders/${folderUID}`,
         {
           headers: this.grafanaHeaders,
           method: "GET",
@@ -168,7 +168,7 @@ export class GrafanaService {
         return jsonFolder.id;
       }
       // Otherwise the folder need to be created
-      const resultPost = await fetch(config.grafana.apiURL.href + "/folders", {
+      const resultPost = await fetch(`${config.grafana.apiURL.href}/folders`, {
         headers: this.grafanaHeaders,
         body: JSON.stringify({
           uid: personId.replace("dcd:persons:", ""),
@@ -180,28 +180,28 @@ export class GrafanaService {
       if (newJsonFolder.id !== undefined) {
         return newJsonFolder.id;
       }
-      return Promise.reject(resultPost);
+      return await Promise.reject(resultPost);
     } catch (error) {
       return Promise.reject(error);
     }
   }
 
   async getGrafanaId(personId: string): Promise<string> {
-    const url =
-      config.grafana.apiURL.href +
-      "/users/lookup?loginOrEmail=" +
-      personId.replace("dcd:persons:", "");
+    const url = `${
+      config.grafana.apiURL.href
+    }/users/lookup?loginOrEmail=${personId.replace("dcd:persons:", "")}`;
     const headers = {
-      Authorization:
-        "Basic " + btoa(config.grafana.user + ":" + config.grafana.pass),
+      Authorization: `Basic ${btoa(
+        `${config.grafana.user}:${config.grafana.pass}`
+      )}`,
     };
     try {
       const result = await fetch(url, {
-        headers: headers,
+        headers,
         method: "GET",
       });
       const json = await result.json();
-      return Promise.resolve(json.id);
+      return await Promise.resolve(json.id);
     } catch (error) {
       if (error.code === "ECONNREFUSED") {
         return Promise.reject(new DCDError(503, "Service unavailable."));
@@ -216,10 +216,10 @@ export class GrafanaService {
   ): Promise<Response> {
     try {
       const result = await fetch(
-        config.grafana.apiURL.href +
-          "/folders/" +
-          personId.replace("dcd:persons:", "") +
-          "/permissions",
+        `${config.grafana.apiURL.href}/folders/${personId.replace(
+          "dcd:persons:",
+          ""
+        )}/permissions`,
         {
           headers: this.grafanaHeaders,
           body: JSON.stringify({
@@ -233,9 +233,9 @@ export class GrafanaService {
           method: "POST",
         }
       );
-      return Promise.resolve(result);
+      return await Promise.resolve(result);
     } catch (error) {
-      return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
+      return Promise.reject(new DCDError(403, `Not allowed: ${error.message}`));
     }
   }
 
@@ -265,22 +265,22 @@ export class GrafanaService {
         // "schemaVersion": 16,
         // "version": 0,
         refresh: "25s",
-        panels: panels,
+        panels,
       },
-      folderId: folderId,
+      folderId,
       // "overwrite": false,
     };
 
     try {
       const result = await fetch(
-        config.grafana.apiURL.href + "/dashboards/db",
+        `${config.grafana.apiURL.href}/dashboards/db`,
         {
           headers: this.grafanaHeaders,
           body: JSON.stringify(dashboard),
           method: "POST",
         }
       );
-      return Promise.resolve(result);
+      return await Promise.resolve(result);
     } catch (error) {
       return Promise.reject(error);
     }
@@ -299,13 +299,13 @@ export class GrafanaService {
     if (onlyNumbers) {
       // only numirical values
       return this.panelChart(thing, property, gridPos);
-    } else if (dim.length > 1) {
+    }
+    if (dim.length > 1) {
       // mix of types
       return this.panelTable(thing, property, gridPos);
-    } else {
-      // 1 non numerical dimension, show last value
-      return this.panelSingleValue(thing, property, gridPos);
     }
+    // 1 non numerical dimension, show last value
+    return this.panelSingleValue(thing, property, gridPos);
   }
 
   panelTable(thing: Thing, property: Property, gridPos: GridPos): Panel {
@@ -339,14 +339,14 @@ export class GrafanaService {
       pluginVersion: "7.1.1",
       targets: [
         {
-          property: property,
+          property,
           refId: "A",
-          thing: thing,
+          thing,
         },
       ],
       title: property.name,
       type: "table",
-      gridPos: gridPos,
+      gridPos,
     };
   }
 
@@ -388,9 +388,9 @@ export class GrafanaService {
       steppedLine: false,
       targets: [
         {
-          property: property,
+          property,
           refId: "A",
-          thing: thing,
+          thing,
         },
       ],
       thresholds: [],
@@ -433,7 +433,7 @@ export class GrafanaService {
         align: false,
         alignLevel: null,
       },
-      gridPos: gridPos,
+      gridPos,
     };
   }
 
@@ -456,14 +456,14 @@ export class GrafanaService {
       pluginVersion: "7.1.1",
       targets: [
         {
-          property: property,
+          property,
           refId: "A",
-          thing: thing,
+          thing,
         },
       ],
-      title: "Last value of " + property.name,
+      title: `Last value of ${property.name}`,
       type: "stat",
-      gridPos: gridPos,
+      gridPos,
     };
   }
 }

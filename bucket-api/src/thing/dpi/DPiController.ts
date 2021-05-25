@@ -1,12 +1,13 @@
 import { Response, NextFunction } from "express";
-import config, { DCDRequest } from "../../config";
 import fetch from "node-fetch";
 import { DCDError } from "@datacentricdesign/types";
+import config, { DCDRequest } from "../../config";
 import { DPiService } from "./DPiService";
 import { ThingService } from "../services/ThingService";
 
 export class DPiController {
   private dpiService: DPiService;
+
   private thingService: ThingService;
 
   constructor() {
@@ -19,7 +20,7 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url = config.env.dpiUrl + "/health";
+    const url = `${config.env.dpiUrl}/health`;
     const options = {
       method: "GET",
     };
@@ -39,9 +40,11 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url =
-      config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
-    const thingId = req.params.thingId;
+    const url = `${config.env.dpiUrl}/${req.params.thingId.replace(
+      "dcd:things:",
+      ""
+    )}`;
+    const { thingId } = req.params;
     const options = {
       method: "GET",
     };
@@ -53,9 +56,10 @@ export class DPiController {
         const dcdError = new DCDError(json.errorCode, json);
         dcdError._statusCode = json.errorCode;
         return next(dcdError);
-      } else if (json.code === 0 && req.query.download === "true") {
+      }
+      if (json.code === 0 && req.query.download === "true") {
         const dpiId = thingId.replace("dcd:things:", "");
-        const downloadURL = config.env.dpiUrl + "/" + dpiId + "?download=true";
+        const downloadURL = `${config.env.dpiUrl}/${dpiId}?download=true`;
         const result = await fetch(downloadURL);
         await new Promise((resolve, reject) => {
           result.body.pipe(res);
@@ -97,11 +101,10 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url =
-      config.env.dpiUrl +
-      "/" +
-      req.params.thingId.replace("dcd:things:", "") +
-      "/cancel";
+    const url = `${config.env.dpiUrl}/${req.params.thingId.replace(
+      "dcd:things:",
+      ""
+    )}/cancel`;
     const options = {
       method: "GET",
     };
@@ -118,8 +121,10 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url =
-      config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
+    const url = `${config.env.dpiUrl}/${req.params.thingId.replace(
+      "dcd:things:",
+      ""
+    )}`;
     const options = {
       method: "DELETE",
     };

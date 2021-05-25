@@ -1,10 +1,10 @@
 import "mocha";
+import { DCDError, DTOProperty } from "@datacentricdesign/types";
+import { expect } from "chai";
 import { Thing } from "../Thing";
 import { PropertyService } from "./PropertyService";
-import { DCDError, DTOProperty } from "@datacentricdesign/types";
 import { Log } from "../../Logger";
 import { ThingService } from "../services/ThingService";
-import { expect } from "chai";
 import { Property } from "./Property";
 import { PropertyType } from "./propertyType/PropertyType";
 

@@ -6,13 +6,12 @@ import {
   ManyToOne,
   JoinColumn,
 } from "typeorm";
-import { Thing } from "../Thing";
-import { PropertyType } from "./propertyType/PropertyType";
-
 import {
   Property as IProperty,
   Thing as IThing,
 } from "@datacentricdesign/types";
+import { Thing } from "../Thing";
+import { PropertyType } from "./propertyType/PropertyType";
 
 @Entity()
 export class Property implements IProperty {

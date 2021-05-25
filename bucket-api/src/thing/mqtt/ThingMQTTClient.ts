@@ -37,11 +37,15 @@ interface MQTTMessage {
  */
 export class ThingMQTTClient {
   private port: number;
+
   private host: string;
+
   private settings: MQTTClientSettings;
+
   private client: MqttClient;
 
   private thingService: ThingService;
+
   private propertyService: PropertyService;
 
   constructor(port: number, host: string, settings: MQTTClientSettings) {
@@ -56,14 +60,10 @@ export class ThingMQTTClient {
   }
 
   connect(): Promise<void> {
-    const url =
-      "mqtt" +
-      (config.http.secured ? "s" : "") +
-      "://" +
-      this.host +
-      ":" +
-      this.port;
-    Log.debug("MQTT connect: " + url);
+    const url = `mqtt${config.http.secured ? "s" : ""}://${this.host}:${
+      this.port
+    }`;
+    Log.debug(`MQTT connect: ${url}`);
     this.client = mqtt.connect(url, this.settings);
     this.client.on("connect", this.onMQTTConnect.bind(this));
     this.client.on("message", this.onMQTTMessage.bind(this));
@@ -74,16 +74,16 @@ export class ThingMQTTClient {
    *
    */
   onMQTTConnect(): void {
-    Log.debug("Bucket connected to MQTT: " + this.client.connected);
+    Log.debug(`Bucket connected to MQTT: ${this.client.connected}`);
     this.client.subscribe(
       "/things/#",
       (error: Error, result: ISubscriptionGrant[]) => {
         if (error) {
           Log.error(
-            "Error while subscribing to MQTT: " + JSON.stringify(error)
+            `Error while subscribing to MQTT: ${JSON.stringify(error)}`
           );
         } else {
-          Log.debug("MQTT subscription success: " + JSON.stringify(result));
+          Log.debug(`MQTT subscription success: ${JSON.stringify(result)}`);
         }
       }
     );
@@ -114,16 +114,15 @@ export class ThingMQTTClient {
           jsonMessage.property,
           this.client
         );
-      } else {
-        return this.client.publish(
-          "/things/" + thingId + "/log",
-          JSON.stringify({
-            level: "error",
-            error: "Missing or malformed property to update its values",
-            requestId: jsonMessage.requestId,
-          })
-        );
       }
+      return this.client.publish(
+        `/things/${thingId}/log`,
+        JSON.stringify({
+          level: "error",
+          error: "Missing or malformed property to update its values",
+          requestId: jsonMessage.requestId,
+        })
+      );
     }
 
     // Create property /things/:thingId/properties/create
@@ -151,7 +150,7 @@ export class ThingMQTTClient {
       return;
     }
 
-    Log.debug("No implementation of " + topic);
+    Log.debug(`No implementation of ${topic}`);
   }
 
   async createProperty(
@@ -164,19 +163,19 @@ export class ThingMQTTClient {
     Log.debug(dtoProperty);
     try {
       // Retrieve thing details from thingId
-      const thing = await this.thingService.getOneThingById(thingId);
+      const thing = await ThingService.getOneThingById(thingId);
       const property: Property = await this.propertyService.createNewProperty(
         thing,
         dtoProperty
       );
       client.publish(
-        "/things/" + thingId + "/reply",
-        JSON.stringify({ property: property, requestId: requestId })
+        `/things/${thingId}/reply`,
+        JSON.stringify({ property, requestId })
       );
     } catch (error) {
       client.publish(
-        "/things/" + thingId + "/log",
-        JSON.stringify({ level: "error", error: error, requestId: requestId })
+        `/things/${thingId}/log`,
+        JSON.stringify({ level: "error", error, requestId })
       );
     }
   }
@@ -191,19 +190,19 @@ export class ThingMQTTClient {
     try {
       await this.propertyService.updatePropertyValues(property);
       client.publish(
-        "/things/" + thingId + "/log",
+        `/things/${thingId}/log`,
         JSON.stringify({
           level: "debug",
           message: "Property value updated",
           code: 0,
-          requestId: requestId,
+          requestId,
         })
       );
     } catch (error) {
       Log.error(error);
       client.publish(
-        "/things/" + thingId + "/log",
-        JSON.stringify({ level: "error", error: error, requestId: requestId })
+        `/things/${thingId}/log`,
+        JSON.stringify({ level: "error", error, requestId })
       );
     }
   }
@@ -214,16 +213,16 @@ export class ThingMQTTClient {
     client: MqttClient
   ): Promise<void> {
     try {
-      const result = await this.thingService.getOneThingById(thingId);
+      const result = await ThingService.getOneThingById(thingId);
       client.publish(
-        "/things/" + thingId + "/reply",
-        JSON.stringify({ thing: result, requestId: requestId })
+        `/things/${thingId}/reply`,
+        JSON.stringify({ thing: result, requestId })
       );
     } catch (error) {
       Log.error(error);
       client.publish(
-        "/things/" + thingId + "/log",
-        JSON.stringify({ level: "error", error: error, requestId: requestId })
+        `/things/${thingId}/log`,
+        JSON.stringify({ level: "error", error, requestId })
       );
     }
   }

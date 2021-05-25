@@ -25,7 +25,7 @@ export class PropertyTypeController {
 
   async getOnePropertyTypeById(req: DCDRequest, res: Response): Promise<void> {
     // Get the ID from the url
-    const propertyTypeId = req.params.propertyTypeId;
+    const { propertyTypeId } = req.params;
     try {
       // Get the Property Type from the Service
       const propertyType: PropertyType = await this.propertyTypeService.getOnePropertyTypeById(
@@ -73,7 +73,7 @@ export class PropertyTypeController {
     next: NextFunction
   ): Promise<void> {
     // Get the thing ID from the url
-    const propertyTypeId = req.params.propertyTypeId;
+    const { propertyTypeId } = req.params;
     // Call the Service
     try {
       await this.propertyTypeService.deleteOnePropertyTypeById(propertyTypeId);

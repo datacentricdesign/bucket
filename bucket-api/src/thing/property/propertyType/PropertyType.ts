@@ -1,7 +1,6 @@
 import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from "typeorm";
-import { Dimension } from "../dimension/Dimension";
-
 import { PropertyType as IPropertyType } from "@datacentricdesign/types";
+import { Dimension } from "../dimension/Dimension";
 
 @Entity()
 export class PropertyType implements IPropertyType {

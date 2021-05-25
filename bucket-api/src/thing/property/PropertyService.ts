@@ -1,10 +1,6 @@
 import { getRepository, DeleteResult } from "typeorm";
 
-import { Property } from "./Property";
-
-import { PropertyTypeService } from "./propertyType/PropertyTypeService";
-
-import { DCDError } from "@datacentricdesign/types";
+import { DCDError, ValueOptions, DTOProperty } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -13,9 +9,11 @@ import {
   Point,
 } from "@influxdata/influxdb-client";
 import { DeleteAPI, SetupAPI } from "@influxdata/influxdb-client-apis";
+import { PropertyTypeService } from "./propertyType/PropertyTypeService";
 
 import config from "../../config";
-import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
+
+import { Property } from "./Property";
 import { Log } from "../../Logger";
 import { PropertyType } from "./propertyType/PropertyType";
 import { AccessControlPolicy, PolicyService } from "../services/PolicyService";
@@ -28,18 +26,26 @@ interface SharedProperties {
 
 export class PropertyService {
   private influx: InfluxDB;
+
   private url: string;
+
   private org: string;
+
   private bucket: string;
+
   private token: string;
+
   private ready = false;
+
   private cachedTypes: Map<string, PropertyType>;
 
   // private thingService: ThingService;
   private policyService: PolicyService;
+
   private propertyTypeService: PropertyTypeService;
 
   private static instance: PropertyService;
+
   private static consumers: unknown[] = [];
 
   public static async getInstance(
@@ -101,7 +107,7 @@ export class PropertyService {
       })
       .catch((error) => {
         Log.error(error);
-        Log.info("Retrying to connect to InfluxDB in " + delayMs + " ms.");
+        Log.info(`Retrying to connect to InfluxDB in ${delayMs} ms.`);
         delay(delayMs).then(() => {
           this.init(delayMs * 1.5);
         });
@@ -127,9 +133,8 @@ export class PropertyService {
           }
           if (itemsRemoved !== 0) {
             return resolve();
-          } else {
-            return reject();
           }
+          return reject();
         }
       });
     });
@@ -141,7 +146,7 @@ export class PropertyService {
 
   /**
    * Create a new Property.
-   **/
+   * */
   async createNewProperty(
     thing: Thing,
     dtoProperty: DTOProperty
@@ -157,7 +162,7 @@ export class PropertyService {
     }
     const property: Property = new Property();
     // Retrieve the property type
-    property.type = await this.propertyTypeService.getOnePropertyTypeById(
+    property.type = await PropertyTypeService.getOnePropertyTypeById(
       dtoProperty.typeId
     );
     property.thing = thing;
@@ -172,7 +177,7 @@ export class PropertyService {
         ? property.type.description
         : dtoProperty.description;
     // Generate a new id with the property prefix
-    property.id = "dcd:properties:" + uuidv4();
+    property.id = `dcd:properties:${uuidv4()}`;
     // Try to retrieve Property from the database
     const propertyRepository = getRepository(Property);
     await propertyRepository.save(property);
@@ -182,7 +187,7 @@ export class PropertyService {
   /**
    * List the Properties of a Thing.
    * @param {string} thingId
-   **/
+   * */
   async getPropertiesOfAThing(thingId: string): Promise<Property[]> {
     // Check if the service is ready
     if (!this.ready) {
@@ -190,13 +195,13 @@ export class PropertyService {
     }
     // Get properties from the database
     const propertyRepository = getRepository(Property);
-    return await propertyRepository
+    return propertyRepository
       .createQueryBuilder("property")
       .innerJoinAndSelect("property.thing", "thing")
       .innerJoinAndSelect("property.type", "type")
       .innerJoinAndSelect("type.dimensions", "dimensions")
       .where("thing.id = :thingId")
-      .setParameters({ thingId: thingId })
+      .setParameters({ thingId })
       .getMany();
   }
 
@@ -204,7 +209,7 @@ export class PropertyService {
    * List all accessible Properties.
    * @param {string} subjectId person, thing or group id ()
    * @param {string} audienceId person, thing or group id
-   **/
+   * */
   async getProperties(
     subject: string,
     audienceId: string,
@@ -248,9 +253,9 @@ export class PropertyService {
         properties[i].values = await this.readValuesFromInfluxDB(
           properties[i],
           {
-            from: from,
-            to: to,
-            timeInterval: timeInterval,
+            from,
+            to,
+            timeInterval,
             fctInterval: "count",
             fill: undefined,
           }
@@ -343,7 +348,7 @@ export class PropertyService {
    * Read a Property.
    * @param {string} propertyId
    * returns {Property}
-   **/
+   * */
   async getOnePropertyById(
     thingId: string,
     propertyId: string,
@@ -361,7 +366,7 @@ export class PropertyService {
       .innerJoinAndSelect("property.type", "type")
       .innerJoinAndSelect("type.dimensions", "dimensions")
       .where("property.id = :propertyId AND thing.id = :thingId")
-      .setParameters({ propertyId: propertyId, thingId: thingId })
+      .setParameters({ propertyId, thingId })
       .getOne();
 
     if (property !== undefined && valueOptions != undefined) {
@@ -377,7 +382,7 @@ export class PropertyService {
   /**
    * List the Properties of a Thing, of a given type
    * @param {string} thingId
-   **/
+   * */
   async getPropertiesOfAThingByType(
     thingId: string,
     typeId: string
@@ -394,7 +399,7 @@ export class PropertyService {
       .innerJoinAndSelect("property.type", "type")
       .innerJoinAndSelect("type.dimensions", "dimensions")
       .where("thing.id = :thingId AND type.id = :typeId")
-      .setParameters({ thingId: thingId, typeId: typeId })
+      .setParameters({ thingId, typeId })
       .getMany();
     return properties;
   }
@@ -403,7 +408,7 @@ export class PropertyService {
    * Edit one Property
    * @param property
    * returns Promise
-   **/
+   * */
   editOneProperty(property: Property): Promise<Property> {
     // Check if the service is ready
     if (!this.ready) {
@@ -417,7 +422,7 @@ export class PropertyService {
    * Update values of a Property
    * @param property
    * returns Promise
-   **/
+   * */
   async updatePropertyValues(property: Property): Promise<void> {
     // Check if the service is ready
     if (!this.ready) {
@@ -441,7 +446,7 @@ export class PropertyService {
         .innerJoinAndSelect("property.type", "type")
         .innerJoinAndSelect("type.dimensions", "dimensions")
         .where("property.id = :propertyId")
-        .setParameters({ propertyId: propertyId })
+        .setParameters({ propertyId })
         .getOne();
       this.cachedTypes.set(property.id, property.type);
     }
@@ -466,11 +471,7 @@ export class PropertyService {
     if (property === undefined) {
       throw new DCDError(
         404,
-        "Property to delete " +
-          propertyId +
-          " could not be found for Thing " +
-          thingId +
-          "."
+        `Property to delete ${propertyId} could not be found for Thing ${thingId}.`
       );
     }
     return propertyRepository
@@ -482,7 +483,7 @@ export class PropertyService {
         return Promise.reject(
           new DCDError(
             500,
-            "Unexpected number of deleted properties: " + result.affected
+            `Unexpected number of deleted properties: ${result.affected}`
           )
         );
       })
@@ -512,7 +513,7 @@ export class PropertyService {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
     const points = [];
-    const dimensions = property.type.dimensions;
+    const { dimensions } = property.type;
     for (let index = 0; index < property.values.length; index++) {
       let ts: number;
       const values: Array<string | number> = property.values[index];
@@ -526,7 +527,7 @@ export class PropertyService {
         } else {
           ts =
             typeof values[0] === "string"
-              ? Number.parseInt(values[0] + "")
+              ? Number.parseInt(`${values[0]}`)
               : values[0];
         }
 
@@ -536,7 +537,7 @@ export class PropertyService {
           .tag("personId", property.thing.personId);
 
         for (let i = 1; i < values.length; i++) {
-          const name = dimensions[i - 1].name;
+          const { name } = dimensions[i - 1];
           switch (dimensions[i - 1].type) {
             case "string":
               point.stringField(name, values[i]);
@@ -611,7 +612,7 @@ export class PropertyService {
       queryApi.queryRows(fluxQuery, {
         next(row: string[], tableMeta: FluxTableMetaData) {
           const o = tableMeta.toObject(row);
-          const val = [Date.parse(o["_time"])];
+          const val = [Date.parse(o._time)];
           for (
             let index = 0;
             index < property.type.dimensions.length;

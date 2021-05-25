@@ -8,11 +8,11 @@ import {
   JoinColumn,
 } from "typeorm";
 import { IsNotEmpty } from "class-validator";
-import { Property } from "./property/Property";
 import {
   Thing as IThing,
   Property as IProperty,
 } from "@datacentricdesign/types";
+import { Property } from "./property/Property";
 /**
  * A Thing represents a physical or virtual component collecting data.
  * For example, a phone which collects acceleration, a website recording

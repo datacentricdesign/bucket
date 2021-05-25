@@ -31,7 +31,7 @@ export class DPiService {
   }
 
   async generateDPiImage(dpi: DPI, thing: Thing): Promise<string> {
-    const url = config.env.dpiUrl + "/";
+    const url = `${config.env.dpiUrl}/`;
 
     const keys = await AuthController.authService.generateKeys(thing.id);
 
@@ -74,7 +74,7 @@ export class DPiService {
     } else {
       netProp = properties[0];
     }
-    netProp.values = [[Date.now(), hostname, hostname + ".local", ""]];
+    netProp.values = [[Date.now(), hostname, `${hostname}.local`, ""]];
     await this.propertyService.updatePropertyValues(netProp);
   }
 }

@@ -2,14 +2,13 @@ import "mocha";
 import * as httpMocks from "node-mocks-http";
 import * as sinon from "sinon";
 
+import { v4 as uuidv4 } from "uuid";
+import { DTOProperty } from "@datacentricdesign/types";
+import { expect } from "chai";
 import { Thing } from "../Thing";
 
-import { v4 as uuidv4 } from "uuid";
-
-import { DTOProperty } from "@datacentricdesign/types";
 import { Log } from "../../Logger";
 import { ThingService } from "../services/ThingService";
-import { expect } from "chai";
 import { PropertyController } from "./PropertyController";
 import { DCDRequest } from "../../config";
 
@@ -34,7 +33,7 @@ describe("Property Controller", function () {
     thingService = ThingService.getInstance();
     createdThing = await thingService.createNewThing(thing);
 
-    personId = "dcd:persons:" + uuidv4();
+    personId = `dcd:persons:${uuidv4()}`;
 
     dtoProperty = {
       name: "Test property",
@@ -46,7 +45,7 @@ describe("Property Controller", function () {
   it("It should create a property.", function (done: Mocha.Done) {
     const request: DCDRequest = httpMocks.createRequest({
       method: "POST",
-      url: "/things/" + createdThing.id + "/properties",
+      url: `/things/${createdThing.id}/properties`,
       params: {
         thingId: createdThing.id,
       },
@@ -79,7 +78,7 @@ describe("Property Controller", function () {
   it("It should list properties.", function (done: Mocha.Done) {
     const request: DCDRequest = httpMocks.createRequest({
       method: "GET",
-      url: "/things/" + createdThing.id + "/properties",
+      url: `/things/${createdThing.id}/properties`,
       params: {
         thingId: createdThing.id,
       },

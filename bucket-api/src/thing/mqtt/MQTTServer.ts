@@ -1,11 +1,19 @@
-import { AuthenticateError, AuthErrorCode, Client, Server, Aedes } from "aedes";
-import { Subscription, PublishPacket } from "aedes";
+import {
+  AuthenticateError,
+  AuthErrorCode,
+  Client,
+  Server,
+  Aedes,
+  Subscription,
+  PublishPacket,
+} from "aedes";
+
 import * as fs from "fs";
 import * as tls from "tls";
 import * as net from "net";
+import { Context, DCDError } from "@datacentricdesign/types";
 import config from "../../config";
 import { ThingMQTTClient } from "./ThingMQTTClient";
-import { Context, DCDError } from "@datacentricdesign/types";
 import { Property } from "../property/Property";
 import { Log } from "../../Logger";
 
@@ -27,11 +35,15 @@ type AuthCallback = (error: AuthenticateError, success: boolean | null) => void;
 
 export class BucketMQTTServer {
   private server: tls.Server | net.Server;
+
   private aedes: Aedes;
 
   private propertyService: PropertyService;
+
   private thingService: ThingService;
+
   private policyService: PolicyService;
+
   private authService: AuthService;
 
   private mqttClient: ThingMQTTClient;
@@ -103,14 +115,13 @@ export class BucketMQTTServer {
         "MQTT_STATUS"
       );
       if (properties.length > 0) {
-        return Promise.resolve(properties[0]);
-      } else {
-        // Retrieve thing details from thingId
-        const thing = await this.thingService.getOneThingById(thingId);
-        return this.propertyService.createNewProperty(thing, {
-          typeId: "MQTT_STATUS",
-        });
+        return await Promise.resolve(properties[0]);
       }
+      // Retrieve thing details from thingId
+      const thing = await this.thingService.getOneThingById(thingId);
+      return await this.propertyService.createNewProperty(thing, {
+        typeId: "MQTT_STATUS",
+      });
     } catch (error) {
       return Promise.reject(error);
     }
@@ -134,17 +145,17 @@ export class BucketMQTTServer {
       (topicArray[topicArray.length - 1] === "log" ||
         topicArray[topicArray.length - 1] === "reply")
     ) {
-      action = "dcd:actions:" + topicArray.pop();
+      action = `dcd:actions:${topicArray.pop()}`;
     }
 
-    let resource = "dcd:" + topicArray.join(":");
+    let resource = `dcd:${topicArray.join(":")}`;
     if (resource.startsWith("dcd:things:dcd:things:")) {
       resource = resource.replace("dcd:things:dcd:things:", "dcd:things:");
     }
 
     const acp: Access = {
-      action: action,
-      resource: resource,
+      action,
+      resource,
       subject: client.context.userId,
     };
 
@@ -155,7 +166,7 @@ export class BucketMQTTServer {
       Log.debug(JSON.stringify(errorResult));
       const error = new DCDError(
         4031,
-        "NOT authorised to publish on " + packet.topic
+        `NOT authorised to publish on ${packet.topic}`
       );
       callback(error);
     }
@@ -177,17 +188,17 @@ export class BucketMQTTServer {
       (topicArray[topicArray.length - 1] === "log" ||
         topicArray[topicArray.length - 1] === "reply")
     ) {
-      action = "dcd:actions:" + topicArray.pop();
+      action = `dcd:actions:${topicArray.pop()}`;
     }
 
-    let resource = "dcd:" + topicArray.join(":").replace("#", "<.*>");
+    let resource = `dcd:${topicArray.join(":").replace("#", "<.*>")}`;
     if (resource.startsWith("dcd:things:dcd:things:")) {
       resource = resource.replace("dcd:things:dcd:things:", "dcd:things:");
     }
 
     const acp: Access = {
-      action: action,
-      resource: resource,
+      action,
+      resource,
       subject: client.context.userId,
     };
 
@@ -197,14 +208,14 @@ export class BucketMQTTServer {
     } catch (errorResult) {
       const error = new DCDError(
         4031,
-        "Subscription denied to " + packet.topic
+        `Subscription denied to ${packet.topic}`
       );
       Log.error(errorResult);
       Log.debug(JSON.stringify(error));
       if (resource.includes(":properties:dcd:")) {
         const consents = await this.policyService.listConsents(
           "resource",
-          "dcd:" + resource.split(":properties:dcd:")[1]
+          `dcd:${resource.split(":properties:dcd:")[1]}`
         );
         for (let i = 0; i < consents.length; i++) {
           const consent = consents[i];
@@ -232,7 +243,7 @@ export class BucketMQTTServer {
     password: Buffer,
     callback: AuthCallback
   ): Promise<void> {
-    Log.debug("authenticate with credentials: " + username);
+    Log.debug(`authenticate with credentials: ${username}`);
     if (username === config.mqtt.client.username) {
       Log.debug("DCD client mqtt");
       client.context = {
@@ -240,9 +251,8 @@ export class BucketMQTTServer {
       };
       // client.user.token = password
       return callback(null, true);
-    } else {
-      Log.debug("NOT DCD client mqtt");
     }
+    Log.debug("NOT DCD client mqtt");
 
     if (password === undefined) {
       const error = <AuthenticateError>(

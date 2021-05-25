@@ -32,7 +32,7 @@ export const introspectToken = (requiredScope: string[]) => {
 
     try {
       const tokenStr = extractToken(req);
-      return AuthController.authService
+      return await AuthController.authService
         .refresh()
         .then(() => {
           if (
@@ -47,12 +47,8 @@ export const introspectToken = (requiredScope: string[]) => {
                 };
                 return Promise.resolve(user);
               });
-          } else {
-            return AuthController.authService.introspect(
-              tokenStr,
-              requiredScope
-            );
           }
+          return AuthController.authService.introspect(tokenStr, requiredScope);
         })
         .then((user: TokenIntrospection) => {
           req.context = {

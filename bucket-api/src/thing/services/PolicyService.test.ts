@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import { AccessControlPolicy, PolicyService } from "./PolicyService";
 import { v4 as uuidv4 } from "uuid";
 import { DCDError } from "@datacentricdesign/types";
+import { AccessControlPolicy, PolicyService } from "./PolicyService";
 import { Log } from "../../Logger";
 
 let policyService: PolicyService;
@@ -13,7 +13,7 @@ describe("Policy Service", function () {
   before(async function () {
     policyService = PolicyService.getInstance();
     // Test values
-    thingId = "dcd:things:" + uuidv4();
+    thingId = `dcd:things:${uuidv4()}`;
     personId = "dcd:persons:test@test.com";
   });
 
