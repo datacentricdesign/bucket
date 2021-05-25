@@ -307,8 +307,7 @@ export class PropertyService {
                     measurement: property.type.id,
                     tags: {
                         "propertyId": property.id,
-                        "thingId": property.thing.id,
-                        "personId": property.thing.personId
+                        "thingId": property.thing.id
                     },
                     fields: fields,
                     timestamp: ts
