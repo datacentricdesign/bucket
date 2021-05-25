@@ -292,6 +292,7 @@ export class PropertyService {
                 if (values.length === dimensions.length) {
                     // missing time, take from server
                     ts = Date.now();
+                    values.unshift(ts)
                 } else {
                     ts = (typeof values[0] === 'string') ? Number.parseInt(values[0] + "") : values[0];
                 }
