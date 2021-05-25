@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { cleanEnv, str, port, bool, url } from "envalid";
+import { bool, cleanEnv, port, str, url } from "envalid";
 import { envConfig } from "./envConfig";
 import { ORMConfig } from "./ormConfig";
 import { httpConfig } from "./httpConfig";

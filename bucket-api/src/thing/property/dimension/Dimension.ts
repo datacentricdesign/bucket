@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 import { Dimension as IDimension } from "@datacentricdesign/types";
 
 @Entity()

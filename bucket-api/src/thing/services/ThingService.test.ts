@@ -4,9 +4,7 @@ import { Log } from "../../Logger";
 import { ThingService } from "./ThingService";
 import { Thing } from "../Thing";
 
-let thingService: ThingService;
-let thing: Thing;
-let createdThing: Thing;
+let createdThing: Thing, thing: Thing, thingService: ThingService;
 
 describe("Thing Service", function () {
   before(async function () {
@@ -74,8 +72,8 @@ describe("Thing Service", function () {
   });
 
   it("Edit One Thing", function (done: Mocha.Done) {
-    const editedName = "A new name";
-    const editedDescription = "A new description";
+    const editedDescription = "A new description",
+      editedName = "A new name";
     createdThing.name = editedName;
     createdThing.description = editedDescription;
     thingService

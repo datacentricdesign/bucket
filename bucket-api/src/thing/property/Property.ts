@@ -1,10 +1,10 @@
 import {
-  Entity,
   Column,
   CreateDateColumn,
-  PrimaryColumn,
-  ManyToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
 } from "typeorm";
 import { Thing } from "../Thing";
 import { PropertyType } from "./propertyType/PropertyType";

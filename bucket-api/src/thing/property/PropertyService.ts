@@ -1,4 +1,4 @@
-import { getRepository, DeleteResult } from "typeorm";
+import { DeleteResult, getRepository } from "typeorm";
 
 import { Property } from "./Property";
 
@@ -15,10 +15,11 @@ import {
 import { DeleteAPI, SetupAPI } from "@influxdata/influxdb-client-apis";
 
 import config from "../../config";
-import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
+import { DTOProperty, ValueOptions } from "@datacentricdesign/types";
 import { Log } from "../../Logger";
 import { PropertyType } from "./propertyType/PropertyType";
 import { AccessControlPolicy, PolicyService } from "../services/PolicyService";
+import { GroupService } from "../services/GroupService";
 import { Thing } from "../Thing";
 
 interface SharedProperties {
@@ -28,18 +29,28 @@ interface SharedProperties {
 
 export class PropertyService {
   private influx: InfluxDB;
+
   private url: string;
+
   private org: string;
+
   private bucket: string;
+
   private token: string;
+
   private ready = false;
+
   private cachedTypes: Map<string, PropertyType>;
 
-  // private thingService: ThingService;
+  // Private thingService: ThingService;
   private policyService: PolicyService;
+
+  private groupService: GroupService;
+
   private propertyTypeService: PropertyTypeService;
 
   private static instance: PropertyService;
+
   private static consumers: unknown[] = [];
 
   public static async getInstance(
@@ -61,6 +72,7 @@ export class PropertyService {
    */
   constructor() {
     this.policyService = PolicyService.getInstance();
+    this.groupService = GroupService.getInstance();
     this.propertyTypeService = PropertyTypeService.getInstance();
     this.cachedTypes = new Map<string, PropertyType>();
   }
@@ -101,7 +113,7 @@ export class PropertyService {
       })
       .catch((error) => {
         Log.error(error);
-        Log.info("Retrying to connect to InfluxDB in " + delayMs + " ms.");
+        Log.info(`Retrying to connect to InfluxDB in ${delayMs} ms.`);
         delay(delayMs).then(() => {
           this.init(delayMs * 1.5);
         });
@@ -109,8 +121,8 @@ export class PropertyService {
   }
 
   static async release(consumer: unknown): Promise<void> {
-    let itemsProcessed = 0;
-    let itemsRemoved = 0;
+    let itemsProcessed = 0,
+      itemsRemoved = 0;
     return new Promise((resolve, reject) => {
       if (PropertyService.consumers.length === 0) {
         return reject();
@@ -127,9 +139,8 @@ export class PropertyService {
           }
           if (itemsRemoved !== 0) {
             return resolve();
-          } else {
-            return reject();
           }
+          return reject();
         }
       });
     });
@@ -141,7 +152,8 @@ export class PropertyService {
 
   /**
    * Create a new Property.
-   **/
+   *
+   */
   async createNewProperty(
     thing: Thing,
     dtoProperty: DTOProperty
@@ -172,7 +184,7 @@ export class PropertyService {
         ? property.type.description
         : dtoProperty.description;
     // Generate a new id with the property prefix
-    property.id = "dcd:properties:" + uuidv4();
+    property.id = `dcd:properties:${uuidv4()}`;
     // Try to retrieve Property from the database
     const propertyRepository = getRepository(Property);
     await propertyRepository.save(property);
@@ -182,7 +194,8 @@ export class PropertyService {
   /**
    * List the Properties of a Thing.
    * @param {string} thingId
-   **/
+   *
+   */
   async getPropertiesOfAThing(thingId: string): Promise<Property[]> {
     // Check if the service is ready
     if (!this.ready) {
@@ -196,7 +209,7 @@ export class PropertyService {
       .innerJoinAndSelect("property.type", "type")
       .innerJoinAndSelect("type.dimensions", "dimensions")
       .where("thing.id = :thingId")
-      .setParameters({ thingId: thingId })
+      .setParameters({ thingId })
       .getMany();
   }
 
@@ -204,7 +217,8 @@ export class PropertyService {
    * List all accessible Properties.
    * @param {string} subjectId person, thing or group id ()
    * @param {string} audienceId person, thing or group id
-   **/
+   *
+   */
   async getProperties(
     subject: string,
     audienceId: string,
@@ -216,16 +230,15 @@ export class PropertyService {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
     // Get an array of group names from the specified audience
-    const groups = await this.audienceToGroups(subject, audienceId);
-    // Get all consents from these groups
-    const consents = await this.getConsentsFromGroupArray(groups);
-    // Extract the property id of the consents and their origin (thing they belong to)
-    const {
-      propertyIdArray,
-      resourceOriginMap,
-    } = this.consentToSharedProperties(consents);
-    // Get the properties
-    const properties = await this.getPropertiesFromList(propertyIdArray);
+    const groups = await this.audienceToGroups(subject, audienceId),
+      // Get all consents from these groups
+      consents = await this.getConsentsFromGroupArray(groups),
+      // Extract the property id of the consents and their origin (thing they belong to)
+      { propertyIdArray, resourceOriginMap } = this.consentToSharedProperties(
+        consents
+      ),
+      // Get the properties
+      properties = await this.getPropertiesFromList(propertyIdArray);
     // Get the number of values for each dimension, per time interval
     return this.getSharedPropertyValueCount(
       properties,
@@ -248,9 +261,9 @@ export class PropertyService {
         properties[i].values = await this.readValuesFromInfluxDB(
           properties[i],
           {
-            from: from,
-            to: to,
-            timeInterval: timeInterval,
+            from,
+            to,
+            timeInterval,
             fctInterval: "count",
             fill: undefined,
           }
@@ -266,10 +279,10 @@ export class PropertyService {
   ): Promise<string[]> {
     let groups = [];
     if (audienceId === "*") {
-      groups = await this.policyService.listGroupMembership(subject);
+      groups = await this.groupService.listGroupMembership(subject);
     } else {
       try {
-        await this.policyService.checkGroupMembership(subject, audienceId);
+        await this.groupService.checkGroupMembership(subject, audienceId);
         groups.push(audienceId);
       } catch (error) {
         return Promise.reject(error);
@@ -343,7 +356,8 @@ export class PropertyService {
    * Read a Property.
    * @param {string} propertyId
    * returns {Property}
-   **/
+   *
+   */
   async getOnePropertyById(
     thingId: string,
     propertyId: string,
@@ -354,15 +368,15 @@ export class PropertyService {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
     // Get property from the database
-    const propertyRepository = getRepository(Property);
-    const property = await propertyRepository
-      .createQueryBuilder("property")
-      .innerJoinAndSelect("property.thing", "thing")
-      .innerJoinAndSelect("property.type", "type")
-      .innerJoinAndSelect("type.dimensions", "dimensions")
-      .where("property.id = :propertyId AND thing.id = :thingId")
-      .setParameters({ propertyId: propertyId, thingId: thingId })
-      .getOne();
+    const propertyRepository = getRepository(Property),
+      property = await propertyRepository
+        .createQueryBuilder("property")
+        .innerJoinAndSelect("property.thing", "thing")
+        .innerJoinAndSelect("property.type", "type")
+        .innerJoinAndSelect("type.dimensions", "dimensions")
+        .where("property.id = :propertyId AND thing.id = :thingId")
+        .setParameters({ propertyId, thingId })
+        .getOne();
 
     if (property !== undefined && valueOptions != undefined) {
       Log.debug(valueOptions.from);
@@ -377,7 +391,8 @@ export class PropertyService {
   /**
    * List the Properties of a Thing, of a given type
    * @param {string} thingId
-   **/
+   *
+   */
   async getPropertiesOfAThingByType(
     thingId: string,
     typeId: string
@@ -387,15 +402,15 @@ export class PropertyService {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
     // Get properties from the database
-    const propertyRepository = getRepository(Property);
-    const properties = await propertyRepository
-      .createQueryBuilder("property")
-      .innerJoinAndSelect("property.thing", "thing")
-      .innerJoinAndSelect("property.type", "type")
-      .innerJoinAndSelect("type.dimensions", "dimensions")
-      .where("thing.id = :thingId AND type.id = :typeId")
-      .setParameters({ thingId: thingId, typeId: typeId })
-      .getMany();
+    const propertyRepository = getRepository(Property),
+      properties = await propertyRepository
+        .createQueryBuilder("property")
+        .innerJoinAndSelect("property.thing", "thing")
+        .innerJoinAndSelect("property.type", "type")
+        .innerJoinAndSelect("type.dimensions", "dimensions")
+        .where("thing.id = :thingId AND type.id = :typeId")
+        .setParameters({ thingId, typeId })
+        .getMany();
     return properties;
   }
 
@@ -403,7 +418,8 @@ export class PropertyService {
    * Edit one Property
    * @param property
    * returns Promise
-   **/
+   *
+   */
   editOneProperty(property: Property): Promise<Property> {
     // Check if the service is ready
     if (!this.ready) {
@@ -417,7 +433,8 @@ export class PropertyService {
    * Update values of a Property
    * @param property
    * returns Promise
-   **/
+   *
+   */
   async updatePropertyValues(property: Property): Promise<void> {
     // Check if the service is ready
     if (!this.ready) {
@@ -435,14 +452,14 @@ export class PropertyService {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
     if (!this.cachedTypes.has(propertyId)) {
-      const propertyRepository = getRepository(Property);
-      const property: Property = await propertyRepository
-        .createQueryBuilder("property")
-        .innerJoinAndSelect("property.type", "type")
-        .innerJoinAndSelect("type.dimensions", "dimensions")
-        .where("property.id = :propertyId")
-        .setParameters({ propertyId: propertyId })
-        .getOne();
+      const propertyRepository = getRepository(Property),
+        property: Property = await propertyRepository
+          .createQueryBuilder("property")
+          .innerJoinAndSelect("property.type", "type")
+          .innerJoinAndSelect("type.dimensions", "dimensions")
+          .where("property.id = :propertyId")
+          .setParameters({ propertyId })
+          .getOne();
       this.cachedTypes.set(property.id, property.type);
     }
     return this.cachedTypes.get(propertyId);
@@ -458,19 +475,12 @@ export class PropertyService {
     if (!this.ready) {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
-    const propertyRepository = getRepository(Property);
-    const property: Property = await this.getOnePropertyById(
-      thingId,
-      propertyId
-    );
+    const propertyRepository = getRepository(Property),
+      property: Property = await this.getOnePropertyById(thingId, propertyId);
     if (property === undefined) {
       throw new DCDError(
         404,
-        "Property to delete " +
-          propertyId +
-          " could not be found for Thing " +
-          thingId +
-          "."
+        `Property to delete ${propertyId} could not be found for Thing ${thingId}.`
       );
     }
     return propertyRepository
@@ -482,7 +492,7 @@ export class PropertyService {
         return Promise.reject(
           new DCDError(
             500,
-            "Unexpected number of deleted properties: " + result.affected
+            `Unexpected number of deleted properties: ${result.affected}`
           )
         );
       })
@@ -511,8 +521,8 @@ export class PropertyService {
     if (!this.ready) {
       return Promise.reject(new DCDError(503, "Property Service not ready."));
     }
-    const points = [];
-    const dimensions = property.type.dimensions;
+    const points = [],
+      { dimensions } = property.type;
     for (let index = 0; index < property.values.length; index++) {
       let ts: number;
       const values: Array<string | number> = property.values[index];
@@ -521,12 +531,12 @@ export class PropertyService {
         values.length === dimensions.length
       ) {
         if (values.length === dimensions.length) {
-          // missing time, take from server
+          // Missing time, take from server
           ts = Date.now();
         } else {
           ts =
             typeof values[0] === "string"
-              ? Number.parseInt(values[0] + "")
+              ? Number.parseInt(`${values[0]}`)
               : values[0];
         }
 
@@ -536,7 +546,7 @@ export class PropertyService {
           .tag("personId", property.thing.personId);
 
         for (let i = 1; i < values.length; i++) {
-          const name = dimensions[i - 1].name;
+          const { name } = dimensions[i - 1];
           switch (dimensions[i - 1].type) {
             case "string":
               point.stringField(name, values[i]);
@@ -584,8 +594,8 @@ export class PropertyService {
     let fluxQuery = `from(bucket:"${this.bucket}") `;
 
     if (opt.from !== undefined && opt.to !== undefined) {
-      const start = new Date(opt.from).toISOString();
-      const end = new Date(opt.to).toISOString();
+      const start = new Date(opt.from).toISOString(),
+        end = new Date(opt.to).toISOString();
       fluxQuery += `|> range(start: ${start}, stop: ${end})`;
     }
     fluxQuery += ` |> filter(fn: (r) => r["_measurement"] == "${property.type.id}")`;
@@ -610,8 +620,8 @@ export class PropertyService {
       const values = [];
       queryApi.queryRows(fluxQuery, {
         next(row: string[], tableMeta: FluxTableMetaData) {
-          const o = tableMeta.toObject(row);
-          const val = [Date.parse(o["_time"])];
+          const o = tableMeta.toObject(row),
+            val = [Date.parse(o._time)];
           for (
             let index = 0;
             index < property.type.dimensions.length;

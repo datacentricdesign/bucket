@@ -1,17 +1,17 @@
 import {
-  Entity,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
+  JoinColumn,
   OneToMany,
   PrimaryColumn,
-  JoinColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { IsNotEmpty } from "class-validator";
 import { Property } from "./property/Property";
 import {
-  Thing as IThing,
   Property as IProperty,
+  Thing as IThing,
 } from "@datacentricdesign/types";
 /**
  * A Thing represents a physical or virtual component collecting data.

@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { DCDRequest } from "../../config";
@@ -14,18 +14,20 @@ export const introspectToken = (requiredScope: string[]) => {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    // If running on development environment,
-    // we skip the authentication and pretend we this is the DEV_USER
-    // const user = {
-    //     entityId: config.env.devUser,
-    //     token: config.env.devToken,
-    //     sub: req.params.entityId
-    // }
-    // Log.debug(user)
-    // req.context = {
-    //     userId: user.entityId
-    // }
-    // return next()
+    /*
+     * If running on development environment,
+     * we skip the authentication and pretend we this is the DEV_USER
+     * const user = {
+     *     entityId: config.env.devUser,
+     *     token: config.env.devToken,
+     *     sub: req.params.entityId
+     * }
+     * Log.debug(user)
+     * req.context = {
+     *     userId: user.entityId
+     * }
+     * return next()
+     */
     if (requiredScope.length === 0) {
       requiredScope = ["dcd:things"];
     }
@@ -47,12 +49,8 @@ export const introspectToken = (requiredScope: string[]) => {
                 };
                 return Promise.resolve(user);
               });
-          } else {
-            return AuthController.authService.introspect(
-              tokenStr,
-              requiredScope
-            );
           }
+          return AuthController.authService.introspect(tokenStr, requiredScope);
         })
         .then((user: TokenIntrospection) => {
           req.context = {

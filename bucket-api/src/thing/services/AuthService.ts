@@ -1,18 +1,16 @@
 import * as jwkToBuffer from "jwk-to-pem";
 import * as jwt from "jsonwebtoken";
-import { JWK } from "node-jose";
-import { v4 as uuidv4 } from "uuid";
-
-import fetch from "node-fetch";
-import { RequestInit } from "node-fetch";
 import * as qs from "querystring";
 import * as SimpleOauth from "simple-oauth2";
-import { DCDError } from "@datacentricdesign/types";
-import { Token } from "./ThingService";
 import { Access, PolicyService } from "./PolicyService";
+import fetch, { RequestInit } from "node-fetch";
 import config from "../../config";
-import { URL } from "url";
+import { DCDError } from "@datacentricdesign/types";
+import { JWK } from "node-jose";
 import { Log } from "../../Logger";
+import { Token } from "./ThingService";
+import { URL } from "url";
+import { v4 as uuidv4 } from "uuid";
 
 export interface KeySet {
   algorithm: string;
@@ -52,8 +50,11 @@ export interface JWKParams {
  */
 export class AuthService {
   private oauth2: SimpleOauth.ClientCredentials;
+
   private token = null;
+
   private jwtTokenMap = [];
+
   private policyService: PolicyService;
 
   private static instance: AuthService;
@@ -103,9 +104,9 @@ export class AuthService {
     token: string,
     requiredScope: string[] = []
   ): Promise<TokenIntrospection> {
-    const body = { token: token };
-    // const body = { token: token, scope: requiredScope.join(" ") };
-    const url = config.oauth2.oAuth2IntrospectURL;
+    const body = { token },
+      // Const body = { token: token, scope: requiredScope.join(" ") };
+      url = config.oauth2.oAuth2IntrospectURL;
 
     return this.authorisedRequest(
       "POST",
@@ -147,14 +148,14 @@ export class AuthService {
    * @returns {*}
    */
   generateJWT(privateKey: string): string {
-    const currentTime = Math.floor(Date.now() / 1000);
-    const token = {
-      iat: currentTime - 3600,
-      exp: currentTime + 10 * 31557600, // 10 years
-      aud: config.http.url,
-    };
-    const algorithm = "RS256";
-    return jwt.sign(token, privateKey, { algorithm: algorithm });
+    const currentTime = Math.floor(Date.now() / 1000),
+      token = {
+        iat: currentTime - 3600,
+        exp: currentTime + 10 * 31557600, // 10 years
+        aud: config.http.url,
+      },
+      algorithm = "RS256";
+    return jwt.sign(token, privateKey, { algorithm });
   }
 
   /**
@@ -180,7 +181,7 @@ export class AuthService {
    * @returns {Promise}
    */
   generateJWK(set: string, body: JWKParams): Promise<KeySet> {
-    const url = config.oauth2.oAuth2HydraAdminURL + "/keys/" + set;
+    const url = `${config.oauth2.oAuth2HydraAdminURL}/keys/${set}`;
     return this.authorisedRequest("POST", url, body)
       .then((result) => {
         const jwk = result.keys[0];
@@ -192,7 +193,7 @@ export class AuthService {
         this.jwtTokenMap[set] = jwkToBuffer(jwk);
         const keySet: KeySet = {
           algorithm: jwk.alg,
-          privateKey: privateKey,
+          privateKey,
         };
         return Promise.resolve(keySet);
       })
@@ -208,12 +209,12 @@ export class AuthService {
    * @returns {Promise<string|DCDError>}
    */
   getJWK(setId: string): Promise<string> {
-    const url = config.oauth2.oAuth2HydraAdminURL + "/keys/" + setId;
+    const url = `${config.oauth2.oAuth2HydraAdminURL}/keys/${setId}`;
     return this.authorisedRequest("GET", url)
       .then((result) => {
-        const jwk = result.keys[0];
-        // Convert the JWK into a public key
-        const publicKey = jwkToBuffer(jwk);
+        const jwk = result.keys[0],
+          // Convert the JWK into a public key
+          publicKey = jwkToBuffer(jwk);
         this.jwtTokenMap[setId] = publicKey;
         return Promise.resolve(publicKey);
       })
@@ -223,7 +224,7 @@ export class AuthService {
   }
 
   async setJWK(setId: string, jwk: JWK.Key): Promise<string> {
-    const url = config.oauth2.oAuth2HydraAdminURL + "/keys/" + setId;
+    const url = `${config.oauth2.oAuth2HydraAdminURL}/keys/${setId}`;
     return this.refresh()
       .then(() => {
         return this.authorisedRequest("PUT", url, { keys: [jwk] });
@@ -268,9 +269,9 @@ export class AuthService {
         });
     }
     const introspectionToken: TokenIntrospectionJWT = <TokenIntrospectionJWT>(
-      jwt.verify(acp.token, this.jwtTokenMap[entity])
-    );
-    const currentTime = Math.floor(new Date().getMilliseconds() / 1000);
+        jwt.verify(acp.token, this.jwtTokenMap[entity])
+      ),
+      currentTime = Math.floor(new Date().getMilliseconds() / 1000);
 
     if (
       introspectionToken.aud !== undefined &&
@@ -279,9 +280,8 @@ export class AuthService {
       introspectionToken.exp > currentTime
     ) {
       return this.policyService.check(acp);
-    } else {
-      return Promise.reject(new DCDError(403, "Token expired"));
     }
+    return Promise.reject(new DCDError(403, "Token expired"));
   }
 
   /**
@@ -330,9 +330,8 @@ export class AuthService {
             introspectionToken.exp > currentTime
           ) {
             return resolve(introspectionToken);
-          } else {
-            return reject(new DCDError(403, "Token expired"));
           }
+          return reject(new DCDError(403, "Token expired"));
         }
       );
     });
@@ -361,7 +360,7 @@ export class AuthService {
   }
 
   getBearer(): string {
-    return "bearer " + qs.escape(this.token.token.access_token);
+    return `bearer ${qs.escape(this.token.token.access_token)}`;
   }
 
   /**
@@ -384,7 +383,7 @@ export class AuthService {
         "Content-Type": type,
         Accept: "application/json",
       },
-      method: method,
+      method,
       timeout: 15000,
     };
     if (config.http.secured) {

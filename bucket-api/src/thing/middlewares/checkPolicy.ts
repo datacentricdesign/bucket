@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Access } from "../services/PolicyService";
@@ -15,12 +15,12 @@ export const checkPolicy = (action: string) => {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    const acpResource = buildACPResource(req);
-    const acp: Access = {
-      resource: acpResource,
-      action: "dcd:actions:" + action,
-      subject: req.context.userId,
-    };
+    const acpResource = buildACPResource(req),
+      acp: Access = {
+        resource: acpResource,
+        action: `dcd:actions:${action}`,
+        subject: req.context.userId,
+      };
     AuthController.policyService
       .check(acp)
       .then(() => next())
@@ -43,10 +43,10 @@ function buildACPResource(req: DCDRequest): string {
     acpResource += ":properties";
   }
   if (req.params.propertyId !== undefined) {
-    acpResource += ":" + req.params.propertyId.replace("dcd:", "");
+    acpResource += `:${req.params.propertyId.replace("dcd:", "")}`;
   }
   if (req.params.consentId !== undefined) {
-    acpResource += ":" + req.params.consentId.replace("dcd:", "");
+    acpResource += `:${req.params.consentId.replace("dcd:", "")}`;
   }
   return acpResource;
 }

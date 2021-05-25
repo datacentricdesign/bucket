@@ -5,6 +5,7 @@ import { PropertyTypeController } from "./PropertyTypeController";
 
 export class PropertyTypeRouter {
   private router: Router;
+
   private controller: PropertyTypeController;
 
   constructor() {
@@ -28,7 +29,8 @@ export class PropertyTypeRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {PropertyType[]} properties The retrieved Properties
-     **/
+     *
+     */
     this.router.get(
       "/",
       [introspectToken(["dcd:types"])],
@@ -43,7 +45,8 @@ export class PropertyTypeRouter {
      * @apiVersion 0.1.0
      *
      * @apiHeader {String} Authorization TOKEN ID
-     **/
+     *
+     */
     this.router.post(
       "/",
       [introspectToken(["dcd:types"])],
@@ -58,7 +61,8 @@ export class PropertyTypeRouter {
      * @apiVersion 0.1.0
      *
      * @apiHeader {String} Authorization TOKEN ID
-     **/
+     *
+     */
     this.router.delete(
       "/:propertyTypeId",
       [introspectToken(["dcd:types"])],

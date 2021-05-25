@@ -1,4 +1,4 @@
-import { getRepository, DeleteResult } from "typeorm";
+import { DeleteResult, getRepository } from "typeorm";
 
 import { PropertyType } from "./PropertyType";
 import { DCDError } from "@datacentricdesign/types";
@@ -15,7 +15,8 @@ export class PropertyTypeService {
 
   /**
    * List existing property types.
-   **/
+   *
+   */
   getPropertyTypes(): Promise<PropertyType[]> {
     // Get things from the database
     const propertyTypeRepository = getRepository(PropertyType);
@@ -29,7 +30,8 @@ export class PropertyTypeService {
    * Read a PropertyType.
    * @param {string} typeId
    * returns {PropertyType}
-   **/
+   *
+   */
   getOnePropertyTypeById(typeId: string): Promise<PropertyType> {
     // Get things from the database
     const propertyTypeRepository = getRepository(PropertyType);
@@ -43,7 +45,8 @@ export class PropertyTypeService {
    * Read a PropertyType.
    * @param {PropertyType} propertyType
    * returns {PropertyType}
-   **/
+   *
+   */
   async createOnePropertyType(
     propertyType: PropertyType
   ): Promise<PropertyType> {
@@ -67,13 +70,15 @@ export class PropertyTypeService {
     } catch (error) {
       throw new DCDError(
         404,
-        "PropertyType to delete " + propertyTypeId + " could not be not found."
+        `PropertyType to delete ${propertyTypeId} could not be not found.`
       );
     }
-    // await getConnection().createQueryBuilder().delete()
-    //     .from(PropertyType)
-    //     .where("PropertyType.id = :propertyTypeId", { propertyTypeId })
-    //     .execute();
+    /*
+     * Await getConnection().createQueryBuilder().delete()
+     *     .from(PropertyType)
+     *     .where("PropertyType.id = :propertyTypeId", { propertyTypeId })
+     *     .execute();
+     */
     return propertyTypeRepository.delete(propertyTypeId);
   }
 }

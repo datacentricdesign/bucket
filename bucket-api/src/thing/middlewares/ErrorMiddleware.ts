@@ -8,8 +8,8 @@ export default function errorMiddleware(
   request: Request,
   response: Response
 ): void {
-  const status = error._statusCode || 500;
-  const message = error.message || "Something went wrong";
+  const status = error._statusCode || 500,
+    message = error.message || "Something went wrong";
   Log.debug(
     JSON.stringify({
       status,

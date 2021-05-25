@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import config, { DCDRequest } from "../../config";
 import fetch from "node-fetch";
 import { DCDError } from "@datacentricdesign/types";
@@ -7,6 +7,7 @@ import { ThingService } from "../services/ThingService";
 
 export class DPiController {
   private dpiService: DPiService;
+
   private thingService: ThingService;
 
   constructor() {
@@ -19,13 +20,13 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url = config.env.dpiUrl + "/health";
-    const options = {
-      method: "GET",
-    };
+    const url = `${config.env.dpiUrl}/health`,
+      options = {
+        method: "GET",
+      };
     try {
-      const result = await fetch(url, options);
-      const json = await result.json();
+      const result = await fetch(url, options),
+        json = await result.json();
       res.status(200).send(json);
     } catch (error) {
       const dcdError = new DCDError(503, "Service not available.");
@@ -39,24 +40,26 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url =
-      config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
-    const thingId = req.params.thingId;
-    const options = {
-      method: "GET",
-    };
+    const url = `${config.env.dpiUrl}/${req.params.thingId.replace(
+        "dcd:things:",
+        ""
+      )}`,
+      { thingId } = req.params,
+      options = {
+        method: "GET",
+      };
     try {
-      const result = await fetch(url, options);
-      const json = await result.json();
+      const result = await fetch(url, options),
+        json = await result.json();
       if (json.errorCode !== undefined) {
         res.status(json.errorCode).json(json);
         const dcdError = new DCDError(json.errorCode, json);
         dcdError._statusCode = json.errorCode;
         return next(dcdError);
       } else if (json.code === 0 && req.query.download === "true") {
-        const dpiId = thingId.replace("dcd:things:", "");
-        const downloadURL = config.env.dpiUrl + "/" + dpiId + "?download=true";
-        const result = await fetch(downloadURL);
+        const dpiId = thingId.replace("dcd:things:", ""),
+          downloadURL = `${config.env.dpiUrl}/${dpiId}?download=true`,
+          result = await fetch(downloadURL);
         await new Promise((resolve, reject) => {
           result.body.pipe(res);
           result.body.on("error", (error) => {
@@ -84,8 +87,8 @@ export class DPiController {
   ): Promise<void> {
     try {
       // Retrieve thing details from thingId
-      const thing = await this.thingService.getOneThingById(req.params.thingId);
-      const text = await this.dpiService.generateDPiImage(req.body, thing);
+      const thing = await this.thingService.getOneThingById(req.params.thingId),
+        text = await this.dpiService.generateDPiImage(req.body, thing);
       res.send(text);
     } catch (error) {
       return next(error);
@@ -97,14 +100,13 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url =
-      config.env.dpiUrl +
-      "/" +
-      req.params.thingId.replace("dcd:things:", "") +
-      "/cancel";
-    const options = {
-      method: "GET",
-    };
+    const url = `${config.env.dpiUrl}/${req.params.thingId.replace(
+        "dcd:things:",
+        ""
+      )}/cancel`,
+      options = {
+        method: "GET",
+      };
     try {
       await fetch(url, options);
       res.status(204).send();
@@ -118,11 +120,13 @@ export class DPiController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const url =
-      config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
-    const options = {
-      method: "DELETE",
-    };
+    const url = `${config.env.dpiUrl}/${req.params.thingId.replace(
+        "dcd:things:",
+        ""
+      )}`,
+      options = {
+        method: "DELETE",
+      };
     try {
       await fetch(url, options);
       res.status(204).send();

@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { validate } from "class-validator";
 
 import { Thing } from "../Thing";
@@ -9,6 +9,7 @@ import { DPiService } from "../dpi/DPiService";
 
 export class ThingController {
   private thingService: ThingService;
+
   private dpiService: DPiService;
 
   constructor() {
@@ -43,7 +44,7 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get the ID from the url
-    const thingId: string = req.params.thingId;
+    const { thingId } = req.params;
     try {
       // Get the Thing from the Service
       const thing: Thing = await this.thingService.getOneThingById(thingId);
@@ -59,8 +60,8 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get parameters from the body
-    const { name, description, type, pem, dpi } = req.body;
-    const thing = new Thing();
+    const { name, description, type, pem, dpi } = req.body,
+      thing = new Thing();
     thing.name = name;
     thing.description = description;
     thing.type = type;
@@ -100,9 +101,9 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get the ID from the url
-    const thingId = req.params.thingId;
-    // Get values from the body
-    const { name, description } = req.body;
+    const { thingId } = req.params,
+      // Get values from the body
+      { name, description } = req.body;
     let thing: Thing;
     try {
       thing = await this.thingService.getOneThingById(thingId);
@@ -125,7 +126,7 @@ export class ThingController {
     } catch (error) {
       return next(new DCDError(500, "Failed to update thing"));
     }
-    //After all send a 204 (no content, but accepted) response
+    // After all send a 204 (no content, but accepted) response
     res.status(204).send();
   };
 
@@ -135,9 +136,9 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get the thing ID from the url
-    const thingId = req.params.thingId;
-    // Get pem from body
-    const pem = req.body.pem;
+    const { thingId } = req.params,
+      // Get pem from body
+      { pem } = req.body;
     if (pem !== undefined && typeof pem !== "string") {
       return next(new DCDError(400, "Missing PEM key."));
     }
@@ -161,7 +162,7 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get the thing ID from the url
-    const thingId = req.params.thingId;
+    const { thingId } = req.params;
     // Call the Service
     try {
       await this.thingService.deleteOneThing(thingId);
@@ -178,8 +179,8 @@ export class ThingController {
     next: NextFunction
   ): Promise<void> => {
     // Get the property ID from the url
-    const from = parseInt(req.query.from as string);
-    const timeInterval = req.query.timeInterval as string;
+    const from = parseInt(req.query.from as string),
+      timeInterval = req.query.timeInterval as string;
 
     // Call the Service
     try {

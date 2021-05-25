@@ -13,12 +13,12 @@ import { expect } from "chai";
 import { PropertyController } from "./PropertyController";
 import { DCDRequest } from "../../config";
 
-let propertyController: PropertyController;
-let thingService: ThingService;
-let thing: Thing;
-let createdThing: Thing;
-let dtoProperty: DTOProperty;
-let personId: string;
+let createdThing: Thing,
+  dtoProperty: DTOProperty,
+  personId: string,
+  propertyController: PropertyController,
+  thing: Thing,
+  thingService: ThingService;
 
 describe("Property Controller", function () {
   before(async function () {
@@ -34,7 +34,7 @@ describe("Property Controller", function () {
     thingService = ThingService.getInstance();
     createdThing = await thingService.createNewThing(thing);
 
-    personId = "dcd:persons:" + uuidv4();
+    personId = `dcd:persons:${uuidv4()}`;
 
     dtoProperty = {
       name: "Test property",
@@ -46,7 +46,7 @@ describe("Property Controller", function () {
   it("It should create a property.", function (done: Mocha.Done) {
     const request: DCDRequest = httpMocks.createRequest({
       method: "POST",
-      url: "/things/" + createdThing.id + "/properties",
+      url: `/things/${createdThing.id}/properties`,
       params: {
         thingId: createdThing.id,
       },
@@ -56,8 +56,8 @@ describe("Property Controller", function () {
       userId: personId,
     };
 
-    const response = httpMocks.createResponse();
-    const next = sinon.spy();
+    const response = httpMocks.createResponse(),
+      next = sinon.spy();
 
     propertyController
       .createNewProperty(request, response, next)
@@ -79,7 +79,7 @@ describe("Property Controller", function () {
   it("It should list properties.", function (done: Mocha.Done) {
     const request: DCDRequest = httpMocks.createRequest({
       method: "GET",
-      url: "/things/" + createdThing.id + "/properties",
+      url: `/things/${createdThing.id}/properties`,
       params: {
         thingId: createdThing.id,
       },
@@ -88,8 +88,8 @@ describe("Property Controller", function () {
       userId: personId,
     };
 
-    const response = httpMocks.createResponse();
-    const next = sinon.spy();
+    const response = httpMocks.createResponse(),
+      next = sinon.spy();
 
     propertyController
       .getProperties(request, response, next)
@@ -111,7 +111,7 @@ describe("Property Controller", function () {
 
   after(async function () {
     await thingService.deleteOneThing(createdThing.id);
-    // await PropertyService.release(this);
+    // Await PropertyService.release(this);
     return Promise.resolve();
   });
 });

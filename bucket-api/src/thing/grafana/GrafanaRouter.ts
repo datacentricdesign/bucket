@@ -5,6 +5,7 @@ import { GrafanaController } from "./GrafanaController";
 
 export class GrafanaRouter {
   private router: Router;
+
   private controller: GrafanaController;
 
   constructor() {
@@ -24,7 +25,8 @@ export class GrafanaRouter {
      * @apiDescription Create Grafana dashboard for a Thing
      *
      * @apiVersion 0.0.1
-     **/
+     *
+     */
     this.router.post(
       "/",
       [introspectToken(["dcd:things"])],
@@ -37,7 +39,8 @@ export class GrafanaRouter {
      * @apiDescription Get user id on Grafana
      *
      * @apiVersion 0.0.1
-     **/
+     *
+     */
     this.router.get(
       "/user",
       [introspectToken(["dcd:things"])],

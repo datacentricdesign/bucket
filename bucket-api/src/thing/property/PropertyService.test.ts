@@ -8,12 +8,12 @@ import { expect } from "chai";
 import { Property } from "./Property";
 import { PropertyType } from "./propertyType/PropertyType";
 
-let propertyService: PropertyService;
-let thingService: ThingService;
-let thing: Thing;
-let createdThing: Thing;
-let createdProperty: Property;
-let dtoProperty: DTOProperty;
+let createdProperty: Property,
+  createdThing: Thing,
+  dtoProperty: DTOProperty,
+  propertyService: PropertyService,
+  thing: Thing,
+  thingService: ThingService;
 
 describe("Property Service", function () {
   before(async function () {
@@ -46,8 +46,10 @@ describe("Property Service", function () {
         );
         expect(rePropertyId.test(createdProperty.id)).to.be.true;
         expect(createdProperty.thing.id).to.equal(createdThing.id);
-        // The dimension for the requested type should be automatically created
-        // We expect 3 dimensions for the type ACCELEROMETER
+        /*
+         * The dimension for the requested type should be automatically created
+         * We expect 3 dimensions for the type ACCELEROMETER
+         */
         expect(createdProperty.type.dimensions.length).to.equal(3);
         done();
       })
@@ -111,8 +113,8 @@ describe("Property Service", function () {
   });
 
   it("It should edit the property name and description.", function (done: Mocha.Done) {
-    const editedName = "A new name";
-    const editedDescription = "A new description";
+    const editedDescription = "A new description",
+      editedName = "A new name";
     createdProperty.name = editedName;
     createdProperty.description = editedDescription;
     propertyService
@@ -224,7 +226,7 @@ describe("Property Service", function () {
 
   after(async function () {
     await thingService.deleteOneThing(createdThing.id);
-    // await PropertyService.release(this);
+    // Await PropertyService.release(this);
     return Promise.resolve();
   });
 });

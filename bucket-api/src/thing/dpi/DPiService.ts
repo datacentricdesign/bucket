@@ -31,9 +31,8 @@ export class DPiService {
   }
 
   async generateDPiImage(dpi: DPI, thing: Thing): Promise<string> {
-    const url = config.env.dpiUrl + "/";
-
-    const keys = await AuthController.authService.generateKeys(thing.id);
+    const url = `${config.env.dpiUrl}/`,
+      keys = await AuthController.authService.generateKeys(thing.id);
 
     dpi.id = thing.id;
     dpi.enable_SSH = dpi.enable_SSH ? "1" : "0";
@@ -42,14 +41,14 @@ export class DPiService {
     this.createOrUpdateHostnameProperty(thing, dpi.target_hostname);
 
     const options = {
-      method: "POST",
-      body: JSON.stringify(dpi),
-      headers: {
-        "Content-Type": "application/json",
+        method: "POST",
+        body: JSON.stringify(dpi),
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    };
-    const result = await fetch(url, options);
-    const text = await result.text();
+      result = await fetch(url, options),
+      text = await result.text();
     return text;
   }
 
@@ -74,7 +73,7 @@ export class DPiService {
     } else {
       netProp = properties[0];
     }
-    netProp.values = [[Date.now(), hostname, hostname + ".local", ""]];
+    netProp.values = [[Date.now(), hostname, `${hostname}.local`, ""]];
     await this.propertyService.updatePropertyValues(netProp);
   }
 }

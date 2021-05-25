@@ -11,9 +11,13 @@ import { ThingController } from "./ThingController";
 
 export class ThingRouter {
   private router: Router;
+
   private controller: ThingController;
+
   private propertyRouter: PropertyRouter;
+
   private grafanaRouter: GrafanaRouter;
+
   private dpiRouter: DPiRouter;
 
   constructor() {
@@ -46,7 +50,8 @@ export class ThingRouter {
      * @apiVersion 0.1.0
      *
      * @apiSuccess {object} health status
-     **/
+     *
+     */
     this.router.get("/health", this.controller.apiHealth);
 
     /**
@@ -59,7 +64,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {object} things The retrieved Things
-     **/
+     *
+     */
     this.router.get(
       "/",
       [introspectToken(["dcd:things"])],
@@ -84,7 +90,8 @@ export class ThingRouter {
      * @apiParam {String} thingId Id of the Thing to read.
      *
      * @apiSuccess {object} thing The retrieved Thing
-     **/
+     *
+     */
     this.router.get(
       "/:thingId",
       [introspectToken(["dcd:things"]), checkPolicy("read")],
@@ -114,7 +121,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {object} thing The created Thing
-     **/
+     *
+     */
     this.router.post(
       "/",
       [introspectToken(["dcd:things"])],
@@ -131,7 +139,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to update.
-     **/
+     *
+     */
     this.router.patch(
       "/:thingId",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
@@ -151,7 +160,8 @@ export class ThingRouter {
      *
      * @apiParam (Body) {string} thingId Id of the Thing to update.
      * @apiParam (Body) {string} pem of the Thing to update.
-     **/
+     *
+     */
     this.router.patch(
       "/:thingId/pem",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
@@ -168,7 +178,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to delete.
-     **/
+     *
+     */
     this.router.delete(
       "/:thingId",
       [introspectToken(["dcd:things"]), checkPolicy("delete")],

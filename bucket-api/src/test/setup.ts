@@ -4,7 +4,7 @@ import { Log } from "../Logger";
 
 let connection: Connection;
 
-// root hook to run before all test
+// Root hook to run before all test
 before(async function () {
   this.timeout(10000);
   Log.init("Test");
@@ -14,7 +14,7 @@ before(async function () {
   Log.info("Migration done");
 });
 
-// root hook to run after all test
+// Root hook to run after all test
 after(function () {
   connection.dropDatabase();
 });

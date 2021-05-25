@@ -20,9 +20,11 @@ export const ORMConfig: ConnectionOptions = {
   ],
   migrations: ["./src/thing/migration/**/*.ts"],
   subscribers: ["./src/thing/subscriber/**/*.ts"],
-  // cli: {
-  //     entitiesDir: "./thing/entities",
-  //     migrationsDir: "./thing/migration",
-  //     subscribersDir: "./thing/subscriber"
-  // }
+  /*
+   * Cli: {
+   *     entitiesDir: "./thing/entities",
+   *     migrationsDir: "./thing/migration",
+   *     subscribersDir: "./thing/subscriber"
+   * }
+   */
 };

@@ -1,13 +1,10 @@
+import fetch, { Response } from "node-fetch";
+import config from "../../config";
+import { DCDError } from "@datacentricdesign/types";
 import { getRepository } from "typeorm";
 import { httpConfig } from "../../config/httpConfig";
-import { DCDError } from "@datacentricdesign/types";
-
-import fetch, { Response } from "node-fetch";
 import { Role } from "../role/Role";
-
 import { v4 as uuidv4 } from "uuid";
-import config from "../../config";
-import { Log } from "../../Logger";
 
 export interface AccessControlPolicy {
   id: string;
@@ -26,27 +23,32 @@ export interface Access {
   subject: string;
 }
 
+export interface Policy {
+  effect: "allow" | "deny";
+  id?: string;
+  resourceId: string;
+  roleName: string;
+  subjectId: string;
+}
+
 /**
- * Manage access policies
+ * Manage access control policies
  */
 export class PolicyService {
   private static instance: PolicyService;
 
   public static getInstance(): PolicyService {
-    if (PolicyService.instance === undefined) {
+    if (typeof PolicyService.instance === "undefined") {
       PolicyService.instance = new PolicyService();
     }
     return PolicyService.instance;
   }
 
   private ketoHeaders = {
-    "Content-Type": "application/json",
     Accept: "application/json",
+    "Content-Type": "application/json",
   };
 
-  /**
-   *
-   */
   constructor() {
     if (httpConfig.secured) {
       this.ketoHeaders["X-Forwarded-Proto"] = "https";
@@ -55,78 +57,82 @@ export class PolicyService {
 
   /**
    * Grant a role on a resource entity to a subject entity.
-   * @param {string} subjectId
-   * @param {string} resourceId
-   * @param {string} roleName
-   * returns Promise
-   **/
+   */
   async grant(
     subjectId: string,
     resourceId: string,
     roleName: string
   ): Promise<AccessControlPolicy> {
     try {
-      const policyId = await this.getRoleId(subjectId, resourceId, roleName);
-      // There is an existing policy, let's update
-      return this.createPolicy(
+      const policyId = await PolicyService.getRoleId(
         subjectId,
         resourceId,
-        roleName,
-        "allow",
-        policyId
+        roleName
       );
+      // There is an existing policy, let's update
+      return this.createPolicy({
+        effect: "allow",
+        id: policyId,
+        resourceId,
+        roleName,
+        subjectId,
+      });
     } catch (error) {
       if (error.errorCode === 4041) {
         // No existing policy (Not found)
-        return this.createPolicy(subjectId, resourceId, roleName, "allow");
+        return this.createPolicy({
+          effect: "allow",
+          resourceId,
+          roleName,
+          subjectId,
+        });
       }
-      return Promise.reject(error); // Otherwise, something went wrong
+      // Otherwise, something went wrong
+      return Promise.reject(error);
     }
   }
 
   /**
    * Revoke a role on a resource entity to a subject entity.
-   * @param {string} subjectId
-   * @param {string} resourceId
-   * @param {string} roleName
-   * returns Promise
-   **/
+   */
   async revoke(
     subjectId: string,
     resourceId: string,
     roleName: string
   ): Promise<AccessControlPolicy> {
     try {
-      const policyId: string = await this.getRoleId(
+      const policyId: string = await PolicyService.getRoleId(
         subjectId,
         resourceId,
         roleName
       );
       // There is an existing policy, let's update
-      return this.createPolicy(
-        subjectId,
+      return this.createPolicy({
+        effect: "deny",
+        id: policyId,
         resourceId,
         roleName,
-        "deny",
-        policyId
-      );
+        subjectId,
+      });
     } catch (error) {
       if (error.errorCode === 4041) {
         // No existing policy (Not found)
-        return this.createPolicy(subjectId, resourceId, roleName, "deny");
+        return this.createPolicy({
+          effect: "deny",
+          resourceId,
+          roleName,
+          subjectId,
+        });
       }
-      return Promise.reject(error); // Otherwise, something went wrong
+      // Otherwise, something went wrong
+      return Promise.reject(error);
     }
   }
 
   /**
    * Provides the role id for a given triple subject/resource/role.
-   * @param subjectId
-   * @param resourceId
-   * @param roleName
-   * @returns
    */
-  async getRoleId(
+  static async getRoleId(
     subjectId: string,
     resourceId: string,
     roleName: string
@@ -136,8 +142,8 @@ export class PolicyService {
       const role: Role = await roleRepository.findOneOrFail({
         where: {
           actorEntityId: subjectId,
-          subjectEntityId: resourceId,
           role: roleName,
+          subjectEntityId: resourceId,
         },
       });
       return Promise.resolve(role.id);
@@ -145,81 +151,80 @@ export class PolicyService {
       return Promise.reject(
         new DCDError(
           4041,
-          "Role not found for " +
-            subjectId +
-            ", " +
-            resourceId +
-            " and " +
-            roleName
+          `Role not found for ${subjectId}, ${resourceId} and ${roleName}`
         )
       );
     }
   }
 
-  async createPolicy(
-    subjectId: string,
-    resourceId: string,
-    roleName: string,
-    effect = "allow",
-    id?: string
-  ): Promise<AccessControlPolicy> {
-    Log.debug("creating policy...");
-    const policyId: string = id !== undefined ? id : uuidv4();
-    const roleRepository = getRepository(Role);
+  /**
+   *
+   */
+  async createPolicy(policy: Policy): Promise<AccessControlPolicy> {
+    let policyId: string = policy.id;
+    if (typeof policyId === "undefined") {
+      policyId = uuidv4();
+    }
     const newRole: Role = {
+      actorEntityId: policy.subjectId,
       id: policyId,
-      actorEntityId: subjectId,
-      subjectEntityId: resourceId,
-      role: roleName,
+      role: policy.roleName,
+      subjectEntityId: policy.resourceId,
     };
 
     try {
-      const result = await roleRepository.save(newRole);
-      Log.info(result);
+      const roleRepository = getRepository(Role);
+      await roleRepository.save(newRole);
     } catch (error) {
       return Promise.reject(error);
     }
 
-    const policy: AccessControlPolicy = {
+    const acp: AccessControlPolicy = {
+      actions: PolicyService.roleToActions(policy.roleName),
+      effect: policy.effect,
       id: policyId,
-      effect: effect,
-      actions: PolicyService.roleToActions(roleName),
-      subjects: [subjectId],
-      resources: PolicyService.entityToResource(resourceId),
+      resources: PolicyService.entityToResource(policy.resourceId),
+      subjects: [policy.subjectId],
     };
-    return this.updateKetoPolicy(policy);
+    return this.updateKetoPolicy(acp);
   }
 
+  /**
+   *
+   */
   async deletePolicy(
     subjectId: string,
     resourceId: string,
     roleName: string
   ): Promise<Response> {
     try {
-      const roleId: string = await this.getRoleId(
-        subjectId,
-        resourceId,
-        roleName
-      );
-      // There is an existing policy, let's update
-      const roleRepository = getRepository(Role);
+      const roleId: string = await PolicyService.getRoleId(
+          subjectId,
+          resourceId,
+          roleName
+        ),
+        // There is an existing policy, let's update
+        roleRepository = getRepository(Role);
       await roleRepository.delete(roleId);
       // Use the role id to retrieve and delete associated Keto's policy
       return this.deleteKetoPolicy(roleId);
     } catch (error) {
-      return Promise.reject(error); // Otherwise, something went wrong
+      // Otherwise, something went wrong
+      return Promise.reject(error);
     }
   }
 
+  /**
+   *
+   */
   async check(acp: Access): Promise<void> {
-    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/regex/allowed";
-    const options = {
-      headers: this.ketoHeaders,
-      method: "POST",
-      body: JSON.stringify(acp),
-    };
+    const url = `${config.oauth2.acpURL.origin}/engines/acp/ory/regex/allowed`;
     try {
-      const res = await fetch(url, options);
+      const res = await fetch(url, {
+        body: JSON.stringify(acp),
+        headers: this.ketoHeaders,
+        method: "POST",
+      });
       if (res.ok) {
         return Promise.resolve();
       }
@@ -239,20 +244,12 @@ export class PolicyService {
     id: string,
     flavor: "exact" | "regex" = "exact"
   ): Promise<AccessControlPolicy[]> {
-    const url =
-      config.oauth2.acpURL.origin +
-      "/engines/acp/ory/" +
-      flavor +
-      "/policies?limit=100000&" +
-      type +
-      "=" +
-      id;
-    const options = {
-      headers: this.ketoHeaders,
-      method: "GET",
-    };
+    const url = `${config.oauth2.acpURL.origin}/engines/acp/ory/${flavor}/policies?limit=100000&${type}=${id}`;
     try {
-      const res = await fetch(url, options);
+      const res = await fetch(url, {
+        headers: this.ketoHeaders,
+        method: "GET",
+      });
       if (res.ok) {
         let result = await res.json();
         if (result === null) {
@@ -261,71 +258,11 @@ export class PolicyService {
         return Promise.resolve(result);
       }
       if (res.status === 403) {
-        return Promise.reject(new DCDError(4031, "Request was not allowed."));
+        return Promise.reject(new DCDError(403, "Request was not allowed."));
       } else if (res.status === 404) {
         return Promise.reject(new DCDError(404, "Resource not found."));
-      } else {
-        return Promise.reject(new DCDError(res.status, "Server error."));
       }
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-
-  async checkGroupMembership(
-    member: string,
-    groupId: string,
-    flavor = "exact"
-  ): Promise<void> {
-    const url =
-      config.oauth2.acpURL.origin +
-      "/engines/acp/ory/" +
-      flavor +
-      "/roles?member=" +
-      member;
-    try {
-      const res = await fetch(url, {
-        headers: this.ketoHeaders,
-        method: "GET",
-      });
-      const groups = await res.json();
-      for (let i = 0; i < groups.length; i++) {
-        if (groups[i].id === groupId) {
-          return Promise.resolve();
-        }
-      }
-      return Promise.reject(
-        new DCDError(
-          4030,
-          member + " is not member of the group " + groupId + "."
-        )
-      );
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
-
-  async listGroupMembership(
-    member: string,
-    flavor = "exact"
-  ): Promise<string[]> {
-    const url =
-      config.oauth2.acpURL.origin +
-      "/engines/acp/ory/" +
-      flavor +
-      "/roles?member=" +
-      member;
-    try {
-      const res = await fetch(url, {
-        headers: this.ketoHeaders,
-        method: "GET",
-      });
-      const result_json = await res.json();
-      const groups = [];
-      for (let i = 0; i < result_json.length; i++) {
-        groups.push(result_json[i].id);
-      }
-      return groups;
+      return Promise.reject(new DCDError(res.status, "Server error."));
     } catch (error) {
       return Promise.reject(error);
     }
@@ -333,50 +270,45 @@ export class PolicyService {
 
   /**
    *
-   * @param policy
-   * @returns {Promise<Response>}
    */
   async updateKetoPolicy(
     policy: AccessControlPolicy,
     flavor = "regex"
   ): Promise<AccessControlPolicy> {
-    const url =
-      config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
+    const url = `${config.oauth2.acpURL.origin}/engines/acp/ory/${flavor}/policies`;
     try {
       const result = await fetch(url, {
+        body: JSON.stringify(policy),
         headers: this.ketoHeaders,
         method: "PUT",
-        body: JSON.stringify(policy),
       });
-      const json = <AccessControlPolicy>await result.json();
-      return Promise.resolve(json);
+      return Promise.resolve(<AccessControlPolicy>await result.json());
     } catch (error) {
-      return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
+      return Promise.reject(new DCDError(403, `Not allowed: ${error.message}`));
     }
   }
 
+  /**
+   *
+   */
   async deleteKetoPolicy(
     policyId: string,
     flavor = "regex"
   ): Promise<Response> {
-    try {
-      const result = await fetch(
-        config.oauth2.acpURL.origin +
-          "/engines/acp/ory/" +
-          flavor +
-          "/policies/" +
-          policyId,
-        {
-          headers: this.ketoHeaders,
-          method: "DELETE",
-        }
-      );
-      return Promise.resolve(result);
-    } catch (error) {
-      return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
-    }
+    return fetch(
+      `${config.oauth2.acpURL.origin}/engines/acp/ory/${flavor}/policies/${policyId}`,
+      {
+        headers: this.ketoHeaders,
+        method: "DELETE",
+      }
+    ).catch((error) => {
+      return Promise.reject(new DCDError(403, `Not allowed: ${error.message}`));
+    });
   }
 
+  /**
+   *
+   */
   static roleToActions(role: string): string[] {
     switch (role) {
       case "user":
@@ -410,6 +342,6 @@ export class PolicyService {
     if (thingId === "dcd") {
       return ["dcd:things"];
     }
-    return [thingId, thingId + ":properties", thingId + ":properties:<.*>"];
+    return [thingId, `${thingId}:properties`, `${thingId}:properties:<.*>`];
   }
 }

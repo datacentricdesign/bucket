@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
 import { Dimension } from "../dimension/Dimension";
 
 import { PropertyType as IPropertyType } from "@datacentricdesign/types";

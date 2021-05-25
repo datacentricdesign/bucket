@@ -6,6 +6,7 @@ import { PropertyController } from "./PropertyController";
 
 export class PropertyRouter {
   private router: Router;
+
   private controller: PropertyController;
 
   constructor() {
@@ -40,7 +41,8 @@ export class PropertyRouter {
      * @apiSuccess (Success 200) {Property[]} properties List of retrieved Properties
      *
      * @apiError {DCDError} 403 Not permitted
-     **/
+     *
+     */
     this.router.get(
       "/",
       [introspectToken(["dcd:properties"]), checkPolicy("read")],
@@ -91,7 +93,8 @@ export class PropertyRouter {
      * @apiParam {String} propertyId Id of the Property to read.
      *
      * @apiSuccess {Property} property The retrieved Property
-     **/
+     *
+     */
     this.router.get(
       "/:propertyId",
       [introspectToken(["dcd:properties"]), checkPolicy("read")],
@@ -116,7 +119,8 @@ export class PropertyRouter {
      *       "name": "A new Property name",
      *       "description": "A new description of my property."
      *     }
-     **/
+     *
+     */
     this.router.patch(
       "/:propertyId",
       [introspectToken(["dcd:properties"]), checkPolicy("update")],
@@ -140,7 +144,8 @@ export class PropertyRouter {
      *     {
      *       "values": [[1591868318000,0,1,2],[1591868318200,3,1,1]],
      *     }
-     **/
+     *
+     */
     this.router.put(
       "/:propertyId",
       [introspectToken(["dcd:properties"]), checkPolicy("update")],
@@ -158,7 +163,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property to delete.
      * @apiParam {String} propertyId Id of the Property to delete.
-     **/
+     *
+     */
     this.router.delete(
       "/:propertyId",
       [introspectToken(["dcd:properties"]), checkPolicy("delete")],
@@ -188,7 +194,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property.
      * @apiParam {String} propertyId Id of the Property to list consents from.
-     **/
+     *
+     */
     this.router.get(
       "/:propertyId/consents",
       [
@@ -210,7 +217,8 @@ export class PropertyRouter {
      * @apiParam {String} thingId Id of the Thing containing the Property.
      * @apiParam {String} propertyId Id of the Property.
      * @apiParam {String} consentId Id of the Consent to delete.
-     **/
+     *
+     */
     this.router.delete(
       "/:propertyId/consents/:consentId",
       [
@@ -240,7 +248,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property.
      * @apiParam {String} propertyId Id of the Property.
-     **/
+     *
+     */
     this.router.post(
       "/:propertyId/consents",
       [

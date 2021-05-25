@@ -6,6 +6,7 @@ import { DPiController } from "./DPiController";
 
 export class DPiRouter {
   private router: Router;
+
   private controller: DPiController;
 
   constructor() {
@@ -29,7 +30,8 @@ export class DPiRouter {
      * @apiDescription Get DPi Image
      *
      * @apiVersion 0.0.1
-     **/
+     *
+     */
     this.router.get(
       "/",
       [introspectToken(["dcd:things"])],
@@ -45,7 +47,8 @@ export class DPiRouter {
      *
      * @apiParam (Body) {DTODPi} details of the DPi image
      * @apiHeader {String} Content-type application/json
-     **/
+     *
+     */
     this.router.post(
       "/",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
@@ -58,7 +61,8 @@ export class DPiRouter {
      * @apiDescription Delete DPi Image
      *
      * @apiVersion 0.1.0
-     **/
+     *
+     */
     this.router.delete(
       "/",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
@@ -71,7 +75,8 @@ export class DPiRouter {
      * @apiDescription Cancel DPi Image Generation
      *
      * @apiVersion 0.1.0
-     **/
+     *
+     */
     this.router.get(
       "/cancel",
       [introspectToken(["dcd:things"]), checkPolicy("update")],

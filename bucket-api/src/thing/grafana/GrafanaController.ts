@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { DCDRequest } from "../../config";
 import { GrafanaService } from "./GrafanaService";
 
@@ -18,7 +18,7 @@ export class GrafanaController {
       const grafanaId = await this.grafanaService.getGrafanaId(
         req.context.userId
       );
-      res.status(200).send({ grafanaId: grafanaId });
+      res.status(200).send({ grafanaId });
     } catch (error) {
       if (error._hint === "Service unavailable.") {
         return res.status(503).send(error);
@@ -32,7 +32,7 @@ export class GrafanaController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {
-    const thingId = req.params.thingId;
+    const { thingId } = req.params;
     try {
       await this.grafanaService.createThing(req.context.userId, thingId);
       res.status(204).send();
