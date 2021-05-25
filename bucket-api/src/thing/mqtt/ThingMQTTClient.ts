@@ -120,10 +120,15 @@ async function createProperty(thingId: string, requestId: string, dtoProperty: D
 
 async function updatePropertyValues(thingId: string, requestId: string, property: any, client: MqttClient) {
   property.thing = { id: thingId }
+  console.log(thingId)
+  console.log(requestId)
+  console.log(property)
+  console.log(client)
   try {
     const result = await PropertyController.propertyService.updatePropertyValues(property)
     return client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'debug', 'message': 'Property value updated', code: 0, requestId: requestId }))
   } catch (error) {
+    console.log(error)
     Log.error(error)
     return client.publish('/things/' + thingId + '/log', JSON.stringify({ level: 'error', error: error, requestId: requestId }))
   }

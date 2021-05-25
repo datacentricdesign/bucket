@@ -245,6 +245,7 @@ export class PropertyService {
         if (property.type === undefined) {
             property.type = await this.getPropertyType(property.id)
         }
+        console.log(property)
         return this.valuesToInfluxDB(property)
     }
 

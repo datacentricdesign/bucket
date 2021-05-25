@@ -59,9 +59,26 @@ export class Log {
   }
 }
 
+// safely handles circular references
+function safeStringify(obj, indent = 2) {
+  let cache = [];
+  const retVal = JSON.stringify(
+    obj,
+    (key, value) =>
+      typeof value === "object" && value !== null
+        ? cache.includes(value)
+          ? "[Duplicate reference removed to avoid circularity]" // Duplicate reference found, discard key
+          : cache.push(value) && value // Store value in our collection
+        : value,
+    indent
+  );
+  cache = null;
+  return retVal;
+};
+
 function logToTransport(logObject: ILogObject) {
   try {
-    appendFileSync(config.hostDataFolder + '/logs/' + moment(new Date()).format('YYYY-MM-DD_HH') + '.log', JSON.stringify(logObject) + "\n");
+    appendFileSync(config.hostDataFolder + '/logs/' + moment(new Date()).format('YYYY-MM-DD_HH') + '.log', safeStringify(logObject) + "\n");
   } catch(error) {
     console.log(error)
   }
