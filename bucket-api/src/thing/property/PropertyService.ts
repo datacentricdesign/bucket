@@ -312,7 +312,7 @@ export class PropertyService {
                     fields: fields,
                     timestamp: ts
                 };
-
+                console.log(point);
                 points.push(point);
             }
         }
