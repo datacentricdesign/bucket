@@ -17,11 +17,10 @@ export class Log {
   static init(name: string) {
 
     if (config.env.env === 'development') {
-      Log.logger = new Logger({ name: name, type: 'pretty' });
+      Log.logger = new Logger({ name: name, type: 'pretty', ignoreStackLevels: 2 });
     } else {
-      Log.logger = new Logger({ name: name, type: 'hidden' });
+      Log.logger = new Logger({ name: name, type: 'hidden', ignoreStackLevels: 2 });
     }
-    Log.logger.setSettings({ignoreStackLevels: 2})
 
     Log.logger.attachTransport(
       {
