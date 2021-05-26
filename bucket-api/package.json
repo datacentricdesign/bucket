@@ -48,7 +48,7 @@
     "pg": "8.3.0",
     "reflect-metadata": "0.1.13",
     "simple-oauth2": "4.1.0",
-    "tslog": "^2.7.1",
+    "tslog": "3.2.0",
     "typeorm": "0.2.25",
     "url": "0.11.0",
     "uuid": "8.3.0"
