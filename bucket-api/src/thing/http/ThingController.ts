@@ -2,12 +2,12 @@ import { Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
 import { DCDError } from "@datacentricdesign/types";
-import { Thing } from "../Thing";
+import Thing from "../Thing";
 import { ThingService } from "../services/ThingService";
 import { DCDRequest } from "../../config";
 import { DPiService } from "../dpi/DPiService";
 
-export class ThingController {
+class ThingController {
   private thingService: ThingService;
 
   private dpiService: DPiService;
@@ -28,7 +28,7 @@ export class ThingController {
   ): Promise<void> => {
     // Get things from Service
     try {
-      const things: Thing[] = await this.thingService.getThingsOfAPerson(
+      const things: Thing[] = await ThingService.getThingsOfAPerson(
         req.context.userId
       );
       // Send the things object
@@ -47,7 +47,7 @@ export class ThingController {
     const { thingId } = req.params;
     try {
       // Get the Thing from the Service
-      const thing: Thing = await this.thingService.getOneThingById(thingId);
+      const thing: Thing = await ThingService.getOneThingById(thingId);
       res.send(thing);
     } catch (error) {
       return next(new DCDError(404, "Thing not found"));
@@ -106,7 +106,7 @@ export class ThingController {
     const { name, description } = req.body;
     let thing: Thing;
     try {
-      thing = await this.thingService.getOneThingById(thingId);
+      thing = await ThingService.getOneThingById(thingId);
     } catch (error) {
       // If not found, send a 404 response
       return next(new DCDError(404, "Thing not found"));
@@ -122,7 +122,7 @@ export class ThingController {
 
     // Try to save
     try {
-      await this.thingService.editOneThing(thing);
+      await ThingService.editOneThing(thing);
     } catch (error) {
       return next(new DCDError(500, "Failed to update thing"));
     }
@@ -165,7 +165,7 @@ export class ThingController {
     const { thingId } = req.params;
     // Call the Service
     try {
-      await this.thingService.deleteOneThing(thingId);
+      await ThingService.deleteOneThing(thingId);
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
@@ -213,3 +213,5 @@ function checkPEM(pem: string) {
     );
   }
 }
+
+export default ThingController;

@@ -1,8 +1,8 @@
 import { MigrationInterface, getRepository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-import { Thing } from "../Thing";
+import Thing from "../Thing";
 
-export class TestThing1589877764520 implements MigrationInterface {
+class TestThing1589877764520 implements MigrationInterface {
   public async up(): Promise<void> {
     const thing = new Thing();
     thing.id = `dcd:things:${uuidv4()}`;
@@ -19,3 +19,5 @@ export class TestThing1589877764520 implements MigrationInterface {
     // Nothing to do
   }
 }
+
+export default TestThing1589877764520;

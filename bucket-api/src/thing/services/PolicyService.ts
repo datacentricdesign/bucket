@@ -3,11 +3,11 @@ import { DCDError } from "@datacentricdesign/types";
 
 import fetch, { Response } from "node-fetch";
 import { v4 as uuidv4 } from "uuid";
-import { Role } from "../role/Role";
+import Role from "../role/Role";
 
-import { httpConfig } from "../../config/httpConfig";
+import httpConfig from "../../config/httpConfig";
 import config from "../../config";
-import { Log } from "../../Logger";
+import Log from "../../Log";
 
 export interface AccessControlPolicy {
   id: string;
@@ -280,7 +280,7 @@ export class PolicyService {
         method: "GET",
       });
       const groups = await res.json();
-      for (let i = 0; i < groups.length; i++) {
+      for (let i = 0; i < groups.length; i += 1) {
         if (groups[i].id === groupId) {
           return await Promise.resolve();
         }
@@ -303,10 +303,10 @@ export class PolicyService {
         headers: this.ketoHeaders,
         method: "GET",
       });
-      const result_json = await res.json();
+      const resultJson = await res.json();
       const groups = [];
-      for (let i = 0; i < result_json.length; i++) {
-        groups.push(result_json[i].id);
+      for (let i = 0; i < resultJson.length; i += 1) {
+        groups.push(resultJson[i].id);
       }
       return groups;
     } catch (error) {

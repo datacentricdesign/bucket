@@ -1,7 +1,10 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
+
 import { URL } from "url";
 
-export const authConfig = {
+dotenv.config();
+
+const authConfig = {
   oAuth2IntrospectURL: process.env.OAUTH2_INTROSPECT_URL,
   oAuth2TokenURL: process.env.OAUTH2_TOKEN_URL,
   oAuth2RevokeURL: process.env.OAUTH2_REVOKE_URL,
@@ -14,3 +17,5 @@ export const authConfig = {
   oAuth2HydraAdminURL: process.env.OAUTH2_HYDRA_ADMIN_URL,
   acpURL: new URL(process.env.ACP_URL),
 };
+
+export default authConfig;

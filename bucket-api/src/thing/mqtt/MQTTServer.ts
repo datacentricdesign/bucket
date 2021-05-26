@@ -14,11 +14,11 @@ import * as net from "net";
 import { Context, DCDError } from "@datacentricdesign/types";
 import config from "../../config";
 import { ThingMQTTClient } from "./ThingMQTTClient";
-import { Property } from "../property/Property";
-import { Log } from "../../Logger";
+import Property from "../property/Property";
+import Log from "../../Log";
 
 import { Access, PolicyService } from "../services/PolicyService";
-import { PropertyService } from "../property/PropertyService";
+import PropertyService from "../property/PropertyService";
 import { ThingService } from "../services/ThingService";
 import { AuthService } from "../services/AuthService";
 
@@ -33,7 +33,7 @@ type AuthSubscribeCallback = (
 ) => void;
 type AuthCallback = (error: AuthenticateError, success: boolean | null) => void;
 
-export class BucketMQTTServer {
+class MQTTServer {
   private server: tls.Server | net.Server;
 
   private aedes: Aedes;
@@ -49,9 +49,9 @@ export class BucketMQTTServer {
   private mqttClient: ThingMQTTClient;
 
   constructor() {
-    PropertyService.getInstance(this).then(
-      (service) => (this.propertyService = service)
-    );
+    PropertyService.getInstance(this).then((service) => {
+      this.propertyService = service;
+    });
     this.thingService = ThingService.getInstance();
     this.policyService = PolicyService.getInstance();
 
@@ -76,7 +76,7 @@ export class BucketMQTTServer {
 
   mqttInit(): Promise<void> {
     return new Promise((resolve) => {
-      this.server.listen(config.mqtt.port, function () {
+      this.server.listen(config.mqtt.port, () => {
         Log.info("MQTT server listening on port ", config.mqtt.port);
         this.mqttClient = new ThingMQTTClient(
           config.mqtt.port,
@@ -95,8 +95,9 @@ export class BucketMQTTServer {
     if (client.context.userId.startsWith("dcd:things:")) {
       this.findOrCreateMQTTStatusProperty(client.context.userId)
         .then((property: Property) => {
-          property.values = [[new Date().getTime(), status]];
-          this.propertyService.updatePropertyValues(property);
+          const prop = { ...property };
+          prop.values = [[new Date().getTime(), status]];
+          this.propertyService.updatePropertyValues(prop);
         })
         .catch((error) => {
           Log.error(error);
@@ -118,7 +119,7 @@ export class BucketMQTTServer {
         return await Promise.resolve(properties[0]);
       }
       // Retrieve thing details from thingId
-      const thing = await this.thingService.getOneThingById(thingId);
+      const thing = await ThingService.getOneThingById(thingId);
       return await this.propertyService.createNewProperty(thing, {
         typeId: "MQTT_STATUS",
       });
@@ -217,9 +218,9 @@ export class BucketMQTTServer {
           "resource",
           `dcd:${resource.split(":properties:dcd:")[1]}`
         );
-        for (let i = 0; i < consents.length; i++) {
+        for (let i = 0; i < consents.length; i=i+1) {
           const consent = consents[i];
-          for (let j = 0; j < consent.subjects.length; j++) {
+          for (let j = 0; j < consent.subjects.length; j=j+1) {
             try {
               await this.policyService.checkGroupMembership(
                 acp.subject,
@@ -278,3 +279,5 @@ export class BucketMQTTServer {
       });
   }
 }
+
+export default MQTTServer;

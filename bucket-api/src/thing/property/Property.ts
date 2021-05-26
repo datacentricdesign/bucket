@@ -10,11 +10,11 @@ import {
   Property as IProperty,
   Thing as IThing,
 } from "@datacentricdesign/types";
-import { Thing } from "../Thing";
-import { PropertyType } from "./propertyType/PropertyType";
+import Thing from "../Thing";
+import PropertyType from "./propertyType/PropertyType";
 
 @Entity()
-export class Property implements IProperty {
+class Property implements IProperty {
   @PrimaryColumn()
   id: string;
 
@@ -41,3 +41,5 @@ export class Property implements IProperty {
 
   sharedWith?: string[];
 }
+
+export default Property;

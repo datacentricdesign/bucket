@@ -1,11 +1,11 @@
 import * as mqtt from "mqtt";
 import { DTOProperty } from "@datacentricdesign/types";
 import { ISubscriptionGrant, MqttClient } from "mqtt";
-import { Property } from "../property/Property";
+import Property from "../property/Property";
 import config from "../../config";
-import { Log } from "../../Logger";
+import Log from "../../Log";
 import { ThingService } from "../services/ThingService";
-import { PropertyService } from "../property/PropertyService";
+import PropertyService from "../property/PropertyService";
 
 export interface MQTTClientSettings {
   keepalive: number;
@@ -93,7 +93,7 @@ export class ThingMQTTClient {
    * @param topic
    * @param message
    */
-  onMQTTMessage(topic: string, message: string): Promise<void> | MqttClient {
+  onMQTTMessage(topic: string, message: string): Promise<void> {
     let jsonMessage: MQTTMessage;
     try {
       jsonMessage = JSON.parse(message);
@@ -108,49 +108,40 @@ export class ThingMQTTClient {
     if (propertyUpdateRegEx.test(topic)) {
       const property = <Property>jsonMessage.property;
       if (jsonMessage.property !== undefined && property.id === topicArray[4]) {
-        return this.updatePropertyValues(
+        this.updatePropertyValues(
           thingId,
           jsonMessage.requestId,
           jsonMessage.property,
           this.client
         );
+      } else {
+        this.client.publish(
+          `/things/${thingId}/log`,
+          JSON.stringify({
+            level: "error",
+            error: "Missing or malformed property to update its values",
+            requestId: jsonMessage.requestId,
+          })
+        );
       }
-      return this.client.publish(
-        `/things/${thingId}/log`,
-        JSON.stringify({
-          level: "error",
-          error: "Missing or malformed property to update its values",
-          requestId: jsonMessage.requestId,
-        })
-      );
-    }
-
-    // Create property /things/:thingId/properties/create
-    if (propertyCreateRegEx.test(topic)) {
+    } else if (propertyCreateRegEx.test(topic)) {
+      // Create property /things/:thingId/properties/create
       return this.createProperty(
         thingId,
         jsonMessage.requestId,
         jsonMessage.property,
         this.client
       );
-    }
-
-    // Read thing /things/:thingId/read
-    if (thingReadRegEx.test(topic)) {
-      return this.readThing(thingId, jsonMessage.requestId, this.client);
-    }
-
-    if (thingLogsRegEx.test(topic)) {
+    } else if (thingReadRegEx.test(topic)) {
+      // Read thing /things/:thingId/read
+      ThingMQTTClient.readThing(thingId, jsonMessage.requestId, this.client);
+    } else if (thingLogsRegEx.test(topic)) {
       // ignore logs for each things
-      return;
-    }
-
-    if (thingDataRegEx.test(topic)) {
+    } else if (thingDataRegEx.test(topic)) {
       // ignore logs for each things
-      return;
+    } else {
+      Log.debug(`No implementation of ${topic}`);
     }
-
-    Log.debug(`No implementation of ${topic}`);
   }
 
   async createProperty(
@@ -207,7 +198,7 @@ export class ThingMQTTClient {
     }
   }
 
-  async readThing(
+  static async readThing(
     thingId: string,
     requestId: string,
     client: MqttClient

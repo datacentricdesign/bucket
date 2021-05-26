@@ -1,21 +1,21 @@
 import { Response, NextFunction } from "express";
 
-import { PropertyType } from "./PropertyType";
-import { PropertyTypeService } from "./PropertyTypeService";
-import { Dimension } from "../dimension/Dimension";
+import PropertyType from "./PropertyType";
+import PropertyTypeService from "./PropertyTypeService";
+import Dimension from "../dimension/Dimension";
 import { DCDRequest } from "../../../config";
 
-export class PropertyTypeController {
+class PropertyTypeController {
   private propertyTypeService: PropertyTypeService;
 
   constructor() {
     this.propertyTypeService = new PropertyTypeService();
   }
 
-  async getPropertyTypes(req: DCDRequest, res: Response): Promise<void> {
+  static async getPropertyTypes(req: DCDRequest, res: Response): Promise<void> {
     // Get things from Service
     try {
-      const propertyTypes: PropertyType[] = await this.propertyTypeService.getPropertyTypes();
+      const propertyTypes: PropertyType[] = await PropertyTypeService.getPropertyTypes();
       // Send the things object
       res.send(propertyTypes);
     } catch (error) {
@@ -23,12 +23,15 @@ export class PropertyTypeController {
     }
   }
 
-  async getOnePropertyTypeById(req: DCDRequest, res: Response): Promise<void> {
+  static async getOnePropertyTypeById(
+    req: DCDRequest,
+    res: Response
+  ): Promise<void> {
     // Get the ID from the url
     const { propertyTypeId } = req.params;
     try {
       // Get the Property Type from the Service
-      const propertyType: PropertyType = await this.propertyTypeService.getOnePropertyTypeById(
+      const propertyType: PropertyType = await PropertyTypeService.getOnePropertyTypeById(
         propertyTypeId
       );
       res.send(propertyType);
@@ -37,7 +40,7 @@ export class PropertyTypeController {
     }
   }
 
-  async createOnePropertyType(
+  static async createOnePropertyType(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -49,7 +52,7 @@ export class PropertyTypeController {
     propertyType.description = description;
 
     propertyType.dimensions = [];
-    for (let i = 0; i < dimensions.length; i++) {
+    for (let i = 0; i < dimensions.length; i += 1) {
       const dim: Dimension = new Dimension();
       dim.id = dimensions[i].id;
       dim.name = dimensions[i].name;
@@ -60,14 +63,14 @@ export class PropertyTypeController {
     }
 
     try {
-      await this.propertyTypeService.createOnePropertyType(propertyType);
+      await PropertyTypeService.createOnePropertyType(propertyType);
       res.send(propertyType);
     } catch (error) {
       next(error);
     }
   }
 
-  async deleteOnePropertyTypeById(
+  static async deleteOnePropertyTypeById(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -76,7 +79,7 @@ export class PropertyTypeController {
     const { propertyTypeId } = req.params;
     // Call the Service
     try {
-      await this.propertyTypeService.deleteOnePropertyTypeById(propertyTypeId);
+      await PropertyTypeService.deleteOnePropertyTypeById(propertyTypeId);
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
@@ -84,3 +87,5 @@ export class PropertyTypeController {
     }
   }
 }
+
+export default PropertyTypeController;

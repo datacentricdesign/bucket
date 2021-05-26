@@ -1,6 +1,8 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 
-export const httpConfig = {
+dotenv.config();
+
+const httpConfig = {
   host: process.env.HTTP_HOST,
   port: process.env.HTTP_PORT,
   secured: process.env.HTTP_SECURED === "true",
@@ -9,3 +11,5 @@ export const httpConfig = {
     process.env.HTTP_HOST
   }:${process.env.HTTP_PORT}${process.env.HTTP_BASE_URL}`,
 };
+
+export default httpConfig;

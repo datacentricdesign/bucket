@@ -1,12 +1,12 @@
 import "mocha";
 import { DCDError, DTOProperty } from "@datacentricdesign/types";
 import { expect } from "chai";
-import { Thing } from "../Thing";
-import { PropertyService } from "./PropertyService";
-import { Log } from "../../Logger";
+import Thing from "../Thing";
+import PropertyService from "./PropertyService";
+import Log from "../../Log";
 import { ThingService } from "../services/ThingService";
-import { Property } from "./Property";
-import { PropertyType } from "./propertyType/PropertyType";
+import Property from "./Property";
+import PropertyType from "./propertyType/PropertyType";
 
 let propertyService: PropertyService;
 let thingService: ThingService;
@@ -15,8 +15,8 @@ let createdThing: Thing;
 let createdProperty: Property;
 let dtoProperty: DTOProperty;
 
-describe("Property Service", function () {
-  before(async function () {
+describe("Property Service", () => {
+  before(async () => {
     propertyService = await PropertyService.getInstance(this);
 
     // Test values
@@ -35,7 +35,7 @@ describe("Property Service", function () {
     };
   });
 
-  it("It should create a property.", function (done: Mocha.Done) {
+  it("It should create a property.", (done: Mocha.Done) => {
     propertyService
       .createNewProperty(createdThing, dtoProperty)
       .then((newProperty) => {
@@ -57,7 +57,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should find the property.", function (done: Mocha.Done) {
+  it("It should find the property.", (done: Mocha.Done) => {
     propertyService
       .getOnePropertyById(createdThing.id, createdProperty.id)
       .then((foundProperty: Property) => {
@@ -71,7 +71,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should find one property for the test thing.", function (done: Mocha.Done) {
+  it("It should find one property for the test thing.", (done: Mocha.Done) => {
     propertyService
       .getPropertiesOfAThing(createdThing.id)
       .then((foundProperties: Property[]) => {
@@ -84,7 +84,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should find one property of type ACCELEROMETER for the test thing.", function (done: Mocha.Done) {
+  it("It should find one property of type ACCELEROMETER for the test thing.", (done: Mocha.Done) => {
     propertyService
       .getPropertiesOfAThingByType(createdThing.id, dtoProperty.typeId)
       .then((foundProperties: Property[]) => {
@@ -97,7 +97,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should NOT find any property of type GYROSCOPE for the test thing.", function (done: Mocha.Done) {
+  it("It should NOT find any property of type GYROSCOPE for the test thing.", (done: Mocha.Done) => {
     propertyService
       .getPropertiesOfAThingByType(createdThing.id, "GYROSCOPE")
       .then((foundProperties: Property[]) => {
@@ -110,7 +110,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should edit the property name and description.", function (done: Mocha.Done) {
+  it("It should edit the property name and description.", (done: Mocha.Done) => {
     const editedName = "A new name";
     const editedDescription = "A new description";
     createdProperty.name = editedName;
@@ -128,7 +128,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should find the details of the type for the property, and cache them.", function (done: Mocha.Done) {
+  it("It should find the details of the type for the property, and cache them.", (done: Mocha.Done) => {
     propertyService
       .getPropertyType(createdProperty.id)
       .then((foundType: PropertyType) => {
@@ -144,7 +144,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should add values to the property.", function (done: Mocha.Done) {
+  it("It should add values to the property.", (done: Mocha.Done) => {
     const now = Date.now();
     createdProperty.values = [
       [now - 7000, 1.3, 2.2, 3.4],
@@ -162,7 +162,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should get values from the property.", function (done: Mocha.Done) {
+  it("It should get values from the property.", (done: Mocha.Done) => {
     propertyService
       .getOnePropertyById(createdProperty.thing.id, createdProperty.id, {
         from: 0,
@@ -182,7 +182,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should get value count from the property.", function (done: Mocha.Done) {
+  it("It should get value count from the property.", (done: Mocha.Done) => {
     propertyService
       .getOnePropertyById(createdProperty.thing.id, createdProperty.id, {
         from: 0,
@@ -202,7 +202,7 @@ describe("Property Service", function () {
       });
   });
 
-  it("It should delete the property.", function (done: Mocha.Done) {
+  it("It should delete the property.", (done: Mocha.Done) => {
     propertyService
       .deleteOneProperty(createdProperty.thing.id, createdProperty.id)
       .then(() => {
@@ -222,8 +222,8 @@ describe("Property Service", function () {
       });
   });
 
-  after(async function () {
-    await thingService.deleteOneThing(createdThing.id);
+  after(async () => {
+    await ThingService.deleteOneThing(createdThing.id);
     // await PropertyService.release(this);
     return Promise.resolve();
   });

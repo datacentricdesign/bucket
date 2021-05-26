@@ -1,6 +1,9 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
+
 import "reflect-metadata";
 import { ConnectionOptions } from "typeorm";
+
+dotenv.config();
 
 export const ORMConfig: ConnectionOptions = {
   type: "postgres",
@@ -26,3 +29,5 @@ export const ORMConfig: ConnectionOptions = {
   //     subscribersDir: "./thing/subscriber"
   // }
 };
+
+export default ORMConfig;

@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { introspectToken } from "../middlewares/introspectToken";
-import { checkPolicy } from "../middlewares/checkPolicy";
-import { PropertyController } from "./PropertyController";
+import introspectToken from "../middlewares/introspectToken";
+import checkPolicy from "../middlewares/checkPolicy";
+import PropertyController from "./PropertyController";
 
-export class PropertyRouter {
+class PropertyRouter {
   private router: Router;
 
   private controller: PropertyController;
@@ -196,7 +196,7 @@ export class PropertyRouter {
         introspectToken(["dcd:properties", "dcd:consents"]),
         checkPolicy("list"),
       ],
-      this.controller.listConsents
+      PropertyController.listConsents
     );
 
     /**
@@ -218,7 +218,7 @@ export class PropertyRouter {
         introspectToken(["dcd:properties", "dcd:consents"]),
         checkPolicy("delete"),
       ],
-      this.controller.revokeConsent
+      PropertyController.revokeConsent
     );
 
     /**
@@ -248,7 +248,9 @@ export class PropertyRouter {
         introspectToken(["dcd:properties", "dcd:consents"]),
         checkPolicy("create"),
       ],
-      this.controller.grantConsent
+      PropertyController.grantConsent
     );
   }
 }
+
+export default PropertyRouter;

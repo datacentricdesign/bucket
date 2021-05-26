@@ -1,12 +1,11 @@
 import { Connection, createConnection } from "typeorm";
 import config from "../config";
-import { Log } from "../Logger";
+import Log from "../Log";
 
 let connection: Connection;
 
 // root hook to run before all test
-before(async function () {
-  this.timeout(10000);
+before(async () => {
   Log.init("Test");
   connection = await createConnection(config.orm);
   Log.info("Connected to Postgres");
@@ -15,6 +14,6 @@ before(async function () {
 });
 
 // root hook to run after all test
-after(function () {
+after(() => {
   connection.dropDatabase();
 });

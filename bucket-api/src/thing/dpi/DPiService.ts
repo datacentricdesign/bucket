@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
 import config from "../../config";
-import { AuthController } from "../http/AuthController";
-import { Property } from "../property/Property";
-import { PropertyService } from "../property/PropertyService";
-import { Thing } from "../Thing";
+import AuthController from "../http/AuthController";
+import Property from "../property/Property";
+import PropertyService from "../property/PropertyService";
+import Thing from "../Thing";
 
 export interface DPI {
   id: string;
@@ -25,9 +25,9 @@ export class DPiService {
   private propertyService: PropertyService;
 
   constructor() {
-    PropertyService.getInstance(this).then(
-      (service) => (this.propertyService = service)
-    );
+    PropertyService.getInstance(this).then((service) => {
+      this.propertyService = service;
+    });
   }
 
   async generateDPiImage(dpi: DPI, thing: Thing): Promise<string> {

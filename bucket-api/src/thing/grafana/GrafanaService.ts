@@ -3,8 +3,8 @@ import { DCDError } from "@datacentricdesign/types";
 import fetch, { Response } from "node-fetch";
 import * as btoa from "btoa";
 import config from "../../config";
-import { Property } from "../property/Property";
-import { Thing } from "../Thing";
+import Property from "../property/Property";
+import Thing from "../Thing";
 import { ThingService } from "../services/ThingService";
 
 export interface Target {
@@ -136,16 +136,16 @@ export class GrafanaService {
    * @param {string} thingId
    * returns Promise
    * */
-  async createThing(personId: string, thingId: string): Promise<Response> {
+  async createThing(personId: string, thingId: string): Promise<void> {
     try {
       // Make sure the user gave consent by checking if there is a grafana id for this personId
-      const grafanaId = await this.getGrafanaId(personId);
+      const grafanaId = await GrafanaService.getGrafanaId(personId);
       // create (if not exists) a person folder, id person, name My dashboards
       const folderId = await this.createPersonFolder(personId);
       // lock permission for this user only, as editor
       await this.setPersonFolderPermission(personId, grafanaId);
       // create a dashboard inside the user folder, with Thing name, thing id
-      const thing: Thing = await this.thingService.getOneThingById(thingId);
+      const thing: Thing = await ThingService.getOneThingById(thingId);
       await this.createThingDashboard(personId, thing, folderId);
     } catch (error) {
       return Promise.reject(error);
@@ -186,7 +186,7 @@ export class GrafanaService {
     }
   }
 
-  async getGrafanaId(personId: string): Promise<string> {
+  static async getGrafanaId(personId: string): Promise<string> {
     const url = `${
       config.grafana.apiURL.href
     }/users/lookup?loginOrEmail=${personId.replace("dcd:persons:", "")}`;
@@ -249,9 +249,14 @@ export class GrafanaService {
     let y = 0;
     const h = 6;
     const w = 24;
-    for (let i = 0; i < thing.properties.length; i++) {
+    for (let i = 0; i < thing.properties.length; i += 1) {
       panels.push(
-        this.createPropertyPanel(thing, thing.properties[i], { x, y, h, w })
+        GrafanaService.createPropertyPanel(thing, thing.properties[i], {
+          x,
+          y,
+          h,
+          w,
+        })
       );
       y += 6;
     }
@@ -286,29 +291,29 @@ export class GrafanaService {
     }
   }
 
-  createPropertyPanel(
+  static createPropertyPanel(
     thing: Thing,
     property: Property,
     gridPos: GridPos
   ): Panel {
     const dim = property.type.dimensions;
     let onlyNumbers = true;
-    for (let i = 0; i < dim.length; i++) {
+    for (let i = 0; i < dim.length; i += 1) {
       onlyNumbers = onlyNumbers && dim[i].type === "number";
     }
     if (onlyNumbers) {
       // only numirical values
-      return this.panelChart(thing, property, gridPos);
+      return GrafanaService.panelChart(thing, property, gridPos);
     }
     if (dim.length > 1) {
       // mix of types
-      return this.panelTable(thing, property, gridPos);
+      return GrafanaService.panelTable(thing, property, gridPos);
     }
     // 1 non numerical dimension, show last value
-    return this.panelSingleValue(thing, property, gridPos);
+    return GrafanaService.panelSingleValue(thing, property, gridPos);
   }
 
-  panelTable(thing: Thing, property: Property, gridPos: GridPos): Panel {
+  static panelTable(thing: Thing, property: Property, gridPos: GridPos): Panel {
     return {
       datasource: "Bucket",
       fieldConfig: {
@@ -350,7 +355,7 @@ export class GrafanaService {
     };
   }
 
-  panelChart(thing: Thing, property: Property, gridPos: GridPos): Panel {
+  static panelChart(thing: Thing, property: Property, gridPos: GridPos): Panel {
     return {
       bars: false,
       dashLength: 10,
@@ -437,7 +442,11 @@ export class GrafanaService {
     };
   }
 
-  panelSingleValue(thing: Thing, property: Property, gridPos: GridPos): Panel {
+  static panelSingleValue(
+    thing: Thing,
+    property: Property,
+    gridPos: GridPos
+  ): Panel {
     return {
       datasource: "Bucket",
       description: property.description,

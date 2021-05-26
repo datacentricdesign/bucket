@@ -9,22 +9,22 @@ import {
   Point,
 } from "@influxdata/influxdb-client";
 import { DeleteAPI, SetupAPI } from "@influxdata/influxdb-client-apis";
-import { PropertyTypeService } from "./propertyType/PropertyTypeService";
+import PropertyTypeService from "./propertyType/PropertyTypeService";
 
 import config from "../../config";
 
-import { Property } from "./Property";
-import { Log } from "../../Logger";
-import { PropertyType } from "./propertyType/PropertyType";
+import Property from "./Property";
+import Log from "../../Log";
+import PropertyType from "./propertyType/PropertyType";
 import { AccessControlPolicy, PolicyService } from "../services/PolicyService";
-import { Thing } from "../Thing";
+import Thing from "../Thing";
 
 interface SharedProperties {
   propertyIdArray: string[];
   resourceOriginMap: Map<string, string[]>;
 }
 
-export class PropertyService {
+class PropertyService {
   private influx: InfluxDB;
 
   private url: string;
@@ -108,7 +108,7 @@ export class PropertyService {
       .catch((error) => {
         Log.error(error);
         Log.info(`Retrying to connect to InfluxDB in ${delayMs} ms.`);
-        delay(delayMs).then(() => {
+        PropertyService.delay(delayMs).then(() => {
           this.init(delayMs * 1.5);
         });
       });
@@ -122,10 +122,10 @@ export class PropertyService {
         return reject();
       }
       PropertyService.consumers.forEach((item, index, array) => {
-        itemsProcessed++;
+        itemsProcessed += 1;
         if (item === consumer) {
           array.splice(index, 1);
-          itemsRemoved++;
+          itemsRemoved = itemsProcessed + 1;
         }
         if (itemsProcessed === array.length + itemsRemoved) {
           if (array.length === 0) {
@@ -230,7 +230,9 @@ export class PropertyService {
       resourceOriginMap,
     } = this.consentToSharedProperties(consents);
     // Get the properties
-    const properties = await this.getPropertiesFromList(propertyIdArray);
+    const properties = await PropertyService.getPropertiesFromList(
+      propertyIdArray
+    );
     // Get the number of values for each dimension, per time interval
     return this.getSharedPropertyValueCount(
       properties,
@@ -247,7 +249,7 @@ export class PropertyService {
     timeInterval?: string
   ) {
     const to = Date.now();
-    for (let i = 0; i < properties.length; i++) {
+    for (let i = 0; i < properties.length; i += 1) {
       properties[i].sharedWith = resourceOriginMap[properties[i].id];
       if (from !== undefined && timeInterval !== undefined) {
         properties[i].values = await this.readValuesFromInfluxDB(
@@ -288,9 +290,9 @@ export class PropertyService {
   ): SharedProperties {
     let propertyIdArray = [];
     const resourceOriginMap = new Map<string, string[]>();
-    for (let i = 0; i < consents.length; i++) {
+    for (let i = 0; i < consents.length; i += 1) {
       if (consents[i].effect === "allow") {
-        for (let j = 0; j < consents[i].resources.length; j++) {
+        for (let j = 0; j < consents[i].resources.length; j += 1) {
           const resource = consents[i].resources[j];
           if (resourceOriginMap.has(resource)) {
             resourceOriginMap.set(
@@ -315,7 +317,7 @@ export class PropertyService {
   ): Promise<AccessControlPolicy[]> {
     // Get the list of all consent concerning the current subject
     let consents = [];
-    for (let i = 0; i < groups.length; i++) {
+    for (let i = 0; i < groups.length; i += 1) {
       try {
         const result = await this.policyService.listConsents(
           "subject",
@@ -329,7 +331,7 @@ export class PropertyService {
     return consents;
   }
 
-  private getPropertiesFromList(
+  private static getPropertiesFromList(
     propertyIdArray: string[]
   ): Promise<Property[]> {
     // Get properties from the database
@@ -369,7 +371,7 @@ export class PropertyService {
       .setParameters({ propertyId, thingId })
       .getOne();
 
-    if (property !== undefined && valueOptions != undefined) {
+    if (property !== undefined && valueOptions !== undefined) {
       Log.debug(valueOptions.from);
       property.values = await this.readValuesFromInfluxDB(
         property,
@@ -514,7 +516,7 @@ export class PropertyService {
     }
     const points = [];
     const { dimensions } = property.type;
-    for (let index = 0; index < property.values.length; index++) {
+    for (let index = 0; index < property.values.length; index += 1) {
       let ts: number;
       const values: Array<string | number> = property.values[index];
       if (
@@ -527,7 +529,7 @@ export class PropertyService {
         } else {
           ts =
             typeof values[0] === "string"
-              ? Number.parseInt(`${values[0]}`)
+              ? Number.parseInt(`${values[0]}`, 10)
               : values[0];
         }
 
@@ -536,7 +538,7 @@ export class PropertyService {
           .tag("thingId", property.thing.id)
           .tag("personId", property.thing.personId);
 
-        for (let i = 1; i < values.length; i++) {
+        for (let i = 1; i < values.length; i += 1) {
           const { name } = dimensions[i - 1];
           switch (dimensions[i - 1].type) {
             case "string":
@@ -548,6 +550,10 @@ export class PropertyService {
             case "boolean":
               point.booleanField(name, values[i]);
               break;
+            default:
+              Log.warn(
+                `Cannot fit type ${dimensions[i - 1].type} in point field.`
+              );
           }
         }
         point.timestamp(ts);
@@ -593,7 +599,7 @@ export class PropertyService {
     fluxQuery += ` |> filter(fn: (r) => r["propertyId"] == "${property.id}")`;
     fluxQuery += ` |> filter(fn: (r) => r["thingId"] == "${property.thing.id}")`;
     fluxQuery += ` |> filter(fn: (r) =>`;
-    for (let index = 0; index < property.type.dimensions.length; index++) {
+    for (let index = 0; index < property.type.dimensions.length; index += 1) {
       if (index > 0) {
         fluxQuery += ` or `;
       }
@@ -616,7 +622,7 @@ export class PropertyService {
           for (
             let index = 0;
             index < property.type.dimensions.length;
-            index++
+            index += 1
           ) {
             val.push(o[property.type.dimensions[index].name]);
           }
@@ -632,8 +638,10 @@ export class PropertyService {
       });
     });
   }
+
+  private static delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+export default PropertyService;

@@ -1,6 +1,8 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 
-export const influxdbConfig = {
+dotenv.config();
+
+const influxdbConfig = {
   url: process.env.BUCKET_INFLUXDB_URL,
   token: process.env.BUCKET_INFLUXDB_TOKEN,
   org: process.env.BUCKET_INFLUXDB_ORG,
@@ -8,3 +10,5 @@ export const influxdbConfig = {
   username: process.env.BUCKET_INFLUXDB_USER,
   password: process.env.BUCKET_INFLUXDB_PASS,
 };
+
+export default influxdbConfig;

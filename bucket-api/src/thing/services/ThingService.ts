@@ -3,11 +3,11 @@ import { getRepository, getConnection } from "typeorm";
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
-import { Thing } from "../Thing";
-import { Property } from "../property/Property";
+import Thing from "../Thing";
+import Property from "../property/Property";
 import { AuthService, JWKParams, KeySet } from "./AuthService";
 import { PolicyService } from "./PolicyService";
-import { PropertyService } from "../property/PropertyService";
+import PropertyService from "../property/PropertyService";
 
 export interface Token {
   aud: string;

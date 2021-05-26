@@ -1,15 +1,15 @@
 import { expect } from "chai";
 import { DCDError } from "@datacentricdesign/types";
-import { Log } from "../../Logger";
+import Log from "../../Log";
 import { ThingService } from "./ThingService";
-import { Thing } from "../Thing";
+import Thing from "../Thing";
 
 let thingService: ThingService;
 let thing: Thing;
 let createdThing: Thing;
 
-describe("Thing Service", function () {
-  before(async function () {
+describe("Thing Service", () => {
+  before(async () => {
     thingService = ThingService.getInstance();
     // Test values
     thing = new Thing();
@@ -19,8 +19,7 @@ describe("Thing Service", function () {
     thing.personId = "dcd:persons:test@test.com";
   });
 
-  it("Create", function (done: Mocha.Done) {
-    this.timeout(10000);
+  it("Create", (done: Mocha.Done) => {
     thingService
       .createNewThing(thing)
       .then((newThing: Thing) => {
@@ -42,7 +41,7 @@ describe("Thing Service", function () {
       });
   });
 
-  it("Get One Thing by Id", function (done: Mocha.Done) {
+  it("Get One Thing by Id", (done: Mocha.Done) => {
     ThingService.getOneThingById(createdThing.id)
       .then((foundThing: Thing) => {
         expect(foundThing.name).to.equal(thing.name);
@@ -58,7 +57,7 @@ describe("Thing Service", function () {
       });
   });
 
-  it("Get Things of a Person", function (done: Mocha.Done) {
+  it("Get Things of a Person", (done: Mocha.Done) => {
     ThingService.getThingsOfAPerson(createdThing.personId)
       .then((foundThings: Thing[]) => {
         expect(foundThings.length).to.equal(1);
@@ -71,7 +70,7 @@ describe("Thing Service", function () {
       });
   });
 
-  it("Edit One Thing", function (done: Mocha.Done) {
+  it("Edit One Thing", (done: Mocha.Done) => {
     const editedName = "A new name";
     const editedDescription = "A new description";
     createdThing.name = editedName;
@@ -91,7 +90,7 @@ describe("Thing Service", function () {
       });
   });
 
-  it("Delete", function (done: Mocha.Done) {
+  it("Delete", (done: Mocha.Done) => {
     ThingService.deleteOneThing(thing.id)
       .then(() => {
         done();

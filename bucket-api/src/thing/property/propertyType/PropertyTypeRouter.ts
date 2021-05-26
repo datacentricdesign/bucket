@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import { introspectToken } from "../../middlewares/introspectToken";
-import { PropertyTypeController } from "./PropertyTypeController";
+import introspectToken from "../../middlewares/introspectToken";
+import PropertyTypeController from "./PropertyTypeController";
 
-export class PropertyTypeRouter {
+class PropertyTypeRouter {
   private router: Router;
 
   private controller: PropertyTypeController;
@@ -33,7 +33,7 @@ export class PropertyTypeRouter {
     this.router.get(
       "/",
       [introspectToken(["dcd:types"])],
-      this.controller.getPropertyTypes
+      PropertyTypeController.getPropertyTypes
     );
 
     /**
@@ -48,7 +48,7 @@ export class PropertyTypeRouter {
     this.router.post(
       "/",
       [introspectToken(["dcd:types"])],
-      this.controller.createOnePropertyType
+      PropertyTypeController.createOnePropertyType
     );
 
     /**
@@ -63,7 +63,9 @@ export class PropertyTypeRouter {
     this.router.delete(
       "/:propertyTypeId",
       [introspectToken(["dcd:types"])],
-      this.controller.deleteOnePropertyTypeById
+      PropertyTypeController.deleteOnePropertyTypeById
     );
   }
 }
+
+export default PropertyTypeRouter;

@@ -1,32 +1,8 @@
 import { Response, NextFunction } from "express";
 import { DCDError } from "@datacentricdesign/types";
-import { AuthController } from "../http/AuthController";
+import AuthController from "../http/AuthController";
 import { Access } from "../services/PolicyService";
 import { DCDRequest } from "../../config";
-
-/**
- * Check Access Control Policy with Keto, based on subject
- * @param resource
- * @param action
- */
-export const checkPolicy = (action: string) => {
-  return async (
-    req: DCDRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    const acpResource = buildACPResource(req);
-    const acp: Access = {
-      resource: acpResource,
-      action: `dcd:actions:${action}`,
-      subject: req.context.userId,
-    };
-    AuthController.policyService
-      .check(acp)
-      .then(() => next())
-      .catch((error: DCDError) => next(error));
-  };
-};
 
 /**
  * Build ACP resource from request path
@@ -50,3 +26,29 @@ function buildACPResource(req: DCDRequest): string {
   }
   return acpResource;
 }
+
+/**
+ * Check Access Control Policy with Keto, based on subject
+ * @param resource
+ * @param action
+ */
+const checkPolicy = (action: string) => {
+  return async (
+    req: DCDRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    const acpResource = buildACPResource(req);
+    const acp: Access = {
+      resource: acpResource,
+      action: `dcd:actions:${action}`,
+      subject: req.context.userId,
+    };
+    AuthController.policyService
+      .check(acp)
+      .then(() => next())
+      .catch((error: DCDError) => next(error));
+  };
+};
+
+export default checkPolicy;

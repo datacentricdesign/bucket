@@ -6,24 +6,24 @@ import { v4 as uuidv4 } from "uuid";
 import * as multiparty from "multiparty";
 
 import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
-import { PropertyService } from "./PropertyService";
+import PropertyService from "./PropertyService";
 
-import { Property } from "./Property";
-import { AuthController } from "../http/AuthController";
-import { Dimension } from "./dimension/Dimension";
-import { Log } from "../../Logger";
+import Property from "./Property";
+import AuthController from "../http/AuthController";
+import Dimension from "./dimension/Dimension";
+import Log from "../../Log";
 import { DCDRequest } from "../../config";
 import { ThingService } from "../services/ThingService";
 
-export class PropertyController {
+class PropertyController {
   private propertyService: PropertyService;
 
   private thingService: ThingService;
 
   constructor() {
-    PropertyService.getInstance(this).then(
-      (service) => (this.propertyService = service)
-    );
+    PropertyService.getInstance(this).then((service) => {
+      this.propertyService = service;
+    });
     this.thingService = ThingService.getInstance();
   }
 
@@ -41,7 +41,7 @@ export class PropertyController {
 
     // optional query params
     const sharedWith: string = req.query.sharedWith as string;
-    const from = parseInt(req.query.from as string);
+    const from = parseInt(req.query.from as string, 10);
     const timeInterval = req.query.timeInterval as string;
 
     // Get properties from Service
@@ -111,7 +111,7 @@ export class PropertyController {
     }
   }
 
-  public static async getOnePropertyById(
+  public async getOnePropertyById(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -122,7 +122,7 @@ export class PropertyController {
     const options = PropertyController.parseValueOptions(req);
 
     // Get the Property from the Service
-    const property: Property = await PropertyController.propertyService.getOnePropertyById(
+    const property: Property = await this.propertyService.getOnePropertyById(
       thingId,
       propertyId,
       options
@@ -131,10 +131,8 @@ export class PropertyController {
     // Double-check the property is actually part of this thing
     if (property === undefined) {
       // If not found, send a 404 response
-      return next(new DCDError(404, "Property not found in the thing."));
-    }
-
-    if (req.accepts("text/csv")) {
+      next(new DCDError(404, "Property not found in the thing."));
+    } else if (req.accepts("text/csv")) {
       res.set({ "Content-Type": "text/csv" });
       res.send(PropertyController.toCSV(property));
     } else {
@@ -241,7 +239,7 @@ export class PropertyController {
     // Get the property ID from the url
     const { thingId } = req.params;
     const { propertyId } = req.params;
-    const from = parseInt(req.query.from as string);
+    const from = parseInt(req.query.from as string, 10);
     const timeInterval = req.query.timeInterval as string;
     // Call the Service
     try {
@@ -362,8 +360,8 @@ export class PropertyController {
       return undefined;
     }
     return {
-      from: Number.parseInt(`${req.query.from}`),
-      to: Number.parseInt(`${req.query.to}`),
+      from: Number.parseInt(`${req.query.from}`, 10),
+      to: Number.parseInt(`${req.query.to}`, 10),
       timeInterval:
         req.query.timeInterval !== undefined
           ? `${req.query.timeInterval}`
@@ -396,7 +394,7 @@ export class PropertyController {
       });
     });
     form.on("close", () => {
-      property.values = this.csvStrToValueArray(
+      property.values = PropertyController.csvStrToValueArray(
         property.type.dimensions,
         dataStr,
         hasLabel
@@ -428,11 +426,11 @@ export class PropertyController {
    */
   private static toCSV(property: Property): string {
     let csv = "time";
-    for (let i = 0; i < property.type.dimensions.length; i++) {
+    for (let i = 0; i < property.type.dimensions.length; i += 1) {
       csv += `,${property.type.dimensions[i].name}`;
     }
     csv += "\n";
-    for (let i = 0; i < property.values.length; i++) {
+    for (let i = 0; i < property.values.length; i += 1) {
       csv += property.values[i].join(",");
       csv += "\n";
     }
@@ -443,7 +441,7 @@ export class PropertyController {
    * Convert values of a CSV string into a 2D array (property values).
    * @returns {{id: *, values: Array}}
    */
-  private csvStrToValueArray(
+  private static csvStrToValueArray(
     dimensions: Dimension[],
     csvStr: string,
     hasLabel: boolean
@@ -455,7 +453,7 @@ export class PropertyController {
         try {
           const val: Array<string | number> = line.split(",");
           val[0] = Number(val[0]);
-          for (let i = 1; i < val.length; i++) {
+          for (let i = 1; i < val.length; i += 1) {
             if (dimensions[i - 1].type === "number") {
               val[i] = Number(val[i]);
             }
@@ -472,3 +470,5 @@ export class PropertyController {
     return values;
   }
 }
+
+export default PropertyController;

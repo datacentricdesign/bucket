@@ -5,7 +5,7 @@ import config, { DCDRequest } from "../../config";
 import { DPiService } from "./DPiService";
 import { ThingService } from "../services/ThingService";
 
-export class DPiController {
+class DPiController {
   private dpiService: DPiService;
 
   private thingService: ThingService;
@@ -15,7 +15,7 @@ export class DPiController {
     this.thingService = ThingService.getInstance();
   }
 
-  async healthStatus(
+  static async healthStatus(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -31,11 +31,11 @@ export class DPiController {
     } catch (error) {
       const dcdError = new DCDError(503, "Service not available.");
       dcdError._statusCode = 503;
-      return next(dcdError);
+      next(dcdError);
     }
   }
 
-  async getOneDPIImage(
+  static async getOneDPIImage(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -49,24 +49,23 @@ export class DPiController {
       method: "GET",
     };
     try {
-      const result = await fetch(url, options);
-      const json = await result.json();
+      const resultDetails = await fetch(url, options);
+      const json = await resultDetails.json();
       if (json.errorCode !== undefined) {
         res.status(json.errorCode).json(json);
         const dcdError = new DCDError(json.errorCode, json);
         dcdError._statusCode = json.errorCode;
-        return next(dcdError);
-      }
-      if (json.code === 0 && req.query.download === "true") {
+        next(dcdError);
+      } else if (json.code === 0 && req.query.download === "true") {
         const dpiId = thingId.replace("dcd:things:", "");
         const downloadURL = `${config.env.dpiUrl}/${dpiId}?download=true`;
-        const result = await fetch(downloadURL);
+        const resultDownload = await fetch(downloadURL);
         await new Promise((resolve, reject) => {
-          result.body.pipe(res);
-          result.body.on("error", (error) => {
+          resultDownload.body.pipe(res);
+          resultDownload.body.on("error", (error) => {
             reject(error);
           });
-          res.on("finish", function () {
+          res.on("finish", () => {
             resolve({});
           });
         });
@@ -75,9 +74,10 @@ export class DPiController {
       }
     } catch (error) {
       if (error.errorCode === 404) {
-        return next(new DCDError(404, error));
+        next(new DCDError(404, error));
+      } else {
+        next(error);
       }
-      return next(error);
     }
   }
 
@@ -88,15 +88,15 @@ export class DPiController {
   ): Promise<void> {
     try {
       // Retrieve thing details from thingId
-      const thing = await this.thingService.getOneThingById(req.params.thingId);
+      const thing = await ThingService.getOneThingById(req.params.thingId);
       const text = await this.dpiService.generateDPiImage(req.body, thing);
       res.send(text);
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 
-  async cancelDPiImageGeneration(
+  static async cancelDPiImageGeneration(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -112,11 +112,11 @@ export class DPiController {
       await fetch(url, options);
       res.status(204).send();
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 
-  async deleteDPiImage(
+  static async deleteDPiImage(
     req: DCDRequest,
     res: Response,
     next: NextFunction
@@ -132,7 +132,9 @@ export class DPiController {
       await fetch(url, options);
       res.status(204).send();
     } catch (error) {
-      return next(error);
+      next(error);
     }
   }
 }
+
+export default DPiController;

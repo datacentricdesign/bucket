@@ -1,15 +1,15 @@
 import { Router } from "express";
 
-import { introspectToken } from "../middlewares/introspectToken";
-import { checkPolicy } from "../middlewares/checkPolicy";
-import { PropertyRouter } from "../property/PropertyRouter";
+import introspectToken from "../middlewares/introspectToken";
+import checkPolicy from "../middlewares/checkPolicy";
+import PropertyRouter from "../property/PropertyRouter";
 
-import { DPiRouter } from "../dpi/DPiRouter";
+import DPiRouter from "../dpi/DPiRouter";
 import config from "../../config";
-import { GrafanaRouter } from "../grafana/GrafanaRouter";
-import { ThingController } from "./ThingController";
+import GrafanaRouter from "../grafana/GrafanaRouter";
+import ThingController from "./ThingController";
 
-export class ThingRouter {
+class ThingRouter {
   private router: Router;
 
   private controller: ThingController;
@@ -189,3 +189,5 @@ export class ThingRouter {
     this.router.use("/:thingId/apps/grafana", this.grafanaRouter.getRouter());
   }
 }
+
+export default ThingRouter;

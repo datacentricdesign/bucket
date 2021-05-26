@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { DCDError } from "@datacentricdesign/types";
-import { Log } from "../../Logger";
+import Log from "../../Log";
 import config from "../../config";
 
 export default function errorMiddleware(

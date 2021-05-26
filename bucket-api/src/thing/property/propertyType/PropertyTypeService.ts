@@ -1,9 +1,9 @@
 import { getRepository, DeleteResult } from "typeorm";
 
 import { DCDError } from "@datacentricdesign/types";
-import { PropertyType } from "./PropertyType";
+import PropertyType from "./PropertyType";
 
-export class PropertyTypeService {
+class PropertyTypeService {
   private static instance: PropertyTypeService;
 
   public static getInstance(): PropertyTypeService {
@@ -77,3 +77,5 @@ export class PropertyTypeService {
     return propertyTypeRepository.delete(propertyTypeId);
   }
 }
+
+export default PropertyTypeService;

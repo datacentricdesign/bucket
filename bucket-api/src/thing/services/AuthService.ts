@@ -12,7 +12,7 @@ import { URL } from "url";
 import { Token } from "./ThingService";
 import { Access, PolicyService } from "./PolicyService";
 import config from "../../config";
-import { Log } from "../../Logger";
+import Log from "../../Log";
 
 export interface KeySet {
   algorithm: string;
@@ -116,19 +116,24 @@ export class AuthService {
       body,
       "application/x-www-form-urlencoded"
     )
-      .then((body: TokenIntrospection) => {
-        if (!body.active) {
+      .then((introspection: TokenIntrospection) => {
+        if (!introspection.active) {
           return Promise.reject(
             new DCDError(4031, "The bearer token is not active.")
           );
         }
-        if (body.token_type && body.token_type !== "access_token") {
+        if (
+          introspection.token_type &&
+          introspection.token_type !== "access_token"
+        ) {
           return Promise.reject(
             new DCDError(4031, "The bearer token is not an access token.")
           );
         }
 
-        if (!requiredScope.every((scope) => body.scope.includes(scope))) {
+        if (
+          !requiredScope.every((scope) => introspection.scope.includes(scope))
+        ) {
           return Promise.reject(
             new DCDError(
               4031,
@@ -137,7 +142,7 @@ export class AuthService {
           );
         }
 
-        return Promise.resolve(body);
+        return Promise.resolve(introspection);
       })
       .catch((error) => {
         return Promise.reject(error);

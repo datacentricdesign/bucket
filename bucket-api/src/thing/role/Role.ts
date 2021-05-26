@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 import { Role as IRole } from "@datacentricdesign/types";
 
 @Entity()
-export class Role implements IRole {
+class Role implements IRole {
   @PrimaryColumn()
   id: string;
 
@@ -16,3 +16,5 @@ export class Role implements IRole {
   @Column()
   role: string;
 }
+
+export default Role;

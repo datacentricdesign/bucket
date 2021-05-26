@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import { introspectToken } from "../middlewares/introspectToken";
-import { GrafanaController } from "./GrafanaController";
+import introspectToken from "../middlewares/introspectToken";
+import GrafanaController from "./GrafanaController";
 
-export class GrafanaRouter {
+class GrafanaRouter {
   private router: Router;
 
   private controller: GrafanaController;
@@ -46,3 +46,5 @@ export class GrafanaRouter {
     );
   }
 }
+
+export default GrafanaRouter;

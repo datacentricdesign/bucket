@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-export const formatEntityId = () => {
+const formatEntityId = () => {
   return async (
     req: Request,
     res: Response,
@@ -14,3 +14,5 @@ export const formatEntityId = () => {
     next();
   };
 };
+
+export default formatEntityId;

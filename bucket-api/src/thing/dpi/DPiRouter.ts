@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { introspectToken } from "../middlewares/introspectToken";
-import { checkPolicy } from "../middlewares/checkPolicy";
-import { DPiController } from "./DPiController";
+import introspectToken from "../middlewares/introspectToken";
+import checkPolicy from "../middlewares/checkPolicy";
+import DPiController from "./DPiController";
 
-export class DPiRouter {
+class DPiRouter {
   private router: Router;
 
   private controller: DPiController;
@@ -34,7 +34,7 @@ export class DPiRouter {
     this.router.get(
       "/",
       [introspectToken(["dcd:things"])],
-      this.controller.getOneDPIImage
+      DPiController.getOneDPIImage
     );
 
     /**
@@ -63,7 +63,7 @@ export class DPiRouter {
     this.router.delete(
       "/",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
-      this.controller.deleteDPiImage
+      DPiController.deleteDPiImage
     );
 
     /**
@@ -76,7 +76,9 @@ export class DPiRouter {
     this.router.get(
       "/cancel",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
-      this.controller.cancelDPiImageGeneration
+      DPiController.cancelDPiImageGeneration
     );
   }
 }
+
+export default DPiRouter;

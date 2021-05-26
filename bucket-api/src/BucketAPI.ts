@@ -8,24 +8,25 @@ import * as helmet from "helmet";
 import * as cors from "cors";
 import { Server } from "http";
 import config from "./config";
-import { Log } from "./Logger";
+import Log from "./Log";
 
-import { ThingRouter } from "./thing/http/ThingRouter";
+import ThingRouter from "./thing/http/ThingRouter";
 
 import errorMiddleware from "./thing/middlewares/ErrorMiddleware";
 
-import { introspectToken } from "./thing/middlewares/introspectToken";
-import { PropertyTypeRouter } from "./thing/property/propertyType/PropertyTypeRouter";
-import { BucketMQTTServer } from "./thing/mqtt/MQTTServer";
+import introspectToken from "./thing/middlewares/introspectToken";
+import PropertyTypeRouter from "./thing/property/propertyType/PropertyTypeRouter";
+import MQTTServer from "./thing/mqtt/MQTTServer";
+import DPiController from "./thing/dpi/DPiController";
 
 Log.init("Bucket");
 
-export class BucketAPI {
+class BucketAPI {
   private app: express.Application;
 
   private server: Server;
 
-  private mqttServer: BucketMQTTServer;
+  private mqttServer: MQTTServer;
 
   async start(delayMs: number): Promise<void> {
     Log.info("Bucket starting...");
@@ -35,7 +36,7 @@ export class BucketAPI {
         .then(async (connection) => {
           Log.info("Connected to Postgres");
           await connection.runMigrations();
-          this.mqttServer = new BucketMQTTServer();
+          this.mqttServer = new MQTTServer();
           await this.mqttServer.mqttInit();
           return this.startAPI();
         })
@@ -74,7 +75,7 @@ export class BucketAPI {
      * */
     this.app.use(
       `${config.http.baseUrl}/things/types/dpi/health`,
-      thingRouter.getDPiRouter().getController().healthStatus
+      DPiController.healthStatus
     );
 
     const propertyTypeRouter = new PropertyTypeRouter();
@@ -123,3 +124,5 @@ export class BucketAPI {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
+
+export default BucketAPI;

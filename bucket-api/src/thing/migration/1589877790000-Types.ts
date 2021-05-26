@@ -1,8 +1,8 @@
 import { MigrationInterface, getRepository } from "typeorm";
-import { Log } from "../../Logger";
-import { PropertyType } from "../property/propertyType/PropertyType";
+import Log from "../../Log";
+import PropertyType from "../property/propertyType/PropertyType";
 
-export class TypesMQTT1589877780000 implements MigrationInterface {
+class TypesMQTT1589877780000 implements MigrationInterface {
   public async up(): Promise<void> {
     const propertyTypes: PropertyType[] = [
       {
@@ -605,3 +605,5 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
     // Nothing to do
   }
 }
+
+export default TypesMQTT1589877780000;

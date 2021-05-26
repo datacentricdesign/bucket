@@ -5,11 +5,11 @@ import * as sinon from "sinon";
 import { v4 as uuidv4 } from "uuid";
 import { DTOProperty } from "@datacentricdesign/types";
 import { expect } from "chai";
-import { Thing } from "../Thing";
+import Thing from "../Thing";
 
-import { Log } from "../../Logger";
+import Log from "../../Log";
 import { ThingService } from "../services/ThingService";
-import { PropertyController } from "./PropertyController";
+import PropertyController from "./PropertyController";
 import { DCDRequest } from "../../config";
 
 let propertyController: PropertyController;
@@ -19,9 +19,8 @@ let createdThing: Thing;
 let dtoProperty: DTOProperty;
 let personId: string;
 
-describe("Property Controller", function () {
-  before(async function () {
-    this.timeout(10000);
+describe("Property Controller", () => {
+  before(async () => {
     propertyController = new PropertyController();
 
     // Test values
@@ -42,7 +41,7 @@ describe("Property Controller", function () {
     };
   });
 
-  it("It should create a property.", function (done: Mocha.Done) {
+  it("It should create a property.", (done: Mocha.Done) => {
     const request: DCDRequest = httpMocks.createRequest({
       method: "POST",
       url: `/things/${createdThing.id}/properties`,
@@ -75,7 +74,7 @@ describe("Property Controller", function () {
       });
   });
 
-  it("It should list properties.", function (done: Mocha.Done) {
+  it("It should list properties.", (done: Mocha.Done) => {
     const request: DCDRequest = httpMocks.createRequest({
       method: "GET",
       url: `/things/${createdThing.id}/properties`,
@@ -108,8 +107,8 @@ describe("Property Controller", function () {
       });
   });
 
-  after(async function () {
-    await thingService.deleteOneThing(createdThing.id);
+  after(async () => {
+    await ThingService.deleteOneThing(createdThing.id);
     // await PropertyService.release(this);
     return Promise.resolve();
   });

@@ -2,28 +2,27 @@ import { expect } from "chai";
 import { v4 as uuidv4 } from "uuid";
 import { DCDError } from "@datacentricdesign/types";
 import { AccessControlPolicy, PolicyService } from "./PolicyService";
-import { Log } from "../../Logger";
+import Log from "../../Log";
 
 let policyService: PolicyService;
 let thingId: string;
 let personId: string;
 let createdACP: AccessControlPolicy;
 
-describe("Policy Service", function () {
-  before(async function () {
+describe("Policy Service", () => {
+  before(async () => {
     policyService = PolicyService.getInstance();
     // Test values
     thingId = `dcd:things:${uuidv4()}`;
     personId = "dcd:persons:test@test.com";
   });
 
-  it("Role to Actions - empty role", function () {
+  it("Role to Actions - empty role", () => {
     const result = PolicyService.roleToActions("");
     expect(result.length).equal(0);
   });
 
-  it("Grant", function (done: Mocha.Done) {
-    this.timeout(10000);
+  it("Grant", (done: Mocha.Done) => {
     policyService
       .grant(personId, thingId, "owner")
       .then((acp: AccessControlPolicy) => {
@@ -37,10 +36,8 @@ describe("Policy Service", function () {
       });
   });
 
-  it("Get Role Id", function (done: Mocha.Done) {
-    this.timeout(10000);
-    policyService
-      .getRoleId(personId, thingId, "owner")
+  it("Get Role Id", (done: Mocha.Done) => {
+    PolicyService.getRoleId(personId, thingId, "owner")
       .then((roleId: string) => {
         Log.info(roleId);
         expect(roleId).to.equal(createdACP.id);
@@ -52,8 +49,7 @@ describe("Policy Service", function () {
       });
   });
 
-  it("Revoke", function (done: Mocha.Done) {
-    this.timeout(10000);
+  it("Revoke", (done: Mocha.Done) => {
     policyService
       .revoke(personId, thingId, "owner")
       .then((acp: AccessControlPolicy) => {

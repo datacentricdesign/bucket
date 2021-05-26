@@ -2,7 +2,7 @@ import { Response, NextFunction } from "express";
 import { DCDRequest } from "../../config";
 import { GrafanaService } from "./GrafanaService";
 
-export class GrafanaController {
+class GrafanaController {
   private grafanaService: GrafanaService;
 
   constructor() {
@@ -13,17 +13,16 @@ export class GrafanaController {
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<void> => {
     try {
-      const grafanaId = await this.grafanaService.getGrafanaId(
-        req.context.userId
-      );
+      const grafanaId = await GrafanaService.getGrafanaId(req.context.userId);
       res.status(200).send({ grafanaId });
     } catch (error) {
       if (error._hint === "Service unavailable.") {
-        return res.status(503).send(error);
+        res.status(503).send(error);
+      } else {
+        next(error);
       }
-      return next(error);
     }
   };
 
@@ -37,7 +36,9 @@ export class GrafanaController {
       await this.grafanaService.createThing(req.context.userId, thingId);
       res.status(204).send();
     } catch (error) {
-      return next(error);
+      next(error);
     }
   };
 }
+
+export default GrafanaController;

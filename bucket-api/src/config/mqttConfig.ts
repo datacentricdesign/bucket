@@ -1,10 +1,12 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 
-export const mqttConfig = {
+dotenv.config();
+
+const mqttConfig = {
   host: process.env.MQTT_HOST || "mqtt",
   port:
     process.env.MQTT_PORT !== undefined
-      ? parseInt(process.env.MQTT_PORT)
+      ? parseInt(process.env.MQTT_PORT, 10)
       : 1883,
   client: {
     keepalive: 1000,
@@ -21,3 +23,5 @@ export const mqttConfig = {
     certPath: process.env.CERT_PATH,
   },
 };
+
+export default mqttConfig;

@@ -1,15 +1,17 @@
-import "dotenv/config";
+import * as dotenv from "dotenv";
 
 import { cleanEnv, str, port, bool, url } from "envalid";
 import { Context } from "@datacentricdesign/types";
 import { Request } from "express";
-import { envConfig } from "./envConfig";
-import { ORMConfig } from "./ormConfig";
-import { httpConfig } from "./httpConfig";
-import { authConfig } from "./authConfig";
-import { influxdbConfig } from "./influxdbConfig";
-import { mqttConfig } from "./mqttConfig";
-import { grafanaConfig } from "./grafanaConfig";
+import envConfig from "./envConfig";
+import ORMConfig from "./ormConfig";
+import httpConfig from "./httpConfig";
+import authConfig from "./authConfig";
+import influxdbConfig from "./influxdbConfig";
+import mqttConfig from "./mqttConfig";
+import grafanaConfig from "./grafanaConfig";
+
+dotenv.config();
 
 export function validateEnv(): void {
   cleanEnv(process.env, {
@@ -61,7 +63,7 @@ export function validateEnv(): void {
 
 validateEnv();
 
-export default {
+const config = {
   hostDataFolder: process.env.HOST_DATA_FOLDER,
   env: envConfig,
   orm: ORMConfig,
@@ -71,6 +73,8 @@ export default {
   mqtt: mqttConfig,
   grafana: grafanaConfig,
 };
+
+export default config;
 
 // Setup context of Request to pass user info once identified
 
