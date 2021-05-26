@@ -18,7 +18,6 @@ export class Log {
 
     if (config.env.env === 'development') {
       Log.logger = new Logger({ name: name, type: 'pretty', ignoreStackLevels: 4 });
-      console.log(Log.logger.settings)
     } else {
       Log.logger = new Logger({ name: name, type: 'hidden', ignoreStackLevels: 4 });
     }
