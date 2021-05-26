@@ -17,9 +17,9 @@ export class Log {
   static init(name: string) {
 
     if (config.env.env === 'development') {
-      Log.logger = new Logger({ name: name, type: 'pretty', ignoreStackLevels: 2 });
+      Log.logger = new Logger({ name: name, type: 'pretty' });
     } else {
-      Log.logger = new Logger({ name: name, type: 'hidden', ignoreStackLevels: 2 });
+      Log.logger = new Logger({ name: name, type: 'hidden' });
     }
 
     Log.logger.attachTransport(
@@ -39,6 +39,7 @@ export class Log {
       return Log.logger.silly(...Log.convertArgObjectToString(args))
     }
     Log.debug = (...args: unknown[]): ILogObject => {
+      Log.logger.setSettings({ignoreStackLevels: 2})
       return Log.logger.debug(...Log.convertArgObjectToString(args))
     }
     Log.trace = (...args: unknown[]): ILogObject => {
