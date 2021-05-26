@@ -17,7 +17,7 @@ export class Log {
   static init(name: string) {
 
     if (config.env.env === 'development') {
-      Log.logger = new Logger({ name: "hello?", ignoreStackLevels: 4 });
+      Log.logger = new Logger({ name: name, type: 'json', ignoreStackLevels: 4 });
     } else {
       Log.logger = new Logger({ name: name, type: 'hidden', ignoreStackLevels: 4 });
     }
