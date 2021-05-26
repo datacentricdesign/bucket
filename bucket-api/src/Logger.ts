@@ -36,25 +36,25 @@ export class Log {
     );
 
     Log.silly = (...args: unknown[]): ILogObject => {
-      return Log.logger.silly(Log.convertArgObjectToString(args))
+      return Log.logger.silly(...Log.convertArgObjectToString(args))
     }
     Log.debug = (...args: unknown[]): ILogObject => {
-      return Log.logger.debug(Log.convertArgObjectToString(args))
+      return Log.logger.debug(...Log.convertArgObjectToString(args))
     }
     Log.trace = (...args: unknown[]): ILogObject => {
-      return Log.logger.trace(Log.convertArgObjectToString(args))
+      return Log.logger.trace(...Log.convertArgObjectToString(args))
     }
     Log.info = (...args: unknown[]): ILogObject => {
-      return Log.logger.info(Log.convertArgObjectToString(args))
+      return Log.logger.info(...Log.convertArgObjectToString(args))
     }
     Log.warn = (...args: unknown[]): ILogObject => {
-      return Log.logger.warn(Log.convertArgObjectToString(args))
+      return Log.logger.warn(...Log.convertArgObjectToString(args))
     }
     Log.error = (...args: unknown[]): ILogObject => {
-      return Log.logger.error(Log.convertArgObjectToString(args))
+      return Log.logger.error(...Log.convertArgObjectToString(args))
     }
     Log.fatal = (...args: unknown[]): ILogObject => {
-      return Log.logger.fatal(Log.convertArgObjectToString(args))
+      return Log.logger.fatal(...Log.convertArgObjectToString(args))
     }
 
     // Make sure there is a subfolder to store images and logs
