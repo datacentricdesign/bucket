@@ -21,7 +21,7 @@ export class Log {
     } else {
       Log.logger = new Logger({ name: name, type: 'hidden' });
     }
-    Log.logger.setSettings({ignoreStackLevels: 4})
+    Log.logger.setSettings({ignoreStackLevels: 2})
 
     Log.logger.attachTransport(
       {
