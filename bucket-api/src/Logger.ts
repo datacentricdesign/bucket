@@ -39,7 +39,7 @@ export class Log {
       return Log.logger.silly(...Log.convertArgObjectToString(args))
     }
     Log.debug = (...args: unknown[]): ILogObject => {
-      Log.logger.setSettings({ignoreStackLevels: 2})
+      Log.logger.setSettings({ignoreStackLevels: 4})
       return Log.logger.debug(...Log.convertArgObjectToString(args))
     }
     Log.trace = (...args: unknown[]): ILogObject => {
