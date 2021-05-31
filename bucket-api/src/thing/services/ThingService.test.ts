@@ -19,7 +19,7 @@ describe("Thing Service", () => {
     thing.personId = "dcd:persons:test@test.com";
   });
 
-  it("Create", (done: Mocha.Done) => {
+  it("Create a Thing", (done: Mocha.Done) => {
     thingService
       .createNewThing(thing)
       .then((newThing: Thing) => {
@@ -40,6 +40,70 @@ describe("Thing Service", () => {
         done(error);
       });
   });
+
+  it("Create a Thing - Missing name", (done: Mocha.Done) => {
+    // Test values
+    const thingWithoutName = new Thing();
+    thingWithoutName.description = "A test thing.";
+    thingWithoutName.type = "GENERIC";
+    thingWithoutName.personId = "dcd:persons:test@test.com";
+
+    thingService
+      .createNewThing(thingWithoutName)
+      .then((newThing: Thing) => {
+        done(new Error("Should not create thing without name."));
+      })
+      .catch((error: DCDError) => {
+        expect(error.errorCode).to.equal(4003);
+        done();
+      });
+  });
+
+  it("Create a Thing - Missing type", (done: Mocha.Done) => {
+    // Test values
+    const thingWithoutType = new Thing();
+    thingWithoutType.name = "Test Thing";
+    thingWithoutType.description = "A test thing.";
+    thingWithoutType.personId = "dcd:persons:test@test.com";
+
+    thingService
+      .createNewThing(thingWithoutType)
+      .then((newThing: Thing) => {
+        done(new Error("Should not create thing without type."));
+      })
+      .catch((error: DCDError) => {
+        expect(error.errorCode).to.equal(4003);
+        done();
+      });
+  });
+
+  // it("Edit Thing - Change PEM", (done: Mocha.Done) => {
+  //   // Test values
+  //   const pem = `-----BEGIN PUBLIC KEY-----
+  //   MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1ugLkVZT1WoY6xu/t8M7
+  //   8oNyP4274q0CRFf1MYQyMKEULpWjlq3uudIIcp15AaJl+jxRDkCEb12B8ex/PDKQ
+  //   adYg3FZ/TR2QB5RvotiD6gn5w2HhPwUu35ETFfnIKmidPXLHvchPh9AFrbla5hwl
+  //   migCiLx7rwApFqbuhqN2R76LNJ67mxsQ9Hzdt1PcQohPtaG17bratcH3hF5YzTn+
+  //   1Bd3D2zH8vK7WQVVBSL9zLuWg2OSBJFF39ceWfAcMJp8+YRV2w/uQlS5TqgL6lS+
+  //   7II+1LGOMnT8LiZ4Akwu5Uly0JOE+zf9VDaZQYbLjuSe6puaDa+zGDoKDuLpFmVw
+  //   0tVd1kWtHuGEK5HXL7olYUxF9EneeoL7Gba32FWcGV2d5onhYA99hq6sM6Hefxvo
+  //   b/HgeTAAuxNhtKSEMX7FYSEcsn2Vtv/t2S1b5yvqxxYfSY8QS+fHAzZXT0TBx1yg
+  //   ibOvWBCkwWgXmbg4in9LOOCla34xSWKY7Ba0wSdQuEO4xattaG7aZL/bfx8JB+hT
+  //   iIv8NJTIHq1uHsUGP9iVfil1Uify6ypyJON97yAAylT8Muiuh6QBNMqQ0B8WF+tl
+  //   QDg2NjCGl/ioRAe5Kp0fIO2SbRLBci63CgMHqIQSFMtK5yph91jjpzuQvM+eIB08
+  //   UqiT7uj6UAVOlsf5fBlL7QkCAwEAAQ==
+  //   -----END PUBLIC KEY-----`
+  //   thingService
+  //     .editThingPEM(thing.id, pem)
+  //     .then((jwk: string) => {
+  //       Log.debug(jwk);
+  //       done();
+  //     })
+  //     .catch((error: DCDError) => {
+  //       // Log.error(error)
+  //       done(error);
+  //     });
+  // });
 
   it("Get One Thing by Id", (done: Mocha.Done) => {
     ThingService.getOneThingById(createdThing.id)

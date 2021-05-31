@@ -51,7 +51,7 @@ class ThingRouter {
      *
      * @apiSuccess {object} health status
      * */
-    this.router.get("/health", this.controller.apiHealth);
+    this.router.get("/health", ThingController.apiHealth);
 
     /**
      * @api {get} /things List
@@ -67,7 +67,7 @@ class ThingRouter {
     this.router.get(
       "/",
       [introspectToken(["dcd:things"])],
-      this.controller.getThingsOfAPerson
+      ThingController.getThingsOfAPerson
     );
 
     this.router.get(
@@ -92,7 +92,7 @@ class ThingRouter {
     this.router.get(
       "/:thingId",
       [introspectToken(["dcd:things"]), checkPolicy("read")],
-      this.controller.getOneThingById
+      ThingController.getOneThingById
     );
 
     /**
@@ -139,7 +139,7 @@ class ThingRouter {
     this.router.patch(
       "/:thingId",
       [introspectToken(["dcd:things"]), checkPolicy("update")],
-      this.controller.editThing
+      ThingController.editThing
     );
 
     /**
@@ -176,7 +176,7 @@ class ThingRouter {
     this.router.delete(
       "/:thingId",
       [introspectToken(["dcd:things"]), checkPolicy("delete")],
-      this.controller.deleteOneThing
+      ThingController.deleteOneThing
     );
 
     // If there is a config for DPi, it means we should be able to use it!

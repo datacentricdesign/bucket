@@ -154,16 +154,16 @@ export class AuthService {
    * @param {String} privateKey
    * @returns {*}
    */
-  static generateJWT(privateKey: string): string {
-    const currentTime = Math.floor(Date.now() / 1000);
-    const token = {
-      iat: currentTime - 3600,
-      exp: currentTime + 10 * 31557600, // 10 years
-      aud: config.http.url,
-    };
-    const algorithm = "RS256";
-    return jwt.sign(token, privateKey, { algorithm });
-  }
+  // static generateJWT(privateKey: string): string {
+  //   const currentTime = Math.floor(Date.now() / 1000);
+  //   const token = {
+  //     iat: currentTime - 3600,
+  //     exp: currentTime + 10 * 31557600, // 10 years
+  //     aud: config.http.url,
+  //   };
+  //   const algorithm = "RS256";
+  //   return jwt.sign(token, privateKey, { algorithm });
+  // }
 
   /**
    * Generate a JWK set of keys for a given thing id.
@@ -247,16 +247,14 @@ export class AuthService {
       });
   }
 
-  setPEM(setId: string, pem: string): Promise<string> {
+  async setPEM(setId: string, pem: string): Promise<string> {
     const keystore = JWK.createKeyStore();
-    return keystore
-      .add(pem, "pem")
-      .then((result: JWK.Key) => {
-        return this.setJWK(setId, <JWK.Key>result.toJSON());
-      })
-      .catch((error) => {
-        return Promise.reject(error);
-      });
+    try {
+      const result = await keystore.add(pem, "pem");
+      return await this.setJWK(setId, <JWK.Key>result.toJSON());
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   checkJWT(acp: Access, entity: string): Promise<void> {
@@ -354,19 +352,20 @@ export class AuthService {
     return this.requestNewToken();
   }
 
-  requestNewToken(): Promise<void> {
-    return this.oauth2
-      .getToken({ scope: config.oauth2.oAuth2Scope })
-      .then((result) => {
-        this.token = this.oauth2.createToken(result);
-        return Promise.resolve();
-      })
-      .catch((error) => {
-        return Promise.reject(error);
-      });
+  private async requestNewToken(): Promise<void> {
+    try {
+      Log.debug(config.oauth2)
+      const result = await this.oauth2
+        .getToken({ scope: config.oauth2.oAuth2Scope });
+      this.token = this.oauth2.createToken(result);
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
-  getBearer(): string {
+  private async getBearer(): Promise<string> {
+    await this.refresh()
     return `bearer ${qs.escape(this.token.token.access_token)}`;
   }
 
@@ -386,7 +385,7 @@ export class AuthService {
   ): Promise<Record<string, unknown>> {
     const options: RequestInit = {
       headers: {
-        Authorization: this.getBearer(),
+        Authorization: await this.getBearer(),
         "Content-Type": type,
         Accept: "application/json",
       },

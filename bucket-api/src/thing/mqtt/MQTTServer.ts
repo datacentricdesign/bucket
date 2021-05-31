@@ -106,7 +106,6 @@ class MQTTServer {
   }
 
   /**
-   *
    * @param thingId
    */
   async findOrCreateMQTTStatusProperty(thingId: string): Promise<Property> {
@@ -218,9 +217,9 @@ class MQTTServer {
           "resource",
           `dcd:${resource.split(":properties:dcd:")[1]}`
         );
-        for (let i = 0; i < consents.length; i=i+1) {
+        for (let i = 0; i < consents.length; i += 1) {
           const consent = consents[i];
-          for (let j = 0; j < consent.subjects.length; j=j+1) {
+          for (let j = 0; j < consent.subjects.length; j += 1) {
             try {
               await this.policyService.checkGroupMembership(
                 acp.subject,

@@ -12,7 +12,11 @@ import {
 } from "@datacentricdesign/types";
 import Thing from "../Thing";
 import PropertyType from "./propertyType/PropertyType";
-
+/**
+ * A property belongs to a Thing and represents an entry point for data.
+ * It enable to stream data in and out of a Thing. It is characterised
+ * by a PropertyType which define the Dimensions of the property.
+ */
 @Entity()
 class Property implements IProperty {
   @PrimaryColumn()

@@ -17,15 +17,15 @@ class ThingController {
     this.dpiService = DPiService.getInstance();
   }
 
-  apiHealth = async (req: DCDRequest, res: Response): Promise<void> => {
+  static async apiHealth(req: DCDRequest, res: Response): Promise<void> {
     res.send({ status: "OK" });
-  };
+  }
 
-  getThingsOfAPerson = async (
+  static async getThingsOfAPerson(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get things from Service
     try {
       const things: Thing[] = await ThingService.getThingsOfAPerson(
@@ -34,15 +34,15 @@ class ThingController {
       // Send the things object
       res.send(things);
     } catch (error) {
-      return next(error);
+      next(error);
     }
-  };
+  }
 
-  getOneThingById = async (
+  static async getOneThingById(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const { thingId } = req.params;
     try {
@@ -50,15 +50,15 @@ class ThingController {
       const thing: Thing = await ThingService.getOneThingById(thingId);
       res.send(thing);
     } catch (error) {
-      return next(new DCDError(404, "Thing not found"));
+      next(new DCDError(404, "Thing not found"));
     }
-  };
+  }
 
-  createNewThing = async (
+  async createNewThing(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get parameters from the body
     const { name, description, type, pem, dpi } = req.body;
     const thing = new Thing();
@@ -72,34 +72,34 @@ class ThingController {
     // Validade if the parameters are ok
     const errors = await validate(thing);
     if (errors.length > 0) {
-      return next(new DCDError(400, errors.toString()));
-    }
+      next(new DCDError(400, errors.toString()));
+    } else {
+      try {
+        const createdThing = await this.thingService.createNewThing(thing);
+        if (pem !== undefined && typeof pem === "string") {
+          pem.trim();
+          const error = ThingController.checkPEM(pem);
+          if (error !== undefined) return next(error);
+          await this.thingService.editThingPEM(thing.id, pem);
+        }
 
-    try {
-      const createdThing = await this.thingService.createNewThing(thing);
-      if (pem !== undefined && typeof pem === "string") {
-        pem.trim();
-        const error = checkPEM(pem);
-        if (error !== undefined) return next(error);
-        await this.thingService.editThingPEM(thing.id, pem);
+        if (thing.type === "RASPBERRYPI" && dpi !== undefined) {
+          await this.dpiService.generateDPiImage(dpi, thing);
+        }
+
+        // If all ok, send 201 response
+        res.status(201).send(createdThing);
+      } catch (error) {
+        next(error);
       }
-
-      if (thing.type === "RASPBERRYPI" && dpi !== undefined) {
-        await this.dpiService.generateDPiImage(dpi, thing);
-      }
-
-      // If all ok, send 201 response
-      res.status(201).send(createdThing);
-    } catch (error) {
-      next(error);
     }
-  };
+  }
 
-  editThing = async (
+  static async editThing(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const { thingId } = req.params;
     // Get values from the body
@@ -107,60 +107,61 @@ class ThingController {
     let thing: Thing;
     try {
       thing = await ThingService.getOneThingById(thingId);
+      // Validate the new values on model
+      thing.name = name;
+      thing.description = description;
+      const errors = await validate(thing);
+      if (errors.length > 0) {
+        next(new DCDError(400, errors.toString()));
+      } else {
+        // Try to save
+        try {
+          await ThingService.editOneThing(thing);
+          // After all send a 204 (no content, but accepted) response
+          res.status(204).send();
+        } catch (error) {
+          next(new DCDError(500, "Failed to update thing"));
+        }
+      }
     } catch (error) {
       // If not found, send a 404 response
-      return next(new DCDError(404, "Thing not found"));
+      next(new DCDError(404, "Thing not found"));
     }
+  }
 
-    // Validate the new values on model
-    thing.name = name;
-    thing.description = description;
-    const errors = await validate(thing);
-    if (errors.length > 0) {
-      return next(new DCDError(400, errors.toString()));
-    }
-
-    // Try to save
-    try {
-      await ThingService.editOneThing(thing);
-    } catch (error) {
-      return next(new DCDError(500, "Failed to update thing"));
-    }
-    // After all send a 204 (no content, but accepted) response
-    res.status(204).send();
-  };
-
-  editThingPEM = async (
+  async editThingPEM(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the thing ID from the url
     const { thingId } = req.params;
     // Get pem from body
     const { pem } = req.body;
     if (pem !== undefined && typeof pem !== "string") {
-      return next(new DCDError(400, "Missing PEM key."));
+      next(new DCDError(400, "Missing PEM key."));
+    } else {
+      pem.trim();
+      const errorPEM = ThingController.checkPEM(pem);
+      if (errorPEM !== undefined) {
+        next(errorPEM);
+      } else {
+        // Call the Service
+        try {
+          await this.thingService.editThingPEM(thingId, pem);
+          res.status(204).send();
+        } catch (error) {
+          next(error);
+        }
+      }
     }
-    pem.trim();
-    const error = checkPEM(pem);
-    if (error !== undefined) return next(error);
-    // Call the Service
-    this.thingService
-      .editThingPEM(thingId, pem)
-      .then(() => {
-        res.status(204).send();
-      })
-      .catch((error) => {
-        next(error);
-      });
-  };
+  }
 
-  deleteOneThing = async (
+  static async deleteOneThing(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the thing ID from the url
     const { thingId } = req.params;
     // Call the Service
@@ -171,15 +172,15 @@ class ThingController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  countDataPoints = async (
+  async countDataPoints(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
-    const from = parseInt(req.query.from as string);
+    const from = parseInt(req.query.from as string, 10);
     const timeInterval = req.query.timeInterval as string;
 
     // Call the Service
@@ -193,24 +194,24 @@ class ThingController {
     } catch (error) {
       next(error);
     }
-  };
-}
-
-function checkPEM(pem: string) {
-  if (pem === undefined) {
-    return new DCDError(
-      400,
-      'The public key should be provided in the body parameter "pem".'
-    );
   }
-  if (
-    !pem.startsWith("-----BEGIN PUBLIC KEY-----") ||
-    !pem.endsWith("-----END PUBLIC KEY-----")
-  ) {
-    return new DCDError(
-      400,
-      'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"'
-    );
+
+  private static checkPEM(pem: string): DCDError {
+    if (pem === undefined) {
+      return new DCDError(
+        400,
+        'The public key should be provided in the body parameter "pem".'
+      );
+    }
+    if (
+      !pem.startsWith("-----BEGIN PUBLIC KEY-----") ||
+      !pem.endsWith("-----END PUBLIC KEY-----")
+    ) {
+      return new DCDError(
+        400,
+        'The public key should start with "-----BEGIN PUBLIC KEY-----" and ends with "-----END PUBLIC KEY-----"'
+      );
+    }
   }
 }
 

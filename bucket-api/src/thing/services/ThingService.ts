@@ -61,24 +61,10 @@ export class ThingService {
 
     // Try to retrieve Thing from the database
     const thingRepository = getRepository(Thing);
-    try {
-      await thingRepository.findOneOrFail(thing.id);
-      // Read positive, the Thing already exist
-      return await Promise.reject({
-        code: 400,
-        message: `Thing ${thing.id} already exist.`,
-      });
-    } catch (findError) {
-      // Read negative, the Thing does not exist yet
-      if (findError.name === "EntityNotFound") {
-        await thingRepository.save(thing);
-        await this.policyService.grant(thing.personId, thing.id, "owner");
-        await this.policyService.grant(thing.id, thing.id, "subject");
-        return thing;
-      }
-      // unknown error to report
-      throw findError;
-    }
+    await thingRepository.save(thing);
+    await this.policyService.grant(thing.personId, thing.id, "owner");
+    await this.policyService.grant(thing.id, thing.id, "subject");
+    return thing;
   }
 
   /**

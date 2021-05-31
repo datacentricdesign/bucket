@@ -8,7 +8,7 @@
     "build": "tsc",
     "typeorm:cli": "node ./node_modules/typeorm/cli -f ./dist/config/ormMigrationWrap.js",
     "migration:run": "npm run typeorm:cli migration:run",
-    "test": "mocha -r ts-node/register --file src/test/setup.ts src/**/*.test.ts",
+    "test": "mocha -r ts-node/register --file src/test/setup.ts src/**/*.test.ts --timeout 10000",
     "coverage": "nyc npm run test",
     "prod": "npm run doc && ts-node ./src/index.ts",
     "doc": "apidoc -i src/ -o dist/public/docs/",

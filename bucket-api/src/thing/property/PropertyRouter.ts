@@ -200,28 +200,6 @@ class PropertyRouter {
     );
 
     /**
-     * @api {delete} /things/:thingId/properties/:propertyId/consents Revoke a consent
-     * @apiGroup Property
-     * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
-     *
-     * @apiVersion 0.1.0
-     *
-     * @apiHeader {String} Authorization TOKEN ID
-     *
-     * @apiParam {String} thingId Id of the Thing containing the Property.
-     * @apiParam {String} propertyId Id of the Property.
-     * @apiParam {String} consentId Id of the Consent to delete.
-     * */
-    this.router.delete(
-      "/:propertyId/consents/:consentId",
-      [
-        introspectToken(["dcd:properties", "dcd:consents"]),
-        checkPolicy("delete"),
-      ],
-      PropertyController.revokeConsent
-    );
-
-    /**
      * @api {post} /things/:thingId/properties/:propertyId/consents Grant a consent
      * @apiGroup Property
      * @apiDescription Grant a consent for one Property. Only property owner can access this list.
@@ -231,7 +209,7 @@ class PropertyRouter {
      * @apiParam (Body) {Consent} consent Consent to grant as JSON.
      * @apiParamExample {json} consent:
      *     {
-     *       "subjects": ["dcd:persons:4baec95d-98cf-44a5-9c4d-08ef0d734d07", "dcd:team:4baec95d-98cf-44a5-9c4d-08ef0d734d07"],
+     *       "subjects": ["dcd:persons:4baec95d-98cf-44a5-9c4d-08ef0d734d07", "dcd:groups:4baec95d-98cf-44a5-9c4d-08ef0d734d07"],
      *       "actions": ["dcd:read"]
      *     }
      *
@@ -249,6 +227,29 @@ class PropertyRouter {
         checkPolicy("create"),
       ],
       PropertyController.grantConsent
+    );
+
+
+    /**
+     * @api {delete} /things/:thingId/properties/:propertyId/consents/:consentId Revoke a consent
+     * @apiGroup Property
+     * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property.
+     * @apiParam {String} propertyId Id of the Property.
+     * @apiParam {String} consentId Id of the Consent to delete.
+     * */
+     this.router.delete(
+      "/:propertyId/consents/:consentId",
+      [
+        introspectToken(["dcd:properties", "dcd:consents"]),
+        checkPolicy("delete"),
+      ],
+      PropertyController.revokeConsent
     );
   }
 }

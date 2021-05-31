@@ -146,7 +146,7 @@ export class GrafanaService {
       await this.setPersonFolderPermission(personId, grafanaId);
       // create a dashboard inside the user folder, with Thing name, thing id
       const thing: Thing = await ThingService.getOneThingById(thingId);
-      await this.createThingDashboard(personId, thing, folderId);
+      return await this.createThingDashboard(personId, thing, folderId);
     } catch (error) {
       return Promise.reject(error);
     }
@@ -243,7 +243,7 @@ export class GrafanaService {
     personId: string,
     thing: Thing,
     folderId: string
-  ): Promise<Response> {
+  ): Promise<void> {
     const panels = [];
     const x = 0;
     let y = 0;
@@ -277,15 +277,12 @@ export class GrafanaService {
     };
 
     try {
-      const result = await fetch(
-        `${config.grafana.apiURL.href}/dashboards/db`,
-        {
-          headers: this.grafanaHeaders,
-          body: JSON.stringify(dashboard),
-          method: "POST",
-        }
-      );
-      return await Promise.resolve(result);
+      await fetch(`${config.grafana.apiURL.href}/dashboards/db`, {
+        headers: this.grafanaHeaders,
+        body: JSON.stringify(dashboard),
+        method: "POST",
+      });
+      return await Promise.resolve();
     } catch (error) {
       return Promise.reject(error);
     }

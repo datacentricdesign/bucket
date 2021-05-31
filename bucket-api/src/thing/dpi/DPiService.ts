@@ -30,7 +30,8 @@ export class DPiService {
     });
   }
 
-  async generateDPiImage(dpi: DPI, thing: Thing): Promise<string> {
+  async generateDPiImage(dpiInfo: DPI, thing: Thing): Promise<string> {
+    const dpi = Object.apply({}, dpiInfo);
     const url = `${config.env.dpiUrl}/`;
 
     const keys = await AuthController.authService.generateKeys(thing.id);

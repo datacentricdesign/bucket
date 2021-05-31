@@ -83,7 +83,7 @@ describe("Property Controller", () => {
       },
     });
     request.context = {
-      userId: personId,
+      userId: createdThing.id,
     };
 
     const response = httpMocks.createResponse();

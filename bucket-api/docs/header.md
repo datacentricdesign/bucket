@@ -1,1 +1,1 @@
-Bucket is a cloud application which help you collect data for your Data-Centric Design process. 
+Bucket is a cloud application which help you collect data for your Data-Centric Design process.
