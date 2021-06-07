@@ -1,4 +1,6 @@
 import config from "./config";
+import { Log } from "./Logger";
+Log.init("Bucket")
 
 import { ThingRouter } from './thing/http/ThingRouter';
 
@@ -10,14 +12,14 @@ import * as cookieParser from 'cookie-parser'
 import * as helmet from "helmet";
 import * as cors from "cors";
 import errorMiddleware from './thing/middlewares/ErrorMiddleware';
-import { PropertyTypeRouter } from './thing/property/propertyType/PropertyTypeRouter';
 
 import { mqttInit } from './thing/mqtt/MQTTServer';
 import { introspectToken } from "./thing/middlewares/introspectToken";
 import PropertyController from "./thing/property/PropertyController";
+import DPiController from "./thing/dpi/DPiController";
+import { PropertyTypeRouter } from "./thing/property/propertyType/PropertyTypeRouter";
 
-
-console.log("starting...")
+Log.info("Bucket starting...")
 
 waitAndConnect(1000);
 
@@ -31,8 +33,8 @@ function waitAndConnect(delayMs: number) {
         })
         // Could not connect wait and try again
         .catch((error) => {
-            console.log(JSON.stringify(error));
-            console.log("Retrying to connect in " + delayMs + " ms.");
+            Log.debug(JSON.stringify(error));
+            Log.info("Retrying to connect in " + delayMs + " ms.");
             delay(delayMs).then(() => {
                 waitAndConnect(delayMs * 1.5);
             })
@@ -56,6 +58,16 @@ function startAPI() {
 
     // Set all routes from routes folder
     app.use(config.http.baseUrl + "/things", ThingRouter);
+
+    /**
+    * @api {delete} /dpi/health Health status
+    * @apiGroup DPi
+    * @apiDescription Health status of the DPi Generator (available or not available)
+    *
+    * @apiVersion 0.1.1
+    **/
+    app.use(config.http.baseUrl + "/things/types/dpi/health", DPiController.healthStatus);
+
     app.use(config.http.baseUrl + "/types", PropertyTypeRouter);
 
     /**
@@ -63,7 +75,7 @@ function startAPI() {
      * @apiGroup Properties
      * @apiDescription List all properties accessible for the authenticated person.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -79,6 +91,6 @@ function startAPI() {
 
     // Start listening
     app.listen(config.http.port, () => {
-        console.log("Server started on port " + config.http.port + "!");
+        Log.info("Server started on port " + config.http.port + "!");
     });
 }

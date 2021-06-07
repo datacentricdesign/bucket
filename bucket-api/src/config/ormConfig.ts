@@ -9,7 +9,7 @@ export const ORMConfig: ConnectionOptions = {
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB,
     synchronize: true,
-    logging: Boolean(process.env.POSTGRES_LOGGING),
+    logging: process.env.POSTGRES_LOGGING === 'true',
     entities: [
         "./src/thing/Thing.ts",
         "./src/thing/role/Role.ts",

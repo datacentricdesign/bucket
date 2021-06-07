@@ -7,15 +7,19 @@ import { ThingBucketRouterModule } from './thing-bucket.routes';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ThingComponent } from './thing/thing.component';
 import { PropertyComponent } from './property/property.component';
-import { ThingConnectedComponent } from '../shared/thing-connected/thing-connected.component';
-import { ThingStatsComponent } from '../shared/thing-stats/thing-stats.component';
-import {AutocompleteLibModule} from 'angular-ng-autocomplete';
+import { ThingConnectedComponent } from './thing-connected/thing-connected.component';
+import { ThingStatsComponent } from './thing-stats/thing-stats.component';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ThingService } from './services/thing.service';
 import { SharedModule } from 'app/shared/shared.module';
-import { ExploreComponent } from './explore/explore.component';
+import { SharedPropertiesComponent } from './shared-properties/shared-properties.component';
+import { SharedPropertiesStatsComponent } from './shared-properties-stats/shared-properties-stats.component';
+import { ThingFormComponent } from './thing-form/thing-form.component';
+import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thing.component';
+import { SAVER, getSaver } from './services/saver.provider';
+import { SpinnerButtonComponent } from './spinner-button/spinner-button.component';
 
 @NgModule({
   imports: [
@@ -23,9 +27,7 @@ import { ExploreComponent } from './explore/explore.component';
     FormsModule,
     NgbModule,
     ReactiveFormsModule,
-    SharedModule,
-    ThingBucketRouterModule,
-    AutocompleteLibModule
+    ThingBucketRouterModule
   ],
   declarations: [
     DashboardComponent,
@@ -33,9 +35,16 @@ import { ExploreComponent } from './explore/explore.component';
     PropertyComponent,
     ThingConnectedComponent,
     ThingStatsComponent,
-    ExploreComponent
+    ThingFormComponent,
+    RaspberryPiThingComponent,
+    SharedPropertiesComponent,
+    SharedPropertiesStatsComponent,
+    SpinnerButtonComponent
   ],
-  providers: [ThingService],
+  providers: [
+    ThingService,
+    {provide: SAVER, useFactory: getSaver}
+  ],
 })
 
 export class ThingBucketModule { }

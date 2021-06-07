@@ -13,6 +13,6 @@ export class ThingBucketComponent implements OnInit {
   }
 
   ngOnInit() {
-    
+
   }
 }

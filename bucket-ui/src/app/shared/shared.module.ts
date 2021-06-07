@@ -2,7 +2,6 @@ import { NgModule, ModuleWithProviders } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthGuard } from './auth/auth.guard';
-import { ThingFormComponent } from './thing-form/thing-form.component';
 
 @NgModule({
   imports: [
@@ -11,10 +10,10 @@ import { ThingFormComponent } from './thing-form/thing-form.component';
   ],
   providers: [],
   declarations: [
-    ThingFormComponent
+
   ],
   exports: [
-    ThingFormComponent
+
   ]
 })
 export class SharedModule {

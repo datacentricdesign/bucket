@@ -1,7 +1,0 @@
-{
-    "name": "Bucket",
-    "version": "0.0.1",
-    "environment": "development",
-    "basehref": "bucket",
-    "apiURL": "http://localhost:8081/bucket/api"
-}

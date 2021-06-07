@@ -1,0 +1,20 @@
+{
+    "name": "Bucket",
+    "version": "0.0.1",
+    "environment": "development",
+    "basehref": "bucket",
+    "apiURL": "http://localhost:8081/bucket/api",
+    "grafanaURL": "http://localhost:3000/grafana",
+    "authCodeFlow": {
+        "issuer": "https://dwd.tudelft.nl:443/",
+        "redirectUri": "https://dwd.tudelft.nl:443/bucket",
+        "clientId": "clients:bucket-ui",
+        "responseType": "code",
+        "scope": "openid profile email offline dcd:things",
+        "useSilentRefresh": false,
+        "showDebugInformation": true,
+        "sessionChecksEnabled": false,
+        "timeoutFactor": 0.01,
+        "clearHashAfterLogin": false
+      }
+}

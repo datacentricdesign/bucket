@@ -1,9 +1,6 @@
 import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
-import { Thing } from "../Thing";
-import { v4 as uuidv4 } from 'uuid';
+import { Log } from "../../Logger";
 import { PropertyType } from "../property/propertyType/PropertyType";
-import { Dimension } from "../property/dimension/Dimension";
-import { Property } from "@datacentricdesign/types";
 
 export class TypesMQTT1589877780000 implements MigrationInterface {
 
@@ -229,6 +226,14 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
                 ]
             },
             {
+                id: 'CPU',
+                name: 'CPU',
+                description: '',
+                dimensions: [
+                    { id:'cpu', name: 'CPU', description: 'CPU Usage', unit: '%', type:'number' }
+                ]
+            },
+            {
                 id: 'STATE',
                 name: 'State',
                 description: '',
@@ -236,12 +241,33 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
                     { id:'state', name: 'Value', description: '', unit: '', type:'number' }
                 ]
             },
+            {
+                id: 'IP_ADDRESS',
+                name: 'IP Address',
+                description: 'Local and external IP address',
+                dimensions: [
+                    { id: 'local-ip-address', name: 'Local IP', description: 'Local IP', unit: '', type: 'string' },
+                    { id: 'local-ip-address-type', name: 'Type Local IP', description: 'Type Local IP', unit: '', type: 'number' },
+                    { id: 'external-ip-address', name: 'External IP', description: 'External IP', unit: '', type: 'string' },
+                    { id: 'external-ip-address-type', name: 'Type External IP', description: 'Type External IP', unit: '', type: 'number' }
+                ]
+            },
+            {
+                id: 'DNS',
+                name: 'Domain Name System',
+                description: 'The network names of the Thing',
+                dimensions: [
+                    { id: 'dns-hostname', name: 'Local hostname', description: 'The machine hostname', unit: '', type: 'string' },
+                    { id: 'dns-local', name: 'Local domain', description: 'The local domain name (usually [hostname].local)', unit: '', type: 'string' },
+                    { id: 'dns-fqdn', name: 'FQDN', description: 'The Fully Qualified Domain Name, accessible from the Internet external networks.', unit: '', type: 'string' }
+                ]
+            }
         ]
 
         const propertyTypeRepository = getRepository(PropertyType);
         propertyTypes.forEach(property => {
             propertyTypeRepository.save(property).catch( (error) => {
-                console.error(JSON.stringify(error))
+                Log.error(JSON.stringify(error))
             });
         });
     }

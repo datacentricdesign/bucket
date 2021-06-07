@@ -33,7 +33,7 @@ export class Thing implements IThing {
     @IsNotEmpty()
     personId: string;
 
-    @OneToMany(type => Property, property => property.thing, { cascade: true })
+    @OneToMany(type => Property, property => property.thing)
     @JoinColumn()
     properties: IProperty[];
 

@@ -1,12 +1,12 @@
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations"
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { NgModule, APP_INITIALIZER } from '@angular/core'
 import { RouterModule } from '@angular/router'
-import { ToastrModule } from "ngx-toastr"
+import { ToastrModule } from 'ngx-toastr'
 
 import { SidebarModule } from './shared/sidebar/sidebar.module'
 import { FooterModule } from './shared/footer/footer.module'
-import { NavbarModule} from './shared/navbar/navbar.module'
-import { FixedPluginModule} from './shared/fixedplugin/fixedplugin.module'
+import { NavbarModule } from './shared/navbar/navbar.module'
+import { FixedPluginModule } from './shared/fixedplugin/fixedplugin.module'
 
 import { AppComponent } from './app.component'
 import { AppRoutes } from './app.routes'
@@ -15,7 +15,7 @@ import { ThingBucketComponent } from './thing-bucket/thing-bucket.component'
 
 import { HttpClientModule } from '@angular/common/http'
 
-import { FormsModule }   from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { OAuthModule } from 'angular-oauth2-oidc'
 import { BrowserModule } from '@angular/platform-browser'
@@ -55,10 +55,10 @@ export function init_app(appService: AppService) {
     ThingBucketComponent,
     LandingPageComponent
   ],
-  providers: [{ 
-    provide: APP_INITIALIZER, 
-    useFactory: init_app, 
-    deps: [ AppService ], 
+  providers: [{
+    provide: APP_INITIALIZER,
+    useFactory: init_app,
+    deps: [AppService],
     multi: true
   }],
   bootstrap: [AppComponent],

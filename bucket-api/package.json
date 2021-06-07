@@ -1,6 +1,6 @@
 {
   "name": "@datacentricdesign/bucket-api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A bucket of data, in the cloud.",
   "main": "index.js",
   "scripts": {
@@ -22,9 +22,10 @@
   },
   "homepage": "https://github.com/datacentricdesign/bucket#readme",
   "dependencies": {
-    "@datacentricdesign/types": "0.0.4",
+    "@datacentricdesign/types": "0.0.6",
     "aedes": "0.42.5",
     "apidoc": "0.24.0",
+    "btoa": "^1.2.1",
     "class-validator": "0.12.2",
     "cookie-parser": "1.4.5",
     "cors": "2.8.5",
@@ -35,9 +36,11 @@
     "influx": "5.6.2",
     "jsonwebtoken": "8.5.1",
     "jwk-to-pem": "2.0.4",
+    "moment": "^2.27.0",
     "mqtt": "4.1.0",
     "multiparty": "^4.2.2",
     "node-fetch": "2.6.1",
+    "node-jose": "2.0.0",
     "passport": "0.4.1",
     "passport-oauth2": "1.5.0",
     "passport-oauth2-refresh": "2.0.0",
@@ -45,6 +48,7 @@
     "pg": "8.3.0",
     "reflect-metadata": "0.1.13",
     "simple-oauth2": "4.1.0",
+    "tslog": "3.2.0",
     "typeorm": "0.2.25",
     "url": "0.11.0",
     "uuid": "8.3.0"
@@ -61,6 +65,7 @@
     "@types/multiparty": "0.0.32",
     "@types/node": "14.0.27",
     "@types/node-fetch": "2.5.7",
+    "@types/node-jose": "^1.1.5",
     "@types/passport": "1.0.4",
     "@types/passport-oauth2-refresh": "1.1.1",
     "@types/pem-jwk": "1.5.0",

@@ -1,32 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-    moduleId: module.id,
-    selector: 'fixedplugin-cmp',
-    templateUrl: 'fixedplugin.component.html'
+  moduleId: module.id,
+  selector: 'app-fixedplugin-cmp',
+  templateUrl: 'fixedplugin.component.html'
 })
 
-export class FixedPluginComponent implements OnInit{
+export class FixedPluginComponent implements OnInit {
 
-  public sidebarColor: string = "white";
-  public sidebarActiveColor: string = "danger";
+  public sidebarColor = 'white';
+  public sidebarActiveColor = 'danger';
 
-  public state: boolean = true;
+  public state = true;
 
-  changeSidebarColor(color){
-    var sidebar = <HTMLElement>document.querySelector('.sidebar');
+  changeSidebarColor(color) {
+    const sidebar = <HTMLElement>document.querySelector('.sidebar');
 
     this.sidebarColor = color;
-    if(sidebar != undefined){
-        sidebar.setAttribute('data-color',color);
+    if (sidebar !== undefined) {
+      sidebar.setAttribute('data-color', color);
     }
   }
-  changeSidebarActiveColor(color){
-    var sidebar = <HTMLElement>document.querySelector('.sidebar');
+  changeSidebarActiveColor(color) {
+    const sidebar = <HTMLElement>document.querySelector('.sidebar');
     this.sidebarActiveColor = color;
-    if(sidebar != undefined){
-        sidebar.setAttribute('data-active-color',color);
+    if (sidebar !== undefined) {
+      sidebar.setAttribute('data-active-color', color);
     }
   }
-  ngOnInit(){}
+  ngOnInit() { }
 }

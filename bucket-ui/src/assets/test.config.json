@@ -1,0 +1,20 @@
+{
+    "name": "Bucket",
+    "version": "0.0.1",
+    "environment": "test",
+    "basehref": "bucket",
+    "apiURL": "https://dwd-test.tudelft.nl/bucket/api",
+    "grafanaURL": "https://dwd-test.tudelft.nl/grafana",
+    "authCodeFlow": {
+        "issuer": "https://dwd-test.tudelft.nl:443/",
+        "redirectUri": "https://dwd-test.tudelft.nl:443/bucket",
+        "clientId": "clients:bucket-ui",
+        "responseType": "code",
+        "scope": "openid profile email offline dcd:things",
+        "useSilentRefresh": false,
+        "showDebugInformation": true,
+        "sessionChecksEnabled": false,
+        "timeoutFactor": 0.01,
+        "clearHashAfterLogin": false
+      }
+}

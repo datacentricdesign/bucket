@@ -4,6 +4,8 @@ services:
   bucket-api:
     build:
       context: ./bucket-api
+      args:
+        - START_COMMAND=$BUCKET_API_START_COMMAND
     container_name: bucket-api
     environment:
       - HOST_DATA_FOLDER=$HOST_DATA_FOLDER
@@ -11,6 +13,7 @@ services:
       - NODE_ENV=$NODE_ENV
       - DEV_USER=$DEV_USER
       - DEV_TOKEN=$DEV_TOKEN
+      - DPI_URL=$DPI_URL
       
       - HTTP_HOST=$HTTP_HOST
       - HTTP_PORT=$HTTP_PORT
@@ -36,6 +39,11 @@ services:
       - INFLUXDB_HOST=$BUCKET_INFLUXDB_HOST
       - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
 
+      - GRAFANA_API_URL=$GRAFANA_API_URL
+      - GRAFANA_API_KEY=$GRAFANA_API_KEY
+      - GRAFANA_USER=$GRAFANA_USER
+      - GRAFANA_PASS=$GRAFANA_PASS
+
       - OAUTH2_INTROSPECT_URL=$OAUTH2_INTROSPECT_URL
       - OAUTH2_TOKEN_URL=$OAUTH2_TOKEN_URL
       - OAUTH2_REVOKE_URL=$OAUTH2_REVOKE_URL
@@ -53,6 +61,7 @@ services:
       - bucket-influxdb
     volumes:
       - ./certs:/etc/certs
+      - $HOST_DATA_FOLDER:$HOST_DATA_FOLDER
     ports:
     #   - $HTTP_PORT:$HTTP_PORT
       - $MQTT_PORT:$MQTT_PORT
@@ -63,6 +72,7 @@ services:
       args:
         - BASE_HREF=$BUCKET_UI_BASE_HREF
         - DEPLOY_URL=$BUCKET_UI_DEPLOY_URL
+        - CONFIGURATION=$BUCKET_UI_CONFIGURATION
     container_name: bucket-ui
     environment:
      - NGINX_HOST=$BUCKET_UI_HOST
@@ -80,17 +90,17 @@ services:
       - POSTGRES_DB=$BUCKET_POSTGRES_DB
     volumes:
       - $HOST_DATA_FOLDER/bucket-postgres:/var/lib/postgresql/data
-    # ports:
-    #   - $BUCKET_POSTGRES_PORT:$BUCKET_POSTGRES_PORT
+    ports:
+      - $BUCKET_POSTGRES_PORT:$BUCKET_POSTGRES_PORT
 
   bucket-influxdb:
-    image: influxdb
+    image: influxdb:1.8
     container_name: bucket-influxdb
     volumes:
       - $HOST_DATA_FOLDER/bucket-influxdb:/var/lib/influxdb
-    # ports:
-    #   - 8086:8086
-    #   - 8083:8083
+    ports:
+      - 8086:8086
+      - 8083:8083
     environment:
       - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
       - INFLUXDB_ADMIN_ENABLED=true

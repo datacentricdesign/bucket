@@ -1,11 +1,22 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpEvent, HttpResponse, HttpEventType, HttpProgressEvent } from '@angular/common/http';
 import { BASE_URL } from '../../app.tokens';
 import { Observable } from 'rxjs';
 import { Thing, PropertyType, DTOThing, DTOProperty, ValueOptions, Property } from '@datacentricdesign/types';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { AppService } from 'app/app.service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, scan } from 'rxjs/operators';
+import { saveAs } from 'file-saver';
+import { Saver, SAVER } from './saver.provider';
+import { element } from 'protractor';
+import { ToastrService } from 'ngx-toastr';
+
+export interface Download {
+  state: 'PENDING' | 'IN_PROGRESS' | 'DONE'
+  progress: number
+  content: Blob | null
+}
+
 
 @Injectable()
 export class ThingService {
@@ -16,67 +27,51 @@ export class ThingService {
   constructor(
     private oauthService: OAuthService,
     private http: HttpClient,
-    private appService: AppService
+    private appService: AppService,
+    private toastr: ToastrService,
+    @Inject(SAVER) private save: Saver
   ) {
-    console.log('constructor thing service')
-    this.apiURL = appService.settings.apiURL;
+    this.apiURL = this.appService.settings.apiURL;
   }
 
   public things: Array<Thing> = [];
 
-  find(): void {
-    let url = this.apiURL + '/things';
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
-    // let params = new HttpParams().set('from', from).set('to', to);
-
-    this.http
-      .get<Thing[]>(url, { headers/*, params*/ })
-      .subscribe(
-        things => {
-          this.things = things;
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+  find(): Promise<Thing[]> {
+    const url = this.apiURL + '/things';
+    const headers = this.getHeader()
+    return this.http.get<Thing[]>(url, { headers }).toPromise()
   }
 
-  getPropertyValues(thingId: string, propertyId: string, options: ValueOptions, csvFormat: boolean): void {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
-    let params = new HttpParams()
+  getPropertyValues(thingId: string, propertyId: string, options: ValueOptions, csvFormat: boolean): Promise<Blob> {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
+    const params = new HttpParams()
       .set('from', options.from + '')
       .set('to', options.to + '')
-    if (options.fctInterval !== undefined) params.set('fctInterval', options.fctInterval + '')
-    if (options.timeInterval !== undefined) params.set('timeInterval', options.timeInterval)
-    if (options.fill !== undefined) params.set('fill', options.fill)
-    console.log(params)
-    let headers = new HttpHeaders().set('Accept', csvFormat ? 'text/csv' : 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken())
-
-
-    this.http
-      .get(url, { headers, params, responseType: 'blob' as 'blob' })
-      .subscribe(
-        blob => {
-          const a = document.createElement('a')
-          const objectUrl = URL.createObjectURL(blob)
-          a.href = objectUrl
-          a.download = propertyId + '.csv';
-          a.click();
-          URL.revokeObjectURL(objectUrl);
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+    if (options.fctInterval !== undefined) {
+      params.set('fctInterval', options.fctInterval + '')
+    }
+    if (options.timeInterval !== undefined) {
+      params.set('timeInterval', options.timeInterval)
+    }
+    if (options.fill !== undefined) {
+      params.set('fill', options.fill)
+    }
+    let headers = this.getHeader()
+    console.log(csvFormat)
+    headers = headers.set('Accept', csvFormat ? 'text/csv' : 'application/json')
+    console.log(headers)
+    return this.http.get(url, { headers, params, responseType: 'blob' as 'blob' }).toPromise()
   }
 
-  edit(thingId: string, fields: DTOThing): void {
-    let url = this.apiURL + '/things/' + thingId;
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+  createThing(thing: DTOThing): Promise<Thing> {
+    const url = this.apiURL + '/things'
+    const headers = this.getHeader()
+    return this.http.post<Thing>(url, thing, { headers }).toPromise()
+  }
+
+  edit(thingId: string, fields: DTOThing) {
+    const url = this.apiURL + '/things/' + thingId;
+    const headers = this.getHeader()
 
     const body: DTOThing = {}
     if (fields.name !== undefined && fields.name !== '') {
@@ -85,86 +80,41 @@ export class ThingService {
     if (fields.description !== undefined && fields.description !== '') {
       body.description = fields.description;
     }
-    console.log(body)
-    this.http.patch(url, body, { headers })
-      .subscribe(
-        result => {
-          window.location.reload(true);
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+    return this.http.patch(url, body, { headers }).toPromise()
   }
 
-  updatePEM(thingId: string, pem: string): void {
-    let url = this.apiURL + '/things/' + thingId + "/pem";
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
-    this.http.patch(url, { pem: pem }, { headers })
-      .subscribe(
-        result => {
-          window.location.reload(true);
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+  updatePEM(thingId: string, pem: string) {
+    const url = this.apiURL + '/things/' + thingId + '/pem';
+    const headers = this.getHeader()
+    return this.http.patch(url, { pem: pem }, { headers }).toPromise()
   }
 
-  delete(thingId: string): void {
-    let url = this.apiURL + '/things/' + thingId;
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
-    this.http.delete(url, { headers })
-      .subscribe(
-        result => {
-          window.location.href = './things';
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+  delete(thingId: string) {
+    const url = this.apiURL + '/things/' + thingId;
+    const headers = this.getHeader()
+    return this.http.delete(url, { headers }).toPromise()
   }
 
-  grant(thingId: string, propertyId:string, subjects:string[], actions:string[]): void {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents';
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
-    this.http.post(url, { subjects: subjects, actions: actions }, { headers })
-      .subscribe(
-        result => {
-          window.location.reload();
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+  grant(thingId: string, propertyId: string, subjects: string[], actions: string[]) {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents';
+    const headers = this.getHeader()
+    return this.http.post(url, { subjects: subjects, actions: actions }, { headers }).toPromise()
   }
 
-  revoke(thingId: string, propertyId:string, consentId: string): void {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents/' + consentId;
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
-    this.http.delete(url, { headers })
-      .subscribe(
-        result => {
-          window.location.reload();
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+  revoke(thingId: string, propertyId: string, consentId: string) {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/consents/' + consentId;
+    const headers = this.getHeader()
+    return this.http.delete(url, { headers }).toPromise()
   }
 
-  editProperty(thingId: string, propertyId: string, fields: DTOProperty): void {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+  createProperty(thingId: string, property: DTOProperty) {
+    const headers = this.getHeader()
+    return this.http.post(this.apiURL + '/things/' + thingId + '/properties', property, { headers }).toPromise()
+  }
+
+  editProperty(thingId: string, propertyId: string, fields: DTOProperty): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
+    const headers = this.getHeader()
 
     const body: DTOProperty = {}
     if (fields.name !== undefined && fields.name !== '') {
@@ -173,72 +123,53 @@ export class ThingService {
     if (fields.description !== undefined && fields.description !== '') {
       body.description = fields.description;
     }
-    console.log(body)
-    this.http.patch(url, body, { headers })
-      .subscribe(
-        result => {
-          window.location.reload(true);
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+    return this.http.patch(url, body, { headers }).toPromise()
   }
 
-  deleteProperty(thingId: string, propertyId: string): void {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
-    this.http.delete(url, { headers })
-      .subscribe(
-        result => {
-          window.location.href = './things/' + thingId;
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
+  deleteProperty(thingId: string, propertyId: string): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
+    const headers = this.getHeader()
+    return this.http.delete(url, { headers }).toPromise()
   }
 
   lastValues(thingId: string, propertyId: string): Promise<any> {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/last';
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '/last';
+    const headers = this.getHeader()
 
     return this.http.get(url, { headers }).toPromise()
-    // .subscribe(
-    //   result => {
-    //     return Promise.resolve(result)
-    //   },
-    //   err => {
-    //     console.warn('status', err.status);
-    //     return Promise.reject(error)
-    //   }
-    // );
   }
 
   dpCount(timeExpressionFrom, timeInterval?): Promise<any> {
     let url = this.apiURL + '/things/count?from=' + timeExpressionFrom
-    if (timeInterval !== undefined) url += '&timeInterval=' + timeInterval;
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    if (timeInterval !== undefined) {
+      url += '&timeInterval=' + timeInterval;
+    }
+    const headers = this.getHeader()
 
     return this.http.get(url, { headers }).toPromise()
   }
 
-  async getPropertyTypes(): Promise<PropertyType[]> {
-    if (this.propertyTypes) return Promise.resolve(this.propertyTypes)
+  async sharedProperties(sharedWith: string = '*', timeExpressionFrom: string, timeInterval?: string): Promise<any> {
+    let url = this.apiURL + '/properties?sharedWith=' + sharedWith
+    if (timeExpressionFrom !== undefined && timeInterval !== undefined) {
+      url += '&from=' + timeExpressionFrom + '&timeInterval=' + timeInterval
+    }
+    const headers = this.getHeader()
+    return this.http.get(url, { headers }).toPromise()
+  }
 
-    let url = this.apiURL + '/types';
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+  async getPropertyTypes(): Promise<PropertyType[]> {
+    if (this.propertyTypes) {
+      return Promise.resolve(this.propertyTypes)
+    }
+
+    const url = this.apiURL + '/types';
+    const headers = this.getHeader()
 
     await this.http
       .get<PropertyType[]>(url, { headers })
       .subscribe(
         propertyTypes => {
-          console.log(propertyTypes)
           this.propertyTypes = propertyTypes;
         },
         err => {
@@ -248,14 +179,175 @@ export class ThingService {
     return Promise.resolve(this.propertyTypes)
   }
 
-  csvFileUpload(thingId: string, propertyId: string, fileToUpload: File, hasLabel: boolean): Observable<boolean> {
-    let url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '?hasLabel=' + (hasLabel ? 'true' : 'false');
-
-    let headers = new HttpHeaders().set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
-
+  csvFileUpload(thingId: string, propertyId: string, fileToUpload: File, hasLabel: boolean): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '?hasLabel=' + (hasLabel ? 'true' : 'false');
+    const headers = this.getHeader()
     const formData: FormData = new FormData();
     formData.append('fileKey', fileToUpload, fileToUpload.name);
-    return this.http.put<any>(url, formData, { headers: headers })
+    return this.http.put<any>(url, formData, { headers: headers }).toPromise()
   }
+
+  dpiStatus(thingId: string): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    const headers = this.getHeader()
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+  dpiCreate(thingId: string, dpi: any): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    const headers = this.getHeader()
+    return this.http.post(url, dpi, { headers }).toPromise()
+  }
+
+  dpiCancel(thingId: string): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/types/dpi/cancel'
+    const headers = new HttpHeaders({ timeout: `${20000}` })
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+  dpiDelete(thingId: string): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    const headers = this.getHeader()
+    return this.http.delete(url, { headers }).toPromise()
+  }
+
+  dpiDownload(thingId: string): Observable<Download> {
+    const url = this.apiURL + '/things/' + thingId + '/types/dpi'
+    const headers = this.getHeader()
+    const params = new HttpParams().set('download', 'true')
+    const fileName = 'dpi_image_' + thingId.replace('dcd:things:', '') + '.zip'
+    return this.http.get(url, {
+      headers,
+      params,
+      reportProgress: true,
+      observe: 'events',
+      responseType: 'blob'
+    }).pipe(download(blob => this.save(blob, fileName)))
+  }
+
+  createGrafanaThing(thingId: string) {
+    const url = this.apiURL + '/things/' + thingId + '/apps/grafana'
+    const headers = this.getHeader()
+    return this.http.post(url, {}, { headers }).toPromise()
+  }
+
+  getGrafanaId(thingId: string) {
+    const url = this.apiURL + '/things/' + thingId + '/apps/grafana/user'
+    const headers = this.getHeader()
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+  getDPiHealth() {
+    const url = this.apiURL + '/things/types/dpi/health'
+    const headers = this.getHeader()
+    return this.http.get(url, { headers }).toPromise()
+  }
+
+  getHeader() {
+    return new HttpHeaders().set('Accept', 'application/json')
+      .set('Authorization', 'Bearer ' + this.oauthService.getAccessToken());
+  }
+
+  toast(payload: any, type: string = 'danger', icon: string = 'nc-alert-circle-i') {
+    let message = ''
+    if (typeof (payload) === 'string') {
+      message = payload
+    } else if (payload.error !== undefined && typeof (payload.error) !== 'string') {
+      message = payload.error.name + ' -- ' + payload.error.message
+      if (payload.error.requirement) {
+        message += '<br>Requirement: ' + payload.error.requirement
+      }
+      if (payload.error.hint) {
+        message += '<br>Hint: ' + payload.error.hint
+      }
+    } else {
+      message = 'Bucket service unavailable.'
+    }
+
+    this.toastr.info(
+      '<span data-notify="icon" class="nc-icon ' + icon + '"></span><span data-notify="message">' + message + '</span>',
+      '',
+      {
+        timeOut: 4000,
+        closeButton: true,
+        enableHtml: true,
+        toastClass: 'alert alert-' + type + ' alert-with-icon',
+        positionClass: 'toast-top-center'
+      }
+    );
+  }
+
+}
+
+export function download(
+  saver?: (b: Blob) => void
+): (source: Observable<HttpEvent<Blob>>) => Observable<Download> {
+  return (source: Observable<HttpEvent<Blob>>) =>
+    source.pipe(
+      scan((previous: Download, event: HttpEvent<Blob>): Download => {
+        if (isHttpProgressEvent(event)) {
+          const total = 1166082792
+          let progress = Math.round((100 * event.loaded) / total)
+          if (progress > 100) {
+            progress = 100
+          }
+
+          // fix to improve!
+          const elem: HTMLElement = document.getElementById('download-dpi-image-progress')
+          if (elem) {
+            elem.style.width = progress + '%'
+          }
+
+          return {
+            // progress: event.total
+            //   ? Math.round((100 * event.loaded) / event.total)
+            //   : previous.progress,
+            progress: total
+              ? Math.round((100 * event.loaded) / total)
+              : previous.progress,
+            state: 'IN_PROGRESS',
+            content: null
+          }
+        }
+        if (isHttpResponse(event)) {
+          if (saver && event.body) {
+            saver(event.body)
+          }
+
+          const bt: HTMLButtonElement = document.getElementById('downloadImage') as HTMLButtonElement
+          if (bt) {
+            bt.disabled = false
+          }
+          const btSpinner: HTMLElement = document.getElementById('spinnerDownloadImage')
+          if (btSpinner) {
+            btSpinner.style.display = 'none'
+          }
+          const bar: HTMLElement = document.getElementById('download-dpi-image-progress-bar')
+          if (bar) {
+            bar.style.display = 'none'
+          }
+
+          return {
+            progress: 100,
+            state: 'DONE',
+            content: event.body
+          }
+        }
+        return previous
+      },
+        { state: 'PENDING', progress: 0, content: null }
+      )
+    )
+}
+
+
+
+function isHttpResponse<T>(event: HttpEvent<T>): event is HttpResponse<T> {
+  return event.type === HttpEventType.Response
+}
+
+function isHttpProgressEvent(event: HttpEvent<unknown>): event is HttpProgressEvent {
+  return event.type === HttpEventType.DownloadProgress
+    || event.type === HttpEventType.UploadProgress
 }

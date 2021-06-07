@@ -1,5 +1,5 @@
 
-import { getRepository, DeleteResult} from "typeorm";
+import { getRepository, DeleteResult, getConnection } from "typeorm";
 
 import { Thing } from "../Thing";
 import { DCDError } from "@datacentricdesign/types";
@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import PropertyController from "../property/PropertyController";
 import { Property } from "../property/Property";
 import { AuthController } from "../http/AuthController";
+import GrafanaController from "../grafana/GrafanaController";
 
 export interface Token {
     aud: string,
@@ -75,13 +76,13 @@ export class ThingService {
         // Get things from the database
         const thingRepository = getRepository(Thing);
         let thing = await thingRepository
-                                .createQueryBuilder("thing")
-                                .leftJoinAndSelect("thing.properties", "properties")
-                                .leftJoinAndSelect("properties.type", "type")
-                                .leftJoinAndSelect("type.dimensions", "dimensions")
-                                .where("thing.id = :thingId")
-                                .setParameters({ thingId: thingId })
-                                .getOne();
+            .createQueryBuilder("thing")
+            .leftJoinAndSelect("thing.properties", "properties")
+            .leftJoinAndSelect("properties.type", "type")
+            .leftJoinAndSelect("type.dimensions", "dimensions")
+            .where("thing.id = :thingId")
+            .setParameters({ thingId: thingId })
+            .getOne();
 
         return thing
     }
@@ -107,12 +108,17 @@ export class ThingService {
      */
     async deleteOneThing(thingId: string): Promise<DeleteResult> {
         const thingRepository = getRepository(Thing);
+        const propertyRepository = getRepository(Property);
         let thing: Thing;
         try {
             thing = await thingRepository.findOneOrFail(thingId);
         } catch (error) {
-            throw new DCDError( 404, 'Thing to delete ' + thingId + ' could not be not found.')
+            throw new DCDError(404, 'Thing to delete ' + thingId + ' could not be not found.')
         }
+        await getConnection().createQueryBuilder().delete()
+            .from(Property)
+            .where("thing.id = :thingId", { thingId })
+            .execute();
         return thingRepository.delete(thingId);
     }
 
@@ -132,12 +138,12 @@ export class ThingService {
         })
     }
 
-    async countDataPoints(personId, from, timeInterval): Promise<any> {
+    async countDataPoints(personId: string, from: string, timeInterval: string): Promise<any> {
         const things = await this.getThingsOfAPerson(personId);
-        for (let i=0;i<things.length;i++) {
+        for (let i = 0; i < things.length; i++) {
             const thing = things[i]
-            for (let j=0; j<thing.properties.length;j++) {
-                const property:Property = thing.properties[j]
+            for (let j = 0; j < thing.properties.length; j++) {
+                const property: Property = thing.properties[j]
                 const result = await PropertyController.propertyService.countDataPoints(thing.id, property.id, property.type.id, from, timeInterval)
                 property.values = result
             }

@@ -2,9 +2,34 @@
     <h1>
         <i class="nc-icon nc-app"></i>
         &nbsp;{{thing.name}}
-        <div class="status status{{mqttStatus[1]}}"></div>
+        <ul class="nc-icon-ul ip">
+            <li *ngIf="ipAddress.length > 0">
+                <div class="status status{{mqttStatus[1]}}"></div>MQTT {{mqttStatus[1]}}
+            </li>
+            <li *ngIf="ipAddress.length > 0">
+                <i class="nc-icon nc-world-2"></i>Local IP: {{ipAddress[3]}}
+                (IPv{{ipAddress[1]}})
+            </li>
+            <li *ngIf="ipAddress.length > 0">
+                <i class="nc-icon nc-world-2"></i>External IP: {{ipAddress[4]}}
+                (IPv{{ipAddress[2]}})
+            </li>
+            <li *ngIf="dns.length > 0">
+                Hostname: {{dns[3]}} (Local: <a href="http://{{dns[2]}}" target="_blank">{{dns[2]}}</a>
+                <span *ngIf="dns[1]!==''">
+                    / FQDN: <a href="http://{{dns[1]}}" target="_blank">{{dns[1]}}</a>
+                </span>
+                )
+            </li>
+        </ul>
+
     </h1>
     <p>{{thing.description}}</p>
+    <button *ngIf="grafanaId > 0" type="button" (click)="visualiseWithGrafana(thing.id)"
+        class="btn btn-success">Visualise with Grafana</button>
+    <a *ngIf="grafanaId === 0" href="{{grafanaURL}}" target="_blank">Give permission to visualise your data with
+        Grafana</a>
+
     <h2>Properties</h2>
     <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-12" *ngFor="let property of thing.properties; let iProperty = index">
@@ -67,8 +92,8 @@
                         <div style="max-width: 500px;">
                             <div class="form-group" *ngIf="types$ | async as types else loadingTypes">
                                 <label for="type">Type</label>
-                                <select class="form-control" id="type" required [(ngModel)]="model.type" name="type">
-                                    <option *ngFor="let type of types" (click)="selectType(type)">{{type.name}}</option>
+                                <select class="form-control" id="type" (change)="selectType($event.target.value);" required [(ngModel)]="model.type" name="type">
+                                    <option *ngFor="let type of types" [value]="type.id">{{type.name}}</option>
                                 </select>
                                 <div id="typeDetails"></div>
                             </div>
@@ -91,8 +116,11 @@
                     </div>
                     <div class="card-footer ">
                         <hr>
-                        <button type="submit" class="btn btn-success"
-                            [disabled]="!propertyForm.form.valid">Create</button>
+                        <button type="submit" class="btn btn-info" [disabled]="!propertyForm.form.valid">Create</button>
+
+                        <!-- <app-spinner-button #updatePEMBt [disabled]="updateThing.pem===''" type="success"
+                            content="Set new PEM" (click)="updatePEM()">
+                        </app-spinner-button> -->
                     </div>
                 </div>
             </form>
@@ -102,28 +130,31 @@
     <hr>
 
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-6 col-md-6 col-sm-12">
             <div class="card card-stats">
                 <div class="card-body">
                     <h3>Settings</h3>
                     <p>
-                        ID: {{thing.id}}
+                        ID: <span id="id-thing-to-copy">{{thing.id}}</span>
+                        <i class="nc-icon nc-single-copy-04" (click)="copyId()" style="margin-left: 20px;cursor: pointer;"></i>
                     </p>
                     <div style="max-width: 500px;">
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" class="form-control" id="name" name="name" [(ngModel)]="updateThing.name"
                                 #name="ngModel">
-                            <button (click)="editName(name.value)" class="btn btn-success"
-                                [disabled]="updateThing.name===''">Rename</button>
+                            <app-spinner-button #nameEditBt [disabled]="updateThing.name===''" type="success"
+                                content="Rename" (spinnerBtClick)="editName(name.value)">
+                            </app-spinner-button>
                         </div>
 
                         <div class="form-group">
                             <label for="name">Description</label>
                             <input type="text" class="form-control" id="description" name="description"
                                 [(ngModel)]="updateThing.description" #description="ngModel">
-                            <button (click)="editDescription(description.value)" class="btn btn-success"
-                                [disabled]="updateThing.description===''">Update the description</button>
+                            <app-spinner-button #descEditBt [disabled]="updateThing.description===''" type="success"
+                                content="Update the description" (spinnerBtClick)="editDescription(description.value)">
+                            </app-spinner-button>
                         </div>
 
                         <div class="form-group">
@@ -140,24 +171,110 @@
                             </textarea>
                         </div>
                     </div>
+                    <app-spinner-button #updatePEMBt [disabled]="updateThing.pem===''" type="success"
+                        content="Set new PEM" (spinnerBtClick)="updatePEM()">
+                    </app-spinner-button>
+                </div>
+            </div>
+        </div>
 
-                    <button (click)="updatePEM()" class="btn btn-success" [disabled]="updateThing.pem===''">Set new
-                        PEM</button>
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div class="card card-stats">
+                <div class="card-header">
+                    <h3>Custom Settings for '{{thing.type}}'</h3>
+                </div>
+                <div *ngIf="thing.type==='GENERIC'">
+                    <div class="card-body">
+                        No custom settings for things of type 'Generic'.
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
+                <div *ngIf="thing.type==='RASPBERRYPI'">
+                    <form #raspberryForm="ngForm">
+                        <div class="card-body">
+                            <app-raspberry-pi-thing [thingName]="thing.name" [thingId]="thing.id"
+                                (foundEvent)="dpiEventHander($event)"></app-raspberry-pi-thing>
+
+                        </div>
+                        <div class="card-footer">
+                            <div *ngIf="dpi && !dpi.dpiGenerator.error && !dpiFound">
+                                <hr>
+                                <app-spinner-button #rpiCreateBt [disabled]="!raspberryForm.form.valid" type="info"
+                                    content="Create" (spinnerBtClick)="onRaspberryPiSubmit()">
+                                </app-spinner-button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="nc-icon nc-glasses-2"></i>
+                        Property Accesses
+                    </h3>
+                    <p>
+                        Here is the list of properties this Thing can access, beyond its own properties.
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class=" text-primary">
+                                <th>
+                                    Property
+                                </th>
+                                <th>
+                                    From Thing
+                                </th>
+                                <th>
+                                    Shared with
+                                </th>
+                            </thead>
+                            <tbody *ngIf="propertyAccess$ | async as accesses">
+                                <tr *ngFor="let access of accesses; let iAccess = index">
+                                    <td style="vertical-align: top;">
+                                        <i class="nc-icon nc-sound-wave"></i>&nbsp;{{access.name}}<br>
+                                        <span style="font-size:x-small" >{{access.id}}</span>
+                                    </td>
+                                    <td>
+                                        <i class="nc-icon nc-app"></i>&nbsp;{{access.thing.name}}<br>
+                                        <span style="font-size:x-small" >{{access.thing.id}}</span><br>
+                                        <i class="nc-icon nc-single-02"></i>&nbsp;Owned by {{access.thing.personId}}
+                                    </td>
+                                    <td>
+                                        {{access.sharedWith}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-6=12">
             <div class="card card-stats">
                 <div class="card-body">
                     <h3>Dangerous Zone</h3>
                     <p>
                         Here you can delete your Thing.<br>
-                        <b>Attention:</b> this action cannot be undone. It will erase all properties attached to this
+                        <b>Attention:</b> this action cannot be undone. It will erase all properties attached to
+                        this
                         Thing as well as their data.
                     </p>
-                    <button (click)="delete()" class="btn btn-danger">Delete {{thing.name}}</button>
+
+                    <app-spinner-button #deleteBt type="danger" content="Delete {{thing.name}}" (spinnerBtClick)="delete()">
+                    </app-spinner-button>
                 </div>
             </div>
         </div>
