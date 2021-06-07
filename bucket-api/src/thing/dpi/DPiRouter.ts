@@ -11,7 +11,7 @@ export const DPiRouter = Router({mergeParams: true});
  * @apiGroup DPi
  * @apiDescription Get DPi Image
  *
- * @apiVersion 0.0.1
+ * @apiVersion 0.1.1
 **/
 DPiRouter.get(
     "/",
@@ -23,7 +23,7 @@ DPiRouter.get(
  * @apiGroup DPi
  * @apiDescription Generate a new DPi Image
  *
- * @apiVersion 0.1.0
+ * @apiVersion 0.1.1
  *
  * @apiParam (Body) {DTODPi} details of the DPi image
  * @apiHeader {String} Content-type application/json
@@ -38,7 +38,7 @@ DPiRouter.post(
  * @apiGroup DPi
  * @apiDescription Delete DPi Image
  *
- * @apiVersion 0.1.0
+ * @apiVersion 0.1.1
  **/
 DPiRouter.delete(
     "/",
@@ -50,7 +50,7 @@ DPiRouter.delete(
  * @apiGroup DPi
  * @apiDescription Cancel DPi Image Generation
  *
- * @apiVersion 0.1.0
+ * @apiVersion 0.1.1
  **/
 DPiRouter.get(
     "/cancel",
