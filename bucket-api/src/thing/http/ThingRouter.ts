@@ -16,7 +16,7 @@ export const ThingRouter = Router();
      * @apiGroup Thing
      * @apiDescription Get Health status of Things API
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiSuccess {object} health status
 **/
@@ -29,7 +29,7 @@ ThingRouter.get(
      * @apiGroup Thing
      * @apiDescription Get Things of a Person.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -51,7 +51,7 @@ ThingRouter.get(
      * @apiGroup Thing
      * @apiDescription Get one Thing.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -70,7 +70,7 @@ ThingRouter.get(
      * @apiGroup Thing
      * @apiDescription Create a new Thing.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiParam (Body) {Thing} thing Thing to create as JSON.
      * @apiParamExample {json} thing:
@@ -99,7 +99,7 @@ ThingRouter.post(
      * @apiGroup Thing
      * @apiDescription Edit one Thing.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -116,7 +116,7 @@ ThingRouter.patch(
      * @apiGroup Thing
      * @apiDescription Update the PEM file containing a public key, so that the Hub can identify a Thing as data transmitter.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {string} Authorization TOKEN ID
      *
@@ -136,7 +136,7 @@ ThingRouter.patch(
      * @apiGroup Thing
      * @apiDescription Delete one Thing.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *

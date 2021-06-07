@@ -64,7 +64,7 @@ function startAPI() {
     * @apiGroup DPi
     * @apiDescription Health status of the DPi Generator (available or not available)
     *
-    * @apiVersion 0.1.0
+    * @apiVersion 0.1.1
     **/
     app.use(config.http.baseUrl + "/things/types/dpi/health", DPiController.healthStatus);
 
@@ -75,7 +75,7 @@ function startAPI() {
      * @apiGroup Properties
      * @apiDescription List all properties accessible for the authenticated person.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *

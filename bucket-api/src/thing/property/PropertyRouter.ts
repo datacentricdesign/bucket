@@ -13,7 +13,7 @@ export const PropertyRouter = Router({ mergeParams: true });
      * @apiGroup Property
      * @apiDescription Get Properties of a Thing.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -30,7 +30,7 @@ PropertyRouter.get(
      * @apiGroup Property
      * @apiDescription Get one Property.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -49,7 +49,7 @@ PropertyRouter.get(
      * @apiGroup Property
      * @apiDescription Create a Property.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiParam {String} thingId Id of the Thing to which we add the Property.
      *
@@ -76,7 +76,7 @@ PropertyRouter.post(
      * @apiGroup Property
      * @apiDescription Edit one Property to change its name or description.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -101,7 +101,7 @@ PropertyRouter.patch(
      * @apiGroup Property
      * @apiDescription Update values of a Property.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -125,7 +125,7 @@ PropertyRouter.put(
      * @apiGroup Property
      * @apiDescription Delete one Property.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -155,7 +155,7 @@ PropertyRouter.get(
      * @apiGroup Property
      * @apiDescription List consents granted for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -173,7 +173,7 @@ PropertyRouter.get(
      * @apiGroup Property
      * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -192,7 +192,7 @@ PropertyRouter.delete(
      * @apiGroup Property
      * @apiDescription Grant a consent for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      * 
      * @apiParam (Body) {Consent} consent Consent to grant as JSON.
      * @apiParamExample {json} consent:

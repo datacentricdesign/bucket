@@ -13,7 +13,7 @@ export const PropertyTypeRouter = Router({ mergeParams: true });
      * @apiGroup PropertyType
      * @apiDescription Get Property Types.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.1
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -29,7 +29,7 @@ PropertyTypeRouter.get(
 * @apiGroup PropertyType
 * @apiDescription Create a Property Types.
 *
-* @apiVersion 0.1.0
+* @apiVersion 0.1.1
 *
 * @apiHeader {String} Authorization TOKEN ID
 **/
@@ -43,7 +43,7 @@ PropertyTypeRouter.post(
 * @apiGroup PropertyType
 * @apiDescription Delete a Property Type by id.
 *
-* @apiVersion 0.1.0
+* @apiVersion 0.1.1
 *
 * @apiHeader {String} Authorization TOKEN ID
 **/
