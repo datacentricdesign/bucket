@@ -4,9 +4,98 @@ import { introspectToken } from "../middlewares/introspectToken";
 import { checkPolicy } from "../middlewares/checkPolicy";
 
 import PropertyController from "./PropertyController";
+import { DCDError, Property } from "@datacentricdesign/types";
+import path = require("path");
+import multer = require("multer");
 
 export const PropertyRouter = Router({ mergeParams: true });
 
+import { Log } from "../../Logger";
+import config from "../../config";
+
+// Set The Storage Engine
+const storage = multer.diskStorage({
+     destination: config.hostDataFolder + "/files/",
+     filename: function (req, file, cb) {
+          Log.debug(file)
+          const thingId = req.params.thingId;
+          const propertyId = req.params.propertyId;
+          // Extract timestamp
+          Log.debug(req.body.property)
+          if (req.body.property !== undefined) {
+               const body = JSON.parse(req.body.property)
+               const timestamp = body.values[0][0];
+               cb(
+                    null,
+                    thingId + "-" + propertyId + "-" + timestamp +
+                    "#" + file.fieldname +
+                    path.extname(file.originalname).toLowerCase()
+               );
+          } else {
+               if (file.fieldname === "csv") {
+                    cb(null, thingId + "-" + propertyId + ".csv");
+               } else {
+                    cb(new DCDError(400, "Requests has no values nor 'csv' field containing a CSV file."), file.filename)
+               }
+          }
+     }
+});
+
+var upload = multer({
+     storage: storage,
+     limits: { fileSize: 1000000000 },
+     fileFilter: function (req, file, cb) {
+          checkFileType(req, file, cb);
+     }
+})
+
+// Check File Type
+async function checkFileType(req, file, cb) {
+     // Get the ID from the url
+     const thingId = req.params.thingId
+     const propertyId = req.params.propertyId
+     // Check ext
+     const extensionName = path.extname(file.originalname).toLowerCase();
+
+     if (file.fieldname === 'csv') {
+          Log.debug(extensionName)
+          if (extensionName === '.csv' && file.mimetype === 'text/csv') {
+               return cb(null, true);
+          } else {
+               return cb(new DCDError(400, "Error: the file extension must be '.csv' and mimetype 'text/csv'."));
+          }
+     }
+
+     // get property details with 
+     let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
+     // Double-check the property is actually part of this thing
+     if (property === undefined) {
+          // If not found, send a 404 response
+          return cb(new DCDError(404, "Property not found in the thing."))
+     }
+
+     let dimension = null;
+     for (let i = 0; i < property.type.dimensions.length; i++) {
+          if (property.type.dimensions[i].id === file.fieldname) {
+               dimension = property.type.dimensions[i];
+          }
+     }
+     Log.debug(dimension)
+
+     if (dimension !== null) {
+          if (dimension.unit === extensionName) {
+               if (dimension.type === file.mimetype) {
+                    return cb(null, true);
+               } else {
+                    cb(new DCDError(400, "Error: File in field " + file.fieldname + " must have mime type " + file.mimetype + "."));
+               }
+          } else {
+               cb(new DCDError(400, "Error: File in field " + file.fieldname + " must have extension " + dimension.unit + "."));
+          }
+     } else {
+          cb(new DCDError(400, "Error: field " + file.fieldname + " is not matching any dimension ID."));
+     }
+}
 
 /**
      * @api {get} /things/:thingId/properties List
@@ -43,6 +132,30 @@ PropertyRouter.get(
      "/:propertyId",
      [introspectToken(['dcd:properties']), checkPolicy('read')],
      PropertyController.getOnePropertyById);
+
+
+
+/**
+     * @api {get} /things/:thingId/properties/:propertyId/dimensions/:dimensionId/timestamp/:timestamp Download media value
+     * @apiGroup Property
+     * @apiDescription Get the media associated to a dimension's timestamp.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property to read.
+     * @apiParam {String} propertyId Id of the Property to read.
+     * @apiParam {String} dimensionId Id of the Dimension to read.
+     * @apiParam {String} timestamp Timestamp of the value.
+     *
+     * @apiSuccess {Property} property The retrieved Property
+     **/
+PropertyRouter.get(
+     "/:propertyId/dimensions/:dimensionId/timestamp/:timestamp",
+     [introspectToken(['dcd:properties']),checkPolicy('read')
+     ],
+     PropertyController.getPropertyMediaValue);
 
 /**
      * @api {post} /things/:thingId/properties Create
@@ -117,6 +230,7 @@ PropertyRouter.patch(
 PropertyRouter.put(
      "/:propertyId",
      [introspectToken(['dcd:properties']), checkPolicy('update')],
+     upload.any(),
      PropertyController.updatePropertyValues
 );
 

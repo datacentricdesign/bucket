@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Support media video, image, audio in dimensions (as part of updatePropertyValue and new endpoint to download media)
+
 ## [0.1.1] - 2021-06-07
 
 ### Added

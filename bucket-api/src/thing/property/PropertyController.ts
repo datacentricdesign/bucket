@@ -1,11 +1,10 @@
-import { Request, Response, Router, NextFunction } from "express";
-import { getRepository, DeleteResult } from "typeorm";
+import { Request, Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
 import { Property } from "./Property";
 import { v4 as uuidv4 } from 'uuid';
 
-import * as multiparty from 'multiparty'
+import * as fs from 'fs'
 
 import { PropertyService } from "./PropertyService"
 
@@ -13,7 +12,19 @@ import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
-import { nextTick } from "process";
+import config from "../../config";
+
+
+function streamToString(stream): Promise<string> {
+    const chunks = [];
+    return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('error', (err) => reject(err));
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    })
+}
+
+
 
 export class PropertyController {
 
@@ -60,7 +71,7 @@ export class PropertyController {
             return next(new DCDError(404, error))
         }
     };
-    
+
 
     static getOnePropertyById = async (req: Request, res: Response, next: NextFunction) => {
         // Get the ID from the url
@@ -142,13 +153,44 @@ export class PropertyController {
         res.status(204).send();
     };
 
+    static getPropertyMediaValue = async (req: Request, res: Response, next: NextFunction) => {
+        // Get the ID from the url
+        const thingId = req.params.thingId;
+        const propertyId = req.params.propertyId;
+        const timestamp = Number.parseInt(req.params.timestamp);
+        const dimension = req.params.dimensionId;
+        let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
+        if (property === undefined) {
+            return next(new DCDError(404, "Property not found."))
+        }
+        let extension = null
+        for (let i = 0; i<property.type.dimensions.length; i++) {
+            if (property.type.dimensions[i].id === dimension) {
+                extension = property.type.dimensions[i].unit
+            }
+        }
+        if (extension === null) {
+            return next(new DCDError(404, "Dimension not found: " + dimension))
+        }
+        const path = config.hostDataFolder + '/files/' + thingId + '-' + propertyId + '-' + timestamp + '#' + dimension + extension;
+        res.download((path), function (error) {
+            if (error) {
+                Log.error("Failed to serve property media " + path + " Error: " + error)
+                return next(new DCDError(404, "Media not found for this timestamp: " + timestamp))
+            } else {
+                Log.info("Served property media " + path)
+            }
+        })
+    }
+
     static updatePropertyValues = async (req: Request, res: Response, next: NextFunction) => {
         Log.debug('update property values')
         // Get the ID from the url
         const thingId = req.params.thingId
         const propertyId = req.params.propertyId
-        // Get values from the body
-        const { values } = req.body;
+
+        const contentType = req.headers['content-type']
+
         let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
 
         // Double-check the property is actually part of this thing
@@ -157,18 +199,66 @@ export class PropertyController {
             return next(new DCDError(404, "Property not found in the thing."))
         }
 
-        const contentType = req.headers['content-type']
         if (contentType.indexOf('application/json') === 0) {
             // Get values from the body
             const { values } = req.body;
             property.values = values
             return saveValuesAndRespond(property, res, next)
         } else if (contentType.indexOf('multipart/form-data') === 0) {
-            // Look for data in a CSV file
-            return PropertyController.uploadDataFile(property, req, res, next)
+            Log.debug("values with file")
+            Log.debug(req.body.property)
+            if (req.body.property !== undefined) {
+                const body = JSON.parse(req.body.property)
+                // there are values, 
+                const timestamp = body.values[0][0];
+
+                // check if missing files (dimension with no value)
+                const completeValues = [timestamp];
+                let indexValues = 1;
+                for (let i = 0; i < property.type.dimensions.length; i++) {
+                    // if type is a mime type (includes a slash)
+                    if (property.type.dimensions[i].type.split("/").length > 1) {
+                        // Then there must be a received file for this dimension
+                        let fileExist = false;
+                        for (let j = 0; j < req.files.length; j++) {
+                            if (property.type.dimensions[i].id === req.files[j].fieldname) {
+                                fileExist = true;
+                                completeValues.push(req.files[j].filename)
+                            }
+                        }
+                        if (!fileExist) {
+                            return next(new DCDError(400, "Dimension " + property.type.dimensions[i].id + " has no file."))
+                        }
+                    } else {
+                        completeValues.push(body.values[0][indexValues])
+                        indexValues++
+                    }
+                }
+                Log.debug(completeValues)
+                property.values = [completeValues]
+                saveValuesAndRespond(property, res, next)
+            } else {
+                // there is no value, this should be in a CSV file
+                const hasLabel = req.query.hasLabel === 'true'
+                // Load in 
+                Log.debug("array files")
+                Log.debug(req.files)
+                const stream = fs.createReadStream(req.files[0].path, 'utf8');
+                const dataStr = await streamToString(stream)
+                // delete CSV file
+                fs.unlink(req.files[0].path, (err) => {
+                    if (err) {
+                        Log.error("CSV file could not be deleted.")
+                        return next(new DCDError(500, "Error with the csv file."));
+                    }
+                    Log.debug("File is deleted.");
+                    return res.status(201).send();
+                });
+                property.values = csvStrToValueArray(property.type.dimensions, dataStr, hasLabel)
+                // Log.debug(property.values)
+                saveValuesAndRespond(property, res, next)
+            }
         }
-        // After all send a 204 (no content, but accepted) response
-        res.status(204).send();
     };
 
     static deleteOneProperty = async (req: Request, res: Response, next: NextFunction) => {
@@ -199,29 +289,6 @@ export class PropertyController {
             next(error)
         }
     };
-
-    static uploadDataFile(property: Property, request, response, next) {
-        Log.debug("upload data file")
-        const hasLabel = request.query.hasLabel === 'true'
-        const form = new multiparty.Form()
-        let dataStr = ''
-        // listen on part event for data file
-        form.on('part', part => {
-            if (!part.filename) {
-                return
-            }
-            part.on('data', buf => {
-                dataStr += buf.toString()
-            })
-        })
-        form.on('close', () => {
-            property.values = csvStrToValueArray(property.type.dimensions, dataStr, hasLabel)
-            // Log.debug(property.values)
-            saveValuesAndRespond(property, response, next)
-        })
-        form.on('error', next)
-        form.parse(request)
-    }
 
     static lastDataPoints = async (req: Request, res: Response, next: NextFunction) => {
         // Get the property ID from the url
@@ -326,7 +393,7 @@ function csvStrToValueArray(dimensions: Dimension[], csvStr: string, hasLabel: b
                 }
                 values.push(val)
             } catch (error) {
-                console.error(error)
+                Log.error(error)
             }
         }
         if (first) {
@@ -343,6 +410,9 @@ async function saveValuesAndRespond(property: Property, res: Response, next: Nex
         return res.json()
     } catch (error) {
         Log.error(error)
+        if (error._hint !== undefined) {
+            return next(error)
+        }
         return next(new DCDError(500, "Failed updating property values"))
     }
 }

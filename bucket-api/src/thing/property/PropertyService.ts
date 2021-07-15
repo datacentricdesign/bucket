@@ -1,24 +1,19 @@
 
 import { getRepository, DeleteResult, SelectQueryBuilder } from "typeorm";
 
-import { Thing } from "../Thing";
 import { Property } from "./Property";
-import { PropertyType } from "./propertyType/PropertyType";
 
 import { PropertyTypeService } from "./propertyType/PropertyTypeService"
 
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from 'uuid';
-import { envConfig } from "../../config/envConfig";
 import { InfluxDB } from "influx";
 import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
-import { ThingService } from "../services/ThingService";
 import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
 import ThingController from "../http/ThingController";
-import { PolicyService } from "../services/PolicyService";
 
 export class PropertyService {
 
@@ -282,6 +277,7 @@ export class PropertyService {
      * @param {Property} property
      */
     private valuesToInfluxDB(property: Property) {
+        console.log('### values to influx')
         const points = [];
         const dimensions = property.type.dimensions;
         for (let index in property.values) {
@@ -299,6 +295,12 @@ export class PropertyService {
 
                 const fields = {};
                 for (let i = 1; i < values.length; i++) {
+                    // check that we have numbers where we should
+                    if ( (dimensions[i - 1].type === 'number' && (typeof values[i] !== 'number'))
+                    || (dimensions[i - 1].type !== 'number' && (typeof values[i] === 'number') ) ) {
+                        return Promise.reject(new DCDError(404, "Mismatch type of value for dimension " + dimensions[i - 1].id))
+                    }
+                    // use dimension names to associate fields to values in InfluxDB
                     const name = dimensions[i - 1].name;
                     fields[name] = values[i];
                 }
