@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Support media video, image, audio in dimensions (as part of updatePropertyValue and new endpoint to download media)
+- Support video streaming WebRTC
+- Properly handle token expiry time on MQTT, closing the connection when necessary
 
 ## [0.1.1] - 2021-06-07
 
