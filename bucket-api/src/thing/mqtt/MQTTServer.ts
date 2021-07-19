@@ -12,7 +12,8 @@ import { Property } from '../property/Property'
 import { Log } from '../../Logger'
 
 interface Client extends Aedes.Client {
-  context: Context
+  context: Context,
+  tokenExpiryTime: number
 }
 
 const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, packet: PublishPacket, callback: Function) => {
@@ -21,9 +22,15 @@ const authorizePublish: Aedes.AuthorizePublishHandler = async (client: Client, p
     return callback(null)
   }
 
+  // Check that the token is still valid
+  if (!accessIsStillValid(client)) {
+    callback(new DCDError(403, 'Token expired'));
+    return client.close();
+  }
+
   let topicArray = packet.topic.substr(1).split('/')
   let action = 'dcd:actions:update'
-  if (topicArray.length > 0 && topicArray.length > 0 && (topicArray[topicArray.length-1] === 'log' || topicArray[topicArray.length-1] === 'reply')) {
+  if (topicArray.length > 0 && topicArray.length > 0 && (topicArray[topicArray.length - 1] === 'log' || topicArray[topicArray.length - 1] === 'reply')) {
     action = 'dcd:actions:' + topicArray.pop()
   }
 
@@ -53,9 +60,15 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
     return callback(null, packet)
   }
 
+  // Check that the token is still valid
+  if (!accessIsStillValid(client)) {
+    callback(new DCDError(403, 'Token expired'));
+    return client.close();
+  }
+
   let topicArray = packet.topic.substr(1).split('/')
   let action = 'dcd:actions:read'
-  if (topicArray.length > 0 && (topicArray[topicArray.length-1] === 'log' || topicArray[topicArray.length-1] === 'reply')) {
+  if (topicArray.length > 0 && (topicArray[topicArray.length - 1] === 'log' || topicArray[topicArray.length - 1] === 'reply')) {
     action = 'dcd:actions:' + topicArray.pop()
   }
 
@@ -70,6 +83,8 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
     subject: client.context.userId
   }
 
+
+
   try {
     await AuthController.policyService.check(acp)
     callback(null, packet)
@@ -79,13 +94,13 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (client: Clien
     Log.debug(JSON.stringify(error))
     if (resource.includes(":properties:dcd:")) {
       const consents = await AuthController.policyService.listConsents("resource", 'dcd:' + resource.split(":properties:dcd:")[1])
-      for (let i=0;i<consents.length;i++) {
+      for (let i = 0; i < consents.length; i++) {
         const consent = consents[i]
-        for (let j=0;j<consent.subjects.length;j++) {
+        for (let j = 0; j < consent.subjects.length; j++) {
           try {
             await AuthController.policyService.checkGroupMembership(acp.subject, consent.subjects[j])
             return callback(null, packet)
-          } catch(error) {
+          } catch (error) {
             console.log(error)
           }
         }
@@ -103,7 +118,6 @@ const authenticate: Aedes.AuthenticateHandler = (client: Client, username: strin
     client.context = {
       userId: username
     }
-    // client.user.token = password
     return callback(null, true)
   } else {
     Log.debug('NOT DCD client mqtt')
@@ -113,10 +127,11 @@ const authenticate: Aedes.AuthenticateHandler = (client: Client, username: strin
     return callback(new DCDError(403, 'Missing token in the password field.'), false)
   }
   AuthController.authService.checkJWTAuth(password.toString(), username)
-    .then(() => {
+    .then((token: any) => {
       client.context = {
         userId: username
       }
+      client.tokenExpiryTime = token.exp
       callback(null, true)
     })
     .catch((error: DCDError) => {
@@ -162,9 +177,22 @@ aedes.on('closed', () => {
   Log.debug('closed')
 })
 
-aedes.on('ping', (packet, client) => {
-  updateStatusProperty(client as Client, "Ping")
+aedes.on('ping', (packet, client: Client) => {
+  Log.debug('ping')
+  if (client.context.userId !== config.mqtt.client.username) {
+    if (!accessIsStillValid(client)) {
+      return client.close()
+    } else {
+      updateStatusProperty(client as Client, "Ping")
+    }
+  }
 })
+
+function accessIsStillValid(client: Client): boolean {
+  Log.debug('Expiry time: ' + client.tokenExpiryTime)
+  Log.debug('Current time: ' + Math.floor(Date.now() / 1000))
+  return client.tokenExpiryTime > Math.floor(Date.now() / 1000)
+}
 
 aedes.on('clientDisconnect', (client) => {
   Log.debug('clientDisconnect')

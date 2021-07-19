@@ -12,7 +12,8 @@ import GrafanaController from "../grafana/GrafanaController";
 
 export interface Token {
     aud: string,
-    exp: Number
+    exp: Number,
+    sub: string
 }
 
 export class ThingService {

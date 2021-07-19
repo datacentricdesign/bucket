@@ -263,6 +263,7 @@ export class AuthService {
 
                 Log.debug(introspectionToken)
                 if (
+                    introspectionToken.sub === thingId &&
                     introspectionToken.aud !== undefined &&
                     introspectionToken.aud === config.http.url &&
                     introspectionToken.exp !== undefined &&
