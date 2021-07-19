@@ -20,7 +20,7 @@ WORKDIR /usr/app
 # Install ONLY prod dependencies
 COPY package*.json ./
 # RUN npm install --production
-RUN npm install @mapbox/node-pre-gyp
+RUN npm install @mapbox/node-pre-gyp -g
 RUN npm install
 # Copy compiled sources
 # COPY --from=builder /usr/app/dist ./dist
