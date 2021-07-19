@@ -12,7 +12,7 @@
 # Note: migration does node go through on js, thus getting rid of the first stage for now
 
 # stage 2
-FROM node:14.6.0-alpine
+FROM node:current-buster
 ARG START_COMMAND
 ENV START_COMMAND ${START_COMMAND}
 # Create app directory
