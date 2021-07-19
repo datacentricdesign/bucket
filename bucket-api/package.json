@@ -24,6 +24,7 @@
   "dependencies": {
     "@datacentricdesign/types": "0.0.6",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@mapbox/node-pre-gyp": "^1.0.5",
     "aedes": "0.42.5",
     "apidoc": "0.24.0",
     "btoa": "^1.2.1",
