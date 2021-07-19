@@ -1,16 +1,28 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 import { DCDError } from "@datacentricdesign/types";
-import { envConfig } from "../../config/envConfig";
 import { AuthController } from "../http/AuthController";
+import * as ws from 'ws'
+import { WebsocketRequestHandler } from "express-ws";
 
 /**
  * Check Access Control Policy with Keto, based on subject
  * @param resource
  * @param action
  */
-export const checkPolicy = (action: string) => {
+export const checkPolicy = (action: string): RequestHandler => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        const acpResource = buildACPResource(req)
+        return _checkPolicy(action, req, next)
+    }
+};
+
+export const checkPolicyWs = (action: string): WebsocketRequestHandler => {
+    return async (ws: ws, req: Request, next: NextFunction) => {
+        return _checkPolicy(action, req, next)
+    }
+};
+
+async function _checkPolicy(action: string, req: Request, next: NextFunction) {
+    const acpResource = buildACPResource(req)
         const acp = {
             resource: acpResource,
             action: 'dcd:actions:' + action,
@@ -20,8 +32,7 @@ export const checkPolicy = (action: string) => {
             .check(acp)
             .then(() => next())
             .catch((error: DCDError) => next(error))
-    }
-};
+}
 
 /**
  * Build ACP resource from request path

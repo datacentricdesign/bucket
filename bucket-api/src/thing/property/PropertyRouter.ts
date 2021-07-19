@@ -1,7 +1,8 @@
 import { Router } from "express";
+import * as expressWs from "express-ws"
 
-import { introspectToken } from "../middlewares/introspectToken";
-import { checkPolicy } from "../middlewares/checkPolicy";
+import { introspectToken, introspectTokenWs } from "../middlewares/introspectToken";
+import { checkPolicy, checkPolicyWs } from "../middlewares/checkPolicy";
 
 import PropertyController from "./PropertyController";
 import { DCDError, Property } from "@datacentricdesign/types";
@@ -125,6 +126,9 @@ PropertyRouter.get(
      *
      * @apiParam {String} thingId Id of the Thing containing the Property to read.
      * @apiParam {String} propertyId Id of the Property to read.
+     * 
+     * @apiParam (Query) {Number} [from=0] The start time when fetching data of the property, epoch time in milliseconds
+     * @apiParam (Query) {Number} [to=1626357490387] The start time when fetching data of the property, epoch time in milliseconds
      *
      * @apiSuccess {Property} property The retrieved Property
      **/
@@ -156,6 +160,23 @@ PropertyRouter.get(
      [introspectToken(['dcd:properties']),checkPolicy('read')
      ],
      PropertyController.getPropertyMediaValue);
+
+/**
+     * @api {get} /things/:thingId/properties/:propertyId/stream
+     * @apiGroup Property
+     * @apiDescription Websocket to establish a WebRTC connection.
+     *
+     * @apiVersion 0.1.0
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property to stream.
+     * @apiParam {String} propertyId Id of the Property to stream.
+     * 
+     * @apiParam (Query) {String} authorization The access token.
+     **/
+PropertyRouter.ws(
+     "/:propertyId/stream",
+     introspectTokenWs(['dcd:properties']), checkPolicyWs('read'),
+     PropertyController.streamMedia);
 
 /**
      * @api {post} /things/:thingId/properties Create

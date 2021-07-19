@@ -2,11 +2,17 @@ import config from "./config";
 import { Log } from "./Logger";
 Log.init("Bucket")
 
-import { ThingRouter } from './thing/http/ThingRouter';
-
 import { createConnection } from "typeorm";
 
 import * as express from "express";
+import * as expressWs from "express-ws"
+
+// Create a new express application instance
+const app = express();
+const ws = expressWs(app);
+
+import { ThingRouter } from './thing/http/ThingRouter';
+
 import * as bodyParser from "body-parser";
 import * as cookieParser from 'cookie-parser'
 import * as helmet from "helmet";
@@ -46,9 +52,6 @@ function delay(ms: number) {
 }
 
 function startAPI() {
-    // Create a new express application instance
-    const app = express();
-
     // Call middleware
     app.use(cors());
     app.use(helmet());

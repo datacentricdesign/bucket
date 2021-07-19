@@ -14,6 +14,8 @@ import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
 import config from "../../config";
 
+import * as ws from 'ws'
+import { WebRtcConnectionManager } from "./webrtc/WebRTCConnectionManager";
 
 function streamToString(stream): Promise<string> {
     const chunks = [];
@@ -24,12 +26,10 @@ function streamToString(stream): Promise<string> {
     })
 }
 
-
-
 export class PropertyController {
 
     static propertyService = new PropertyService();
-
+    static connectionManager = new WebRtcConnectionManager();
 
     static parseValueOptions(req: Request): ValueOptions {
         if (req.query.from === undefined || req.query.to === undefined) {
@@ -123,6 +123,60 @@ export class PropertyController {
         }
     };
 
+    static streamMedia = async (ws: ws, req: Request, next: NextFunction) => {
+        // Retrieve property
+        const thingId = req.params.thingId
+        const propertyId = req.params.propertyId
+        let property: Property = await PropertyController.propertyService.getOnePropertyById(thingId, propertyId)
+        if (property === undefined) {
+            return next(new DCDError(404, "Property not found."))
+        }
+        ws.on('message', async (message:any) => {
+            let connection = null;
+            message = JSON.parse(message.toString())
+            switch (message.type) {
+                case 'new':
+                    // TODO get video property to record on
+                    try {
+                        connection = await PropertyController.connectionManager.createConnection(property);
+                        ws.send(JSON.stringify(connection));
+                    } catch (error) {
+                        console.error(error);
+                        ws.send(JSON.stringify(error));
+                    }
+                    break;
+                case 'leave':
+                    console.log("leaving: " + message.id)
+                    connection = PropertyController.connectionManager.getConnection(message.id);
+                    console.log(connection)
+                    if (!connection) {
+                        ws.send('Connection not found');
+                        return;
+                    }
+                    connection.close();
+                    ws.send(JSON.stringify(connection));
+                    break;
+                case 'answer':
+                    console.log('answer type for ' + message.id)
+                    connection = PropertyController.connectionManager.getConnection(message.id);
+                    if (!connection) {
+                        ws.send('Connection not found');
+                        return;
+                    }
+                    try {
+                        await connection.applyAnswer(message.localDescription);
+                        ws.send(JSON.stringify(connection.toJSON().remoteDescription));
+                    } catch (error) {
+                        ws.send(JSON.stringify(error));
+                    }
+                    break;
+                default:
+                    console.log(message);
+                    break;
+            }
+        });
+    }
+
     static editProperty = async (req: Request, res: Response, next: NextFunction) => {
         // Get the ID from the url
         const thingId = req.params.thingId;
@@ -164,7 +218,7 @@ export class PropertyController {
             return next(new DCDError(404, "Property not found."))
         }
         let extension = null
-        for (let i = 0; i<property.type.dimensions.length; i++) {
+        for (let i = 0; i < property.type.dimensions.length; i++) {
             if (property.type.dimensions[i].id === dimension) {
                 extension = property.type.dimensions[i].unit
             }
