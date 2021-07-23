@@ -6,8 +6,8 @@ The following is a set of guidelines for contributing to Bucket, which is hosted
 
 #### Table Of Contents
 
-[Code of Conduct](#code-of-conduct)
-[Getting started](#getting-started)
+* [Code of Conduct](#code-of-conduct)
+* [Getting started](#getting-started)
 
 ## Code of Conduct
 
