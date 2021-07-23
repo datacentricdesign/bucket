@@ -7,7 +7,6 @@ import { Policy } from "../services/PolicyService";
 
 /**
  * Check Access Control Policy with Keto, based on subject
- * @param resource
  * @param action
  */
 export const checkPolicy = (action: string): RequestHandler => {

@@ -563,8 +563,9 @@ export class PropertyController {
 export default PropertyController;
 
 /**
- * @param property
+ * @param dimensions
  * @param csvStr
+ * @param hasLabel
  * @returns {{id: *, values: Array}}
  */
 function csvStrToValueArray(

@@ -1,0 +1,12 @@
+{
+    "source": "./src",
+    "destination": "./dist/public/docs/ts",
+    "plugins": [
+        {
+            "name": "esdoc-standard-plugin"
+        },
+        {
+            "name": "esdoc-typescript-plugin"
+        }
+    ]
+}

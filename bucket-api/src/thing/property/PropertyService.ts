@@ -396,11 +396,7 @@ export class PropertyService {
 
   /**
    * @param {Property} property
-   * @param {number} from
-   * @param {number} to
-   * @param {string} timeInterval
-   * @param {string} fctInterval
-   * @param {string} fill
+   * @param {ValueOptions} opt
    * @return {Promise<Property>}
    */
   private readValuesFromInfluxDB(
