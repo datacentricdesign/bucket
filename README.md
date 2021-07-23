@@ -42,32 +42,6 @@ A __[Thing](#api-Thing)__ relies on JWT tokens to interact with Bucket. The clie
 
 [Tutorial develop an Arduino Thing]
 
-# Developer 
-
-Note: local deployment will only work through 'localhost'; any other domain will fail to authenticate.
-It means that you cannot use this deployment for external devices like phone or Arduino.
-
-## Deployment with Docker Compose
-
-To run Bucket locally with docker-compose:
-
-1. Copy development.env in .env
-2. Run docker-compose
-
-```
-docker-compose up -d
-```
-
-You can access bucket-ui on [http://localhost:4200/bucket](http://localhost:4200/bucket)
-You can access bucket-api on [http://localhost:8081/bucket/api](http://localhost:8081/bucket/api)
-
-To look at the latest logs (tail for online the last x lines, f for listening to incoming logs):
-
-```sh
-docker logs bucket-api --tail=1000 -f
-docker logs bucket-ui --tail=1000 -f
-```
-
 ## Test with Postman
 
 You can import in Postman the environment (local and cloud) and the API collection from the subfolder bucket-api/postman.
