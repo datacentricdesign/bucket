@@ -57,22 +57,71 @@ of your choice. It is added to responses and logs to recognise what it relates t
 
 ### Publishing:
 
-* Create property /things/:thingId/properties/create
-Payload: {"requestId": "myId", "property": {"name": "Prop name", "typeId": "ACCELEROMETER"}}
+* Create property `/things/:thingId/properties/create`
 
-Response on /things/:thingId/reply
-Payload: {"requestId": "myId", "property": Property}
+Payload:
 
-* Update property /things/:thingId/properties/:propertyId/update
-Payload: {"requestId": "myId", "property": {"id": "dcd:properties:....", "values": [[ timestamp, val, val ], [ timestamp, val, val ]]}}
+```json
+{
+  "requestId": "myId",
+  "property": {
+    "name": "Prop name",
+    "typeId": "ACCELEROMETER"
+  }
+}
+```
 
-* Read thing /things/:thingId/read
-Payload: {"requestId": "myId"}
+Response on `/things/:thingId/reply`
 
-Response on /things/:thingId/reply
-Payload: {"requestId": "myId", "thing": Thing}
+Payload: 
 
-### Subscribing:
+```json
+{
+  "requestId": "myId",
+  "property": Property
+}
+```
 
-* Logs /things/:thingId/log
-* Request's response /things/:thingId/reply
+* Update property `/things/:thingId/properties/:propertyId/update`
+
+Payload:
+
+```
+{
+  "requestId": "myId",
+  "property": {
+    "id": "dcd:properties:....",
+    "values":
+    [
+      [ timestamp, val, val ],
+      [ timestamp, val, val ]
+    ]
+  }
+}
+```
+
+* Read thing `/things/:thingId/read`
+
+Payload:
+
+```json
+{
+  "requestId": "myId"
+}
+```
+
+Response on `/things/:thingId/reply`
+
+Payload:
+
+```json
+{
+  "requestId": "myId",
+  "thing": Thing
+}
+```
+
+### Subscribing
+
+* Logs: `/things/:thingId/log`
+* Request's response: `/things/:thingId/reply`
