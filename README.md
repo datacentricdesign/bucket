@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/datacentricdesign/bucket/develop/bucket-ui/src/assets/img/bucket-logo.svg" width="200">
 
-# [Bucket](https://datacentricdesign.org/tools/bucket)
+# [Bucket](https://dwd.tudelft.nl/bucket)
 
 ![version](https://img.shields.io/badge/version-0.1.1-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -9,8 +9,6 @@
 
 ![Docker Cloud Build Status (UI)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-ui?label=docker%20build%20%28ui%29)
 ![Docker Cloud Build Status (API)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-api?label=docker%20build%20%28api%29)
-
-[Bucket page](https://dwd.tudelft.nl/bucket)
 
 Bucket is a cloud application that helps collect data for Data-Centric Design processes.
 
