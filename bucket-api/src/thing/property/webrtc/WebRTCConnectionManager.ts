@@ -3,61 +3,50 @@ import { v4 as uuidv4 } from "uuid";
 import { Property } from "../Property";
 
 export class WebRtcConnectionManager {
-  connections = new Map();
+  connections = new Map<string, WebRtcConnection>();
   closedListeners = new Map();
 
-  constructor() {}
-
-  createId() {
+  createId(): string {
     do {
       const id = uuidv4();
       if (!this.connections.has(id)) {
         return id;
       }
-      // eslint-disable-next-line
     } while (true);
   }
 
-  deleteConnection(connection) {
-    // 1. Remove "closed" listener.
+  deleteConnection(connection: WebRtcConnection): void {
     const closedListener = this.closedListeners.get(connection);
     this.closedListeners.delete(connection);
     connection.removeListener("closed", closedListener);
-
-    // 2. Remove the Connection from the Map.
     this.connections.delete(connection.id);
   }
 
-  async createConnection(property: Property) {
+  async createConnection(property: Property): Promise<WebRtcConnection> {
     // TODO receive thing id/token
 
     const id = this.createId();
     const connection = new WebRtcConnection(id, property);
 
     const manager = this;
-    // 1. Add the "closed" listener.
+
     function closedListener() {
       manager.deleteConnection(connection);
     }
     this.closedListeners.set(connection, closedListener);
     connection.once("closed", closedListener);
 
-    // 2. Add the Connection to the Map.
     this.connections.set(connection.id, connection);
 
     await connection.doOffer();
     return connection;
   }
 
-  getConnection(id: string) {
+  getConnection(id: string): WebRtcConnection {
     return this.connections.get(id) || null;
   }
 
-  getConnections() {
+  getConnections(): Iterable<WebRtcConnection> {
     return this.connections.values();
   }
-
-  // toJSON() {
-  //   return this.getConnections().map(connection => connection.toJSON());
-  // }
 }

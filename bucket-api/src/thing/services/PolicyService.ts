@@ -2,7 +2,7 @@ import { getRepository } from "typeorm";
 import { httpConfig } from "../../config/httpConfig";
 import { DCDError } from "@datacentricdesign/types";
 
-import fetch, { Response } from "node-fetch";
+import fetch from "node-fetch";
 import { Role } from "../role/Role";
 
 import { v4 as uuidv4 } from "uuid";
@@ -15,6 +15,14 @@ export interface AccessControlPolicy {
   resources: string[];
   effect: string;
   id: string;
+  conditions?: Map<string, string>;
+  description?: string;
+}
+
+export interface Policy {
+  subject: string;
+  action: string;
+  resource: string;
 }
 
 /**
@@ -42,7 +50,11 @@ export class PolicyService {
    * @param {string} roleName
    * returns Promise
    **/
-  async grant(subjectId: string, resourceId: string, roleName: string) {
+  async grant(
+    subjectId: string,
+    resourceId: string,
+    roleName: string
+  ): Promise<void> {
     try {
       const policyId = await this.getRoleId(subjectId, resourceId, roleName);
       // There is an existing policy, let's update
@@ -73,7 +85,7 @@ export class PolicyService {
     subjectId: string,
     resourceId: string,
     roleName: string
-  ): Promise<any> {
+  ): Promise<void> {
     try {
       const policyId: string = await this.getRoleId(
         subjectId,
@@ -131,7 +143,7 @@ export class PolicyService {
     roleName: string,
     effect = "allow",
     id?: string
-  ) {
+  ): Promise<void> {
     Log.debug("creating policy...");
     const policyId: string = id !== undefined ? id : uuidv4();
     const roleRepository = getRepository(Role);
@@ -156,10 +168,14 @@ export class PolicyService {
       resources: PolicyService.entityToResource(resourceId),
     };
     Log.debug(JSON.stringify(policy));
-    return this.updateKetoPolicy(policy);
+    await this.updateKetoPolicy(policy);
   }
 
-  async deletePolicy(subjectId: string, resourceId: string, roleName: string) {
+  async deletePolicy(
+    subjectId: string,
+    resourceId: string,
+    roleName: string
+  ): Promise<void> {
     try {
       const roleId: string = await this.getRoleId(
         subjectId,
@@ -176,7 +192,7 @@ export class PolicyService {
     }
   }
 
-  async check(acp: AccessControlPolicy) {
+  async check(acp: Policy): Promise<void> {
     const url = config.oauth2.acpURL.origin + "/engines/acp/ory/regex/allowed";
     const options = {
       headers: this.ketoHeaders,
@@ -199,7 +215,11 @@ export class PolicyService {
    * @param type subject, resource, action
    * @param  id the id of the concerned subject, resource or action
    */
-  async listConsents(type: string, id: string, flavor = "exact") {
+  async listConsents(
+    type: string,
+    id: string,
+    flavor = "exact"
+  ): Promise<AccessControlPolicy[]> {
     const url =
       config.oauth2.acpURL.origin +
       "/engines/acp/ory/" +
@@ -219,7 +239,7 @@ export class PolicyService {
         if (result === null) {
           result = [];
         }
-        return Promise.resolve(result);
+        return Promise.resolve(result as AccessControlPolicy[]);
       }
       return Promise.reject(new DCDError(4031, "Request was not allowed"));
     } catch (error) {
@@ -231,7 +251,7 @@ export class PolicyService {
     member: string,
     groupId: string,
     flavor = "exact"
-  ) {
+  ): Promise<void> {
     const url =
       config.oauth2.acpURL.origin +
       "/engines/acp/ory/" +
@@ -260,7 +280,10 @@ export class PolicyService {
     }
   }
 
-  async listGroupMembership(member: string, flavor = "exact"): Promise<string[]> {
+  async listGroupMembership(
+    member: string,
+    flavor = "exact"
+  ): Promise<string[]> {
     const url =
       config.oauth2.acpURL.origin +
       "/engines/acp/ory/" +
@@ -285,10 +308,11 @@ export class PolicyService {
 
   /**
    *
-   * @param policy
-   * @returns {Promise<Response>}
    */
-  async updateKetoPolicy(policy: AccessControlPolicy, flavor = "regex"): Promise<Response> {
+  async updateKetoPolicy(
+    policy: AccessControlPolicy,
+    flavor = "regex"
+  ): Promise<AccessControlPolicy> {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
     console.log(url);
@@ -298,7 +322,8 @@ export class PolicyService {
         method: "PUT",
         body: JSON.stringify(policy),
       });
-      return Promise.resolve(result);
+      const acp = await result.json();
+      return Promise.resolve(acp as AccessControlPolicy);
     } catch (error) {
       return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
     }

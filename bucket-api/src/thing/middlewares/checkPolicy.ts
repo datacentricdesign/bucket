@@ -3,6 +3,7 @@ import { DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import * as ws from "ws";
 import { WebsocketRequestHandler } from "express-ws";
+import { Policy } from "../services/PolicyService";
 
 /**
  * Check Access Control Policy with Keto, based on subject
@@ -23,7 +24,7 @@ export const checkPolicyWs = (action: string): WebsocketRequestHandler => {
 
 async function _checkPolicy(action: string, req: Request, next: NextFunction) {
   const acpResource = buildACPResource(req);
-  const acp = {
+  const acp: Policy = {
     resource: acpResource,
     action: "dcd:actions:" + action,
     subject: req.context.userId,

@@ -68,7 +68,7 @@ async function _introspectToken(
  * @param req
  * @return {*|void|string}
  */
-function extractToken(req: Request): any | void | string {
+function extractToken(req: Request): string {
   if (req.get("Authorization") !== undefined) {
     const authorization = req.get("Authorization");
     if (

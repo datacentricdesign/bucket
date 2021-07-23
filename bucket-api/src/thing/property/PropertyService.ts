@@ -146,9 +146,7 @@ export class PropertyService {
         "subject",
         groups[i]
       );
-      if (result.errorCode === undefined) {
-        consents = consents.concat(result);
-      }
+      consents = consents.concat(result);
     }
 
     let resources = [];
