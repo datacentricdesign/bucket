@@ -5,12 +5,6 @@ import { DCDError } from "@datacentricdesign/types";
 
 export class PropertyTypeService {
   /**
-   *
-   * @constructor
-   */
-  constructor() {}
-
-  /**
    * List existing property types.
    **/
   getPropertyTypes(): Promise<PropertyType[]> {
@@ -59,19 +53,14 @@ export class PropertyTypeService {
     propertyTypeId: string
   ): Promise<DeleteResult> {
     const propertyTypeRepository = getRepository(PropertyType);
-    let propertyType: PropertyType;
     try {
-      propertyType = await propertyTypeRepository.findOneOrFail(propertyTypeId);
+      await propertyTypeRepository.findOneOrFail(propertyTypeId);
     } catch (error) {
       throw new DCDError(
         404,
         "PropertyType to delete " + propertyTypeId + " could not be not found."
       );
     }
-    // await getConnection().createQueryBuilder().delete()
-    //     .from(PropertyType)
-    //     .where("PropertyType.id = :propertyTypeId", { propertyTypeId })
-    //     .execute();
     return propertyTypeRepository.delete(propertyTypeId);
   }
 }

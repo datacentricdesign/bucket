@@ -63,13 +63,13 @@ function startAPI() {
   app.use(config.http.baseUrl + "/things", ThingRouter);
 
   /**
-   * @api {delete} /dpi/health Health status
+   * @api {get} /dpi/health Health status
    * @apiGroup DPi
    * @apiDescription Health status of the DPi Generator (available or not available)
    *
    * @apiVersion 0.1.1
    **/
-  app.use(
+  app.get(
     config.http.baseUrl + "/things/types/dpi/health",
     DPiController.healthStatus
   );

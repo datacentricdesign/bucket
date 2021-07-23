@@ -7,12 +7,11 @@ export class WebRtcConnectionManager {
   closedListeners = new Map();
 
   createId(): string {
-    do {
-      const id = uuidv4();
-      if (!this.connections.has(id)) {
-        return id;
-      }
-    } while (true);
+    const id = uuidv4();
+    if (!this.connections.has(id)) {
+      return id;
+    }
+    return this.createId();
   }
 
   deleteConnection(connection: WebRtcConnection): void {
@@ -28,11 +27,10 @@ export class WebRtcConnectionManager {
     const id = this.createId();
     const connection = new WebRtcConnection(id, property);
 
-    const manager = this;
+    const closedListener = () => {
+      this.deleteConnection(connection);
+    };
 
-    function closedListener() {
-      manager.deleteConnection(connection);
-    }
     this.closedListeners.set(connection, closedListener);
     connection.once("closed", closedListener);
 

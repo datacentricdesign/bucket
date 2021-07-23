@@ -14,7 +14,7 @@ export class PropertyType implements IPropertyType {
   @Column()
   description: string;
 
-  @ManyToMany((type) => Dimension, { cascade: true })
+  @ManyToMany(() => Dimension, { cascade: true })
   @JoinTable()
   dimensions: Dimension[];
 }

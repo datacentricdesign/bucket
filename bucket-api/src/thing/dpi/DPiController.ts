@@ -11,7 +11,7 @@ export class DPiController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     const url = config.env.dpiUrl + "/health";
     const options = {
       method: "GET",
@@ -31,7 +31,7 @@ export class DPiController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     const url =
       config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
     const thingId = req.params.thingId;
@@ -74,7 +74,7 @@ export class DPiController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     try {
       const text = await DPiController.dpiService.generateDPiImage(
         req.body,
@@ -90,7 +90,7 @@ export class DPiController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     const url =
       config.env.dpiUrl +
       "/" +
@@ -111,7 +111,7 @@ export class DPiController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     const url =
       config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
     const options = {

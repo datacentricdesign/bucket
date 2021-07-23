@@ -54,7 +54,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     const sharedWith: string = req.query.sharedWith as string;
     const subject: string = req.params.thingId
       ? req.params.thingId
@@ -76,7 +76,7 @@ export class PropertyController {
             from,
             timeInterval
           );
-        return res.send(properties);
+        res.send(properties);
       } else if (actor == subject) {
         const properties: Property[] =
           await PropertyController.propertyService.getPropertiesOfAThing(
@@ -87,9 +87,10 @@ export class PropertyController {
       }
     } catch (error) {
       if (error.errorCode !== 500) {
-        return next(error);
+        next(error);
+      } else {
+        next(new DCDError(404, error));
       }
-      return next(new DCDError(404, error));
     }
   };
 
@@ -97,7 +98,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the ID from the url
     const thingId: string = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -112,28 +113,26 @@ export class PropertyController {
       );
 
     if (req.accepts("application/json")) {
-      return res.send(property);
+      res.send(property);
     } else if (req.accepts("text/csv")) {
       res.set({ "Content-Type": "text/csv" });
       res.send(PropertyController.toCSV(property));
     } else {
-      return res.send(property);
+      // Double-check the property is actually part of this thing
+      if (property === undefined) {
+        // If not found, send a 404 response
+        next(new DCDError(404, "Property not found in the thing."));
+      } else {
+        res.send(property);
+      }
     }
-
-    // Double-check the property is actually part of this thing
-    if (property === undefined) {
-      // If not found, send a 404 response
-      return next(new DCDError(404, "Property not found in the thing."));
-    }
-
-    return res.send(property);
   };
 
   static createNewProperty = async (
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get parameters from the body
     const { name, description, typeId } = req.body;
     const property: DTOProperty = {};
@@ -154,13 +153,17 @@ export class PropertyController {
           property
         );
       // If all ok, send 201 response
-      return res.status(201).send(createdProperty);
+      res.status(201).send(createdProperty);
     } catch (error) {
-      return next(error);
+      next(error);
     }
   };
 
-  static streamMedia = async (ws: ws, req: Request, next: NextFunction) => {
+  static streamMedia = async (
+    ws: ws,
+    req: Request,
+    next: NextFunction
+  ): Promise<void> => {
     // Retrieve property
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -172,10 +175,10 @@ export class PropertyController {
     if (property === undefined) {
       return next(new DCDError(404, "Property not found."));
     }
-    ws.on("message", async (message: any) => {
+    ws.on("message", async (message: Buffer) => {
       let connection = null;
-      message = JSON.parse(message.toString());
-      switch (message.type) {
+      const messageJson = JSON.parse(message.toString());
+      switch (messageJson.type) {
         case "new":
           // TODO get video property to record on
           try {
@@ -190,9 +193,9 @@ export class PropertyController {
           }
           break;
         case "leave":
-          console.log("leaving: " + message.id);
+          console.log("leaving: " + messageJson.id);
           connection = PropertyController.connectionManager.getConnection(
-            message.id
+            messageJson.id
           );
           console.log(connection);
           if (!connection) {
@@ -203,23 +206,23 @@ export class PropertyController {
           ws.send(JSON.stringify(connection));
           break;
         case "answer":
-          console.log("answer type for " + message.id);
+          console.log("answer type for " + messageJson.id);
           connection = PropertyController.connectionManager.getConnection(
-            message.id
+            messageJson.id
           );
           if (!connection) {
             ws.send("Connection not found");
             return;
           }
           try {
-            await connection.applyAnswer(message.localDescription);
+            await connection.applyAnswer(messageJson.localDescription);
             ws.send(JSON.stringify(connection.toJSON().remoteDescription));
           } catch (error) {
             ws.send(JSON.stringify(error));
           }
           break;
         default:
-          console.log(message);
+          console.log(messageJson);
           break;
       }
     });
@@ -229,7 +232,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -267,7 +270,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -319,7 +322,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     Log.debug("update property values");
     // Get the ID from the url
     const thingId = req.params.thingId;
@@ -343,7 +346,7 @@ export class PropertyController {
       // Get values from the body
       const { values } = req.body;
       property.values = values;
-      return saveValuesAndRespond(property, res, next);
+      saveValuesAndRespond(property, res, next);
     } else if (contentType.indexOf("multipart/form-data") === 0) {
       Log.debug("values with file");
       Log.debug(req.body.property);
@@ -416,7 +419,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -437,7 +440,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -462,7 +465,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -478,7 +481,7 @@ export class PropertyController {
     }
   };
 
-  static toCSV(property: Property) {
+  static toCSV(property: Property): string {
     let csv = "time";
     for (let i = 0; i < property.type.dimensions.length; i++) {
       csv += "," + property.type.dimensions[i].name;
@@ -495,9 +498,8 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
-    const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
     const body = req.body;
     const id = uuidv4();
@@ -525,7 +527,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
     const consentId = req.params.consentId;
     // Call the Service
@@ -542,7 +544,7 @@ export class PropertyController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
     const propertyId = req.params.propertyId;
     const resource = propertyId;
@@ -572,13 +574,13 @@ function csvStrToValueArray(
   dimensions: Dimension[],
   csvStr: string,
   hasLabel: boolean
-) {
+): (number | string)[][] {
   const values = [];
   let first = true;
   csvStr.split("\n").forEach((line) => {
     if ((!first || !hasLabel) && line !== "") {
       try {
-        const val: any[] = line.split(",");
+        const val: (string | number | boolean)[] = line.split(",");
         val[0] = Number(val[0]);
         for (let i = 1; i < val.length; i++) {
           switch (dimensions[i - 1].type) {
@@ -607,12 +609,11 @@ async function saveValuesAndRespond(
   property: Property,
   res: Response,
   next: NextFunction
-) {
+): Promise<void> {
   // Try to save
   try {
-    const result =
-      await PropertyController.propertyService.updatePropertyValues(property);
-    return res.json();
+    await PropertyController.propertyService.updatePropertyValues(property);
+    res.json();
   } catch (error) {
     Log.error(error);
     if (error._hint !== undefined) {

@@ -1,4 +1,4 @@
-import { Request, Response, Router, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 
 import { PropertyType } from "./PropertyType";
 import { PropertyTypeService } from "./PropertyTypeService";
@@ -7,7 +7,10 @@ import { Dimension } from "../dimension/Dimension";
 export class PropertyTypeController {
   static propertyTypeService = new PropertyTypeService();
 
-  static getPropertyTypes = async (req: Request, res: Response) => {
+  static getPropertyTypes = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     // Get things from Service
     try {
       const propertyTypes: PropertyType[] =
@@ -19,7 +22,10 @@ export class PropertyTypeController {
     }
   };
 
-  static getOnePropertyTypeById = async (req: Request, res: Response) => {
+  static getOnePropertyTypeById = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     // Get the ID from the url
     const propertyTypeId = req.params.propertyTypeId;
     try {
@@ -38,7 +44,7 @@ export class PropertyTypeController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     const { id, name, description, dimensions } = req.body;
     const propertyType = new PropertyType();
     propertyType.id = id;
@@ -70,7 +76,7 @@ export class PropertyTypeController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the thing ID from the url
     const propertyTypeId = req.params.propertyTypeId;
     // Call the Service

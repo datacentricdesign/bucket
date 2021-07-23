@@ -9,7 +9,7 @@ import DPiController from "../dpi/DPiController";
 export class ThingController {
   static thingService = new ThingService();
 
-  static apiHealth = async (req: Request, res: Response) => {
+  static apiHealth = async (req: Request, res: Response): Promise<void> => {
     res.send({ status: "OK" });
   };
 
@@ -17,7 +17,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get things from Service
     try {
       const things: Thing[] =
@@ -35,7 +35,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the ID from the url
     const thingId: string = req.params.thingId;
     try {
@@ -53,7 +53,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get parameters from the body
     const { name, description, type, pem, dpi } = req.body;
     const thing = new Thing();
@@ -86,7 +86,7 @@ export class ThingController {
       }
 
       // If all ok, send 201 response
-      return res.status(201).send(createdThing);
+      res.status(201).send(createdThing);
     } catch (error) {
       return next(error);
     }
@@ -96,7 +96,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the ID from the url
     const thingId = req.params.thingId;
     // Get values from the body
@@ -131,7 +131,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the thing ID from the url
     const thingId = req.params.thingId;
     // Get pem from body
@@ -157,7 +157,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the thing ID from the url
     const thingId = req.params.thingId;
     // Call the Service
@@ -174,7 +174,7 @@ export class ThingController {
     req: Request,
     res: Response,
     next: NextFunction
-  ) => {
+  ): Promise<void> => {
     // Get the property ID from the url
     const from = req.query.from as string;
     const timeInterval = req.query.timeInterval as string;
@@ -195,7 +195,7 @@ export class ThingController {
 
 export default ThingController;
 
-function checkPEM(pem: string) {
+function checkPEM(pem: string): DCDError {
   if (pem === undefined) {
     return new DCDError(
       400,

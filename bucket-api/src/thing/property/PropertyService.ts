@@ -13,6 +13,7 @@ import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
 import ThingController from "../http/ThingController";
+import { PropertyType } from "./propertyType/PropertyType";
 
 export class PropertyService {
   static propertyTypeService = new PropertyTypeService();
@@ -20,15 +21,11 @@ export class PropertyService {
   private ready = false;
   private cachedTypes = {};
 
-  /**
-   *
-   * @constructor
-   */
   constructor() {
     this.init(1000);
   }
 
-  async init(delayMs: number) {
+  async init(delayMs: number): Promise<void> {
     // Connect to the time series database
     this.influx = new InfluxDB(config.influxdb);
     this.influx
@@ -203,7 +200,7 @@ export class PropertyService {
     thingId: string,
     propertyId: string,
     valueOptions?: ValueOptions
-  ) {
+  ): Promise<Property> {
     // Get property from the database
     const propertyRepository = getRepository(Property);
     const property = await propertyRepository
@@ -272,7 +269,7 @@ export class PropertyService {
    * @param property
    * returns Promise
    **/
-  editOneProperty(property: Property) {
+  editOneProperty(property: Property): Promise<Property> {
     const propertyRepository = getRepository(Property);
     return propertyRepository.save(property);
   }
@@ -282,7 +279,7 @@ export class PropertyService {
    * @param property
    * returns Promise
    **/
-  async updatePropertyValues(property: Property) {
+  async updatePropertyValues(property: Property): Promise<void> {
     if (property.type === undefined) {
       property.type = await this.getPropertyType(property.id);
     }
@@ -290,8 +287,8 @@ export class PropertyService {
     return this.valuesToInfluxDB(property);
   }
 
-  async getPropertyType(propertyId: string) {
-    if (!this.cachedTypes.hasOwnProperty(propertyId)) {
+  async getPropertyType(propertyId: string): Promise<PropertyType> {
+    if (this.cachedTypes[propertyId] === undefined) {
       const propertyRepository = getRepository(Property);
       const property: Property = await propertyRepository
         .createQueryBuilder("property")
@@ -340,7 +337,7 @@ export class PropertyService {
     const points = [];
     const dimensions = property.type.dimensions;
     for (const index in property.values) {
-      let ts: any;
+      let ts: number;
       const values: Array<string | number> = property.values[index];
       if (
         values.length - 1 === dimensions.length ||
@@ -451,7 +448,7 @@ export class PropertyService {
     typeId: string = undefined,
     from: string,
     timeInterval: string
-  ): Promise<any> {
+  ): Promise<(number | string)[][]> {
     let measurement = typeId;
     if (measurement === undefined) {
       const property = await this.getOnePropertyById(thingId, propertyId);
@@ -475,7 +472,10 @@ export class PropertyService {
       });
   }
 
-  async lastDataPoints(thingId: string, propertyId: string) {
+  async lastDataPoints(
+    thingId: string,
+    propertyId: string
+  ): Promise<(number | string)[][]> {
     const property = await this.getOnePropertyById(thingId, propertyId);
     return this.influx
       .queryRaw(
@@ -494,6 +494,6 @@ export class PropertyService {
   }
 }
 
-function delay(ms: number) {
+function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
