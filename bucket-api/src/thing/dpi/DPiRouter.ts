@@ -4,7 +4,7 @@ import DPiController from "./DPiController";
 import { introspectToken } from "../middlewares/introspectToken";
 import { checkPolicy } from "../middlewares/checkPolicy";
 
-export const DPiRouter = Router({mergeParams: true});
+export const DPiRouter = Router({ mergeParams: true });
 
 /**
  * @api {get} /
@@ -12,11 +12,12 @@ export const DPiRouter = Router({mergeParams: true});
  * @apiDescription Get DPi Image
  *
  * @apiVersion 0.1.1
-**/
+ **/
 DPiRouter.get(
-    "/",
-    [introspectToken(['dcd:things'])],
-    DPiController.getOneDPIImage);
+  "/",
+  [introspectToken(["dcd:things"])],
+  DPiController.getOneDPIImage
+);
 
 /**
  * @api {post} /
@@ -29,9 +30,10 @@ DPiRouter.get(
  * @apiHeader {String} Content-type application/json
  **/
 DPiRouter.post(
-    "/",
-    [introspectToken(['dcd:things']), checkPolicy('update')],
-    DPiController.generateNewDPIImage);
+  "/",
+  [introspectToken(["dcd:things"]), checkPolicy("update")],
+  DPiController.generateNewDPIImage
+);
 
 /**
  * @api {delete} /dpi/:dpiId Delete
@@ -41,9 +43,10 @@ DPiRouter.post(
  * @apiVersion 0.1.1
  **/
 DPiRouter.delete(
-    "/",
-    [introspectToken(['dcd:things']), checkPolicy('update')],
-    DPiController.deleteDPiImage);
+  "/",
+  [introspectToken(["dcd:things"]), checkPolicy("update")],
+  DPiController.deleteDPiImage
+);
 
 /**
  * @api {delete} /dpi/:dpiId Cancel
@@ -53,6 +56,7 @@ DPiRouter.delete(
  * @apiVersion 0.1.1
  **/
 DPiRouter.get(
-    "/cancel",
-    [introspectToken(['dcd:things']), checkPolicy('update')],
-    DPiController.cancelDPiImageGeneration);
+  "/cancel",
+  [introspectToken(["dcd:things"]), checkPolicy("update")],
+  DPiController.cancelDPiImageGeneration
+);

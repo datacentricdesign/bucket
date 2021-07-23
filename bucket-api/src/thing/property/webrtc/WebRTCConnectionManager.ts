@@ -1,15 +1,12 @@
-import { WebRtcConnection } from './WebRTCConnection';
-import { v4 as uuidv4 } from 'uuid';
-import { Property } from '../Property';
-
+import { WebRtcConnection } from "./WebRTCConnection";
+import { v4 as uuidv4 } from "uuid";
+import { Property } from "../Property";
 
 export class WebRtcConnectionManager {
-
   connections = new Map();
   closedListeners = new Map();
 
-  constructor() {    
-  }
+  constructor() {}
 
   createId() {
     do {
@@ -17,7 +14,7 @@ export class WebRtcConnectionManager {
       if (!this.connections.has(id)) {
         return id;
       }
-    // eslint-disable-next-line
+      // eslint-disable-next-line
     } while (true);
   }
 
@@ -25,8 +22,8 @@ export class WebRtcConnectionManager {
     // 1. Remove "closed" listener.
     const closedListener = this.closedListeners.get(connection);
     this.closedListeners.delete(connection);
-    connection.removeListener('closed', closedListener);
-  
+    connection.removeListener("closed", closedListener);
+
     // 2. Remove the Connection from the Map.
     this.connections.delete(connection.id);
   }
@@ -43,26 +40,24 @@ export class WebRtcConnectionManager {
       manager.deleteConnection(connection);
     }
     this.closedListeners.set(connection, closedListener);
-    connection.once('closed', closedListener);
+    connection.once("closed", closedListener);
 
     // 2. Add the Connection to the Map.
     this.connections.set(connection.id, connection);
 
     await connection.doOffer();
     return connection;
-  };
+  }
 
   getConnection(id: string) {
     return this.connections.get(id) || null;
-  };
+  }
 
   getConnections() {
     return this.connections.values();
-  };
+  }
 
   // toJSON() {
   //   return this.getConnections().map(connection => connection.toJSON());
   // }
-
 }
-

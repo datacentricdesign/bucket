@@ -1,27 +1,21 @@
-import {
-    Entity,
-    Column, PrimaryColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable
-} from "typeorm";
-import {Length, IsNotEmpty} from "class-validator";
+import { Entity, Column, PrimaryColumn } from "typeorm";
 
-import { Property } from "../Property"
-import {Property as IProperty, Dimension as IDimension} from "@datacentricdesign/types" 
-import { PropertyType } from "../propertyType/PropertyType";
+import { Dimension as IDimension } from "@datacentricdesign/types";
 
 @Entity()
 export class Dimension implements IDimension {
-    @PrimaryColumn()
-    id: string;
+  @PrimaryColumn()
+  id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column()
-    description: string;
+  @Column()
+  description: string;
 
-    @Column()
-    unit: string;
+  @Column()
+  unit: string;
 
-    @Column()
-    type: string;
+  @Column()
+  type: string;
 }

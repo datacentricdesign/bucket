@@ -1,22 +1,15 @@
-import {
-    Entity,
-    Column,
-    PrimaryColumn,
-} from "typeorm";
-import {IsNotEmpty} from "class-validator";
+import { Entity, PrimaryColumn } from "typeorm";
 
-import {Role as IRole} from "@datacentricdesign/types";
-
+import { Role as IRole } from "@datacentricdesign/types";
 
 @Entity()
 export class Role implements IRole {
+  @PrimaryColumn()
+  id: string;
 
-    @PrimaryColumn()
-    id: string;
+  actorEntityId: string;
 
-    actorEntityId: string;
+  subjectEntityId: string;
 
-    subjectEntityId: string;
-
-    role: string;
+  role: string;
 }
