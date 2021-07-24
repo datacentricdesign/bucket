@@ -88,9 +88,8 @@ export class WebRtcConnection extends EventEmitter {
     });
   }
 
-  onIceConnectionStateChange() {
-    console.log("onIceConnectionStateChange");
-    console.log(this);
+  onIceConnectionStateChange(): void {
+    Log.debug("onIceConnectionStateChange");
     if (
       this.peerConnection.iceConnectionState === "connected" ||
       this.peerConnection.iceConnectionState === "completed"
@@ -106,7 +105,6 @@ export class WebRtcConnection extends EventEmitter {
       this.peerConnection.iceConnectionState === "failed"
     ) {
       if (!this.connectionTimer && !this.reconnectionTimer) {
-        const self = this;
         this.reconnectionTimer = setTimeout(() => {
           this.close();
         }, TIME_TO_RECONNECTED);
@@ -114,7 +112,7 @@ export class WebRtcConnection extends EventEmitter {
     }
   }
 
-  async doOffer() {
+  async doOffer(): Promise<void> {
     const offer = await this.peerConnection.createOffer();
     await this.peerConnection.setLocalDescription(offer);
     try {
@@ -125,7 +123,7 @@ export class WebRtcConnection extends EventEmitter {
     }
   }
 
-  async applyAnswer(answer) {
+  async applyAnswer(answer): Promise<void> {
     await this.peerConnection.setRemoteDescription(answer);
   }
 

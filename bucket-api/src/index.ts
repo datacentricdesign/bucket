@@ -9,7 +9,7 @@ import * as expressWs from "express-ws";
 
 // Create a new express application instance
 const app = express();
-const ws = expressWs(app);
+expressWs(app);
 
 import { ThingRouter } from "./thing/http/ThingRouter";
 

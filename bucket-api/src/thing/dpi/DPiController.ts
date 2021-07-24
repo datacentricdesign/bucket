@@ -1,4 +1,4 @@
-import { Request, Response, Router, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import config from "../../config";
 import fetch from "node-fetch";
 import { DCDError } from "@datacentricdesign/types";
@@ -100,7 +100,7 @@ export class DPiController {
       method: "GET",
     };
     try {
-      const result = await fetch(url, options);
+      await fetch(url, options);
       res.status(204).send();
     } catch (error) {
       return next(error);
@@ -118,7 +118,7 @@ export class DPiController {
       method: "DELETE",
     };
     try {
-      const result = await fetch(url, options);
+      await fetch(url, options);
       res.status(204).send();
     } catch (error) {
       return next(error);

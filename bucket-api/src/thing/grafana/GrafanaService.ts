@@ -7,6 +7,13 @@ import { Thing } from "../Thing";
 import ThingController from "../http/ThingController";
 import * as btoa from "btoa";
 
+interface GridPos {
+  x: number;
+  y: number;
+  h: number;
+  w: number;
+}
+
 /**
  * Manage sync with Grafana
  */
@@ -18,16 +25,11 @@ export class GrafanaService {
   };
 
   /**
-   *
-   */
-  constructor() {}
-
-  /**
    * @param {string} personId
    * @param {string} thingId
    * returns Promise
    **/
-  async createThing(personId: string, thingId: string) {
+  async createThing(personId: string, thingId: string): Promise<void> {
     try {
       // Make sure the user gave consent by checking if there is a grafana id for this personId
       const grafanaId = await this.getGrafanaId(personId);
@@ -45,7 +47,7 @@ export class GrafanaService {
     }
   }
 
-  async createPersonFolder(personId) {
+  async createPersonFolder(personId: string) {
     try {
       const folderUID = personId.replace("dcd:persons:", "");
       const resultGet = await fetch(
@@ -77,7 +79,7 @@ export class GrafanaService {
     }
   }
 
-  async getGrafanaId(personId: string) {
+  async getGrafanaId(personId: string): Promise<number> {
     const url =
       config.grafana.apiURL.href +
       "/users/lookup?loginOrEmail=" +
@@ -101,9 +103,12 @@ export class GrafanaService {
     }
   }
 
-  async setPersonFolderPermission(personId: string, grafanaId: number) {
+  async setPersonFolderPermission(
+    personId: string,
+    grafanaId: number
+  ): Promise<void> {
     try {
-      const result = await fetch(
+      await fetch(
         config.grafana.apiURL.href +
           "/folders/" +
           personId.replace("dcd:persons:", "") +
@@ -121,13 +126,17 @@ export class GrafanaService {
           method: "POST",
         }
       );
-      return Promise.resolve(result);
+      return Promise.resolve();
     } catch (error) {
       return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
     }
   }
 
-  async createThingDashboard(personId: string, thing: Thing, folderId: number) {
+  async createThingDashboard(
+    personId: string,
+    thing: Thing,
+    folderId: number
+  ): Promise<void> {
     const panels = [];
     const x = 0;
     let y = 0;
@@ -156,21 +165,22 @@ export class GrafanaService {
     };
 
     try {
-      const result = await fetch(
-        config.grafana.apiURL.href + "/dashboards/db",
-        {
-          headers: this.grafanaHeaders,
-          body: JSON.stringify(dashboard),
-          method: "POST",
-        }
-      );
-      return Promise.resolve(result);
+      await fetch(config.grafana.apiURL.href + "/dashboards/db", {
+        headers: this.grafanaHeaders,
+        body: JSON.stringify(dashboard),
+        method: "POST",
+      });
+      return Promise.resolve();
     } catch (error) {
       return Promise.reject(error);
     }
   }
 
-  createPropertyPanel(thing: Thing, property: Property, gridPos) {
+  createPropertyPanel(
+    thing: Thing,
+    property: Property,
+    gridPos: GridPos
+  ): Record<string, unknown> {
     const dim = property.type.dimensions;
     let onlyNumbers = true;
     for (let i = 0; i < dim.length; i++) {
@@ -188,7 +198,11 @@ export class GrafanaService {
     }
   }
 
-  panelTable(thing: Thing, property: Property, gridPos) {
+  panelTable(
+    thing: Thing,
+    property: Property,
+    gridPos: GridPos
+  ): Record<string, unknown> {
     const panel = {
       datasource: "Bucket",
       fieldConfig: {
@@ -231,7 +245,11 @@ export class GrafanaService {
     return panel;
   }
 
-  panelChart(thing, property, gridPos) {
+  panelChart(
+    thing: Thing,
+    property: Property,
+    gridPos: GridPos
+  ): Record<string, unknown> {
     const panel = {
       bars: false,
       dashLength: 10,
@@ -319,7 +337,11 @@ export class GrafanaService {
     return panel;
   }
 
-  panelSingleValue(thing, property, gridPos) {
+  panelSingleValue(
+    thing: Thing,
+    property: Property,
+    gridPos: GridPos
+  ): Record<string, unknown> {
     const panel = {
       datasource: "Bucket",
       description: property.description,

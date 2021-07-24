@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { URL } from "url";
 
-export const authConfig: any = {
+export const authConfig = {
   oAuth2IntrospectURL: process.env.OAUTH2_INTROSPECT_URL,
   oAuth2TokenURL: process.env.OAUTH2_TOKEN_URL,
   oAuth2RevokeURL: process.env.OAUTH2_REVOKE_URL,

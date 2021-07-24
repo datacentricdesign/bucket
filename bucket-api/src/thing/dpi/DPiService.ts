@@ -4,8 +4,15 @@ import { AuthController } from "../http/AuthController";
 import { Property } from "../property/Property";
 import PropertyController from "../property/PropertyController";
 
+export interface DPI {
+  id: string;
+  enable_SSH: string;
+  private_key: string;
+  target_hostname: string;
+}
+
 export class DPiService {
-  async generateDPiImage(dpi, thingId) {
+  async generateDPiImage(dpi: DPI, thingId: string): Promise<string> {
     const url = config.env.dpiUrl + "/";
 
     const keys = await AuthController.authService.generateKeys(thingId);
@@ -33,7 +40,10 @@ export class DPiService {
    * @param thingId
    * @param hostname
    */
-  async createOrUpdateHostnameProperty(thingId: string, hostname: string) {
+  async createOrUpdateHostnameProperty(
+    thingId: string,
+    hostname: string
+  ): Promise<void> {
     const properties =
       await PropertyController.propertyService.getPropertiesOfAThingByType(
         thingId,

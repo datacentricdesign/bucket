@@ -92,10 +92,7 @@ export class PropertyService {
    * List the Properties of a Thing.
    * @param {string} thingId
    **/
-  async getPropertiesOfAThing(
-    thingId: string,
-    valueOptions?: ValueOptions
-  ): Promise<Property[]> {
+  async getPropertiesOfAThing(thingId: string): Promise<Property[]> {
     // Get properties from the database
     const propertyRepository = getRepository(Property);
     const properties = await propertyRepository
@@ -225,8 +222,7 @@ export class PropertyService {
    **/
   async getPropertiesOfAThingByType(
     thingId: string,
-    typeId: string,
-    valueOptions?: ValueOptions
+    typeId: string
   ): Promise<Property[]> {
     // Get properties from the database
     const propertyRepository = getRepository(Property);

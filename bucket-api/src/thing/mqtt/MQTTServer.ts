@@ -1,5 +1,14 @@
-import * as Aedes from "aedes";
-import { Subscription, PublishPacket } from "aedes";
+import {
+  AuthenticateError,
+  AuthErrorCode,
+  Client as AedesClient,
+  Server,
+  Subscription,
+  PublishPacket,
+  AuthorizePublishHandler,
+  AuthorizeSubscribeHandler,
+  AuthenticateHandler,
+} from "aedes";
 import * as fs from "fs";
 import * as tls from "tls";
 import * as net from "net";
@@ -10,17 +19,25 @@ import { AuthController } from "../http/AuthController";
 import PropertyController from "../property/PropertyController";
 import { Property } from "../property/Property";
 import { Log } from "../../Logger";
+import { Token } from "simple-oauth2";
 
-interface Client extends Aedes.Client {
+interface Client extends AedesClient {
   context: Context;
   tokenExpiryTime: number;
 }
 
-const authorizePublish: Aedes.AuthorizePublishHandler = async (
+type AuthPublishCallback = (error?: Error | null) => void;
+type AuthSubscribeCallback = (
+  error: Error | null,
+  subscription?: Subscription | null
+) => void;
+type AuthCallback = (error: AuthenticateError, success: boolean | null) => void;
+
+const authorizePublish: AuthorizePublishHandler = async (
   client: Client,
   packet: PublishPacket,
-  callback: Function
-) => {
+  callback: AuthPublishCallback
+): Promise<void> => {
   Log.debug("publish");
   if (client.context.userId === config.mqtt.client.username) {
     return callback(null);
@@ -67,11 +84,11 @@ const authorizePublish: Aedes.AuthorizePublishHandler = async (
   }
 };
 
-const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (
+const authorizeSubscribe: AuthorizeSubscribeHandler = async (
   client: Client,
   packet: Subscription,
-  callback: Function
-) => {
+  callback: AuthSubscribeCallback
+): Promise<void> => {
   if (client.context.userId === config.mqtt.client.username) {
     return callback(null, packet);
   }
@@ -135,12 +152,12 @@ const authorizeSubscribe: Aedes.AuthorizeSubscribeHandler = async (
   }
 };
 
-const authenticate: Aedes.AuthenticateHandler = (
+const authenticate: AuthenticateHandler = async (
   client: Client,
   username: string,
   password: Buffer,
-  callback: Function
-) => {
+  callback: AuthCallback
+): Promise<void> => {
   Log.debug("authenticate with credentials: " + username);
   if (username === config.mqtt.client.username) {
     Log.debug("DCD client mqtt");
@@ -153,14 +170,16 @@ const authenticate: Aedes.AuthenticateHandler = (
   }
 
   if (password === undefined) {
-    return callback(
-      new DCDError(403, "Missing token in the password field."),
-      false
+    const error = <AuthenticateError>(
+      new Error("Missing token in the password field.")
     );
+    error.returnCode = AuthErrorCode.BAD_USERNAME_OR_PASSWORD;
+    callback(error, null);
+    return callback(error, false);
   }
   AuthController.authService
     .checkJWTAuth(password.toString(), username)
-    .then((token: any) => {
+    .then((token: Token) => {
       client.context = {
         userId: username,
       };
@@ -169,13 +188,16 @@ const authenticate: Aedes.AuthenticateHandler = (
     })
     .catch((error: DCDError) => {
       Log.error(error);
-      callback(error, false);
+      const mqttError = <AuthenticateError>new Error(error.message);
+      mqttError.returnCode = AuthErrorCode.BAD_USERNAME_OR_PASSWORD;
+      Log.error(error);
+      callback(mqttError, false);
     });
 };
 
-const aedes = Aedes({ authenticate, authorizePublish, authorizeSubscribe });
+const aedes = Server({ authenticate, authorizePublish, authorizeSubscribe });
 
-let server: any;
+let server: net.Server | tls.Server;
 
 if (config.http.secured) {
   Log.debug("Starting mqtts server over SSL...");
@@ -189,7 +211,7 @@ if (config.http.secured) {
   server = net.createServer(aedes.handle);
 }
 
-export const mqttInit = () => {
+export const mqttInit = async (): Promise<void> => {
   server.listen(config.mqtt.port, function () {
     Log.info("MQTT server listening on port ", config.mqtt.port);
     const mqttClient = new ThingMQTTClient(config.mqtt);

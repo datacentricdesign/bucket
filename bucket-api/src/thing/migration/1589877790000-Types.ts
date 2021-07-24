@@ -1,9 +1,9 @@
-import { MigrationInterface, QueryRunner, getRepository } from "typeorm";
+import { MigrationInterface, getRepository } from "typeorm";
 import { Log } from "../../Logger";
 import { PropertyType } from "../property/propertyType/PropertyType";
 
 export class TypesMQTT1589877780000 implements MigrationInterface {
-  public async up(queryRunner: QueryRunner): Promise<any> {
+  public async up(): Promise<void> {
     const propertyTypes: PropertyType[] = [
       {
         id: "ACCELEROMETER",
@@ -601,5 +601,7 @@ export class TypesMQTT1589877780000 implements MigrationInterface {
     });
   }
 
-  public async down(queryRunner: QueryRunner): Promise<any> {}
+  public async down(): Promise<void> {
+    // Nothing to do while wraping up the migration.
+  }
 }

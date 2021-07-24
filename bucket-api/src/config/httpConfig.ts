@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-export const httpConfig: any = {
+export const httpConfig = {
   host: process.env.HTTP_HOST,
   port: process.env.HTTP_PORT,
   secured: process.env.HTTP_SECURED === "true",

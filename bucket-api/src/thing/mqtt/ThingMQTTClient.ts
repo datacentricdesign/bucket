@@ -17,13 +17,13 @@ export class ThingMQTTClient {
   private settings: any;
   private client: MqttClient;
 
-  constructor(settings: any) {
+  constructor(settings) {
     this.port = settings.port;
     this.host = settings.host;
     this.settings = settings.client;
   }
 
-  connect() {
+  connect(): Promise<void> {
     const url =
       "mqtt" +
       (config.http.secured ? "s" : "") +
@@ -44,13 +44,16 @@ export class ThingMQTTClient {
  */
 function onMQTTConnect() {
   Log.debug("Bucket connected to MQTT: " + this.client.connected);
-  this.client.subscribe("/things/#", (error: Error, result: any) => {
-    if (error) {
-      Log.error("Error while subscribing to MQTT: " + JSON.stringify(error));
-    } else {
-      Log.debug("MQTT subscription success: " + JSON.stringify(result));
+  this.client.subscribe(
+    "/things/#",
+    (error: Error, result: Record<string, unknown>) => {
+      if (error) {
+        Log.error("Error while subscribing to MQTT: " + JSON.stringify(error));
+      } else {
+        Log.debug("MQTT subscription success: " + JSON.stringify(result));
+      }
     }
-  });
+  );
 }
 
 /**
@@ -67,7 +70,7 @@ const thingDataRegEx = new RegExp("/things/.*/reply");
  * @param topic
  * @param message
  */
-function onMQTTMessage(topic: string, message: string) {
+function onMQTTMessage(topic: string, message: string): void {
   let jsonMessage: any;
   try {
     jsonMessage = JSON.parse(message);
@@ -84,14 +87,15 @@ function onMQTTMessage(topic: string, message: string) {
       jsonMessage.property !== undefined &&
       jsonMessage.property.id === topicArray[4]
     ) {
-      return updatePropertyValues(
+      updatePropertyValues(
         thingId,
         jsonMessage.requestId,
         jsonMessage.property,
         this.client
       );
+      return;
     } else {
-      return this.client.publish(
+      this.client.publish(
         "/things/" + thingId + "/log",
         JSON.stringify({
           level: "error",
@@ -99,22 +103,25 @@ function onMQTTMessage(topic: string, message: string) {
           requestId: jsonMessage.requestId,
         })
       );
+      return;
     }
   }
 
   // Create property /things/:thingId/properties/create
   if (propertyCreateRegEx.test(topic)) {
-    return createProperty(
+    createProperty(
       thingId,
       jsonMessage.requestId,
       jsonMessage.property,
       this.client
     );
+    return;
   }
 
   // Read thing /things/:thingId/read
   if (thingReadRegEx.test(topic)) {
-    return readThing(thingId, jsonMessage.requestId, this.client);
+    readThing(thingId, jsonMessage.requestId, this.client);
+    return;
   }
 
   if (thingLogsRegEx.test(topic)) {
@@ -163,13 +170,8 @@ async function updatePropertyValues(
   client: MqttClient
 ) {
   property.thing = { id: thingId };
-  console.log(thingId);
-  console.log(requestId);
-  console.log(property);
-  console.log(client);
   try {
-    const result =
-      await PropertyController.propertyService.updatePropertyValues(property);
+    await PropertyController.propertyService.updatePropertyValues(property);
     return client.publish(
       "/things/" + thingId + "/log",
       JSON.stringify({

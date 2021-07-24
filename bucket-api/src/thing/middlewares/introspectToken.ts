@@ -1,15 +1,24 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { Response, NextFunction, RequestHandler } from "express";
 import { DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import * as ws from "ws";
 import { WebsocketRequestHandler } from "express-ws";
+import { DCDRequest } from "../../config";
+import { Token } from "simple-oauth2";
+
+interface User {
+  entityId?: string;
+  token?: string;
+  sub?: string;
+  token_type?: string;
+}
 
 /**
  * Introspect the token from the 'Authorization' HTTP header to
  * determined if it is valid and who it belongs to.
  */
 export const introspectToken = (requiredScope: string[]): RequestHandler => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: DCDRequest, res: Response, next: NextFunction) => {
     return _introspectToken(requiredScope, req, next);
   };
 };
@@ -17,14 +26,14 @@ export const introspectToken = (requiredScope: string[]): RequestHandler => {
 export const introspectTokenWs = (
   requiredScope: string[]
 ): WebsocketRequestHandler => {
-  return async (ws: ws, req: Request, next: NextFunction) => {
+  return async (ws: ws, req: DCDRequest, next: NextFunction) => {
     return _introspectToken(requiredScope, req, next);
   };
 };
 
 async function _introspectToken(
   requiredScope: string[],
-  req: Request,
+  req: DCDRequest,
   next: NextFunction
 ) {
   if (requiredScope.length === 0) {
@@ -39,7 +48,7 @@ async function _introspectToken(
         if (token.split(".").length === 3 && req.params.thingId !== undefined) {
           return AuthController.authService
             .checkJWTAuth(token, req.params.thingId)
-            .then((token: any) => {
+            .then((token: Token) => {
               const user = {
                 entityId: req.params.thingId,
                 token: token,
@@ -51,7 +60,7 @@ async function _introspectToken(
           return AuthController.authService.introspect(token, requiredScope);
         }
       })
-      .then((user: any) => {
+      .then((user: User) => {
         req.context = {
           userId: user.sub,
         };
@@ -68,7 +77,7 @@ async function _introspectToken(
  * @param req
  * @return {*|void|string}
  */
-function extractToken(req: Request): string {
+function extractToken(req: DCDRequest): string {
   if (req.get("Authorization") !== undefined) {
     const authorization = req.get("Authorization");
     if (
@@ -89,13 +98,13 @@ function extractToken(req: Request): string {
   }
 }
 
-function refresh() {
-  if (this.token) {
-    if (this.token.expired()) {
-      return this.requestNewToken();
-    }
-    return Promise.resolve();
-  }
+// function refresh() {
+//   if (this.token) {
+//     if (this.token.expired()) {
+//       return this.requestNewToken();
+//     }
+//     return Promise.resolve();
+//   }
 
-  return this.requestNewToken();
-}
+//   return this.requestNewToken();
+// }

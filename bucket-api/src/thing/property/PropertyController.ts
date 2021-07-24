@@ -12,7 +12,7 @@ import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
 import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
-import config from "../../config";
+import config, { DCDRequest } from "../../config";
 
 import * as ws from "ws";
 import { WebRtcConnectionManager } from "./webrtc/WebRTCConnectionManager";
@@ -51,7 +51,7 @@ export class PropertyController {
   }
 
   static getProperties = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {

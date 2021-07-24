@@ -9,6 +9,7 @@ import { influxdbConfig } from "./influxdbConfig";
 import { mqttConfig } from "./mqttConfig";
 import { grafanaConfig } from "./grafanaConfig";
 import { Context } from "@datacentricdesign/types";
+import { Request } from "express";
 
 function validateEnv() {
   cleanEnv(process.env, {
@@ -71,10 +72,6 @@ export default {
 
 // Setup context of Request to pass user info once identified
 
-declare global {
-  namespace Express {
-    interface Request {
-      context: Context;
-    }
-  }
-}
+export type DCDRequest = Request & {
+  context: Context;
+};
