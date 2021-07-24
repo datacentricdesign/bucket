@@ -1,20 +1,21 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { validate } from "class-validator";
 
 import { Thing } from "../Thing";
 import { ThingService } from "../services/ThingService";
 import { DCDError } from "@datacentricdesign/types";
 import DPiController from "../dpi/DPiController";
+import { DCDRequest } from "../../config";
 
 export class ThingController {
   static thingService = new ThingService();
 
-  static apiHealth = async (req: Request, res: Response): Promise<void> => {
+  static apiHealth = async (req: DCDRequest, res: Response): Promise<void> => {
     res.send({ status: "OK" });
   };
 
   static getThingsOfAPerson = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -32,7 +33,7 @@ export class ThingController {
   };
 
   static getOneThingById = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -50,7 +51,7 @@ export class ThingController {
   };
 
   static createNewThing = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -93,7 +94,7 @@ export class ThingController {
   };
 
   static editThing = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -128,7 +129,7 @@ export class ThingController {
   };
 
   static editThingPEM = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -154,7 +155,7 @@ export class ThingController {
   };
 
   static deleteOneThing = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
@@ -171,7 +172,7 @@ export class ThingController {
   };
 
   static countDataPoints = async (
-    req: Request,
+    req: DCDRequest,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
