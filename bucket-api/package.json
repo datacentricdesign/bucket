@@ -59,7 +59,7 @@
     "reflect-metadata": "0.1.13",
     "simple-oauth2": "4.1.0",
     "tslog": "3.2.0",
-    "typeorm": "0.2.25",
+    "typeorm": "0.2.34",
     "url": "0.11.0",
     "uuid": "8.3.0",
     "wrtc": "^0.4.7"
@@ -92,7 +92,7 @@
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "3.4.0",
     "ts-node": "8.10.2",
-    "ts-node-dev": "1.0.0-pre.56",
+    "ts-node-dev": "1.1.8",
     "typescript": "3.9.7"
   }
 }
