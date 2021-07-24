@@ -3,13 +3,15 @@ import { Request, Response, NextFunction } from "express";
 import { PropertyType } from "./PropertyType";
 import { PropertyTypeService } from "./PropertyTypeService";
 import { Dimension } from "../dimension/Dimension";
+import { DCDError } from "@datacentricdesign/types";
 
 export class PropertyTypeController {
   static propertyTypeService = new PropertyTypeService();
 
   static getPropertyTypes = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     // Get things from Service
     try {
@@ -18,13 +20,14 @@ export class PropertyTypeController {
       // Send the things object
       res.send(propertyTypes);
     } catch (error) {
-      res.status(404).send(error);
+      next(error);
     }
   };
 
   static getOnePropertyTypeById = async (
     req: Request,
-    res: Response
+    res: Response,
+    next: NextFunction
   ): Promise<void> => {
     // Get the ID from the url
     const propertyTypeId = req.params.propertyTypeId;
@@ -36,7 +39,7 @@ export class PropertyTypeController {
         );
       res.send(propertyType);
     } catch (error) {
-      res.status(404).send("Thing not found");
+      next(new DCDError(404, "Thing not found"));
     }
   };
 

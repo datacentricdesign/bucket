@@ -20,7 +20,6 @@ let uid = 0;
 import { EventEmitter } from "events";
 import { Property } from "../Property";
 import { Log } from "../../../Logger";
-import { PropertyService } from "../PropertyService";
 import PropertyController from "../PropertyController";
 import config from "../../../config";
 
@@ -109,7 +108,7 @@ export class WebRtcConnection extends EventEmitter {
       if (!this.connectionTimer && !this.reconnectionTimer) {
         const self = this;
         this.reconnectionTimer = setTimeout(() => {
-          self.close();
+          this.close();
         }, TIME_TO_RECONNECTED);
       }
     }
@@ -130,8 +129,8 @@ export class WebRtcConnection extends EventEmitter {
     await this.peerConnection.setRemoteDescription(answer);
   }
 
-  close() {
-    console.log("closing connection...");
+  close(): void {
+    Log.debug("closing connection...");
     this.state = "closed";
     this.emit("closed");
     this.peerConnection.removeEventListener(
@@ -149,7 +148,7 @@ export class WebRtcConnection extends EventEmitter {
     this.peerConnection.close();
   }
 
-  toJSON() {
+  toJSON(): Record<string, unknown> {
     console.log("connection to JSON");
     return {
       id: this.id,
@@ -161,7 +160,7 @@ export class WebRtcConnection extends EventEmitter {
     };
   }
 
-  beforeOffer(peerConnection) {
+  beforeOffer(peerConnection: RTCPeerConnection): void {
     console.log("before offer");
 
     const audioTransceiver = peerConnection.addTransceiver("audio");
@@ -253,13 +252,12 @@ export class WebRtcConnection extends EventEmitter {
       }
     );
 
-    const { close } = peerConnection;
-    const connection = this;
-    peerConnection.close = function () {
+    peerConnection.close = () => {
       audioSink.stop();
       videoSink.stop();
 
-      streams.forEach(({ audio, video, end, proc, recordPath }) => {
+      // Some other variables available: proc, recordPath
+      streams.forEach(({ audio, video, end }) => {
         if (!end) {
           if (audio) {
             audio.end();
@@ -280,31 +278,27 @@ export class WebRtcConnection extends EventEmitter {
               // Change video ouput file name to fit the property-dimension structure
               const outputPath = config.hostDataFolder + "/files/";
               const outputName =
-                connection.property.thing.id +
+                this.property.thing.id +
                 "-" +
-                connection.property.id +
+                this.property.id +
                 "-" +
-                connection.currentPropertyValue[0] +
+                this.currentPropertyValue[0] +
                 "#video-mp4.mp4";
 
               const mergeProc = ffmpeg()
                 .on("start", () => {
-                  Log.debug("Start merging into " + connection.property.id);
+                  Log.debug("Start merging into " + this.property.id);
                 })
                 .on("end", () => {
                   streams.forEach(({ recordPath }) => {
                     fs.unlinkSync(recordPath);
                   });
-                  Log.debug(
-                    "Merge end. You can play " + connection.property.id
-                  );
+                  Log.debug("Merge end. You can play " + this.property.id);
                   // TODO push update property
-                  connection.currentPropertyValue.push(outputName);
-                  connection.property.values = [
-                    connection.currentPropertyValue,
-                  ];
+                  this.currentPropertyValue.push(outputName);
+                  this.property.values = [this.currentPropertyValue];
                   PropertyController.propertyService.updatePropertyValues(
-                    connection.property
+                    this.property
                   );
                 });
 
@@ -318,7 +312,7 @@ export class WebRtcConnection extends EventEmitter {
         });
       }, 1000);
 
-      return close.apply(this, arguments);
+      return peerConnection.close();
     };
   }
 }

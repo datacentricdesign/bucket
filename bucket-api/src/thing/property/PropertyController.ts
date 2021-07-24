@@ -193,11 +193,11 @@ export class PropertyController {
           }
           break;
         case "leave":
-          console.log("leaving: " + messageJson.id);
+          Log.debug("leaving: " + messageJson.id);
           connection = PropertyController.connectionManager.getConnection(
             messageJson.id
           );
-          console.log(connection);
+          Log.debug(connection);
           if (!connection) {
             ws.send("Connection not found");
             return;
@@ -206,7 +206,7 @@ export class PropertyController {
           ws.send(JSON.stringify(connection));
           break;
         case "answer":
-          console.log("answer type for " + messageJson.id);
+          Log.debug("answer type for " + messageJson.id);
           connection = PropertyController.connectionManager.getConnection(
             messageJson.id
           );
@@ -222,7 +222,7 @@ export class PropertyController {
           }
           break;
         default:
-          console.log(messageJson);
+          Log.debug(messageJson);
           break;
       }
     });
