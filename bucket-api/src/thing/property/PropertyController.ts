@@ -9,14 +9,14 @@ import * as fs from "fs";
 import { PropertyService } from "./PropertyService";
 
 import { ValueOptions, DTOProperty, DCDError } from "@datacentricdesign/types";
-import { AuthController } from "../http/AuthController";
 import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
 import config, { DCDRequest } from "../../config";
 
 import * as ws from "ws";
 import { WebRtcConnectionManager } from "./webrtc/WebRTCConnectionManager";
-import { AccessControlPolicy } from "../services/PolicyService";
+import { AccessControlPolicy, PolicyService } from "../../policy/PolicyService";
+import { ThingService } from "../ThingService";
 
 function streamToString(stream): Promise<string> {
   const chunks = [];
@@ -28,33 +28,34 @@ function streamToString(stream): Promise<string> {
 }
 
 export class PropertyController {
-  static propertyService = new PropertyService();
-  static connectionManager = new WebRtcConnectionManager();
 
-  static parseValueOptions(req: Request): ValueOptions {
-    if (req.query.from === undefined || req.query.to === undefined) {
-      return undefined;
+  private propertyService: PropertyService;
+  private thingService: ThingService;
+  private policyService: PolicyService;
+  private connectionManager: WebRtcConnectionManager;
+
+  private static instance: PropertyController;
+
+  public static getInstance(): PropertyController {
+    if (PropertyController.instance === undefined) {
+      PropertyController.instance = new PropertyController();
     }
-    return {
-      from: Number.parseInt(req.query.from + ""),
-      to: Number.parseInt(req.query.to + ""),
-      timeInterval:
-        req.query.timeInterval !== undefined
-          ? req.query.timeInterval + ""
-          : undefined,
-      fctInterval:
-        req.query.fctInterval !== undefined
-          ? req.query.fctInterval + ""
-          : undefined,
-      fill: req.query.fill !== undefined ? req.query.fill + "" : "none",
-    };
+    return PropertyController.instance;
   }
 
-  static getProperties = async (
+  private constructor() {
+    this.propertyService = PropertyService.getInstance()
+    this.connectionManager = new WebRtcConnectionManager();
+    this.thingService = ThingService.getInstance();
+    this.policyService = PolicyService.getInstance();
+  }
+
+  public async getProperties(
     req: DCDRequest,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
+    console.log("hello")
     const sharedWith: string = req.query.sharedWith as string;
     const subject: string = req.params.thingId
       ? req.params.thingId
@@ -69,7 +70,7 @@ export class PropertyController {
     try {
       if (sharedWith !== undefined) {
         const properties: Property[] =
-          await PropertyController.propertyService.getProperties(
+          await this.propertyService.getProperties(
             actor,
             subject,
             sharedWith,
@@ -77,9 +78,9 @@ export class PropertyController {
             timeInterval
           );
         res.send(properties);
-      } else if (actor == subject) {
+      } else {
         const properties: Property[] =
-          await PropertyController.propertyService.getPropertiesOfAThing(
+          await this.propertyService.getPropertiesOfAThing(
             subject
           );
         // Send the things object
@@ -92,13 +93,13 @@ export class PropertyController {
         next(new DCDError(404, error));
       }
     }
-  };
+  }
 
-  static getOnePropertyById = async (
+  public async getOnePropertyById(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const thingId: string = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -106,7 +107,7 @@ export class PropertyController {
 
     // Get the Property from the Service
     const property: Property =
-      await PropertyController.propertyService.getOnePropertyById(
+      await this.propertyService.getOnePropertyById(
         thingId,
         propertyId,
         options
@@ -126,19 +127,22 @@ export class PropertyController {
         res.send(property);
       }
     }
-  };
+  }
 
-  static createNewProperty = async (
+  public async createNewProperty(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get parameters from the body
     const { name, description, typeId } = req.body;
-    const property: DTOProperty = {};
-    property.name = name;
-    property.description = description;
-    property.typeId = typeId;
+    const property: DTOProperty = {
+      name: name,
+      description: description,
+      typeId: typeId
+    };
+
+    const thing = await this.thingService.getOneThingById(req.params.thingId);
 
     // Validade if the parameters are ok
     const errors = await validate(property);
@@ -148,8 +152,8 @@ export class PropertyController {
 
     try {
       const createdProperty =
-        await PropertyController.propertyService.createNewProperty(
-          req.params.thingId,
+        await this.propertyService.createNewProperty(
+          thing,
           property
         );
       // If all ok, send 201 response
@@ -157,18 +161,18 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  static streamMedia = async (
+  public async streamMedia(
     ws: ws,
     req: Request,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Retrieve property
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
     const property: Property =
-      await PropertyController.propertyService.getOnePropertyById(
+      await this.propertyService.getOnePropertyById(
         thingId,
         propertyId
       );
@@ -183,7 +187,7 @@ export class PropertyController {
           // TODO get video property to record on
           try {
             connection =
-              await PropertyController.connectionManager.createConnection(
+              await this.connectionManager.createConnection(
                 property
               );
             ws.send(JSON.stringify(connection));
@@ -194,7 +198,7 @@ export class PropertyController {
           break;
         case "leave":
           Log.debug("leaving: " + messageJson.id);
-          connection = PropertyController.connectionManager.getConnection(
+          connection = this.connectionManager.getConnection(
             messageJson.id
           );
           Log.debug(connection);
@@ -207,7 +211,7 @@ export class PropertyController {
           break;
         case "answer":
           Log.debug("answer type for " + messageJson.id);
-          connection = PropertyController.connectionManager.getConnection(
+          connection = this.connectionManager.getConnection(
             messageJson.id
           );
           if (!connection) {
@@ -226,20 +230,20 @@ export class PropertyController {
           break;
       }
     });
-  };
+  }
 
-  static editProperty = async (
+  public async editProperty(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
     // Get values from the body
     const { name, description } = req.body;
     const property: Property =
-      await PropertyController.propertyService.getOnePropertyById(
+      await this.propertyService.getOnePropertyById(
         thingId,
         propertyId
       );
@@ -258,26 +262,26 @@ export class PropertyController {
 
     // Try to save
     try {
-      await PropertyController.propertyService.editOneProperty(property);
+      await this.propertyService.editOneProperty(property);
     } catch (e) {
       return next(new DCDError(500, "failed updating property"));
     }
     // After all send a 204 (no content, but accepted) response
     res.status(204).send();
-  };
+  }
 
-  static getPropertyMediaValue = async (
+  public async getPropertyMediaValue(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
     const timestamp = Number.parseInt(req.params.timestamp);
     const dimension = req.params.dimensionId;
     const property: Property =
-      await PropertyController.propertyService.getOnePropertyById(
+      await this.propertyService.getOnePropertyById(
         thingId,
         propertyId
       );
@@ -316,13 +320,13 @@ export class PropertyController {
         Log.info("Served property media " + path);
       }
     });
-  };
+  }
 
-  static updatePropertyValues = async (
+  public async updatePropertyValues(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     Log.debug("update property values");
     // Get the ID from the url
     const thingId = req.params.thingId;
@@ -331,7 +335,7 @@ export class PropertyController {
     const contentType = req.headers["content-type"];
 
     const property: Property =
-      await PropertyController.propertyService.getOnePropertyById(
+      await this.propertyService.getOnePropertyById(
         thingId,
         propertyId
       );
@@ -346,7 +350,7 @@ export class PropertyController {
       // Get values from the body
       const { values } = req.body;
       property.values = values;
-      saveValuesAndRespond(property, res, next);
+      this.saveValuesAndRespond(property, res, next);
     } else if (contentType.indexOf("multipart/form-data") === 0) {
       Log.debug("values with file");
       Log.debug(req.body.property);
@@ -386,7 +390,7 @@ export class PropertyController {
         }
         Log.debug(completeValues);
         property.values = [completeValues];
-        saveValuesAndRespond(property, res, next);
+        this.saveValuesAndRespond(property, res, next);
       } else {
         // there is no value, this should be in a CSV file
         const hasLabel = req.query.hasLabel === "true";
@@ -410,22 +414,22 @@ export class PropertyController {
           hasLabel
         );
         // Log.debug(property.values)
-        saveValuesAndRespond(property, res, next);
+        this.saveValuesAndRespond(property, res, next);
       }
     }
-  };
+  }
 
-  static deleteOneProperty = async (
+  public async deleteOneProperty(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
     // Call the Service
     try {
-      await PropertyController.propertyService.deleteOneProperty(
+      await this.propertyService.deleteOneProperty(
         thingId,
         propertyId
       );
@@ -434,13 +438,13 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  static countDataPoints = async (
+  public async countDataPoints(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -448,7 +452,7 @@ export class PropertyController {
     const timeInterval = req.query.timeInterval as string;
     // Call the Service
     try {
-      const result = await PropertyController.propertyService.countDataPoints(
+      const result = await this.propertyService.countDataPoints(
         thingId,
         propertyId,
         undefined,
@@ -459,19 +463,19 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  static lastDataPoints = async (
+  public async lastDataPoints(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
     // Call the Service
     try {
-      const result = await PropertyController.propertyService.lastDataPoints(
+      const result = await this.propertyService.lastDataPoints(
         thingId,
         propertyId
       );
@@ -479,26 +483,13 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
-
-  static toCSV(property: Property): string {
-    let csv = "time";
-    for (let i = 0; i < property.type.dimensions.length; i++) {
-      csv += "," + property.type.dimensions[i].name;
-    }
-    csv += "\n";
-    for (let i = 0; i < property.values.length; i++) {
-      csv += property.values[i].join(",");
-      csv += "\n";
-    }
-    return csv;
   }
 
-  static grantConsent = async (
+  public async grantConsent(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const propertyId = req.params.propertyId;
     const body = req.body;
@@ -513,7 +504,7 @@ export class PropertyController {
     Log.debug("granting: " + JSON.stringify(acp));
     // Call the Service
     try {
-      const result = await AuthController.policyService.updateKetoPolicy(
+      const result = await this.policyService.updateKetoPolicy(
         acp,
         "exact"
       );
@@ -521,36 +512,36 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  static revokeConsent = async (
+  public async revokeConsent(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const consentId = req.params.consentId;
     // Call the Service
     try {
-      await AuthController.policyService.deleteKetoPolicy(consentId, "exact");
+      await this.policyService.deleteKetoPolicy(consentId, "exact");
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
       next(error);
     }
-  };
+  }
 
-  static listConsents = async (
+  public async listConsents(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the property ID from the url
     const propertyId = req.params.propertyId;
     const resource = propertyId;
     // Call the Service
     try {
-      const consents = await AuthController.policyService.listConsents(
+      const consents = await this.policyService.listConsents(
         "resource",
         resource
       );
@@ -559,7 +550,58 @@ export class PropertyController {
     } catch (error) {
       next(error);
     }
-  };
+  }
+
+  public async saveValuesAndRespond(
+    property: Property,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    // Try to save
+    try {
+      await this.propertyService.updatePropertyValues(property);
+      res.json();
+    } catch (error) {
+      Log.error(error);
+      if (error._hint !== undefined) {
+        return next(error);
+      }
+      return next(new DCDError(500, "Failed updating property values"));
+    }
+  }
+
+
+  static toCSV(property: Property): string {
+    let csv = "time";
+    for (let i = 0; i < property.type.dimensions.length; i++) {
+      csv += "," + property.type.dimensions[i].name;
+    }
+    csv += "\n";
+    for (let i = 0; i < property.values.length; i++) {
+      csv += property.values[i].join(",");
+      csv += "\n";
+    }
+    return csv;
+  }
+
+  static parseValueOptions(req: Request): ValueOptions {
+    if (req.query.from === undefined || req.query.to === undefined) {
+      return undefined;
+    }
+    return {
+      from: Number.parseInt(req.query.from + ""),
+      to: Number.parseInt(req.query.to + ""),
+      timeInterval:
+        req.query.timeInterval !== undefined
+          ? req.query.timeInterval + ""
+          : undefined,
+      fctInterval:
+        req.query.fctInterval !== undefined
+          ? req.query.fctInterval + ""
+          : undefined,
+      fill: req.query.fill !== undefined ? req.query.fill + "" : "none",
+    };
+  }
 }
 
 export default PropertyController;
@@ -603,22 +645,4 @@ function csvStrToValueArray(
     }
   });
   return values;
-}
-
-async function saveValuesAndRespond(
-  property: Property,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  // Try to save
-  try {
-    await PropertyController.propertyService.updatePropertyValues(property);
-    res.json();
-  } catch (error) {
-    Log.error(error);
-    if (error._hint !== undefined) {
-      return next(error);
-    }
-    return next(new DCDError(500, "Failed updating property values"));
-  }
 }

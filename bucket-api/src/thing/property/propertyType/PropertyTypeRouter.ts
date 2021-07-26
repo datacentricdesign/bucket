@@ -1,54 +1,82 @@
 import { Router } from "express";
+import { Application } from "express-serve-static-core";
 
-import { introspectToken } from "../../middlewares/introspectToken";
+import { AuthController } from "../../../auth/AuthController";
 
 import PropertyTypeController from "./PropertyTypeController";
 
-export const PropertyTypeRouter = Router({ mergeParams: true });
+export class PropertyTypeRouter {
+  private router: Router;
 
-/**
- * @api {get} /types List
- * @apiGroup PropertyType
- * @apiDescription Get Property Types.
- *
- * @apiVersion 0.1.1
- *
- * @apiHeader {String} Authorization TOKEN ID
- *
- * @apiSuccess {PropertyType[]} properties The retrieved Properties
- **/
-PropertyTypeRouter.get(
-  "/",
-  [introspectToken(["dcd:types"])],
-  PropertyTypeController.getPropertyTypes
-);
+  private controller: PropertyTypeController;
+  private authController: AuthController;
 
-/**
- * @api {post} /types Create
- * @apiGroup PropertyType
- * @apiDescription Create a Property Types.
- *
- * @apiVersion 0.1.1
- *
- * @apiHeader {String} Authorization TOKEN ID
- **/
-PropertyTypeRouter.post(
-  "/",
-  [introspectToken(["dcd:types"])],
-  PropertyTypeController.createOnePropertyType
-);
+  private app: Application;
 
-/**
- * @api {post} /types Delete
- * @apiGroup PropertyType
- * @apiDescription Delete a Property Type by id.
- *
- * @apiVersion 0.1.1
- *
- * @apiHeader {String} Authorization TOKEN ID
- **/
-PropertyTypeRouter.delete(
-  "/:propertyTypeId",
-  [introspectToken(["dcd:types"])],
-  PropertyTypeController.deleteOnePropertyTypeById
-);
+  constructor(app: Application) {
+    this.app = app;
+    this.router = Router({ mergeParams: true });
+    this.controller = new PropertyTypeController();
+    this.authController = AuthController.getInstance();
+    this.setRoutes();
+  }
+
+  getRouter(): Router {
+    return this.router;
+  }
+
+  getController(): PropertyTypeController {
+    return this.controller;
+  }
+
+  setRoutes(): void {
+    /**
+     * @api {get} /types List
+     * @apiGroup PropertyType
+     * @apiDescription Get Property Types.
+     *
+     * @apiVersion 0.1.1
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiSuccess {PropertyType[]} properties The retrieved Properties
+     **/
+    this.router.get(
+      "/",
+      [this.authController.authenticate(["dcd:types"])],
+      this.controller.getPropertyTypes.bind(this.controller)
+    );
+
+    /**
+     * @api {post} /types Create
+     * @apiGroup PropertyType
+     * @apiDescription Create a Property Types.
+     *
+     * @apiVersion 0.1.1
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     **/
+     this.router.post(
+      "/",
+      [this.authController.authenticate(["dcd:types"])],
+      this.controller.createOnePropertyType.bind(this.controller)
+    );
+
+    /**
+     * @api {post} /types Delete
+     * @apiGroup PropertyType
+     * @apiDescription Delete a Property Type by id.
+     *
+     * @apiVersion 0.1.1
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     **/
+     this.router.delete(
+      "/:propertyTypeId",
+      [this.authController.authenticate(["dcd:types"])],
+      this.controller.deleteOnePropertyTypeById.bind(this.controller)
+    );
+  }
+
+}
+

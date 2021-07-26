@@ -1,13 +1,13 @@
 import { getRepository } from "typeorm";
-import { httpConfig } from "../../config/httpConfig";
+import { httpConfig } from "../config/httpConfig";
 import { DCDError } from "@datacentricdesign/types";
 
 import fetch from "node-fetch";
-import { Role } from "../role/Role";
+import { Role } from "../thing/role/Role";
 
 import { v4 as uuidv4 } from "uuid";
-import config from "../../config";
-import { Log } from "../../Logger";
+import config from "../config";
+import { Log } from "../Logger";
 
 export interface AccessControlPolicy {
   subjects: string[];
@@ -29,15 +29,22 @@ export interface Policy {
  * Manage access policies
  */
 export class PolicyService {
+
+  private static instance: PolicyService;
+
+  public static getInstance(): PolicyService {
+    if (PolicyService.instance === undefined) {
+      PolicyService.instance = new PolicyService();
+    }
+    return PolicyService.instance;
+  }
+
   private ketoHeaders = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
 
-  /**
-   *
-   */
-  constructor() {
+  private constructor() {
     if (httpConfig.secured) {
       this.ketoHeaders["X-Forwarded-Proto"] = "https";
     }

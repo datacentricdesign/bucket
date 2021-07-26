@@ -8,11 +8,11 @@ import { RequestInit } from "node-fetch";
 import * as qs from "querystring";
 import * as SimpleOauth from "simple-oauth2";
 import { DCDError } from "@datacentricdesign/types";
-import { Token } from "./ThingService";
-import { PolicyService } from "./PolicyService";
-import config from "../../config";
+import { Token } from "../thing/ThingService";
+import { PolicyService } from "../policy/PolicyService";
+import config from "../config";
 import { URL } from "url";
-import { Log } from "../../Logger";
+import { Log } from "../Logger";
 
 export interface KeySet {
   algorithm: string;
@@ -23,12 +23,21 @@ export interface KeySet {
  * This class handle Authentication and Authorisation processes
  */
 export class AuthService {
-  oauth2: SimpleOauth.ClientCredentials;
-  token = null;
-  jwtTokenMap = [];
-  private static policyService = new PolicyService();
 
-  constructor() {
+  private static instance: AuthService;
+
+  public static getInstance(): AuthService {
+    if (AuthService.instance === undefined) {
+      AuthService.instance = new AuthService();
+    }
+    return AuthService.instance;
+  }
+
+  private oauth2: SimpleOauth.ClientCredentials;
+  private token = null;
+  private jwtTokenMap = [];
+
+  private constructor() {
     const header = {
       Accept: "application/json",
     };

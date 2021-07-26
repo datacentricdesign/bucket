@@ -5,13 +5,27 @@ import { DCDError } from "@datacentricdesign/types";
 import { DPiService } from "./DPiService";
 
 export class DPiController {
-  static dpiService = new DPiService();
 
-  static healthStatus = async (
+  private static instance: DPiController;
+
+  public static getInstance(): DPiController {
+    if (DPiController.instance === undefined) {
+      DPiController.instance = new DPiController();
+    }
+    return DPiController.instance;
+  }
+
+  private dpiService: DPiService;
+
+  private constructor() {
+    this.dpiService = DPiService.getInstance();
+  }
+
+  public async healthStatus(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     const url = config.env.dpiUrl + "/health";
     const options = {
       method: "GET",
@@ -27,11 +41,11 @@ export class DPiController {
     }
   };
 
-  static getOneDPIImage = async (
+  public async getOneDPIImage(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     const url =
       config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
     const thingId = req.params.thingId;
@@ -50,7 +64,7 @@ export class DPiController {
         const dpiId = thingId.replace("dcd:things:", "");
         const downloadURL = config.env.dpiUrl + "/" + dpiId + "?download=true";
         const result = await fetch(downloadURL);
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
           result.body.pipe(res);
           result.body.on("error", (error) => {
             reject(error);
@@ -70,13 +84,13 @@ export class DPiController {
     }
   };
 
-  static generateNewDPIImage = async (
+  public async generateNewDPIImage(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     try {
-      const text = await DPiController.dpiService.generateDPiImage(
+      const text = await this.dpiService.generateDPiImage(
         req.body,
         req.params.thingId
       );
@@ -86,11 +100,11 @@ export class DPiController {
     }
   };
 
-  static cancelDPiImageGeneration = async (
+  public async cancelDPiImageGeneration(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     const url =
       config.env.dpiUrl +
       "/" +
@@ -107,11 +121,11 @@ export class DPiController {
     }
   };
 
-  static deleteDPiImage = async (
+  public async deleteDPiImage(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     const url =
       config.env.dpiUrl + "/" + req.params.thingId.replace("dcd:things:", "");
     const options = {

@@ -22,6 +22,7 @@ import { Property } from "../Property";
 import { Log } from "../../../Logger";
 import PropertyController from "../PropertyController";
 import config from "../../../config";
+import { PropertyService } from "../PropertyService";
 
 const TIME_TO_CONNECTED = 10000;
 const TIME_TO_HOST_CANDIDATES = 3000; // NOTE(mroberts): Too long.
@@ -38,8 +39,13 @@ export class WebRtcConnection extends EventEmitter {
 
   currentPropertyValue: Array<string | number>;
 
+  private propertyService: PropertyService;
+
   constructor(id: string, property: Property) {
     super();
+
+    this.propertyService = PropertyService.getInstance();
+
     this.id = id;
     this.state = "open";
     this.property = property;
@@ -295,7 +301,7 @@ export class WebRtcConnection extends EventEmitter {
                   // TODO push update property
                   this.currentPropertyValue.push(outputName);
                   this.property.values = [this.currentPropertyValue];
-                  PropertyController.propertyService.updatePropertyValues(
+                  this.propertyService.updatePropertyValues(
                     this.property
                   );
                 });

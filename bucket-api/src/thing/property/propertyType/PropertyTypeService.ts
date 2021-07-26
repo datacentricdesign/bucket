@@ -4,6 +4,20 @@ import { PropertyType } from "./PropertyType";
 import { DCDError } from "@datacentricdesign/types";
 
 export class PropertyTypeService {
+
+  private static instance: PropertyTypeService;
+
+  public static getInstance(): PropertyTypeService {
+    if (PropertyTypeService.instance === undefined) {
+      PropertyTypeService.instance = new PropertyTypeService();
+    }
+    return PropertyTypeService.instance;
+  }
+
+  private constructor() {
+    
+  }
+
   /**
    * List existing property types.
    **/

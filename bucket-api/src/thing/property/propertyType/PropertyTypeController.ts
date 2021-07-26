@@ -6,17 +6,31 @@ import { Dimension } from "../dimension/Dimension";
 import { DCDError } from "@datacentricdesign/types";
 
 export class PropertyTypeController {
-  static propertyTypeService = new PropertyTypeService();
 
-  static getPropertyTypes = async (
+  private static instance: PropertyTypeController;
+
+  public static getInstance(): PropertyTypeController {
+    if (PropertyTypeController.instance === undefined) {
+      PropertyTypeController.instance = new PropertyTypeController();
+    }
+    return PropertyTypeController.instance;
+  }
+
+  private propertyTypeService: PropertyTypeService;
+
+  constructor() {
+    this.propertyTypeService = PropertyTypeService.getInstance();
+  }
+
+  public async getPropertyTypes(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get things from Service
     try {
       const propertyTypes: PropertyType[] =
-        await PropertyTypeController.propertyTypeService.getPropertyTypes();
+        await this.propertyTypeService.getPropertyTypes();
       // Send the things object
       res.send(propertyTypes);
     } catch (error) {
@@ -24,17 +38,17 @@ export class PropertyTypeController {
     }
   };
 
-  static getOnePropertyTypeById = async (
+  public async getOnePropertyTypeById(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the ID from the url
     const propertyTypeId = req.params.propertyTypeId;
     try {
       // Get the Property Type from the Service
       const propertyType: PropertyType =
-        await PropertyTypeController.propertyTypeService.getOnePropertyTypeById(
+        await this.propertyTypeService.getOnePropertyTypeById(
           propertyTypeId
         );
       res.send(propertyType);
@@ -43,11 +57,11 @@ export class PropertyTypeController {
     }
   };
 
-  static createOnePropertyType = async (
+  public async createOnePropertyType(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     const { id, name, description, dimensions } = req.body;
     const propertyType = new PropertyType();
     propertyType.id = id;
@@ -66,7 +80,7 @@ export class PropertyTypeController {
     }
 
     try {
-      await PropertyTypeController.propertyTypeService.createOnePropertyType(
+      await this.propertyTypeService.createOnePropertyType(
         propertyType
       );
       res.send(propertyType);
@@ -75,16 +89,16 @@ export class PropertyTypeController {
     }
   };
 
-  static deleteOnePropertyTypeById = async (
+  public async deleteOnePropertyTypeById(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+  ): Promise<void> {
     // Get the thing ID from the url
     const propertyTypeId = req.params.propertyTypeId;
     // Call the Service
     try {
-      await PropertyTypeController.propertyTypeService.deleteOnePropertyTypeById(
+      await this.propertyTypeService.deleteOnePropertyTypeById(
         propertyTypeId
       );
       // After all send a 204 (no content, but accepted) response

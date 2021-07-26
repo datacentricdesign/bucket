@@ -7,53 +7,49 @@ import { PropertyTypeService } from "./propertyType/PropertyTypeService";
 import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
-import { InfluxDB } from "influx";
-import config from "../../config";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
-import { AuthController } from "../http/AuthController";
 import { Log } from "../../Logger";
-import ThingController from "../http/ThingController";
 import { PropertyType } from "./propertyType/PropertyType";
+import { PolicyService } from "../../policy/PolicyService";
+import { ThingService } from "../ThingService";
+import { InfluxDbService } from "../../influx/InfluxDbService";
+import { Thing } from "../Thing";
 
 export class PropertyService {
-  static propertyTypeService = new PropertyTypeService();
-  private influx: InfluxDB;
-  private ready = false;
+
+  private static instance: PropertyService;
+
+  private policyService: PolicyService;
+  private propertyTypeService: PropertyTypeService;
+
+  private influxDbService: InfluxDbService;
+
   private cachedTypes = {};
 
-  constructor() {
-    this.init(1000);
+  public static getInstance(): PropertyService {
+    if (PropertyService.instance === undefined) {
+      PropertyService.instance = new PropertyService();
+    }
+    return PropertyService.instance;
   }
 
-  async init(delayMs: number): Promise<void> {
-    // Connect to the time series database
-    this.influx = new InfluxDB(config.influxdb);
-    this.influx
-      .getDatabaseNames()
-      // Double check the timeseries db exists
-      .then(async (names) => {
-        Log.info("Connected to InfluxDb");
-        if (names.indexOf(config.influxdb.database) > -1) {
-          await this.influx.createDatabase(config.influxdb.database);
-          this.ready = true;
-        }
-        this.ready = true;
-        return Promise.resolve();
-      })
-      .catch((error) => {
-        Log.error(JSON.stringify(error));
-        Log.info("Retrying to connect to InfluxDB in " + delayMs + " ms.");
-        delay(delayMs).then(() => {
-          this.init(delayMs * 1.5);
-        });
-      });
+  /**
+   * If delayMs is defined, the constructor init InfluxDB,
+   * otherwise it only instantiate the service
+   * @constructor
+   */
+  private constructor() {
+    this.policyService = PolicyService.getInstance();
+    this.propertyTypeService = PropertyTypeService.getInstance();
+    this.influxDbService = InfluxDbService.getInstance();
+    this.cachedTypes = new Map<string, PropertyType>();
   }
 
   /**
    * Create a new Property.
    **/
   async createNewProperty(
-    thingId: string,
+    thing: Thing,
     dtoProperty: DTOProperty
   ): Promise<Property> {
     // Check if property type id is provided
@@ -63,13 +59,9 @@ export class PropertyService {
     const property: Property = new Property();
     // Retrieve the property type
     property.type =
-      await PropertyService.propertyTypeService.getOnePropertyTypeById(
+      await this.propertyTypeService.getOnePropertyTypeById(
         dtoProperty.typeId
       );
-    // Retrieve thing details from thingId
-    property.thing = await ThingController.thingService.getOneThingById(
-      thingId
-    );
     // If no name was provided, then use the generic type's
     property.name =
       dtoProperty.name === undefined || dtoProperty.name === ""
@@ -120,10 +112,10 @@ export class PropertyService {
   ): Promise<Property[]> {
     let groups = [];
     if (audienceId === "*") {
-      groups = await AuthController.policyService.listGroupMembership(subject);
+      groups = await this.policyService.listGroupMembership(subject);
     } else {
       try {
-        await AuthController.policyService.checkGroupMembership(
+        await this.policyService.checkGroupMembership(
           subject,
           audienceId
         );
@@ -136,7 +128,7 @@ export class PropertyService {
     // Get the list of all consent concerning the current subject
     let consents = [];
     for (let i = 0; i < groups.length; i++) {
-      const result = await AuthController.policyService.listConsents(
+      const result = await this.policyService.listConsents(
         "subject",
         groups[i]
       );
@@ -211,7 +203,7 @@ export class PropertyService {
 
     if (property !== undefined && valueOptions != undefined) {
       Log.debug(valueOptions.from);
-      return this.readValuesFromInfluxDB(property, valueOptions);
+      return this.influxDbService.readValuesFromInfluxDB(property, valueOptions);
     }
     return property;
   }
@@ -280,7 +272,7 @@ export class PropertyService {
       property.type = await this.getPropertyType(property.id);
     }
     console.log(property);
-    return this.valuesToInfluxDB(property);
+    return this.influxDbService.valuesToInfluxDB(property);
   }
 
   async getPropertyType(propertyId: string): Promise<PropertyType> {
@@ -316,126 +308,13 @@ export class PropertyService {
       throw new DCDError(
         404,
         "Property to delete " +
-          propertyId +
-          " could not be not found for Thing " +
-          thingId +
-          "."
+        propertyId +
+        " could not be not found for Thing " +
+        thingId +
+        "."
       );
     }
     return propertyRepository.delete(propertyId);
-  }
-
-  /**
-   * @param {Property} property
-   */
-  private valuesToInfluxDB(property: Property) {
-    console.log("### values to influx");
-    const points = [];
-    const dimensions = property.type.dimensions;
-    for (const index in property.values) {
-      let ts: number;
-      const values: Array<string | number> = property.values[index];
-      if (
-        values.length - 1 === dimensions.length ||
-        values.length === dimensions.length
-      ) {
-        if (values.length === dimensions.length) {
-          // missing time, take from server
-          ts = Date.now();
-          values.unshift(ts);
-        } else {
-          ts =
-            typeof values[0] === "string"
-              ? Number.parseInt(values[0] + "")
-              : values[0];
-        }
-
-        const fields = {};
-        for (let i = 1; i < values.length; i++) {
-          // check that we have numbers where we should
-          if (
-            (dimensions[i - 1].type === "number" &&
-              typeof values[i] !== "number") ||
-            (dimensions[i - 1].type !== "number" &&
-              typeof values[i] === "number")
-          ) {
-            return Promise.reject(
-              new DCDError(
-                404,
-                "Mismatch type of value for dimension " + dimensions[i - 1].id
-              )
-            );
-          }
-          // use dimension names to associate fields to values in InfluxDB
-          const name = dimensions[i - 1].name;
-          fields[name] = values[i];
-        }
-
-        const point = {
-          measurement: property.type.id,
-          tags: {
-            propertyId: property.id,
-            thingId: property.thing.id,
-          },
-          fields: fields,
-          timestamp: ts,
-        };
-        console.log(point);
-        points.push(point);
-      }
-    }
-    return this.influx.writePoints(points, { precision: "ms" });
-  }
-
-  /**
-   * @param {Property} property
-   * @param {ValueOptions} opt
-   * @return {Promise<Property>}
-   */
-  private readValuesFromInfluxDB(
-    property: Property,
-    opt: ValueOptions
-  ): Promise<Property> {
-    Log.debug(opt);
-    let query = `SELECT "time"`;
-    for (const index in property.type.dimensions) {
-      if (opt.timeInterval !== undefined) {
-        query += `, ${opt.fctInterval}("${property.type.dimensions[index].name}")`;
-      } else {
-        query += `, "${property.type.dimensions[index].name}" `;
-      }
-    }
-    query += ` FROM "${property.type.id}"`;
-
-    if (opt.from !== undefined && opt.to !== undefined) {
-      const start = new Date(opt.from).toISOString();
-      const end = new Date(opt.to).toISOString();
-      query += ` WHERE time >= '${start}' AND time <= '${end}' AND "thingId" = '${property.thing.id}' AND "propertyId" = '${property.id}'`;
-    }
-
-    if (opt.timeInterval !== undefined) {
-      query += ` GROUP BY time(${opt.timeInterval}) fill(${opt.fill})`;
-    }
-
-    Log.debug(query);
-
-    return this.influx
-      .queryRaw(query, {
-        precision: "ms",
-        database: config.influxdb.database,
-      })
-      .then((data) => {
-        if (
-          data.results.length > 0 &&
-          data.results[0].series !== undefined &&
-          data.results[0].series.length > 0
-        ) {
-          property.values = data.results[0].series[0].values;
-        } else {
-          property.values = [];
-        }
-        return Promise.resolve(property);
-      });
   }
 
   async countDataPoints(
@@ -450,22 +329,7 @@ export class PropertyService {
       const property = await this.getOnePropertyById(thingId, propertyId);
       measurement = property.type.id;
     }
-
-    let query = `SELECT COUNT(*) FROM ${measurement} WHERE time > ${from} AND "propertyId" = '${propertyId}'`;
-    if (timeInterval !== undefined) query += ` GROUP BY time(${timeInterval})`;
-
-    return this.influx
-      .queryRaw(query, {
-        precision: "ms",
-        database: config.influxdb.database,
-      })
-      .then((data) => {
-        if (data.results[0].series === undefined) return Promise.resolve([]);
-        return Promise.resolve(data.results[0].series[0].values);
-      })
-      .catch((error) => {
-        return error;
-      });
+    return this.influxDbService.counDataPoints(measurement, from, propertyId, timeInterval);
   }
 
   async lastDataPoints(
@@ -473,23 +337,6 @@ export class PropertyService {
     propertyId: string
   ): Promise<(number | string)[][]> {
     const property = await this.getOnePropertyById(thingId, propertyId);
-    return this.influx
-      .queryRaw(
-        `SELECT * FROM ${property.type.id}  WHERE "propertyId" = '${property.id}' ORDER BY DESC LIMIT 1`,
-        {
-          precision: "ms",
-          database: config.influxdb.database,
-        }
-      )
-      .then((data) => {
-        return Promise.resolve(data.results[0].series[0].values);
-      })
-      .catch((error) => {
-        return error;
-      });
+    return this.influxDbService.lastDataPoints(property);
   }
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
