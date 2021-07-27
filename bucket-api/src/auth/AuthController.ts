@@ -35,7 +35,7 @@ export class AuthController {
    * determined if it is valid and who it belongs to.
    */
   authenticate(requiredScope: string[]): RequestHandler {
-    return async (req: DCDRequest, res: Response, next: NextFunction) => {
+    return async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
       return this._authenticate(requiredScope, req, next);
     };
   }
@@ -43,7 +43,7 @@ export class AuthController {
   authenticateWs(
     requiredScope: string[]
   ): WebsocketRequestHandler {
-    return async (ws: ws, req: DCDRequest, next: NextFunction) => {
+    return async (ws: ws, req: DCDRequest, next: NextFunction): Promise<void> => {
       return this._authenticate(requiredScope, req, next);
     };
   }
@@ -52,7 +52,7 @@ export class AuthController {
     requiredScope: string[],
     req: DCDRequest,
     next: NextFunction
-  ) {
+  ): Promise<void> {
     if (requiredScope.length === 0) {
       requiredScope = ["dcd:things"];
     }

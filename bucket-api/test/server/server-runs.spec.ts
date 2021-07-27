@@ -23,8 +23,4 @@ describe("Server checks", () => {
     it("Server is created without error", (done) => {
         request.get(config.http.baseUrl + "/").expect(200, done);
     })
-
-    it("Check Thing API health.", (done) => {
-        request.get(config.http.baseUrl + "/things/health").expect(200, done);
-    })
 });

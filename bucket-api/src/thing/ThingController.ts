@@ -26,6 +26,9 @@ export class ThingController {
     this.dpiService = DPiService.getInstance();
   }
 
+  /**
+   * Return a status 'OK', a way to check that the API is up and running.
+   */
   public async apiHealth(req: DCDRequest, res: Response): Promise<void> {
     res.send({ status: "OK" });
   };
@@ -35,16 +38,19 @@ export class ThingController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    console.log(this)
+    console.log("thing controller")
     // Get things from Service
     try {
       const things: Thing[] =
         await this.thingService.getThingsOfAPerson(
           req.context.userId
         );
+
+      console.log("hello")
       // Send the things object
       res.send(things);
     } catch (error) {
+      console.log(error)
       return next(error);
     }
   };
