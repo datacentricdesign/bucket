@@ -10,6 +10,8 @@
 ![Docker Cloud Build Status (UI)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-ui?label=docker%20build%20%28ui%29)
 ![Docker Cloud Build Status (API)](https://img.shields.io/docker/cloud/build/datacentricdesign/bucket-api?label=docker%20build%20%28api%29)
 
+[![Gitter](https://badges.gitter.im/datacentricdesign/community.svg)](https://gitter.im/datacentricdesign/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 Bucket is a cloud application that helps collect data for Data-Centric Design processes.
 
 # Key Concepts
