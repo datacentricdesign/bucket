@@ -14,6 +14,8 @@ import config from "../config";
 import { URL } from "url";
 import { Log } from "../Logger";
 
+import { generateKeyPair } from 'crypto';
+
 export interface KeySet {
   algorithm: string;
   privateKey: string;
@@ -117,49 +119,80 @@ export class AuthService {
     return jwt.sign(token, privateKey, { algorithm: algorithm });
   }
 
+  generateKeys(thingId: string): Promise<KeySet> {
+    return new Promise((resolve, reject) => {
+      generateKeyPair('rsa', {
+        modulusLength: 4096,
+        publicKeyEncoding: {
+          type: 'spki',
+          format: 'pem'
+        },
+        privateKeyEncoding: {
+          type: 'pkcs8',
+          format: 'pem',
+        }
+      }, (error, publicKey, privateKey) => {
+        // Handle errors and use the generated key pair.
+        if (error) {
+          reject(error);
+        } else {
+          return this.setPEM(thingId, publicKey).then( (jwk: jwkToBuffer.JWK) => {
+            resolve({
+              algorithm: "RS256",
+              privateKey: privateKey
+            })
+          });
+        }
+      });
+    });
+    
+  }
+
+  
+
   /**
    * Generate a JWK set of keys for a given thing id.
    * @param {string} thingId
    * @returns {Promise<Object>}
    */
-  generateKeys(thingId: string): Promise<KeySet> {
-    const jwkParams = {
-      kid: uuidv4(),
-      alg: "RS256",
-      use: "sig",
-    };
-    return this.refresh().then(() => {
-      return this.generateJWK(thingId, jwkParams);
-    });
-  }
+  // generateKeys(thingId: string): Promise<KeySet> {
+  //   const jwkParams = {
+  //     kid: uuidv4(),
+  //     alg: "RS256",
+  //     use: "sig",
+  //   };
+  //   return this.refresh().then(() => {
+  //     return this.generateJWK(thingId, jwkParams);
+  //   });
+  // }
 
-  /**
-   * Generate a set of private/public keys out of a JWK managed by Hydra.
-   * @param set
-   * @param body
-   * @returns {Promise}
-   */
-  generateJWK(set: string, body: Record<string, unknown>): Promise<KeySet> {
-    const url = config.oauth2.oAuth2HydraAdminURL + "/keys/" + set;
-    return this.authorisedRequest("POST", url, body)
-      .then((result) => {
-        const jwk = result.keys[0];
-        jwk.dp = "";
-        jwk.dq = "";
-        jwk.qi = "";
-        const privateKey = jwkToBuffer(jwk, { private: true });
-        // Convert the JWK into a public key
-        this.jwtTokenMap[set] = jwkToBuffer(jwk);
-        const keySet = {
-          algorithm: jwk.alg,
-          privateKey: privateKey,
-        };
-        return Promise.resolve(keySet);
-      })
-      .catch((error) => {
-        return Promise.reject(new DCDError(403, error.message));
-      });
-  }
+  // /**
+  //  * Generate a set of private/public keys out of a JWK managed by Hydra.
+  //  * @param set
+  //  * @param body
+  //  * @returns {Promise}
+  //  */
+  // generateJWK(set: string, body: Record<string, unknown>): Promise<KeySet> {
+  //   const url = config.oauth2.oAuth2HydraAdminURL + "/keys/" + set;
+  //   return this.authorisedRequest("POST", url, body)
+  //     .then((result) => {
+  //       const jwk = result.keys[0];
+  //       jwk.dp = "";
+  //       jwk.dq = "";
+  //       jwk.qi = "";
+  //       const privateKey = jwkToBuffer(jwk, { private: true });
+  //       // Convert the JWK into a public key
+  //       this.jwtTokenMap[set] = jwkToBuffer(jwk);
+  //       const keySet = {
+  //         algorithm: jwk.alg,
+  //         privateKey: privateKey,
+  //       };
+  //       return Promise.resolve(keySet);
+  //     })
+  //     .catch((error) => {
+  //       return Promise.reject(new DCDError(403, error.message));
+  //     });
+  // }
 
   /**
    * Retrieves the key set for the given key ID from Hydra,

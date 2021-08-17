@@ -152,22 +152,6 @@ export class ThingService {
     return thingRepository.delete(thingId);
   }
 
-  /**
-   * Generate a JWK set of keys for a given thing id.
-   * @param {string} thingId
-   * @returns {Promise<Object>}
-   */
-  generateKeys(thingId: string): Promise<KeySet> {
-    const jwkParams = {
-      kid: uuidv4(),
-      alg: "RS256",
-      use: "sig",
-    };
-    return this.authService.refresh().then(() => {
-      return this.authService.generateJWK(thingId, jwkParams);
-    });
-  }
-
   async countDataPoints(
     personId: string,
     from: string,
