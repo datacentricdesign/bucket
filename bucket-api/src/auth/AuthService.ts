@@ -120,6 +120,7 @@ export class AuthService {
   }
 
   generateKeys(thingId: string): Promise<KeySet> {
+    console.log("generate keys")
     return new Promise((resolve, reject) => {
       generateKeyPair('rsa', {
         modulusLength: 4096,
