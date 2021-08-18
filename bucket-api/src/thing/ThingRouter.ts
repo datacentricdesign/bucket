@@ -20,6 +20,7 @@ export class ThingRouter {
   private app: Application;
   private propertyRouter: PropertyRouter;
   private dpiRouter: DPiRouter;
+  private grafanaRouter: GrafanaRouter;
 
   constructor(app: Application) {
     this.app = app;
@@ -189,6 +190,7 @@ export class ThingRouter {
     this.propertyRouter = new PropertyRouter(this.app);
     this.router.use("/:thingId/properties", this.propertyRouter.getRouter());
 
-    this.router.use("/:thingId/apps/grafana", GrafanaRouter);
+    this.grafanaRouter = new GrafanaRouter(this.app);
+    this.router.use("/:thingId/apps/grafana", this.grafanaRouter.getRouter());
   }
 }

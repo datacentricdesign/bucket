@@ -3,9 +3,7 @@ import { Application, Router } from "express";
 import { GrafanaController } from "./GrafanaController";
 import { AuthController } from "../../auth/AuthController";
 
-export const GrafanaRouter = Router({ mergeParams: true });
-
-export class DPiRouter {
+export class GrafanaRouter {
   private router: Router;
 
   private controller: GrafanaController;
@@ -37,7 +35,7 @@ export class DPiRouter {
     *
     * @apiVersion 0.0.1
     **/
-    GrafanaRouter.post(
+    this.router.post(
       "/",
       [this.authController.authenticate(["dcd:things"])],
       this.controller.createGrafanaDashboard.bind(this.controller)
@@ -50,7 +48,7 @@ export class DPiRouter {
      *
      * @apiVersion 0.0.1
      **/
-    GrafanaRouter.get(
+    this.router.get(
       "/user",
       [this.authController.authenticate(["dcd:things"])],
       this.controller.getGrafanaUserId.bind(this.controller)
