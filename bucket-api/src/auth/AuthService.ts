@@ -138,6 +138,8 @@ export class AuthService {
           reject(error);
         } else {
           return this.setPEM(thingId, publicKey).then( (jwk: jwkToBuffer.JWK) => {
+            console.log("public")
+            console.log(publicKey)
             resolve({
               algorithm: "RS256",
               privateKey: privateKey
