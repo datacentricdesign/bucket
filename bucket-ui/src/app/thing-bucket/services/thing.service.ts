@@ -57,9 +57,7 @@ export class ThingService {
       params.set('fill', options.fill)
     }
     let headers = this.getHeader()
-    console.log(csvFormat)
     headers = headers.set('Accept', csvFormat ? 'text/csv' : 'application/json')
-    console.log(headers)
     return this.http.get(url, { headers, params, responseType: 'blob' as 'blob' }).toPromise()
   }
 

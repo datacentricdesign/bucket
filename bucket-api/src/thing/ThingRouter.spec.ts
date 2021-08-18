@@ -43,7 +43,6 @@ describe("ThingRouter", () => {
             });
         sinon.stub(ThingService.prototype, 'getThingsOfAPerson').callsFake(
             (personId: string): Promise<Thing[]> => {
-                console.log("fake: " + personId)
                 return Promise.resolve([]);
             })
         request.get(config.http.baseUrl + "/things").expect(200, done);

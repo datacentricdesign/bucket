@@ -322,7 +322,6 @@ export class PolicyService {
   ): Promise<AccessControlPolicy> {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
-    console.log(url);
     try {
       const result = await fetch(url, {
         headers: this.ketoHeaders,

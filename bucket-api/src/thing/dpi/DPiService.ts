@@ -39,8 +39,6 @@ export class DPiService {
     const url = config.env.dpiUrl + "/";
 
     const keys = await this.authService.generateKeys(thingId);
-    console.log("keys")
-    console.log(keys)
 
     dpi.id = thingId;
     dpi.enable_SSH = dpi.enable_SSH ? "1" : "0";

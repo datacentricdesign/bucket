@@ -55,7 +55,6 @@ export class PropertyController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    console.log("hello")
     const sharedWith: string = req.query.sharedWith as string;
     const subject: string = req.params.thingId
       ? req.params.thingId

@@ -120,7 +120,6 @@ export class AuthService {
   }
 
   generateKeys(thingId: string): Promise<KeySet> {
-    console.log("generate keys")
     return new Promise((resolve, reject) => {
       generateKeyPair('rsa', {
         modulusLength: 4096,
@@ -138,8 +137,6 @@ export class AuthService {
           reject(error);
         } else {
           return this.setPEM(thingId, publicKey).then( (jwk: jwkToBuffer.JWK) => {
-            console.log("public")
-            console.log(publicKey)
             resolve({
               algorithm: "RS256",
               privateKey: privateKey

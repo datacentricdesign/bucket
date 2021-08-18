@@ -222,7 +222,7 @@ export class MqttAPI {
               );
               return callback(null, packet);
             } catch (error) {
-              console.log(error);
+              Log.error(error);
             }
           }
         }

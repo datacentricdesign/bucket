@@ -153,7 +153,6 @@ export class WebRtcConnection extends EventEmitter {
   }
 
   toJSON(): Record<string, unknown> {
-    console.log("connection to JSON");
     return {
       id: this.id,
       state: this.state,
@@ -165,7 +164,6 @@ export class WebRtcConnection extends EventEmitter {
   }
 
   beforeOffer(peerConnection: RTCPeerConnection): void {
-    console.log("before offer");
 
     const audioTransceiver = peerConnection.addTransceiver("audio");
     const videoTransceiver = peerConnection.addTransceiver("video");
@@ -182,7 +180,6 @@ export class WebRtcConnection extends EventEmitter {
 
         const size = width + "x" + height;
         if (!streams[0] || (streams[0] && streams[0].size !== size)) {
-          console.log("only once per stream?");
           uid++;
 
           const stream = {

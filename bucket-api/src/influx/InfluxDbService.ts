@@ -97,7 +97,6 @@ export class InfluxDbService {
                     fields: fields,
                     timestamp: ts,
                 };
-                console.log(point);
                 points.push(point);
             }
         }

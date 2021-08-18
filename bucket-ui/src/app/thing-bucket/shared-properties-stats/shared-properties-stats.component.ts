@@ -83,7 +83,6 @@ export class SharedPropertiesStatsComponent implements OnInit {
         let sum = 0
         const label = moment(values[k][0]).format(this.selectedPeriod.timeFormat)
         labels.push(label)
-        // console.log(labels)
         for (let l = 1; l < values[k].length; l++) {
           sum += Number.parseInt(values[k][l] as 'number', 10)
         }

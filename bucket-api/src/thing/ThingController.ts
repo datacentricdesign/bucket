@@ -38,7 +38,6 @@ export class ThingController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    console.log("thing controller")
     // Get things from Service
     try {
       const things: Thing[] =
@@ -46,11 +45,9 @@ export class ThingController {
           req.context.userId
         );
 
-      console.log("hello")
       // Send the things object
       res.send(things);
     } catch (error) {
-      console.log(error)
       return next(error);
     }
   };
