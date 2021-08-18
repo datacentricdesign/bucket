@@ -57,10 +57,12 @@ export class Bucket {
         Log.info("Connecting SQL Database...");
         return createConnection(config.orm)
             .then((connection: Connection) => {
+                Log.info("Running SQL Migrations...");
                 this.connectionSQLDb = connection;
                 return this.connectionSQLDb.runMigrations();
             })
             .then((migrations: Migration[]) => {
+                Log.info("Migrations applied: " + migrations.length);
                 return Promise.resolve()
             })
             .catch((error: Error) => {
