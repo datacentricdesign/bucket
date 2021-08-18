@@ -57,6 +57,7 @@ export class PropertyService {
       return Promise.reject(new DCDError(4003, "Add field typeId."));
     }
     const property: Property = new Property();
+    property.thing = thing;
     // Retrieve the property type
     property.type =
       await this.propertyTypeService.getOnePropertyTypeById(
@@ -271,7 +272,6 @@ export class PropertyService {
     if (property.type === undefined) {
       property.type = await this.getPropertyType(property.id);
     }
-    console.log(property);
     return this.influxDbService.valuesToInfluxDB(property);
   }
 
