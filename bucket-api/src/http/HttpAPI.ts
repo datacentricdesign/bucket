@@ -123,7 +123,7 @@ export class HttpAPI {
     response: Response,
     next: NextFunction
   ): void {
-    console.log("error handler");
+    Log.debug("Error on route: " + request.originalUrl)
     const status = error._statusCode || 500;
     const message = error.message || "Something went wrong";
     Log.debug(
