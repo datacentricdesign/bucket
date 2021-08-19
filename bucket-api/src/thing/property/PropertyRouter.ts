@@ -334,7 +334,11 @@ export class PropertyRouter {
   }
 
   // Check File Type
-  async checkFileType(req: Request, file, cb) {
+  async checkFileType(
+    req: Request,
+    file: Express.Multer.File,
+    cb: multer.FileFilterCallback
+  ): Promise<void> {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
@@ -417,8 +421,12 @@ export class PropertyRouter {
   upload = multer({
     storage: storage,
     limits: { fileSize: 1000000000 },
-    fileFilter: (req, file, cb) => {
-      this.checkFileType(req, file, cb);
+    fileFilter: (
+      request: Request,
+      file: Express.Multer.File,
+      cb: multer.FileFilterCallback
+    ) => {
+      this.checkFileType(request, file, cb);
     },
   });
 }

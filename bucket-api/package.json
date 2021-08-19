@@ -93,7 +93,7 @@
     "@types/uuid": "8.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "chai": "^4.3.4",
-    "esdoc": "^1.1.0",
+    "esdoc": "^1.0.4",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.27.0",
     "eslint-config-prettier": "8.3.0",

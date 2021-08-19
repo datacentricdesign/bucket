@@ -51,7 +51,7 @@ export class GrafanaService {
     }
   }
 
-  async createPersonFolder(personId: string) {
+  async createPersonFolder(personId: string): Promise<number> {
     try {
       const folderUID = personId.replace("dcd:persons:", "");
       const resultGet = await fetch(
@@ -77,7 +77,9 @@ export class GrafanaService {
       if (newJsonFolder.id !== undefined) {
         return newJsonFolder.id;
       }
-      return Promise.resolve(resultPost);
+      return Promise.reject(
+        new DCDError(500, "Could not retrieve the Grafana user id.")
+      );
     } catch (error) {
       return Promise.reject(error);
     }

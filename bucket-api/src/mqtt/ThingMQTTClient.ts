@@ -1,6 +1,6 @@
 import { DTOProperty } from "@datacentricdesign/types";
 import * as mqtt from "mqtt";
-import { ISubscriptionGrant, MqttClient } from "mqtt";
+import { IClientOptions, ISubscriptionGrant, MqttClient } from "mqtt";
 import config from "../config";
 import { Log } from "../Logger";
 import { Property } from "../thing/property/Property";
@@ -8,9 +8,14 @@ import { Property } from "../thing/property/Property";
 import { PropertyService } from "../thing/property/PropertyService";
 import { ThingService } from "../thing/ThingService";
 
+interface MQTTMessage {
+  requestId?: string;
+  property?: Property;
+}
+
 /**
  * This class set up an MQTT client as Bucket MQTT API,
- * listening to /things#
+ * listening to /things# and catching all relevant messages.
  */
 export class ThingMQTTClient {
   // = = = = = = = = = = = MQTT API = = = = = = = = = = =
@@ -24,16 +29,16 @@ export class ThingMQTTClient {
 
   private port: number;
   private host: string;
-  private settings: any;
+  private options: IClientOptions;
   private client: MqttClient;
 
   private propertyService: PropertyService;
   private thingService: ThingService;
 
-  constructor(settings) {
-    this.port = settings.port;
-    this.host = settings.host;
-    this.settings = settings.client;
+  constructor(host: string, port: number, options: IClientOptions) {
+    this.host = host;
+    this.port = port;
+    this.options = options;
 
     this.propertyService = PropertyService.getInstance();
     this.thingService = ThingService.getInstance();
@@ -48,13 +53,13 @@ export class ThingMQTTClient {
       ":" +
       this.port;
     Log.debug("MQTT connect: " + url);
-    this.client = mqtt.connect(url, this.settings);
+    this.client = mqtt.connect(url, this.options);
     this.client.on("connect", this.onMQTTConnect.bind(this));
     this.client.on("message", this.onMQTTMessage.bind(this));
     return Promise.resolve();
   }
 
-  onMQTTConnect() {
+  onMQTTConnect(): void {
     Log.debug("Bucket connected to MQTT: " + this.client.connected);
     this.client.subscribe(
       "/things/#",
@@ -72,7 +77,7 @@ export class ThingMQTTClient {
   }
 
   onMQTTMessage(topic: string, message: string): void {
-    let jsonMessage: any;
+    let jsonMessage: MQTTMessage;
     try {
       jsonMessage = JSON.parse(message);
     } catch (error) {
@@ -143,9 +148,7 @@ export class ThingMQTTClient {
     requestId: string,
     dtoProperty: DTOProperty,
     client: MqttClient
-  ) {
-    Log.debug("create property");
-    Log.debug(dtoProperty);
+  ): Promise<void> {
     try {
       const thing = await this.thingService.getOneThingById(thingId);
       const property: Property = await this.propertyService.createNewProperty(
@@ -167,11 +170,15 @@ export class ThingMQTTClient {
   async updatePropertyValues(
     thingId: string,
     requestId: string,
-    property: any,
+    property: Property,
     client: MqttClient
   ): Promise<MqttClient> {
-    property.thing = { id: thingId };
     try {
+      const retrievedProperty = await this.propertyService.getOnePropertyById(
+        thingId,
+        property.id
+      );
+      retrievedProperty.values = property.values;
       await this.propertyService.updatePropertyValues(property);
       return client.publish(
         "/things/" + thingId + "/log",

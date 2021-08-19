@@ -7,7 +7,6 @@ import { RequestInit } from "node-fetch";
 import * as qs from "querystring";
 import * as SimpleOauth from "simple-oauth2";
 import { DCDError } from "@datacentricdesign/types";
-import { Token } from "../thing/ThingService";
 import config from "../config";
 import { URL } from "url";
 import { Log } from "../Logger";
@@ -92,8 +91,7 @@ export class AuthService {
    * @return {Promise<any>}
    */
   async introspect(token: string, requiredScope: string[] = []): Promise<User> {
-    const body = { token: token };
-    // const body = { token: token, scope: requiredScope.join(" ") };
+    const body = { token: token, scope: requiredScope.join(" ") };
     const url = config.oauth2.oAuth2IntrospectURL;
 
     try {
@@ -227,7 +225,8 @@ export class AuthService {
       token.toString(),
       publicKey,
       options,
-      (error: Error, introspectionToken: Token) => {
+      // introspectionToken (type Token) can be used as second parameter.
+      (error: Error) => {
         if (error) {
           return Promise.reject(new DCDError(403, error.message));
         } else {

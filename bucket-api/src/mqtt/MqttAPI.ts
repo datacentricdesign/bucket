@@ -96,7 +96,11 @@ export class MqttAPI {
   public async start(): Promise<void> {
     this.server.listen(config.mqtt.port, function () {
       Log.info("MQTT server listening on port ", config.mqtt.port);
-      const mqttClient = new ThingMQTTClient(config.mqtt);
+      const mqttClient = new ThingMQTTClient(
+        config.mqtt.host,
+        config.mqtt.port,
+        config.mqtt.client
+      );
       return mqttClient.connect();
     });
   }

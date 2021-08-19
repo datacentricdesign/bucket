@@ -150,8 +150,8 @@ export class InfluxDbService {
     measurement: string,
     from: string,
     propertyId: string,
-    timeInterval = undefined
-  ) {
+    timeInterval: string = undefined
+  ): Promise<(number | string)[][]> {
     let query = `SELECT COUNT(*) FROM ${measurement} WHERE time > ${from} AND "propertyId" = '${propertyId}'`;
     if (timeInterval !== undefined) query += ` GROUP BY time(${timeInterval})`;
     return this.influx
@@ -168,7 +168,9 @@ export class InfluxDbService {
       });
   }
 
-  public async lastDataPoints(property) {
+  public async lastDataPoints(
+    property: Property
+  ): Promise<(number | string)[][]> {
     const query = `SELECT * FROM ${property.type.id}  WHERE "propertyId" = '${property.id}' ORDER BY DESC LIMIT 1`;
     return this.influx
       .queryRaw(query, {
