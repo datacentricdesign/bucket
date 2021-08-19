@@ -1,8 +1,6 @@
 import fetch from "node-fetch";
 import config from "../../config";
-import { AuthController } from "../../auth/AuthController";
 import { Property } from "../property/Property";
-import PropertyController from "../property/PropertyController";
 import { PropertyService } from "../property/PropertyService";
 import { AuthService } from "../../auth/AuthService";
 import { ThingService } from "../ThingService";
@@ -15,7 +13,6 @@ export interface DPI {
 }
 
 export class DPiService {
-
   private static instance: DPiService;
 
   public static getInstance(): DPiService {
@@ -67,20 +64,16 @@ export class DPiService {
     thingId: string,
     hostname: string
   ): Promise<void> {
-    const properties =
-      await this.propertyService.getPropertiesOfAThingByType(
-        thingId,
-        "DNS"
-      );
+    const properties = await this.propertyService.getPropertiesOfAThingByType(
+      thingId,
+      "DNS"
+    );
     let netProp: Property;
     if (properties.length === 0) {
       const thing = await this.thingService.getOneThingById(thingId);
-      netProp = await this.propertyService.createNewProperty(
-        thing,
-        {
-          typeId: "DNS",
-        }
-      );
+      netProp = await this.propertyService.createNewProperty(thing, {
+        typeId: "DNS",
+      });
     } else {
       netProp = properties[0];
     }

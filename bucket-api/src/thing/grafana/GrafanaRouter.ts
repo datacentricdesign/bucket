@@ -29,12 +29,12 @@ export class GrafanaRouter {
 
   setRoutes(): void {
     /**
-    * @api {post} /
-    * @apiGroup Grafana
-    * @apiDescription Create Grafana dashboard for a Thing
-    *
-    * @apiVersion 0.0.1
-    **/
+     * @api {post} /
+     * @apiGroup Grafana
+     * @apiDescription Create Grafana dashboard for a Thing
+     *
+     * @apiVersion 0.0.1
+     **/
     this.router.post(
       "/",
       [this.authController.authenticate(["dcd:things"])],
@@ -53,7 +53,5 @@ export class GrafanaRouter {
       [this.authController.authenticate(["dcd:things"])],
       this.controller.getGrafanaUserId.bind(this.controller)
     );
-
   }
-
 }

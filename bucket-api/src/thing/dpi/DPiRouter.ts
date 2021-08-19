@@ -33,12 +33,12 @@ export class DPiRouter {
 
   setRoutes(): void {
     /**
-   * @api {get} /
-   * @apiGroup DPi
-   * @apiDescription Get DPi Image
-   *
-   * @apiVersion 0.1.1
-   **/
+     * @api {get} /
+     * @apiGroup DPi
+     * @apiDescription Get DPi Image
+     *
+     * @apiVersion 0.1.1
+     **/
     this.router.get(
       "/",
       [this.authController.authenticate(["dcd:things"])],
@@ -55,10 +55,12 @@ export class DPiRouter {
      * @apiParam (Body) {DTODPi} details of the DPi image
      * @apiHeader {String} Content-type application/json
      **/
-     this.router.post(
+    this.router.post(
       "/",
-      [this.authController.authenticate(["dcd:things"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.controller.generateNewDPIImage.bind(this.controller)
     );
 
@@ -69,10 +71,12 @@ export class DPiRouter {
      *
      * @apiVersion 0.1.1
      **/
-     this.router.delete(
+    this.router.delete(
       "/",
-      [this.authController.authenticate(["dcd:things"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.controller.deleteDPiImage.bind(this.controller)
     );
 
@@ -83,12 +87,13 @@ export class DPiRouter {
      *
      * @apiVersion 0.1.1
      **/
-     this.router.get(
+    this.router.get(
       "/cancel",
-      [this.authController.authenticate(["dcd:things"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.controller.cancelDPiImageGeneration.bind(this.controller)
     );
-
   }
 }

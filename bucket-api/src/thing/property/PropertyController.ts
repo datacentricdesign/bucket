@@ -28,7 +28,6 @@ function streamToString(stream): Promise<string> {
 }
 
 export class PropertyController {
-
   private propertyService: PropertyService;
   private thingService: ThingService;
   private policyService: PolicyService;
@@ -44,7 +43,7 @@ export class PropertyController {
   }
 
   private constructor() {
-    this.propertyService = PropertyService.getInstance()
+    this.propertyService = PropertyService.getInstance();
     this.connectionManager = new WebRtcConnectionManager();
     this.thingService = ThingService.getInstance();
     this.policyService = PolicyService.getInstance();
@@ -68,20 +67,17 @@ export class PropertyController {
     // Get properties from Service
     try {
       if (sharedWith !== undefined) {
-        const properties: Property[] =
-          await this.propertyService.getProperties(
-            actor,
-            subject,
-            sharedWith,
-            from,
-            timeInterval
-          );
+        const properties: Property[] = await this.propertyService.getProperties(
+          actor,
+          subject,
+          sharedWith,
+          from,
+          timeInterval
+        );
         res.send(properties);
       } else {
         const properties: Property[] =
-          await this.propertyService.getPropertiesOfAThing(
-            subject
-          );
+          await this.propertyService.getPropertiesOfAThing(subject);
         // Send the things object
         res.send(properties);
       }
@@ -105,12 +101,11 @@ export class PropertyController {
     const options = PropertyController.parseValueOptions(req);
 
     // Get the Property from the Service
-    const property: Property =
-      await this.propertyService.getOnePropertyById(
-        thingId,
-        propertyId,
-        options
-      );
+    const property: Property = await this.propertyService.getOnePropertyById(
+      thingId,
+      propertyId,
+      options
+    );
 
     if (req.accepts("application/json")) {
       res.send(property);
@@ -138,7 +133,7 @@ export class PropertyController {
     const property: DTOProperty = {
       name: name,
       description: description,
-      typeId: typeId
+      typeId: typeId,
     };
 
     const thing = await this.thingService.getOneThingById(req.params.thingId);
@@ -150,11 +145,10 @@ export class PropertyController {
     }
 
     try {
-      const createdProperty =
-        await this.propertyService.createNewProperty(
-          thing,
-          property
-        );
+      const createdProperty = await this.propertyService.createNewProperty(
+        thing,
+        property
+      );
       // If all ok, send 201 response
       res.status(201).send(createdProperty);
     } catch (error) {
@@ -170,11 +164,10 @@ export class PropertyController {
     // Retrieve property
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
-    const property: Property =
-      await this.propertyService.getOnePropertyById(
-        thingId,
-        propertyId
-      );
+    const property: Property = await this.propertyService.getOnePropertyById(
+      thingId,
+      propertyId
+    );
     if (property === undefined) {
       return next(new DCDError(404, "Property not found."));
     }
@@ -185,10 +178,9 @@ export class PropertyController {
         case "new":
           // TODO get video property to record on
           try {
-            connection =
-              await this.connectionManager.createConnection(
-                property
-              );
+            connection = await this.connectionManager.createConnection(
+              property
+            );
             ws.send(JSON.stringify(connection));
           } catch (error) {
             console.error(error);
@@ -197,9 +189,7 @@ export class PropertyController {
           break;
         case "leave":
           Log.debug("leaving: " + messageJson.id);
-          connection = this.connectionManager.getConnection(
-            messageJson.id
-          );
+          connection = this.connectionManager.getConnection(messageJson.id);
           Log.debug(connection);
           if (!connection) {
             ws.send("Connection not found");
@@ -210,9 +200,7 @@ export class PropertyController {
           break;
         case "answer":
           Log.debug("answer type for " + messageJson.id);
-          connection = this.connectionManager.getConnection(
-            messageJson.id
-          );
+          connection = this.connectionManager.getConnection(messageJson.id);
           if (!connection) {
             ws.send("Connection not found");
             return;
@@ -241,11 +229,10 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Get values from the body
     const { name, description } = req.body;
-    const property: Property =
-      await this.propertyService.getOnePropertyById(
-        thingId,
-        propertyId
-      );
+    const property: Property = await this.propertyService.getOnePropertyById(
+      thingId,
+      propertyId
+    );
     if (property === undefined) {
       // If not found, send a 404 response
       return next(new DCDError(404, "Property not found"));
@@ -279,11 +266,10 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     const timestamp = Number.parseInt(req.params.timestamp);
     const dimension = req.params.dimensionId;
-    const property: Property =
-      await this.propertyService.getOnePropertyById(
-        thingId,
-        propertyId
-      );
+    const property: Property = await this.propertyService.getOnePropertyById(
+      thingId,
+      propertyId
+    );
     if (property === undefined) {
       return next(new DCDError(404, "Property not found."));
     }
@@ -333,11 +319,10 @@ export class PropertyController {
 
     const contentType = req.headers["content-type"];
 
-    const property: Property =
-      await this.propertyService.getOnePropertyById(
-        thingId,
-        propertyId
-      );
+    const property: Property = await this.propertyService.getOnePropertyById(
+      thingId,
+      propertyId
+    );
 
     // Double-check the property is actually part of this thing
     if (property === undefined) {
@@ -428,10 +413,7 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Call the Service
     try {
-      await this.propertyService.deleteOneProperty(
-        thingId,
-        propertyId
-      );
+      await this.propertyService.deleteOneProperty(thingId, propertyId);
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
@@ -503,10 +485,7 @@ export class PropertyController {
     Log.debug("granting: " + JSON.stringify(acp));
     // Call the Service
     try {
-      const result = await this.policyService.updateKetoPolicy(
-        acp,
-        "exact"
-      );
+      const result = await this.policyService.updateKetoPolicy(acp, "exact");
       res.status(201).send(result);
     } catch (error) {
       next(error);
@@ -568,7 +547,6 @@ export class PropertyController {
       return next(new DCDError(500, "Failed updating property values"));
     }
   }
-
 
   static toCSV(property: Property): string {
     let csv = "time";

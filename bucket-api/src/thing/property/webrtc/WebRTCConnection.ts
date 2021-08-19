@@ -20,7 +20,6 @@ let uid = 0;
 import { EventEmitter } from "events";
 import { Property } from "../Property";
 import { Log } from "../../../Logger";
-import PropertyController from "../PropertyController";
 import config from "../../../config";
 import { PropertyService } from "../PropertyService";
 
@@ -164,7 +163,6 @@ export class WebRtcConnection extends EventEmitter {
   }
 
   beforeOffer(peerConnection: RTCPeerConnection): void {
-
     const audioTransceiver = peerConnection.addTransceiver("audio");
     const videoTransceiver = peerConnection.addTransceiver("video");
 
@@ -298,9 +296,7 @@ export class WebRtcConnection extends EventEmitter {
                   // TODO push update property
                   this.currentPropertyValue.push(outputName);
                   this.property.values = [this.currentPropertyValue];
-                  this.propertyService.updatePropertyValues(
-                    this.property
-                  );
+                  this.propertyService.updatePropertyValues(this.property);
                 });
 
               streams.forEach(({ recordPath }) => {

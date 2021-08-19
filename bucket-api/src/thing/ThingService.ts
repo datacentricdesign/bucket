@@ -5,7 +5,7 @@ import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
 import { Property } from "./property/Property";
-import { AuthService, KeySet } from "../auth/AuthService";
+import { AuthService } from "../auth/AuthService";
 import jwkToBuffer = require("jwk-to-pem");
 import { PropertyService } from "./property/PropertyService";
 import { PolicyService } from "../policy/PolicyService";
@@ -17,7 +17,6 @@ export interface Token {
 }
 
 export class ThingService {
-
   private static instance: ThingService;
 
   public static getInstance(): ThingService {
@@ -68,11 +67,7 @@ export class ThingService {
       // Read negative, the Thing does not exist yet
       if (findError.name === "EntityNotFound") {
         await thingRepository.save(thing);
-        await this.policyService.grant(
-          thing.personId,
-          thing.id,
-          "owner"
-        );
+        await this.policyService.grant(thing.personId, thing.id, "owner");
         await this.policyService.grant(thing.id, thing.id, "subject");
         return thing;
       }

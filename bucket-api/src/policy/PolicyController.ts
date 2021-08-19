@@ -5,9 +5,7 @@ import { WebsocketRequestHandler } from "express-ws";
 import { Policy, PolicyService } from "./PolicyService";
 import { DCDRequest } from "../config";
 
-
 export class PolicyController {
-
   private static instance: PolicyController;
 
   public static getInstance(): PolicyController {
@@ -31,19 +29,15 @@ export class PolicyController {
     return async (req: DCDRequest, res: Response, next: NextFunction) => {
       return this._checkPolicy(action, req, next);
     };
-  };
+  }
 
   public checkPolicyWs(action: string): WebsocketRequestHandler {
     return async (ws: ws, req: DCDRequest, next: NextFunction) => {
       return this._checkPolicy(action, req, next);
     };
-  };
+  }
 
-  private _checkPolicy(
-    action: string,
-    req: DCDRequest,
-    next: NextFunction
-  ) {
+  private _checkPolicy(action: string, req: DCDRequest, next: NextFunction) {
     const acpResource = buildACPResource(req);
     const acp: Policy = {
       resource: acpResource,

@@ -11,12 +11,10 @@ import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
 import { Log } from "../../Logger";
 import { PropertyType } from "./propertyType/PropertyType";
 import { PolicyService } from "../../policy/PolicyService";
-import { ThingService } from "../ThingService";
 import { InfluxDbService } from "../../influx/InfluxDbService";
 import { Thing } from "../Thing";
 
 export class PropertyService {
-
   private static instance: PropertyService;
 
   private policyService: PolicyService;
@@ -59,10 +57,9 @@ export class PropertyService {
     const property: Property = new Property();
     property.thing = thing;
     // Retrieve the property type
-    property.type =
-      await this.propertyTypeService.getOnePropertyTypeById(
-        dtoProperty.typeId
-      );
+    property.type = await this.propertyTypeService.getOnePropertyTypeById(
+      dtoProperty.typeId
+    );
     // If no name was provided, then use the generic type's
     property.name =
       dtoProperty.name === undefined || dtoProperty.name === ""
@@ -116,10 +113,7 @@ export class PropertyService {
       groups = await this.policyService.listGroupMembership(subject);
     } else {
       try {
-        await this.policyService.checkGroupMembership(
-          subject,
-          audienceId
-        );
+        await this.policyService.checkGroupMembership(subject, audienceId);
         groups.push(audienceId);
       } catch (error) {
         return Promise.reject(error);
@@ -204,7 +198,10 @@ export class PropertyService {
 
     if (property !== undefined && valueOptions != undefined) {
       Log.debug(valueOptions.from);
-      return this.influxDbService.readValuesFromInfluxDB(property, valueOptions);
+      return this.influxDbService.readValuesFromInfluxDB(
+        property,
+        valueOptions
+      );
     }
     return property;
   }
@@ -308,10 +305,10 @@ export class PropertyService {
       throw new DCDError(
         404,
         "Property to delete " +
-        propertyId +
-        " could not be not found for Thing " +
-        thingId +
-        "."
+          propertyId +
+          " could not be not found for Thing " +
+          thingId +
+          "."
       );
     }
     return propertyRepository.delete(propertyId);
@@ -329,7 +326,12 @@ export class PropertyService {
       const property = await this.getOnePropertyById(thingId, propertyId);
       measurement = property.type.id;
     }
-    return this.influxDbService.counDataPoints(measurement, from, propertyId, timeInterval);
+    return this.influxDbService.counDataPoints(
+      measurement,
+      from,
+      propertyId,
+      timeInterval
+    );
   }
 
   async lastDataPoints(

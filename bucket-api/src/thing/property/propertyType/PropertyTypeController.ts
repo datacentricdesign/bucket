@@ -6,7 +6,6 @@ import { Dimension } from "../dimension/Dimension";
 import { DCDError } from "@datacentricdesign/types";
 
 export class PropertyTypeController {
-
   private static instance: PropertyTypeController;
 
   public static getInstance(): PropertyTypeController {
@@ -36,7 +35,7 @@ export class PropertyTypeController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async getOnePropertyTypeById(
     req: Request,
@@ -48,14 +47,12 @@ export class PropertyTypeController {
     try {
       // Get the Property Type from the Service
       const propertyType: PropertyType =
-        await this.propertyTypeService.getOnePropertyTypeById(
-          propertyTypeId
-        );
+        await this.propertyTypeService.getOnePropertyTypeById(propertyTypeId);
       res.send(propertyType);
     } catch (error) {
       next(new DCDError(404, "Thing not found"));
     }
-  };
+  }
 
   public async createOnePropertyType(
     req: Request,
@@ -80,14 +77,12 @@ export class PropertyTypeController {
     }
 
     try {
-      await this.propertyTypeService.createOnePropertyType(
-        propertyType
-      );
+      await this.propertyTypeService.createOnePropertyType(propertyType);
       res.send(propertyType);
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async deleteOnePropertyTypeById(
     req: Request,
@@ -98,15 +93,13 @@ export class PropertyTypeController {
     const propertyTypeId = req.params.propertyTypeId;
     // Call the Service
     try {
-      await this.propertyTypeService.deleteOnePropertyTypeById(
-        propertyTypeId
-      );
+      await this.propertyTypeService.deleteOnePropertyTypeById(propertyTypeId);
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {
       next(error);
     }
-  };
+  }
 }
 
 export default PropertyTypeController;

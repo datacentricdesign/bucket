@@ -8,7 +8,6 @@ import { DCDRequest } from "../config";
 import { DPiService } from "./dpi/DPiService";
 
 export class ThingController {
-
   private static instance: ThingController;
 
   public static getInstance(): ThingController {
@@ -31,7 +30,7 @@ export class ThingController {
    */
   public async apiHealth(req: DCDRequest, res: Response): Promise<void> {
     res.send({ status: "OK" });
-  };
+  }
 
   public async getThingsOfAPerson(
     req: DCDRequest,
@@ -40,17 +39,16 @@ export class ThingController {
   ): Promise<void> {
     // Get things from Service
     try {
-      const things: Thing[] =
-        await this.thingService.getThingsOfAPerson(
-          req.context.userId
-        );
+      const things: Thing[] = await this.thingService.getThingsOfAPerson(
+        req.context.userId
+      );
 
       // Send the things object
       res.send(things);
     } catch (error) {
       return next(error);
     }
-  };
+  }
 
   public async getOneThingById(
     req: DCDRequest,
@@ -61,14 +59,12 @@ export class ThingController {
     const thingId: string = req.params.thingId;
     try {
       // Get the Thing from the Service
-      const thing: Thing = await this.thingService.getOneThingById(
-        thingId
-      );
+      const thing: Thing = await this.thingService.getOneThingById(thingId);
       res.send(thing);
     } catch (error) {
       return next(new DCDError(404, "Thing not found"));
     }
-  };
+  }
 
   public async createNewThing(
     req: DCDRequest,
@@ -92,9 +88,7 @@ export class ThingController {
     }
 
     try {
-      const createdThing = await this.thingService.createNewThing(
-        thing
-      );
+      const createdThing = await this.thingService.createNewThing(thing);
       if (pem !== undefined && typeof pem === "string") {
         pem.trim();
         const error = checkPEM(pem);
@@ -111,7 +105,7 @@ export class ThingController {
     } catch (error) {
       return next(error);
     }
-  };
+  }
 
   public async editThing(
     req: DCDRequest,
@@ -146,7 +140,7 @@ export class ThingController {
     }
     //After all send a 204 (no content, but accepted) response
     res.status(204).send();
-  };
+  }
 
   public async editThingPEM(
     req: DCDRequest,
@@ -172,7 +166,7 @@ export class ThingController {
       .catch((error) => {
         next(error);
       });
-  };
+  }
 
   public async deleteOneThing(
     req: DCDRequest,
@@ -189,7 +183,7 @@ export class ThingController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 
   public async countDataPoints(
     req: DCDRequest,
@@ -211,7 +205,7 @@ export class ThingController {
     } catch (error) {
       next(error);
     }
-  };
+  }
 }
 
 function checkPEM(pem: string): DCDError {

@@ -5,7 +5,6 @@ import config from "../config";
 import { Log } from "../Logger";
 import { Property } from "../thing/property/Property";
 
-import { ClientSubscribeCallback } from "mqtt";
 import { PropertyService } from "../thing/property/PropertyService";
 import { ThingService } from "../thing/ThingService";
 
@@ -14,9 +13,10 @@ import { ThingService } from "../thing/ThingService";
  * listening to /things#
  */
 export class ThingMQTTClient {
-
   // = = = = = = = = = = = MQTT API = = = = = = = = = = =
-  private static propertyCreateRegEx = new RegExp("/things/.*/properties/create");
+  private static propertyCreateRegEx = new RegExp(
+    "/things/.*/properties/create"
+  );
   private static propertyUpdateRegEx = new RegExp("/things/.*/properties/.*");
   private static thingReadRegEx = new RegExp("/things/.*/read");
   private static thingLogsRegEx = new RegExp("/things/.*/log");
@@ -57,10 +57,13 @@ export class ThingMQTTClient {
   onMQTTConnect() {
     Log.debug("Bucket connected to MQTT: " + this.client.connected);
     this.client.subscribe(
-      "/things/#", { qos: 0 },
+      "/things/#",
+      { qos: 0 },
       (error: Error, granted: ISubscriptionGrant[]) => {
         if (error) {
-          Log.error("Error while subscribing to MQTT: " + JSON.stringify(error));
+          Log.error(
+            "Error while subscribing to MQTT: " + JSON.stringify(error)
+          );
         } else {
           Log.debug("MQTT subscription success: " + JSON.stringify(granted));
         }
@@ -145,11 +148,10 @@ export class ThingMQTTClient {
     Log.debug(dtoProperty);
     try {
       const thing = await this.thingService.getOneThingById(thingId);
-      const property: Property =
-        await this.propertyService.createNewProperty(
-          thing,
-          dtoProperty
-        );
+      const property: Property = await this.propertyService.createNewProperty(
+        thing,
+        dtoProperty
+      );
       client.publish(
         "/things/" + thingId + "/reply",
         JSON.stringify({ property: property, requestId: requestId })
@@ -167,7 +169,7 @@ export class ThingMQTTClient {
     requestId: string,
     property: any,
     client: MqttClient
-  ) {
+  ): Promise<MqttClient> {
     property.thing = { id: thingId };
     try {
       await this.propertyService.updatePropertyValues(property);
@@ -194,7 +196,7 @@ export class ThingMQTTClient {
     thingId: string,
     requestId: string,
     client: MqttClient
-  ) {
+  ): Promise<MqttClient> {
     try {
       const result = await this.thingService.getOneThingById(thingId);
       return client.publish(

@@ -4,7 +4,6 @@ import { PropertyType } from "./PropertyType";
 import { DCDError } from "@datacentricdesign/types";
 
 export class PropertyTypeService {
-
   private static instance: PropertyTypeService;
 
   public static getInstance(): PropertyTypeService {
@@ -12,10 +11,6 @@ export class PropertyTypeService {
       PropertyTypeService.instance = new PropertyTypeService();
     }
     return PropertyTypeService.instance;
-  }
-
-  private constructor() {
-    
   }
 
   /**

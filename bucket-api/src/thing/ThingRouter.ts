@@ -9,7 +9,6 @@ import { DPiRouter } from "./dpi/DPiRouter";
 import config from "../config";
 import { GrafanaRouter } from "./grafana/GrafanaRouter";
 
-
 export class ThingRouter {
   private router: Router;
 
@@ -49,8 +48,7 @@ export class ThingRouter {
      *
      * @apiSuccess {object} health status
      **/
-    this.router.get("/health",
-      this.controller.apiHealth.bind(this.controller));
+    this.router.get("/health", this.controller.apiHealth.bind(this.controller));
 
     /**
      * @api {get} /things List
@@ -90,7 +88,10 @@ export class ThingRouter {
      **/
     this.router.get(
       "/:thingId",
-      [this.authController.authenticate(["dcd:things"]), this.policyController.checkPolicy("read")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("read"),
+      ],
       this.controller.getOneThingById.bind(this.controller)
     );
 
@@ -137,8 +138,10 @@ export class ThingRouter {
      **/
     this.router.patch(
       "/:thingId",
-      [this.authController.authenticate(["dcd:things"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.controller.editThing.bind(this.controller)
     );
 
@@ -158,8 +161,10 @@ export class ThingRouter {
      **/
     this.router.patch(
       "/:thingId/pem",
-      [this.authController.authenticate(["dcd:things"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.controller.editThingPEM.bind(this.controller)
     );
 
@@ -176,8 +181,10 @@ export class ThingRouter {
      **/
     this.router.delete(
       "/:thingId",
-      [this.authController.authenticate(["dcd:things"]),
-      this.policyController.checkPolicy("delete")],
+      [
+        this.authController.authenticate(["dcd:things"]),
+        this.policyController.checkPolicy("delete"),
+      ],
       this.controller.deleteOneThing.bind(this.controller)
     );
 

@@ -56,8 +56,10 @@ export class PropertyRouter {
      **/
     this.router.get(
       "/",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("read")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("read"),
+      ],
       this.controller.getProperties.bind(this.controller)
     );
 
@@ -80,8 +82,10 @@ export class PropertyRouter {
      **/
     this.router.get(
       "/:propertyId",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("read")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("read"),
+      ],
       this.controller.getOnePropertyById.bind(this.controller)
     );
 
@@ -103,8 +107,10 @@ export class PropertyRouter {
      **/
     this.router.get(
       "/:propertyId/dimensions/:dimensionId/timestamp/:timestamp",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("read")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("read"),
+      ],
       this.controller.getPropertyMediaValue.bind(this.controller)
     );
 
@@ -151,8 +157,10 @@ export class PropertyRouter {
      */
     this.router.post(
       "/",
-      [this.authController.authenticate([]),
-      this.policyController.checkPolicy("create")],
+      [
+        this.authController.authenticate([]),
+        this.policyController.checkPolicy("create"),
+      ],
       this.controller.createNewProperty.bind(this.controller)
     );
 
@@ -177,8 +185,10 @@ export class PropertyRouter {
      **/
     this.router.patch(
       "/:propertyId",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.controller.editProperty.bind(this.controller)
     );
 
@@ -202,8 +212,10 @@ export class PropertyRouter {
      **/
     this.router.put(
       "/:propertyId",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("update")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("update"),
+      ],
       this.upload.any(),
       this.controller.updatePropertyValues.bind(this.controller)
     );
@@ -222,22 +234,28 @@ export class PropertyRouter {
      **/
     this.router.delete(
       "/:propertyId",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("delete")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("delete"),
+      ],
       this.controller.deleteOneProperty.bind(this.controller)
     );
 
     this.router.get(
       "/:propertyId/count",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("read")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("read"),
+      ],
       this.controller.countDataPoints.bind(this.controller)
     );
 
     this.router.get(
       "/:propertyId/last",
-      [this.authController.authenticate(["dcd:properties"]),
-      this.policyController.checkPolicy("read")],
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("read"),
+      ],
       this.controller.lastDataPoints.bind(this.controller)
     );
 
@@ -255,8 +273,10 @@ export class PropertyRouter {
      **/
     this.router.get(
       "/:propertyId/consents",
-      [this.authController.authenticate(["dcd:properties", "dcd:consents"]),
-      this.policyController.checkPolicy("list")],
+      [
+        this.authController.authenticate(["dcd:properties", "dcd:consents"]),
+        this.policyController.checkPolicy("list"),
+      ],
       this.controller.listConsents.bind(this.controller)
     );
 
@@ -275,8 +295,10 @@ export class PropertyRouter {
      **/
     this.router.delete(
       "/:propertyId/consents/:consentId",
-      [this.authController.authenticate(["dcd:properties", "dcd:consents"]),
-      this.policyController.checkPolicy("delete")],
+      [
+        this.authController.authenticate(["dcd:properties", "dcd:consents"]),
+        this.policyController.checkPolicy("delete"),
+      ],
       this.controller.revokeConsent.bind(this.controller)
     );
 
@@ -303,11 +325,12 @@ export class PropertyRouter {
      **/
     this.router.post(
       "/:propertyId/consents",
-      [this.authController.authenticate(["dcd:properties", "dcd:consents"]),
-      this.policyController.checkPolicy("create")],
+      [
+        this.authController.authenticate(["dcd:properties", "dcd:consents"]),
+        this.policyController.checkPolicy("create"),
+      ],
       this.controller.grantConsent.bind(this.controller)
     );
-
   }
 
   // Check File Type
@@ -333,11 +356,10 @@ export class PropertyRouter {
     }
 
     // get property details with
-    const property: Property =
-      await this.propertyService.getOnePropertyById(
-        thingId,
-        propertyId
-      );
+    const property: Property = await this.propertyService.getOnePropertyById(
+      thingId,
+      propertyId
+    );
     // Double-check the property is actually part of this thing
     if (property === undefined) {
       // If not found, send a 404 response
@@ -361,10 +383,10 @@ export class PropertyRouter {
             new DCDError(
               400,
               "Error: File in field " +
-              file.fieldname +
-              " must have mime type " +
-              file.mimetype +
-              "."
+                file.fieldname +
+                " must have mime type " +
+                file.mimetype +
+                "."
             )
           );
         }
@@ -373,10 +395,10 @@ export class PropertyRouter {
           new DCDError(
             400,
             "Error: File in field " +
-            file.fieldname +
-            " must have extension " +
-            dimension.unit +
-            "."
+              file.fieldname +
+              " must have extension " +
+              dimension.unit +
+              "."
           )
         );
       }
@@ -384,7 +406,9 @@ export class PropertyRouter {
       cb(
         new DCDError(
           400,
-          "Error: field " + file.fieldname + " is not matching any dimension ID."
+          "Error: field " +
+            file.fieldname +
+            " is not matching any dimension ID."
         )
       );
     }
@@ -398,7 +422,6 @@ export class PropertyRouter {
     },
   });
 }
-
 
 // Set The Storage Engine
 const storage = multer.diskStorage({
@@ -415,13 +438,13 @@ const storage = multer.diskStorage({
       cb(
         null,
         thingId +
-        "-" +
-        propertyId +
-        "-" +
-        timestamp +
-        "#" +
-        file.fieldname +
-        path.extname(file.originalname).toLowerCase()
+          "-" +
+          propertyId +
+          "-" +
+          timestamp +
+          "#" +
+          file.fieldname +
+          path.extname(file.originalname).toLowerCase()
       );
     } else {
       if (file.fieldname === "csv") {

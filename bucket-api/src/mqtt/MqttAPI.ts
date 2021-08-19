@@ -33,7 +33,6 @@ type AuthSubscribeCallback = (
 type AuthCallback = (error: AuthenticateError, success: boolean | null) => void;
 
 export class MqttAPI {
-
   private aedes: Aedes;
   private server: net.Server | tls.Server;
 
@@ -45,7 +44,7 @@ export class MqttAPI {
     this.aedes = Server({
       authenticate: this.authenticate.bind(this),
       authorizePublish: this.authorizePublish.bind(this),
-      authorizeSubscribe: this.authorizeSubscribe.bind(this)
+      authorizeSubscribe: this.authorizeSubscribe.bind(this),
     });
 
     if (config.http.secured) {
@@ -59,7 +58,6 @@ export class MqttAPI {
       Log.debug("Creating an mqtt server...");
       this.server = net.createServer(this.aedes.handle);
     }
-
 
     this.aedes.on("clientReady", (client: Client) => {
       Log.debug("New connection: " + client.id);
@@ -104,13 +102,13 @@ export class MqttAPI {
   }
 
   public async stop(): Promise<void> {
-    this.server.close( (error: Error) => {
+    this.server.close((error: Error) => {
       if (error !== null) {
         return Promise.reject(error);
       } else {
-        return Promise.resolve()
+        return Promise.resolve();
       }
-    })
+    });
   }
 
   public async authorizePublish(
@@ -162,7 +160,7 @@ export class MqttAPI {
       );
       callback(error);
     }
-  };
+  }
 
   public async authorizeSubscribe(
     client: Client,
@@ -204,7 +202,10 @@ export class MqttAPI {
       await this.policyService.check(acp);
       callback(null, packet);
     } catch (errorResult) {
-      const error = new DCDError(4031, "Subscription denied to " + packet.topic);
+      const error = new DCDError(
+        4031,
+        "Subscription denied to " + packet.topic
+      );
       Log.error(errorResult);
       Log.debug(JSON.stringify(error));
       if (resource.includes(":properties:dcd:")) {
@@ -230,7 +231,7 @@ export class MqttAPI {
 
       return callback(error);
     }
-  };
+  }
 
   public async authenticate(
     client: Client,
@@ -273,7 +274,7 @@ export class MqttAPI {
         Log.error(error);
         callback(mqttError, false);
       });
-  };
+  }
 
   updateStatusProperty(client: Client, status: string): void {
     Log.debug("update status property...");
@@ -304,11 +305,10 @@ async function findOrCreateMQTTStatusProperty(
   thingId: string
 ): Promise<Property> {
   try {
-    const properties =
-      await this.propertyService.getPropertiesByTypeId(
-        thingId,
-        "MQTT_STATUS"
-      );
+    const properties = await this.propertyService.getPropertiesByTypeId(
+      thingId,
+      "MQTT_STATUS"
+    );
     if (properties.length > 0) {
       return Promise.resolve(properties[0]);
     } else {

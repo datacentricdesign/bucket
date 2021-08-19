@@ -29,7 +29,6 @@ export interface Policy {
  * Manage access policies
  */
 export class PolicyService {
-
   private static instance: PolicyService;
 
   public static getInstance(): PolicyService {

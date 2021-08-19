@@ -18,11 +18,10 @@ interface GridPos {
  * Manage sync with Grafana
  */
 export class GrafanaService {
-
   private thingService: ThingService;
 
   constructor() {
-    this.thingService = ThingService.getInstance()
+    this.thingService = ThingService.getInstance();
   }
 
   private grafanaHeaders = {
@@ -45,9 +44,7 @@ export class GrafanaService {
       // lock permission for this user only, as editor
       await this.setPersonFolderPermission(personId, grafanaId);
       // create a dashboard inside the user folder, with Thing name, thing id
-      const thing: Thing = await this.thingService.getOneThingById(
-        thingId
-      );
+      const thing: Thing = await this.thingService.getOneThingById(thingId);
       await this.createThingDashboard(personId, thing, folderId);
     } catch (error) {
       return Promise.reject(error);

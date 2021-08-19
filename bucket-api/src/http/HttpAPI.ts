@@ -1,9 +1,8 @@
-
 import config from "../config";
 
 import * as express from "express";
 import { Request, Response, NextFunction } from "express";
-import { Server } from "http"
+import { Server } from "http";
 
 import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
@@ -19,7 +18,6 @@ import { Log } from "../Logger";
 import { DCDError } from "@datacentricdesign/types";
 
 export class HttpAPI {
-
   app: express.Application;
   server: Server;
 
@@ -31,7 +29,6 @@ export class HttpAPI {
   dpiController: DPiController;
 
   constructor() {
-
     this.propertyController = PropertyController.getInstance();
     this.authController = AuthController.getInstance();
 
@@ -45,12 +42,12 @@ export class HttpAPI {
     this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(cookieParser());
 
-    this.app.get(config.http.baseUrl + "/", (req: Request, res: Response, next: NextFunction) => {
-      return res.status(200).send({ "status": "OK" });
+    this.app.get(config.http.baseUrl + "/", (req: Request, res: Response) => {
+      return res.status(200).send({ status: "OK" });
     });
 
     // Set all routes from routes folder
-    this.thingRouter = new ThingRouter(this.app)
+    this.thingRouter = new ThingRouter(this.app);
     this.app.use(config.http.baseUrl + "/things", this.thingRouter.getRouter());
 
     this.dpiController = DPiController.getInstance();
@@ -66,8 +63,11 @@ export class HttpAPI {
       this.dpiController.healthStatus
     );
 
-    this.propertyTypeRouter = new PropertyTypeRouter(this.app)
-    this.app.use(config.http.baseUrl + "/types", this.propertyTypeRouter.getRouter());
+    this.propertyTypeRouter = new PropertyTypeRouter(this.app);
+    this.app.use(
+      config.http.baseUrl + "/types",
+      this.propertyTypeRouter.getRouter()
+    );
 
     /**
      * @api {get} /properties List
@@ -86,15 +86,16 @@ export class HttpAPI {
       this.propertyController.getProperties
     );
 
-    this.app.use(config.http.baseUrl + "/docs", express.static("dist/public/docs/rest"));
+    this.app.use(
+      config.http.baseUrl + "/docs",
+      express.static("dist/public/docs/rest")
+    );
 
-
-    this.app.use((
-      request: Request,
-      response: Response,
-      next: NextFunction): void => {
-      next(new DCDError(404, 'This URL does not match any Bucket API.'));
-    });
+    this.app.use(
+      (request: Request, response: Response, next: NextFunction): void => {
+        next(new DCDError(404, "This URL does not match any Bucket API."));
+      }
+    );
 
     this.app.use(this.errorHandler);
   }
@@ -114,16 +115,15 @@ export class HttpAPI {
       } else {
         return Promise.resolve();
       }
-    })
+    });
   }
 
   public errorHandler(
     error: DCDError,
     request: Request,
-    response: Response,
-    next: NextFunction
+    response: Response
   ): void {
-    Log.debug("Error on route: " + request.originalUrl)
+    Log.debug("Error on route: " + request.originalUrl);
     const status = error._statusCode || 500;
     const message = error.message || "Something went wrong";
     Log.debug(

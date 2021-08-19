@@ -5,7 +5,6 @@ import { DCDError } from "@datacentricdesign/types";
 import { DPiService } from "./DPiService";
 
 export class DPiController {
-
   private static instance: DPiController;
 
   public static getInstance(): DPiController {
@@ -39,7 +38,7 @@ export class DPiController {
       dcdError._statusCode = 503;
       return next(dcdError);
     }
-  };
+  }
 
   public async getOneDPIImage(
     req: Request,
@@ -82,7 +81,7 @@ export class DPiController {
       }
       return next(error);
     }
-  };
+  }
 
   public async generateNewDPIImage(
     req: Request,
@@ -98,7 +97,7 @@ export class DPiController {
     } catch (error) {
       return next(error);
     }
-  };
+  }
 
   public async cancelDPiImageGeneration(
     req: Request,
@@ -119,7 +118,7 @@ export class DPiController {
     } catch (error) {
       return next(error);
     }
-  };
+  }
 
   public async deleteDPiImage(
     req: Request,
@@ -137,7 +136,7 @@ export class DPiController {
     } catch (error) {
       return next(error);
     }
-  };
+  }
 }
 
 export default DPiController;

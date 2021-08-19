@@ -56,7 +56,7 @@ export class PropertyTypeRouter {
      *
      * @apiHeader {String} Authorization TOKEN ID
      **/
-     this.router.post(
+    this.router.post(
       "/",
       [this.authController.authenticate(["dcd:types"])],
       this.controller.createOnePropertyType.bind(this.controller)
@@ -71,12 +71,10 @@ export class PropertyTypeRouter {
      *
      * @apiHeader {String} Authorization TOKEN ID
      **/
-     this.router.delete(
+    this.router.delete(
       "/:propertyTypeId",
       [this.authController.authenticate(["dcd:types"])],
       this.controller.deleteOnePropertyTypeById.bind(this.controller)
     );
   }
-
 }
-

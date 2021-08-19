@@ -3,18 +3,9 @@ import { DCDError } from "@datacentricdesign/types";
 import * as ws from "ws";
 import { WebsocketRequestHandler } from "express-ws";
 import { DCDRequest } from "../config";
-import { Token } from "simple-oauth2";
-import { AuthService } from "./AuthService";
-
-interface User {
-  entityId?: string;
-  token?: string;
-  sub?: string;
-  token_type?: string;
-}
+import { AuthService, User } from "./AuthService";
 
 export class AuthController {
-
   private static instance: AuthController;
 
   public static getInstance(): AuthController {
@@ -35,20 +26,26 @@ export class AuthController {
    * determined if it is valid and who it belongs to.
    */
   authenticate(requiredScope: string[]): RequestHandler {
-    return async (req: DCDRequest, res: Response, next: NextFunction): Promise<void> => {
+    return async (
+      req: DCDRequest,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> => {
       return this._authenticate(requiredScope, req, next);
     };
   }
 
-  authenticateWs(
-    requiredScope: string[]
-  ): WebsocketRequestHandler {
-    return async (ws: ws, req: DCDRequest, next: NextFunction): Promise<void> => {
+  authenticateWs(requiredScope: string[]): WebsocketRequestHandler {
+    return async (
+      ws: ws,
+      req: DCDRequest,
+      next: NextFunction
+    ): Promise<void> => {
       return this._authenticate(requiredScope, req, next);
     };
   }
 
-  _authenticate(
+  async _authenticate(
     requiredScope: string[],
     req: DCDRequest,
     next: NextFunction
@@ -56,40 +53,23 @@ export class AuthController {
     if (requiredScope.length === 0) {
       requiredScope = ["dcd:things"];
     }
-
     try {
       const token = extractToken(req);
-      return this.authService
-        .refresh()
-        .then(() => {
-          if (token.split(".").length === 3 && req.params.thingId !== undefined) {
-            return this.authService
-              .checkJWTAuth(token, req.params.thingId)
-              .then((token: Token) => {
-                const user = {
-                  entityId: req.params.thingId,
-                  token: token,
-                  sub: req.params.thingId,
-                };
-                return Promise.resolve(user);
-              });
-          } else {
-            return this.authService.introspect(token, requiredScope);
-          }
-        })
-        .then((user: User) => {
-          req.context = {
-            userId: user.sub,
-          };
-          next();
-        })
-        .catch((error: DCDError) => next(error));
+      let user: User = null;
+      if (token.split(".").length === 3 && req.params.thingId !== undefined) {
+        user = await this.authService.checkJWTAuth(token, req.params.thingId);
+      } else {
+        user = await this.authService.introspect(token, requiredScope);
+      }
+      req.context = {
+        userId: user.sub,
+      };
+      next();
     } catch (error) {
       next(error);
     }
   }
 }
-
 
 /**
  * Check and extract the token from the header
@@ -116,14 +96,3 @@ function extractToken(req: DCDRequest): string {
     throw new DCDError(4031, "Add 'Authorization' header.");
   }
 }
-
-// function refresh() {
-//   if (this.token) {
-//     if (this.token.expired()) {
-//       return this.requestNewToken();
-//     }
-//     return Promise.resolve();
-//   }
-
-//   return this.requestNewToken();
-// }
