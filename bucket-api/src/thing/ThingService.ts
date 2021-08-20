@@ -10,12 +10,6 @@ import jwkToBuffer = require("jwk-to-pem");
 import { PropertyService } from "./property/PropertyService";
 import { PolicyService } from "../policy/PolicyService";
 
-export interface Token {
-  aud: string;
-  exp: number;
-  sub: string;
-}
-
 export class ThingService {
   private static instance: ThingService;
 

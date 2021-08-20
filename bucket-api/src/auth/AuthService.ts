@@ -18,10 +18,19 @@ export interface KeySet {
   privateKey: string;
 }
 
+export interface Token {
+  iss: string;
+  aud: string;
+  exp: number;
+  iat: number;
+  sub: string;
+}
+
 export interface User {
   entityId?: string;
   token?: string;
   sub?: string;
+  exp: number;
   token_type?: string;
 }
 
@@ -112,10 +121,12 @@ export class AuthService {
           new DCDError(4031, "The bearer token is not an access token")
         );
       }
+      Log.debug(result);
       return Promise.resolve({
         entityId: result.sub,
         token: token,
         sub: result.sub,
+        exp: 0,
         token_type: result.token_type,
       });
     } catch (error) {
@@ -229,8 +240,8 @@ export class AuthService {
         token.toString(),
         publicKey,
         options,
-        // introspectionToken (type Token) can be used as second parameter.
-        (error: Error, decoded: any) => {
+        // decoded (type Token) can be used as second parameter.
+        (error: Error, decoded: Token) => {
           if (error) {
             Log.error(error)
             reject(new DCDError(403, error.message));
@@ -240,6 +251,7 @@ export class AuthService {
             resolve({
               entityId: thingId,
               token: token,
+              exp: decoded.exp,
               sub: thingId,
               token_type: "jwt",
             });
