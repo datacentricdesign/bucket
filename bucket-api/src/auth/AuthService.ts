@@ -234,6 +234,7 @@ export class AuthService {
           Log.error(error)
           return Promise.reject(new DCDError(403, error.message));
         } else {
+          Log.error("there is no error, set sub as thingId: " + thingId)
           return Promise.resolve({
             entityId: thingId,
             token: token,
