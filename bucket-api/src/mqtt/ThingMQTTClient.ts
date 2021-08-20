@@ -179,7 +179,7 @@ export class ThingMQTTClient {
         property.id
       );
       retrievedProperty.values = property.values;
-      await this.propertyService.updatePropertyValues(property);
+      await this.propertyService.updatePropertyValues(retrievedProperty);
       return client.publish(
         "/things/" + thingId + "/log",
         JSON.stringify({
