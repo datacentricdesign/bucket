@@ -224,26 +224,27 @@ export class AuthService {
     };
     Log.debug("options: " + JSON.stringify(options));
     Log.debug(token.toString());
-    jwt.verify(
-      token.toString(),
-      publicKey,
-      options,
-      // introspectionToken (type Token) can be used as second parameter.
-      (error: Error) => {
-        if (error) {
-          Log.error(error)
-          return Promise.reject(new DCDError(403, error.message));
-        } else {
-          Log.error("there is no error, set sub as thingId: " + thingId)
-          return Promise.resolve({
-            entityId: thingId,
-            token: token,
-            sub: thingId,
-            token_type: "jwt",
-          });
-        }
-      }
-    );
+    return new Promise((resolve, reject) => {
+      jwt.verify(
+        token.toString(),
+        publicKey,
+        options,
+        // introspectionToken (type Token) can be used as second parameter.
+        (error: Error) => {
+          if (error) {
+            Log.error(error)
+            reject(new DCDError(403, error.message));
+          } else {
+            Log.error("There is no error, set sub as thingId: " + thingId)
+            resolve({
+              entityId: thingId,
+              token: token,
+              sub: thingId,
+              token_type: "jwt",
+            });
+          }
+        });
+    });
   }
 
   refreshTokenIfExpired(): Promise<void> {
