@@ -126,12 +126,12 @@ export class PropertyRouter {
      *
      * @apiParam (Query) {String} authorization The access token.
      **/
-    this.router.ws(
-      "/:propertyId/stream",
-      this.authController.authenticateWs(["dcd:properties"]),
-      this.policyController.checkPolicyWs("read"),
-      this.controller.streamMedia.bind(this.controller)
-    );
+    // this.router.ws(
+    //   "/:propertyId/stream",
+    //   this.authController.authenticateWs(["dcd:properties"]),
+    //   this.policyController.checkPolicyWs("read"),
+    //   this.controller.streamMedia.bind(this.controller)
+    // );
 
     /**
      * @api {post} /things/:thingId/properties Create
