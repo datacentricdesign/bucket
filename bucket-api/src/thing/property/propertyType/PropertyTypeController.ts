@@ -73,6 +73,9 @@ export class PropertyTypeController {
       dim.description = dimensions[i].description;
       dim.unit = dimensions[i].unit;
       dim.type = dimensions[i].type;
+      if (dimensions[i].labels !== undefined) {
+        dim.labels = dimensions[i].labels;
+      }
       propertyType.dimensions.push(dim);
     }
 

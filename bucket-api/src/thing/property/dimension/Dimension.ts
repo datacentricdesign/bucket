@@ -30,7 +30,7 @@ export class Dimension implements IDimension {
 
   @Column({
     type: "simple-array",
-    default: []
+    default: ""
   })
   labels?: string[];
 }
