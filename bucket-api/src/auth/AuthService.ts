@@ -92,6 +92,7 @@ export class AuthService {
    */
   async introspect(token: string, requiredScope: string[] = []): Promise<User> {
     const body = { token: token, scope: requiredScope.join(" ") };
+    Log.debug(body);
     const url = config.oauth2.oAuth2IntrospectURL;
 
     try {
