@@ -101,7 +101,6 @@ export class AuthService {
    */
   async introspect(token: string, requiredScope: string[] = []): Promise<User> {
     const body = { token: token, scope: requiredScope.join(" ") };
-    Log.debug(body);
     const url = config.oauth2.oAuth2IntrospectURL;
 
     try {
@@ -217,7 +216,6 @@ export class AuthService {
    * @param entity
    */
   async checkJWTAuth(token: string, thingId: string): Promise<User> {
-    Log.debug("check JWT auth");
     // Public keys are cached by thingId, we check if this one is cached
     let publicKey = null;
     try {
@@ -232,8 +230,6 @@ export class AuthService {
       clockTimestamp: Math.floor(new Date().getMilliseconds() / 1000),
       clockTolerance: 5,
     };
-    Log.debug("options: " + JSON.stringify(options));
-    Log.debug(token.toString());
     return new Promise((resolve, reject) => {
       jwt.verify(
         token.toString(),
@@ -242,11 +238,9 @@ export class AuthService {
         // decoded (type Token) can be used as second parameter.
         (error: Error, decoded: Token) => {
           if (error) {
-            Log.error(error)
+            Log.debug(error)
             reject(new DCDError(403, error.message));
           } else {
-            Log.debug("There is no error, set sub as thingId: " + thingId)
-            Log.debug(JSON.stringify(decoded))
             resolve({
               entityId: thingId,
               token: token,

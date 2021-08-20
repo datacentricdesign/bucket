@@ -59,7 +59,6 @@ export class AuthController {
       let user: User = null;
       if (token.split(".").length === 3 && req.params.thingId !== undefined) {
         user = await this.authService.checkJWTAuth(token, req.params.thingId);
-        Log.debug("result introspect user: " + JSON.stringify(user));
       } else {
         user = await this.authService.introspect(token, requiredScope);
       }
