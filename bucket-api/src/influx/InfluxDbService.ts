@@ -95,6 +95,7 @@ export class InfluxDbService {
         points.push(point);
       }
     }
+    Log.debug(points)
     return this.influx.writePoints(points, { precision: "ms" });
   }
 
