@@ -121,12 +121,11 @@ export class AuthService {
           new DCDError(4031, "The bearer token is not an access token")
         );
       }
-      Log.debug(result);
       return Promise.resolve({
         entityId: result.sub,
         token: token,
         sub: result.sub,
-        exp: 0,
+        exp: result.exp,
         token_type: result.token_type,
       });
     } catch (error) {
