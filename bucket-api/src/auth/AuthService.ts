@@ -222,14 +222,14 @@ export class AuthService {
       clockTimestamp: Math.floor(new Date().getMilliseconds() / 1000),
       clockTolerance: 5,
     };
-    Log.debug("options: " + options)
+    Log.debug("options: " + JSON.stringify(options));
+    Log.debug(token.toString());
     jwt.verify(
       token.toString(),
       publicKey,
       options,
       // introspectionToken (type Token) can be used as second parameter.
-      (error: Error, introspectionToken: any) => {
-        Log.debug(introspectionToken);
+      (error: Error) => {
         if (error) {
           Log.error(error)
           return Promise.reject(new DCDError(403, error.message));
