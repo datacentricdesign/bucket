@@ -239,6 +239,8 @@ export class AuthService {
         (error: Error, decoded: Token) => {
           if (error) {
             Log.debug(error)
+            Log.debug(token.toString())
+            Log.debug(decoded)
             reject(new DCDError(403, error.message));
           } else {
             resolve({
