@@ -230,12 +230,13 @@ export class AuthService {
         publicKey,
         options,
         // introspectionToken (type Token) can be used as second parameter.
-        (error: Error) => {
+        (error: Error, decoded: any) => {
           if (error) {
             Log.error(error)
             reject(new DCDError(403, error.message));
           } else {
-            Log.error("There is no error, set sub as thingId: " + thingId)
+            Log.debug("There is no error, set sub as thingId: " + thingId)
+            Log.debug(JSON.stringify(decoded))
             resolve({
               entityId: thingId,
               token: token,
