@@ -19,6 +19,7 @@ import { Token } from "simple-oauth2";
 import { PropertyService } from "../thing/property/PropertyService";
 import { PolicyService } from "../policy/PolicyService";
 import { AuthService } from "../auth/AuthService";
+import { ThingService } from "../thing/ThingService";
 
 interface Client extends AedesClient {
   context: Context;
@@ -37,6 +38,7 @@ export class MqttAPI {
   private server: net.Server | tls.Server;
 
   private propertyService: PropertyService;
+  private thingService: ThingService;
   private policyService: PolicyService;
   private authService: AuthService;
 
@@ -89,6 +91,7 @@ export class MqttAPI {
     });
 
     this.propertyService = PropertyService.getInstance();
+    this.thingService = ThingService.getInstance();
     this.policyService = PolicyService.getInstance();
     this.authService = AuthService.getInstance();
   }
@@ -283,7 +286,7 @@ export class MqttAPI {
   updateStatusProperty(client: Client, status: string): void {
     Log.debug("update status property...");
     if (client.context.userId.startsWith("dcd:things:")) {
-      findOrCreateMQTTStatusProperty(client.context.userId)
+      this.findOrCreateMQTTStatusProperty(client.context.userId)
         .then((property: Property) => {
           property.values = [[new Date().getTime(), status]];
           this.propertyService.updatePropertyValues(property);
@@ -293,34 +296,31 @@ export class MqttAPI {
         });
     }
   }
+
+  async findOrCreateMQTTStatusProperty(
+    thingId: string
+  ): Promise<Property> {
+    try {
+      const properties = await this.propertyService.getPropertiesByTypeId(
+        thingId,
+        "MQTT_STATUS"
+      );
+      if (properties.length > 0) {
+        return Promise.resolve(properties[0]);
+      } else {
+        const thing = await this.thingService.getOneThingById(thingId);
+        return this.propertyService.createNewProperty(thing, {
+          typeId: "MQTT_STATUS",
+        });
+      }
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
 }
 
 function accessIsStillValid(client: Client): boolean {
   Log.debug("Expiry time: " + client.tokenExpiryTime);
   Log.debug("Current time: " + Math.floor(Date.now() / 1000));
   return client.tokenExpiryTime > Math.floor(Date.now() / 1000);
-}
-
-/**
- *
- * @param thingId
- */
-async function findOrCreateMQTTStatusProperty(
-  thingId: string
-): Promise<Property> {
-  try {
-    const properties = await this.propertyService.getPropertiesByTypeId(
-      thingId,
-      "MQTT_STATUS"
-    );
-    if (properties.length > 0) {
-      return Promise.resolve(properties[0]);
-    } else {
-      return this.propertyService.createNewProperty(thingId, {
-        typeId: "MQTT_STATUS",
-      });
-    }
-  } catch (error) {
-    return Promise.reject(error);
-  }
 }
