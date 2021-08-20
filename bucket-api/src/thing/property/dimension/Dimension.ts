@@ -28,6 +28,9 @@ export class Dimension implements IDimension {
   @Column()
   type: string;
 
-  @Column("simple-array")
+  @Column({
+    type: "simple-array",
+    default: []
+  })
   labels?: string[];
 }
