@@ -230,6 +230,8 @@ export class AuthService {
       clockTimestamp: Math.floor(new Date().getMilliseconds() / 1000),
       clockTolerance: 5,
     };
+
+    Log.debug(publicKey)
     return new Promise((resolve, reject) => {
       jwt.verify(
         token.toString(),
