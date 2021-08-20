@@ -10,6 +10,7 @@ export interface DPI {
   enable_SSH: string;
   private_key: string;
   target_hostname: string;
+  bucket_host: string;
 }
 
 export class DPiService {
@@ -40,6 +41,7 @@ export class DPiService {
     dpi.id = thingId;
     dpi.enable_SSH = dpi.enable_SSH ? "1" : "0";
     dpi.private_key = keys.privateKey;
+    dpi.bucket_host = config.http.host;
 
     this.createOrUpdateHostnameProperty(thingId, dpi.target_hostname);
 
