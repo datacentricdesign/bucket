@@ -260,7 +260,7 @@ export class ThingComponent implements OnInit {
                 details += ': ' + type.dimensions[dim].description
             }
             if (type.dimensions[dim].labels !== undefined && type.dimensions[dim].labels.length > 0) {
-                details += '<br>Labels: ' + type.dimensions[dim].labels.join(' ') 
+                details += '<br>Labels: [' + type.dimensions[dim].labels.join('] , [') + ']';
             }
             details += '</li>'
         }
