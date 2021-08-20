@@ -259,6 +259,9 @@ export class ThingComponent implements OnInit {
             if (type.dimensions[dim].description !== '') {
                 details += ': ' + type.dimensions[dim].description
             }
+            if (type.dimensions[dim].labels !== undefined && type.dimensions[dim].labels.length > 0) {
+                details += '<br>Labels: ' + type.dimensions[dim].labels.join(' ') 
+            }
             details += '</li>'
         }
         details += '</ul>'
