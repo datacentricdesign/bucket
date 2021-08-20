@@ -21,6 +21,9 @@ import { PolicyService } from "../policy/PolicyService";
 import { AuthService } from "../auth/AuthService";
 import { ThingService } from "../thing/ThingService";
 
+const MQTT_CODE_BAD_USERNAME_OR_PASSWORD = 4;
+const MQTT_CODE_NOT_AUTHORIZED = 5;
+
 interface Client extends AedesClient {
   context: Context;
   tokenExpiryTime: number;
@@ -261,7 +264,7 @@ export class MqttAPI {
       const error = <AuthenticateError>(
         new Error("Missing token in the password field.")
       );
-      error.returnCode = AuthErrorCode.BAD_USERNAME_OR_PASSWORD;
+      error.returnCode = MQTT_CODE_BAD_USERNAME_OR_PASSWORD;
       callback(error, null);
       return callback(error, false);
     }
@@ -277,7 +280,7 @@ export class MqttAPI {
       .catch((error: DCDError) => {
         Log.error(error);
         const mqttError = <AuthenticateError>new Error(error.message);
-        mqttError.returnCode = AuthErrorCode.BAD_USERNAME_OR_PASSWORD;
+        mqttError.returnCode = MQTT_CODE_NOT_AUTHORIZED;
         Log.error(error);
         callback(mqttError, false);
       });
