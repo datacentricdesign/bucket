@@ -1,3 +1,3 @@
-import { ORMConfig } from './ormConfig'
+import { ORMConfig } from "./ormConfig";
 
 module.exports = ORMConfig;

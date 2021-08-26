@@ -15,9 +15,9 @@
                 (IPv{{ipAddress[2]}})
             </li>
             <li *ngIf="dns.length > 0">
-                Hostname: {{dns[3]}} (Local: <a href="http://{{dns[2]}}" target="_blank">{{dns[2]}}</a>
+                Hostname: {{dns[3]}} (Local: <a href="http://{{dns[2]}}" target="_blank" rel="noopener noreferrer nofollow" >{{dns[2]}}</a>
                 <span *ngIf="dns[1]!==''">
-                    / FQDN: <a href="http://{{dns[1]}}" target="_blank">{{dns[1]}}</a>
+                    / FQDN: <a href="http://{{dns[1]}}" target="_blank" rel="noopener noreferrer nofollow" >{{dns[1]}}</a>
                 </span>
                 )
             </li>
@@ -27,7 +27,7 @@
     <p>{{thing.description}}</p>
     <button *ngIf="grafanaId > 0" type="button" (click)="visualiseWithGrafana(thing.id)"
         class="btn btn-success">Visualise with Grafana</button>
-    <a *ngIf="grafanaId === 0" href="{{grafanaURL}}" target="_blank">Give permission to visualise your data with
+    <a *ngIf="grafanaId === 0" href="{{grafanaURL}}" target="_blank" rel="noopener noreferrer nofollow" >Give permission to visualise your data with
         Grafana</a>
 
     <h2>Properties</h2>

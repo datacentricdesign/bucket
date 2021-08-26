@@ -1,14 +1,15 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 import { cleanEnv, str, port, bool, url } from "envalid";
 import { envConfig } from "./envConfig";
 import { ORMConfig } from "./ormConfig";
 import { httpConfig } from "./httpConfig";
-import { authConfig } from './authConfig';
-import { influxdbConfig } from './influxdbConfig';
-import { mqttConfig } from './mqttConfig';
-import { grafanaConfig } from './grafanaConfig';
-import { Context } from '@datacentricdesign/types';
+import { authConfig } from "./authConfig";
+import { influxdbConfig } from "./influxdbConfig";
+import { mqttConfig } from "./mqttConfig";
+import { grafanaConfig } from "./grafanaConfig";
+import { Context } from "@datacentricdesign/types";
+import { Request } from "express";
 
 function validateEnv() {
   cleanEnv(process.env, {
@@ -52,12 +53,11 @@ function validateEnv() {
     GRAFANA_API_URL: url(),
     GRAFANA_API_KEY: str(),
     GRAFANA_USER: str(),
-    GRAFANA_PASS: str()
+    GRAFANA_PASS: str(),
   });
-
 }
 
-validateEnv()
+validateEnv();
 
 export default {
   hostDataFolder: process.env.HOST_DATA_FOLDER,
@@ -72,10 +72,6 @@ export default {
 
 // Setup context of Request to pass user info once identified
 
-declare global {
-  namespace Express {
-    interface Request {
-      context: Context
-    }
-  }
-}
+export type DCDRequest = Request & {
+  context: Context;
+};

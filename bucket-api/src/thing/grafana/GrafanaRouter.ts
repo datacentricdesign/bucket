@@ -1,32 +1,57 @@
-import { Router } from "express";
+import { Application, Router } from "express";
 
-import GrafanaController from "./GrafanaController";
-import { introspectToken } from "../middlewares/introspectToken";
-import { checkPolicy } from "../middlewares/checkPolicy";
+import { GrafanaController } from "./GrafanaController";
+import { AuthController } from "../../auth/AuthController";
 
-export const GrafanaRouter = Router({mergeParams: true});
+export class GrafanaRouter {
+  private router: Router;
 
-/**
- * @api {post} /
- * @apiGroup Grafana
- * @apiDescription Create Grafana dashboard for a Thing
- *
- * @apiVersion 0.0.1
-**/
-GrafanaRouter.post(
-    "/",
-    [introspectToken(['dcd:things'])],
-    GrafanaController.createGrafanaDashboard);
+  private controller: GrafanaController;
+  private authController: AuthController;
 
+  private app: Application;
 
-/**
- * @api {get} /user
- * @apiGroup Grafana
- * @apiDescription Get user id on Grafana
- *
- * @apiVersion 0.0.1
-**/
-GrafanaRouter.get(
-    "/user",
-    [introspectToken(['dcd:things'])],
-    GrafanaController.getGrafanaUserId);
+  constructor(app: Application) {
+    this.app = app;
+    this.router = Router({ mergeParams: true });
+    this.controller = new GrafanaController();
+    this.authController = AuthController.getInstance();
+    this.setRoutes();
+  }
+
+  getRouter(): Router {
+    return this.router;
+  }
+
+  getController(): GrafanaController {
+    return this.controller;
+  }
+
+  setRoutes(): void {
+    /**
+     * @api {post} /
+     * @apiGroup Grafana
+     * @apiDescription Create Grafana dashboard for a Thing
+     *
+     * @apiVersion 0.0.1
+     **/
+    this.router.post(
+      "/",
+      [this.authController.authenticate(["dcd:things"])],
+      this.controller.createGrafanaDashboard.bind(this.controller)
+    );
+
+    /**
+     * @api {get} /user
+     * @apiGroup Grafana
+     * @apiDescription Get user id on Grafana
+     *
+     * @apiVersion 0.0.1
+     **/
+    this.router.get(
+      "/user",
+      [this.authController.authenticate(["dcd:things"])],
+      this.controller.getGrafanaUserId.bind(this.controller)
+    );
+  }
+}
