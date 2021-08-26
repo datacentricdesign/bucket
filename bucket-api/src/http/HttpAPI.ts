@@ -56,7 +56,7 @@ export class HttpAPI {
      * @apiGroup DPi
      * @apiDescription Health status of the DPi Generator (available or not available)
      *
-     * @apiVersion 0.1.1
+     * @apiVersion 0.1.2
      **/
     this.app.get(
       config.http.baseUrl + "/things/types/dpi/health",
@@ -74,7 +74,7 @@ export class HttpAPI {
      * @apiGroup Properties
      * @apiDescription List all properties accessible for the authenticated person.
      *
-     * @apiVersion 0.1.1
+     * @apiVersion 0.1.2
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
