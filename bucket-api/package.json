@@ -8,7 +8,7 @@
     "build": "tsc",
     "typeorm:cli": "node ./node_modules/typeorm/cli -f ./dist/config/ormMigrationWrap.js",
     "migration:run": "npm run typeorm:cli migration:run",
-    "prod": "npm run doc && ts-node ./src/index.ts",
+    "prod": "npm run apidoc && ts-node ./src/index.ts",
     "apidoc": "apidoc -i src/ -o dist/public/docs/rest",
     "esdoc": "./node_modules/.bin/esdoc",
     "lint": "eslint 'src/**/*.ts'",
