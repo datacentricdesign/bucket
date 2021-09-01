@@ -228,7 +228,7 @@ export class PolicyService {
     try {
       while (lastResultSize == 500) {
         const res = await fetch(url + fullList.length, options);
-        console.log(url)
+        console.log(url + fullList.length)
         if (res.ok) {
           let result = await res.json();
           if (result === null) {
