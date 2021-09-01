@@ -482,7 +482,10 @@ export class PropertyController {
       resources: [propertyId],
       effect: "allow",
       id: id,
+      conditions: new Map<string, string>(),
+      description: ""
     };
+
     Log.debug("granting: " + JSON.stringify(acp));
     // Call the Service
     try {
