@@ -273,6 +273,7 @@ export class PolicyService {
         const res = await fetch(url+(i*500), options);
         if (res.ok) {
           let result = await res.json();
+          console.log(result)
           if (result !== null) {
             totalResults.push(result);
           }
