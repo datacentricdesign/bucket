@@ -236,7 +236,7 @@ export class PolicyService {
           }
           console.log("result count " + result.length)
           lastResultSize = result.length
-          fullList.push(result as AccessControlPolicy[])
+          fullList.push(...result as AccessControlPolicy[])
         } else {
           return fullList.length;
         }
@@ -280,7 +280,7 @@ export class PolicyService {
           let result = await res.json();
           console.log(result)
           if (result !== null) {
-            totalResults.push(result);
+            totalResults.push(...result);
           }
         }
         console.log(totalResults)
