@@ -273,8 +273,10 @@ export class PolicyService {
         method: "GET",
       };
       const totalPages = Math.ceil(totalConsents / 500);
+      console.log("total pages:  " + totalPages)
       const totalResults = [];
       for (let i = 0; i < totalPages; i++) {
+        console.log(url + (i * 500))
         const res = await fetch(url + (i * 500), options);
         if (res.ok) {
           let result = await res.json();
