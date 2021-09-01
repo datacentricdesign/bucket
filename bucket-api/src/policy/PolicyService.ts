@@ -217,7 +217,6 @@ export class PolicyService {
   }
 
   async getTotalConsents(flavor) {
-    console.log("get total count")
     const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies?limit=500&offset=";
     const options = {
       headers: this.ketoHeaders,
@@ -228,13 +227,11 @@ export class PolicyService {
     try {
       while (lastResultSize == 500) {
         const res = await fetch(url + fullList.length, options);
-        console.log(url + fullList.length)
         if (res.ok) {
           let result = await res.json();
           if (result === null) {
             return fullList.length
           }
-          console.log("result count " + result.length)
           lastResultSize = result.length
           fullList.push(...result as AccessControlPolicy[])
         } else {
@@ -257,7 +254,6 @@ export class PolicyService {
     id: string,
     flavor = "exact"
   ): Promise<AccessControlPolicy[]> {
-    console.log("list consents for " + type + "=" + id)
     try {
       const totalConsents = await this.getTotalConsents(flavor);
       const url =
@@ -273,19 +269,15 @@ export class PolicyService {
         method: "GET",
       };
       const totalPages = Math.ceil(totalConsents / 500);
-      console.log("total pages:  " + totalPages)
       const totalResults = [];
       for (let i = 0; i < totalPages; i++) {
-        console.log(url + (i * 500))
         const res = await fetch(url + (i * 500), options);
         if (res.ok) {
           let result = await res.json();
-          console.log(result)
           if (result !== null) {
             totalResults.push(...result);
           }
         }
-        console.log(totalResults)
       }
       return Promise.resolve(totalResults as AccessControlPolicy[]);
     } catch (error) {
@@ -368,8 +360,6 @@ export class PolicyService {
         body: JSON.stringify(policy),
       });
       const acp = await result.json();
-      console.log(url)
-      console.log(acp)
       return Promise.resolve(acp as AccessControlPolicy);
     } catch (error) {
       return Promise.reject(new DCDError(403, "Not allowed: " + error.message));

@@ -133,7 +133,6 @@ export class PropertyService {
 
     let resources = [];
     const resourcesOrigin = {};
-    console.log(consents)
     for (let i = 0; i < consents.length; i++) {
       if (consents[i].effect === "allow") {
         for (let j = 0; j < consents[i].resources.length; j++) {
