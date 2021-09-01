@@ -257,7 +257,7 @@ export class PolicyService {
     id: string,
     flavor = "exact"
   ): Promise<AccessControlPolicy[]> {
-    console.log("list consents")
+    console.log("list consents for " + type + "=" + id)
     try {
       const totalConsents = await this.getTotalConsents(flavor);
       const url =
