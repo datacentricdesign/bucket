@@ -286,8 +286,8 @@ export class PolicyService {
           }
         }
         console.log(totalResults)
-        return Promise.resolve(totalResults as AccessControlPolicy[]);
       }
+      return Promise.resolve(totalResults as AccessControlPolicy[]);
     } catch (error) {
       return Promise.reject(error);
     }
