@@ -197,7 +197,6 @@ export class PropertyService {
       .getOne();
 
     if (property !== undefined && valueOptions != undefined) {
-      Log.debug(valueOptions.from);
       return this.influxDbService.readValuesFromInfluxDB(
         property,
         valueOptions

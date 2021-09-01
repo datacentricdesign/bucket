@@ -328,6 +328,8 @@ export class PolicyService {
         body: JSON.stringify(policy),
       });
       const acp = await result.json();
+      console.log(url)
+      console.log(acp)
       return Promise.resolve(acp as AccessControlPolicy);
     } catch (error) {
       return Promise.reject(new DCDError(403, "Not allowed: " + error.message));
