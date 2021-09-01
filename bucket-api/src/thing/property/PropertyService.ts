@@ -111,6 +111,7 @@ export class PropertyService {
     let groups = [];
     if (audienceId === "*") {
       groups = await this.policyService.listGroupMembership(subject);
+      groups.push(actor)
     } else {
       try {
         await this.policyService.checkGroupMembership(subject, audienceId);
