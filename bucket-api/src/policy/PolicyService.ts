@@ -29,6 +29,7 @@ export interface Policy {
  * Manage access policies
  */
 export class PolicyService {
+
   private static instance: PolicyService;
 
   public static getInstance(): PolicyService {
@@ -42,6 +43,8 @@ export class PolicyService {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
+
+  private cacheTotalConsents = -1;
 
   private constructor() {
     if (httpConfig.secured) {
@@ -216,7 +219,10 @@ export class PolicyService {
     }
   }
 
-  async getTotalConsents(flavor) {
+  async getTotalConsents(flavor:string): Promise<number> {
+    if (this.cacheTotalConsents !== -1) {
+      return this.cacheTotalConsents;
+    }
     const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies?limit=500&offset=";
     const options = {
       headers: this.ketoHeaders,
@@ -230,15 +236,16 @@ export class PolicyService {
         if (res.ok) {
           let result = await res.json();
           if (result === null) {
-            return fullList.length
+            return fullList.length;
           }
-          lastResultSize = result.length
+          lastResultSize = result.length;
           fullList.push(...result as AccessControlPolicy[])
         } else {
           return fullList.length;
         }
       }
-      return fullList.length
+      this.cacheTotalConsents = fullList.length;
+      return this.cacheTotalConsents;
     } catch (error) {
       return Promise.reject(error);
     }
@@ -354,6 +361,7 @@ export class PolicyService {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
     try {
+      this.cacheTotalConsents = -1
       const result = await fetch(url, {
         headers: this.ketoHeaders,
         method: "PUT",
@@ -367,6 +375,7 @@ export class PolicyService {
   }
 
   async deleteKetoPolicy(policyId: string, flavor = "regex"): Promise<void> {
+    this.cacheTotalConsents = -1;
     try {
       await fetch(
         config.oauth2.acpURL.origin +
