@@ -217,6 +217,7 @@ export class PolicyService {
   }
 
   async getTotalConsents(flavor) {
+    console.log("get total count")
     const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies?limit=500&offset=";
     const options = {
       headers: this.ketoHeaders,
@@ -232,12 +233,14 @@ export class PolicyService {
           if (result === null) {
             return fullList.length
           }
+          console.log("result count " + result.length)
           lastResultSize = result.length
           fullList.push(result as AccessControlPolicy[])
         } else {
           return fullList.length;
         }
       }
+      return fullList.length
     } catch (error) {
       return Promise.reject(error);
     }
@@ -253,24 +256,25 @@ export class PolicyService {
     id: string,
     flavor = "exact"
   ): Promise<AccessControlPolicy[]> {
-    const totalConsents = await this.getTotalConsents(flavor);
-    const url =
-      config.oauth2.acpURL.origin +
-      "/engines/acp/ory/" +
-      flavor +
-      "/policies?limit=500&" +
-      type +
-      "=" +
-      id + "&offset=";
-    const options = {
-      headers: this.ketoHeaders,
-      method: "GET",
-    };
+    console.log("list consents")
     try {
-      const totalPages = Math.ceil(totalConsents/500);
+      const totalConsents = await this.getTotalConsents(flavor);
+      const url =
+        config.oauth2.acpURL.origin +
+        "/engines/acp/ory/" +
+        flavor +
+        "/policies?limit=500&" +
+        type +
+        "=" +
+        id + "&offset=";
+      const options = {
+        headers: this.ketoHeaders,
+        method: "GET",
+      };
+      const totalPages = Math.ceil(totalConsents / 500);
       const totalResults = [];
-      for(let i=0;i<totalPages;i++) {
-        const res = await fetch(url+(i*500), options);
+      for (let i = 0; i < totalPages; i++) {
+        const res = await fetch(url + (i * 500), options);
         if (res.ok) {
           let result = await res.json();
           console.log(result)
