@@ -3,7 +3,7 @@
         <div class="col-md-12">
             <div class="card card-chart">
                 <div class="card-header">
-                    <select class="form-control" style="display:inline;float: right;" id="period" (change)="selectPeriod($event.target.value);" name="period">
+                    <select style="float: right;" id="period" (change)="selectPeriod($event.target.value);" name="period">
                         <option disabled>Select Period</option>
                         <option *ngFor="let period of periods | keyvalue" [value]="period.key">{{period.value.nameDuration}}</option>
                     </select>
