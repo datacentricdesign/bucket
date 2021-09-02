@@ -44,8 +44,8 @@ export class SharedPropertiesStatsComponent implements OnInit {
     this.changePeriodEvent.emit(this.selectedPeriod)
   }
 
-  async selectPeriod(period: Period) {
-    this.selectedPeriod = period
+  async selectPeriod(periodKey: string) {
+    this.selectedPeriod = periods[periodKey]
     this.changePeriodEvent.emit(this.selectedPeriod)
   }
 
