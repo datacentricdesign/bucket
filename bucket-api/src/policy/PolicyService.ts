@@ -201,8 +201,8 @@ export class PolicyService {
     }
   }
 
-  async check(acp: Policy): Promise<void> {
-    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/regex/allowed";
+  async check(acp: Policy, flavor="regex"): Promise<void> {
+    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/allowed";
     const options = {
       headers: this.ketoHeaders,
       method: "POST",
