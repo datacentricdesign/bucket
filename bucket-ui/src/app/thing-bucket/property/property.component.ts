@@ -61,6 +61,7 @@ export class PropertyComponent implements OnInit {
     description: ''
   }
 
+  // TODO should be 'dcd:actions:read' > requires editing all existing consent to fix this.
   grantModel = {
     subjects: '',
     actions: 'dcd:read'
