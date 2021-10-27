@@ -42,6 +42,7 @@ export class PolicyController {
     // For ownerships, Keto's flavor is 'regex'
     let flavor = "regex";
     let subject = req.context.userId
+    let dcdAction = "dcd:actions:" + action
     if (req.query.sharedWith !== undefined) {
       const groupId = req.query.sharedWith as string;
       try {
@@ -50,6 +51,9 @@ export class PolicyController {
         subject = groupId;
         // For consents (e.g. shared entities), Keto's flavor is 'exact'
         flavor = "exact";
+        // TODO this is a quick fix because the grant function is missing 'actions:'
+        // Fixing this issue requires editing all ongoing consent
+        dcdAction = "dcd:" + action
         console.log("flavor exact from shared with");
       } catch {
         next(new DCDError(403, subject + " is not member of " + groupId));
@@ -60,7 +64,7 @@ export class PolicyController {
 
     const acp: Policy = {
       resource: acpResource,
-      action: "dcd:actions:" + action,
+      action: dcdAction,
       subject: subject,
     };
     
