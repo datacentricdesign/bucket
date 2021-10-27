@@ -362,6 +362,8 @@ export class PolicyService {
   ): Promise<AccessControlPolicy> {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
+    console.log("update policy")
+    console.log(policy);
     try {
       this.cacheTotalConsents = -1
       const result = await fetch(url, {
