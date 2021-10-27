@@ -111,6 +111,7 @@ export class PropertyService {
     let groups = [];
     if (audienceId === "*") {
       groups = await this.policyService.listGroupMembership(subject);
+      groups.push(actor)
     } else {
       try {
         await this.policyService.checkGroupMembership(subject, audienceId);
@@ -197,7 +198,6 @@ export class PropertyService {
       .getOne();
 
     if (property !== undefined && valueOptions != undefined) {
-      Log.debug(valueOptions.from);
       return this.influxDbService.readValuesFromInfluxDB(
         property,
         valueOptions

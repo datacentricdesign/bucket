@@ -111,8 +111,8 @@ export class ThingComponent implements OnInit {
             )
             this.types$ = this.http.get<PropertyType[]>(this.apiURL + '/types', { headers }).pipe(
                 map((data: PropertyType[]) => {
-                    this.types = data;
-                    return data;
+                    this.types = data.sort((first, second) => 0 - (first.name > second.name ? -1 : 1));
+                    return this.types;
                 }), catchError(error => {
                     return throwError('Types not found!');
                 })

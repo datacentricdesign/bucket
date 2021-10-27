@@ -3,8 +3,9 @@
         <div class="col-md-12">
             <div class="card card-chart">
                 <div class="card-header">
-                    <select style="float: right;">
-                        <option *ngFor="let entry of periods | keyvalue" (click)="selectPeriod(entry.value)">{{entry.value.nameDuration}}</option>
+                    <select style="float: right;" id="period" (change)="selectPeriod($event.target.value);" name="period">
+                        <option disabled>Select Period</option>
+                        <option *ngFor="let period of periods | keyvalue" [value]="period.key">{{period.value.nameDuration}}</option>
                     </select>
                     <h5 class="card-title">
                         Data Availability per Type

@@ -83,7 +83,7 @@ export class HttpAPI {
     this.app.get(
       config.http.baseUrl + "/properties",
       [this.authController.authenticate(["dcd:properties", "dcd:consents"])],
-      this.propertyController.getProperties
+      this.propertyController.getProperties.bind(this.propertyController)
     );
 
     this.app.use(

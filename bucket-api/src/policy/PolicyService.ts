@@ -29,6 +29,7 @@ export interface Policy {
  * Manage access policies
  */
 export class PolicyService {
+
   private static instance: PolicyService;
 
   public static getInstance(): PolicyService {
@@ -42,6 +43,8 @@ export class PolicyService {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
+
+  private cacheTotalConsents = -1;
 
   private constructor() {
     if (httpConfig.secured) {
@@ -134,11 +137,11 @@ export class PolicyService {
       throw new DCDError(
         4041,
         "Role not found for " +
-          subjectId +
-          ", " +
-          resourceId +
-          " and " +
-          roleName
+        subjectId +
+        ", " +
+        resourceId +
+        " and " +
+        roleName
       );
     }
   }
@@ -216,6 +219,38 @@ export class PolicyService {
     }
   }
 
+  async getTotalConsents(flavor:string): Promise<number> {
+    if (this.cacheTotalConsents !== -1) {
+      return this.cacheTotalConsents;
+    }
+    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies?limit=500&offset=";
+    const options = {
+      headers: this.ketoHeaders,
+      method: "GET",
+    };
+    const fullList = []
+    let lastResultSize = 500
+    try {
+      while (lastResultSize == 500) {
+        const res = await fetch(url + fullList.length, options);
+        if (res.ok) {
+          let result = await res.json();
+          if (result === null) {
+            return fullList.length;
+          }
+          lastResultSize = result.length;
+          fullList.push(...result as AccessControlPolicy[])
+        } else {
+          return fullList.length;
+        }
+      }
+      this.cacheTotalConsents = fullList.length;
+      return this.cacheTotalConsents;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
   /**
    * Get the list of consents that concern a subject, a resource or an action
    * @param type subject, resource, action
@@ -226,28 +261,32 @@ export class PolicyService {
     id: string,
     flavor = "exact"
   ): Promise<AccessControlPolicy[]> {
-    const url =
-      config.oauth2.acpURL.origin +
-      "/engines/acp/ory/" +
-      flavor +
-      "/policies?limit=100000&" +
-      type +
-      "=" +
-      id;
-    const options = {
-      headers: this.ketoHeaders,
-      method: "GET",
-    };
     try {
-      const res = await fetch(url, options);
-      if (res.ok) {
-        let result = await res.json();
-        if (result === null) {
-          result = [];
+      const totalConsents = await this.getTotalConsents(flavor);
+      const url =
+        config.oauth2.acpURL.origin +
+        "/engines/acp/ory/" +
+        flavor +
+        "/policies?limit=500&" +
+        type +
+        "=" +
+        id + "&offset=";
+      const options = {
+        headers: this.ketoHeaders,
+        method: "GET",
+      };
+      const totalPages = Math.ceil(totalConsents / 500);
+      const totalResults = [];
+      for (let i = 0; i < totalPages; i++) {
+        const res = await fetch(url + (i * 500), options);
+        if (res.ok) {
+          let result = await res.json();
+          if (result !== null) {
+            totalResults.push(...result);
+          }
         }
-        return Promise.resolve(result as AccessControlPolicy[]);
       }
-      return Promise.reject(new DCDError(4031, "Request was not allowed"));
+      return Promise.resolve(totalResults as AccessControlPolicy[]);
     } catch (error) {
       return Promise.reject(error);
     }
@@ -322,6 +361,7 @@ export class PolicyService {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
     try {
+      this.cacheTotalConsents = -1
       const result = await fetch(url, {
         headers: this.ketoHeaders,
         method: "PUT",
@@ -335,13 +375,14 @@ export class PolicyService {
   }
 
   async deleteKetoPolicy(policyId: string, flavor = "regex"): Promise<void> {
+    this.cacheTotalConsents = -1;
     try {
       await fetch(
         config.oauth2.acpURL.origin +
-          "/engines/acp/ory/" +
-          flavor +
-          "/policies/" +
-          policyId,
+        "/engines/acp/ory/" +
+        flavor +
+        "/policies/" +
+        policyId,
         {
           headers: this.ketoHeaders,
           method: "DELETE",
