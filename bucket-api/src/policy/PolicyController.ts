@@ -44,8 +44,15 @@ export class PolicyController {
       action: "dcd:actions:" + action,
       subject: req.context.userId,
     };
+    let flavor = "regex";
+    if (req.query.sharedWith !== undefined) {
+      flavor = "exact";
+      console.log("flavor exact from shared with");
+    } else {
+      console.log("flavor regex (no shared with)");
+    }
     this.policyService
-      .check(acp)
+      .check(acp, flavor)
       .then(() => next())
       .catch((error: DCDError) => next(error));
   }
