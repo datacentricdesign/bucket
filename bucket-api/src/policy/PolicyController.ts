@@ -51,9 +51,6 @@ export class PolicyController {
         subject = groupId;
         // For consents (e.g. shared entities), Keto's flavor is 'exact'
         flavor = "exact";
-        // TODO this is a quick fix because the grant function is missing 'actions:'
-        // Fixing this issue requires editing all ongoing consent
-        dcdAction = "dcd:" + action
         console.log("flavor exact from shared with");
       } catch {
         next(new DCDError(403, subject + " is not member of " + groupId));
