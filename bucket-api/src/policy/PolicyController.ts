@@ -37,15 +37,36 @@ export class PolicyController {
     };
   }
 
-  private _checkPolicy(action: string, req: DCDRequest, next: NextFunction) {
+  private async _checkPolicy(action: string, req: DCDRequest, next: NextFunction) {
     const acpResource = buildACPResource(req);
+    // For ownerships, Keto's flavor is 'regex'
+    let flavor = "regex";
+    let subject = req.context.userId
+    let dcdAction = "dcd:actions:" + action
+    if (req.query.sharedWith !== undefined) {
+      const groupId = req.query.sharedWith as string;
+      try {
+        // Check that the current user is member of the mentioned group id
+        await this.policyService.checkGroupMembership(subject, groupId);
+        subject = groupId;
+        // For consents (e.g. shared entities), Keto's flavor is 'exact'
+        flavor = "exact";
+        console.log("flavor exact from shared with");
+      } catch {
+        next(new DCDError(403, subject + " is not member of " + groupId));
+      }
+    } else {
+      console.log("flavor regex (no shared with)");
+    }
+
     const acp: Policy = {
       resource: acpResource,
-      action: "dcd:actions:" + action,
-      subject: req.context.userId,
+      action: dcdAction,
+      subject: subject,
     };
+    
     this.policyService
-      .check(acp)
+      .check(acp, flavor)
       .then(() => next())
       .catch((error: DCDError) => next(error));
   }
@@ -59,6 +80,11 @@ export class PolicyController {
  */
 function buildACPResource(req: DCDRequest): string {
   let acpResource = "";
+  // If we look for a shared property, return the propertyId as resource
+  if (req.params.propertyId !== undefined && req.query.sharedWith !== undefined) {
+    return req.params.propertyId
+  }
+  // Else, build the resource
   if (req.params.thingId !== undefined) {
     acpResource += req.params.thingId;
   }

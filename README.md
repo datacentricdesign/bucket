@@ -2,7 +2,7 @@
 
 # [Bucket](https://dwd.tudelft.nl/bucket)
 
-![version](https://img.shields.io/badge/version-0.1.2-blue.svg)
+![version](https://img.shields.io/badge/version-3-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 [![GitHub issues open](https://img.shields.io/github/issues/datacentricdesign/bucket.svg?maxAge=2592000)]()
 [![GitHub issues closed](https://img.shields.io/github/issues-closed-raw/datacentricdesign/bucket.svg?maxAge=2592000)]()

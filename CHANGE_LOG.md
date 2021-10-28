@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Support video streaming WebRTC (commented out, work in progress)
 
+## [0.1.3] - 2021-08-26
+
+### Fixed
+
+- Policy management for shared properties
+
 ## [0.1.2] - 2021-08-26
 
 ### Added

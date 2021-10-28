@@ -63,7 +63,7 @@ export class PropertyComponent implements OnInit {
 
   grantModel = {
     subjects: '',
-    actions: 'dcd:read'
+    actions: 'dcd:actions:read'
   }
 
   constructor(

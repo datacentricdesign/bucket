@@ -48,7 +48,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get Properties of a Thing.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -68,7 +68,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get one Property.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -94,7 +94,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get the media associated to a dimension's timestamp.
      *
-     * @apiVersion 0.1.0
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -138,8 +138,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Create a Property.
      *
-     * @apiVersion 0.1.2
-     *
+     * @apiVersion 0.1.3
      * @apiParam {String} thingId Id of the Thing to which we add the Property.
      *
      * @apiParam (Body) {Property} property Property to create as JSON.
@@ -169,7 +168,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Edit one Property to change its name or description.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -197,7 +196,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Update values of a Property.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -225,7 +224,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Delete one Property.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -264,7 +263,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription List consents granted for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -285,7 +284,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -307,13 +306,13 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Grant a consent for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiParam (Body) {Consent} consent Consent to grant as JSON.
      * @apiParamExample {json} consent:
      *     {
      *       "subjects": ["dcd:persons:4baec95d-98cf-44a5-9c4d-08ef0d734d07", "dcd:team:4baec95d-98cf-44a5-9c4d-08ef0d734d07"],
-     *       "actions": ["dcd:read"]
+     *       "actions": ["dcd:actions:read"]
      *     }
      *
      * @apiHeader {String} Content-type application/json

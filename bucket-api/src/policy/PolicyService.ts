@@ -201,8 +201,10 @@ export class PolicyService {
     }
   }
 
-  async check(acp: Policy): Promise<void> {
-    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/regex/allowed";
+  async check(acp: Policy, flavor = "regex"): Promise<void> {
+    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/allowed";
+    console.log(url);
+    console.log(acp);
     const options = {
       headers: this.ketoHeaders,
       method: "POST",
@@ -360,6 +362,8 @@ export class PolicyService {
   ): Promise<AccessControlPolicy> {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
+    console.log("update policy")
+    console.log(policy);
     try {
       this.cacheTotalConsents = -1
       const result = await fetch(url, {

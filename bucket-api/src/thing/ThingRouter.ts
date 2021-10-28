@@ -44,7 +44,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Get Health status of Things API
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiSuccess {object} health status
      **/
@@ -55,7 +55,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Get Things of a Person.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -78,7 +78,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Get one Thing.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -100,7 +100,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Create a new Thing.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiParam (Body) {Thing} thing Thing to create as JSON.
      * @apiParamExample {json} thing:
@@ -130,7 +130,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Edit one Thing.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -150,7 +150,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Update the PEM file containing a public key, so that the Hub can identify a Thing as data transmitter.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {string} Authorization TOKEN ID
      *
@@ -173,7 +173,7 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiDescription Delete one Thing.
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
