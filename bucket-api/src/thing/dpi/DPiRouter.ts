@@ -37,7 +37,7 @@ export class DPiRouter {
      * @apiGroup DPi
      * @apiDescription Get DPi Image
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      **/
     this.router.get(
       "/",
@@ -50,7 +50,7 @@ export class DPiRouter {
      * @apiGroup DPi
      * @apiDescription Generate a new DPi Image
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      *
      * @apiParam (Body) {DTODPi} details of the DPi image
      * @apiHeader {String} Content-type application/json
@@ -69,7 +69,7 @@ export class DPiRouter {
      * @apiGroup DPi
      * @apiDescription Delete DPi Image
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      **/
     this.router.delete(
       "/",
@@ -85,7 +85,7 @@ export class DPiRouter {
      * @apiGroup DPi
      * @apiDescription Cancel DPi Image Generation
      *
-     * @apiVersion 0.1.2
+     * @apiVersion 0.1.3
      **/
     this.router.get(
       "/cancel",
