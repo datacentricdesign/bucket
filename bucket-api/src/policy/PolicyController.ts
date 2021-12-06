@@ -2,8 +2,9 @@ import { Response, NextFunction, RequestHandler } from "express";
 import { DCDError } from "@datacentricdesign/types";
 import * as ws from "ws";
 import { WebsocketRequestHandler } from "express-ws";
-import { Policy, PolicyService } from "./PolicyService";
+import { PolicyService } from "./PolicyService";
 import { DCDRequest } from "../config";
+import { Policy } from "./Policy";
 
 export class PolicyController {
   private static instance: PolicyController;
@@ -37,7 +38,7 @@ export class PolicyController {
     };
   }
 
-  private async _checkPolicy(action: string, req: DCDRequest, next: NextFunction) {
+  private async  _checkPolicy(action: string, req: DCDRequest, next: NextFunction) {
     const acpResource = buildACPResource(req);
     // For ownerships, Keto's flavor is 'regex'
     let flavor = "regex";

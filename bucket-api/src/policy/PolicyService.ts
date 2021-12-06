@@ -8,6 +8,7 @@ import { Role } from "../thing/role/Role";
 import { v4 as uuidv4 } from "uuid";
 import config from "../config";
 import { Log } from "../Logger";
+import { Policy } from "./Policy";
 
 export interface AccessControlPolicy {
   subjects: string[];
@@ -17,12 +18,6 @@ export interface AccessControlPolicy {
   id: string;
   conditions?: Map<string, string>;
   description?: string;
-}
-
-export interface Policy {
-  subject: string;
-  action: string;
-  resource: string;
 }
 
 /**
@@ -203,8 +198,6 @@ export class PolicyService {
 
   async check(acp: Policy, flavor = "regex"): Promise<void> {
     const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/allowed";
-    console.log(url);
-    console.log(acp);
     const options = {
       headers: this.ketoHeaders,
       method: "POST",
