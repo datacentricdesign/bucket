@@ -3,7 +3,7 @@ import * as expressWs from "express-ws";
 import { AuthController } from "../../auth/AuthController";
 import { PolicyController } from "../../policy/PolicyController";
 
-import PropertyController from "./PropertyController";
+import { PropertyController } from "./PropertyController";
 import { DCDError, Property } from "@datacentricdesign/types";
 import path = require("path");
 import multer = require("multer");

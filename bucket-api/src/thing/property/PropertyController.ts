@@ -398,7 +398,6 @@ export class PropertyController {
           dataStr,
           hasLabel
         );
-        // Log.debug(property.values)
         this.saveValuesAndRespond(property, res, next);
       }
     }
@@ -584,8 +583,6 @@ export class PropertyController {
     };
   }
 }
-
-export default PropertyController;
 
 /**
  * @param dimensions
