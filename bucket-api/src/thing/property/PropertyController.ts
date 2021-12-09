@@ -403,6 +403,8 @@ export class PropertyController {
         );
         this.saveValuesAndRespond(property, res, next);
       }
+    } else {
+      return next(new DCDError(503, "Unsupported Content-Type."));
     }
   }
 
