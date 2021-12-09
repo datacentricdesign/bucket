@@ -442,9 +442,10 @@ const storage = multer.diskStorage({
     // Extract timestamp
     Log.debug(req.body.property);
     if (req.body.property !== undefined) {
-      console.log(req.body)
-      console.log(req.body.property)
-      const property = JSON.parse(req.body).property;
+      // console.log(req.body)
+      // console.log(req.body.property)
+      const property = req.body.property;
+      console.log(property)
       const timestamp = property.values[0][0];
       cb(
         null,
