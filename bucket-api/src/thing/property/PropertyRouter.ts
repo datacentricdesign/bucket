@@ -445,9 +445,9 @@ const storage = multer.diskStorage({
     if (req.body.property !== undefined) {
       // console.log(req.body)
       // console.log(req.body.property)
-      const body = JSON.parse(req.body);
-      console.log(body)
-      const timestamp = body.property.values[0][0];
+      // const body = JSON.parse(req.body);
+      // console.log(body)
+      const timestamp = req.body.property.values[0][0];
       cb(
         null,
         thingId +
