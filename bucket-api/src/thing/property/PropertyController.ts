@@ -332,6 +332,7 @@ export class PropertyController {
     }
 
     if (contentType.indexOf("application/json") === 0) {
+      Log.debug("application/json values");
       // Get values from the body
       const { values } = req.body;
       property.values = values;
@@ -377,6 +378,7 @@ export class PropertyController {
         property.values = [completeValues];
         this.saveValuesAndRespond(property, res, next);
       } else {
+        Log.debug("values from csv file");
         // there is no value, this should be in a CSV file
         const hasLabel = req.query.hasLabel === "true";
         // Load in
@@ -538,6 +540,7 @@ export class PropertyController {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    Log.debug("saving values of the property");
     // Try to save
     try {
       await this.propertyService.updatePropertyValues(property);
