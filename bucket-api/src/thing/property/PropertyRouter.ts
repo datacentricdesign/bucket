@@ -388,10 +388,10 @@ export class PropertyRouter {
             new DCDError(
               400,
               "Error: File in field " +
-                file.fieldname +
-                " must have mime type " +
-                file.mimetype +
-                "."
+              file.fieldname +
+              " must have mime type " +
+              file.mimetype +
+              "."
             )
           );
         }
@@ -400,10 +400,10 @@ export class PropertyRouter {
           new DCDError(
             400,
             "Error: File in field " +
-              file.fieldname +
-              " must have extension " +
-              dimension.unit +
-              "."
+            file.fieldname +
+            " must have extension " +
+            dimension.unit +
+            "."
           )
         );
       }
@@ -412,8 +412,8 @@ export class PropertyRouter {
         new DCDError(
           400,
           "Error: field " +
-            file.fieldname +
-            " is not matching any dimension ID."
+          file.fieldname +
+          " is not matching any dimension ID."
         )
       );
     }
@@ -436,21 +436,22 @@ export class PropertyRouter {
 const storage = multer.diskStorage({
   destination: config.hostDataFolder + "/files/",
   filename: function (req, file, cb) {
-    Log.debug(file);
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
-    // Extract timestamp
-    Log.debug(req.body.property);
-    Log.debug(req)
-    if (req.body.property !== undefined) {
-      // console.log(req.body)
-      // console.log(req.body.property)
-      // const body = JSON.parse(req.body);
-      // console.log(body)
-      const timestamp = req.body.property.values[0][0];
-      cb(
-        null,
-        thingId +
+    try {
+      Log.debug(file);
+      const thingId = req.params.thingId;
+      const propertyId = req.params.propertyId;
+      // Extract timestamp
+      Log.debug(req.body.property);
+      Log.debug(req)
+      if (req.body.property !== undefined) {
+        // console.log(req.body)
+        // console.log(req.body.property)
+        // const body = JSON.parse(req.body);
+        // console.log(body)
+        const timestamp = req.body.property.values[0][0];
+        cb(
+          null,
+          thingId +
           "-" +
           propertyId +
           "-" +
@@ -458,19 +459,23 @@ const storage = multer.diskStorage({
           "#" +
           file.fieldname +
           path.extname(file.originalname).toLowerCase()
-      );
-    } else {
-      if (file.fieldname === "csv") {
-        cb(null, thingId + "-" + propertyId + ".csv");
-      } else {
-        cb(
-          new DCDError(
-            400,
-            "Requests has no values nor 'csv' field containing a CSV file."
-          ),
-          file.filename
         );
+      } else {
+        if (file.fieldname === "csv") {
+          cb(null, thingId + "-" + propertyId + ".csv");
+        } else {
+          cb(
+            new DCDError(
+              400,
+              "Requests has no values nor 'csv' field containing a CSV file."
+            ),
+            file.filename
+          );
+        }
       }
+    } catch(error) {
+      cb(error, file.filename)
     }
+    
   },
 });
