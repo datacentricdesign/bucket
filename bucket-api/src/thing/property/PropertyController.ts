@@ -331,6 +331,7 @@ export class PropertyController {
       return next(new DCDError(404, "Property not found in the thing."));
     }
 
+    Log.debug(contentType);
     if (contentType.indexOf("application/json") === 0) {
       Log.debug("application/json values");
       // Get values from the body
