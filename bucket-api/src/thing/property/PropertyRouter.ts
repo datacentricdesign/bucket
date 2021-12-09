@@ -379,6 +379,8 @@ export class PropertyRouter {
 
     if (dimension !== null) {
       if (dimension.unit === extensionName) {
+        console.log(dimension.type)
+        console.log(file.mimetype)
         if (dimension.type === file.mimetype) {
           return cb(null, true);
         } else {
