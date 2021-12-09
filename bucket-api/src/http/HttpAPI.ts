@@ -10,7 +10,7 @@ import * as helmet from "helmet";
 import * as cors from "cors";
 
 import { AuthController } from "../auth/AuthController";
-import PropertyController from "../thing/property/PropertyController";
+import { PropertyController } from "../thing/property/PropertyController";
 import DPiController from "../thing/dpi/DPiController";
 import { PropertyTypeRouter } from "../thing/property/propertyType/PropertyTypeRouter";
 import { ThingRouter } from "../thing/ThingRouter";
