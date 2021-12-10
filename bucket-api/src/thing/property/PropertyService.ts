@@ -193,8 +193,8 @@ export class PropertyService {
       .innerJoinAndSelect("property.thing", "thing")
       .innerJoinAndSelect("property.type", "type")
       .innerJoinAndSelect("type.dimensions", "dimensions")
-      .where("property.id = :propertyId AND thing.id = :thingId")
-      .setParameters({ propertyId: propertyId, thingId: thingId })
+      .where("property.id = ANY (:propertyId) AND thing.id = :thingId")
+      .setParameters({ propertyId: [propertyId], thingId: thingId })
       .getOne();
 
     if (property !== undefined && valueOptions != undefined) {
