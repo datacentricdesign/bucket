@@ -282,6 +282,7 @@ export class PropertyService {
         .where("property.id = :propertyId")
         .setParameters({ propertyId: propertyId })
         .getOne();
+      console.log(property.type)
       this.cachedTypes[propertyId] = property.type;
     }
     return this.cachedTypes[propertyId];
