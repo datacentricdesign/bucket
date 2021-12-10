@@ -324,6 +324,7 @@ export class PropertyController {
       thingId,
       propertyId
     );
+    Log.debug(property)
 
     // Double-check the property is actually part of this thing
     if (property === undefined) {
