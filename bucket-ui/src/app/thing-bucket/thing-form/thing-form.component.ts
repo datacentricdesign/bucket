@@ -14,7 +14,8 @@ export class ThingFormComponent implements OnInit {
 
   types = [
     { id: 'GENERIC', name: 'Generic' },
-    { id: 'RASPBERRYPI', name: 'Raspberry Pi' }
+    { id: 'RASPBERRYPI', name: 'Raspberry Pi' },
+    { id: 'GO_PRO', name: 'Go Pro' },
   ];
 
   submitted = false;

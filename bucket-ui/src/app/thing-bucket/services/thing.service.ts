@@ -42,6 +42,27 @@ export class ThingService {
     return this.http.get<Thing[]>(url, { headers }).toPromise()
   }
 
+  getProperties(thingId: string): Promise<Property[]> {
+    const url = this.apiURL + '/things/' + thingId + '/properties';
+    const headers = this.getHeader()
+    return this.http.get<Property[]>(url, { headers }).toPromise()
+  }
+
+  async findOrCreatePropertyByName(thingId: string, name: string, typeId: string): Promise<Property> {
+    return this.getProperties(thingId).then(properties => {
+      for (let index in properties) {
+        if (properties[index].name == name) {
+          return Promise.resolve(properties[index]);
+        }
+      }
+      return this.createProperty(thingId, {
+        name: name,
+        typeId: typeId
+      })
+    })
+
+  }
+
   getPropertyValues(thingId: string, propertyId: string, options: ValueOptions, csvFormat: boolean): Promise<Blob> {
     const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId;
     const params = new HttpParams()
@@ -105,7 +126,7 @@ export class ThingService {
     return this.http.delete(url, { headers }).toPromise()
   }
 
-  createProperty(thingId: string, property: DTOProperty) {
+  createProperty(thingId: string, property: DTOProperty): Promise<any> {
     const headers = this.getHeader()
     return this.http.post(this.apiURL + '/things/' + thingId + '/properties', property, { headers }).toPromise()
   }
@@ -183,6 +204,12 @@ export class ThingService {
     const formData: FormData = new FormData();
     formData.append('fileKey', fileToUpload, fileToUpload.name);
     return this.http.put<any>(url, formData, { headers: headers }).toPromise()
+  }
+
+  updatePropertyValues(thingId: string, property: Property): Promise<any> {
+    const url = this.apiURL + '/things/' + thingId + '/properties/' + property.id;
+    const headers = this.getHeader()
+    return this.http.put<any>(url, property, { headers: headers }).toPromise()
   }
 
   dpiStatus(thingId: string): Promise<any> {

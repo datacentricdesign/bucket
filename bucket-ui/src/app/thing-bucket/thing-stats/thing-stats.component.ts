@@ -30,7 +30,7 @@ export class ThingStatsComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    const thingsAll = await this.thingService.dpCount('now()-52w')
+    const thingsAll = await this.thingService.dpCount('now()-520w')
     if (thingsAll.length > 0) {
       this.buildChartTypes(thingsAll)
       const things1d = await this.thingService.dpCount(this.selectedPeriod.duration, this.selectedPeriod.interval)
@@ -44,8 +44,6 @@ export class ThingStatsComponent implements OnInit {
 
 
   async selectPeriod(periodKey:string) {
-    console.log(periodKey)
-    console.log(this.periods)
     this.selectedPeriod = this.periods.get(periodKey)
     const thingsDataPoints = await this.thingService.dpCount(this.selectedPeriod.duration, this.selectedPeriod.interval)
     this.buildDataPointsChart(thingsDataPoints)
