@@ -206,10 +206,17 @@ export class ThingService {
     return this.http.put<any>(url, formData, { headers: headers }).toPromise()
   }
 
-  updatePropertyValues(thingId: string, property: Property): Promise<any> {
+  updatePropertyValues(thingId: string, property: Property, file?: File): Observable<any> {
     const url = this.apiURL + '/things/' + thingId + '/properties/' + property.id;
     const headers = this.getHeader()
-    return this.http.put<any>(url, property, { headers: headers }).toPromise()
+    let payload:any = property;
+    if (file !== undefined) {
+      payload = new FormData()
+      payload.append('property', JSON.stringify(property));
+      payload.append('video-mp4', file, file.name ? file.name : "");
+    }
+    console.log(payload)
+    return this.http.put<any>(url, payload, { headers, observe: 'events', reportProgress: true} as any) as Observable<HttpEvent<any>>;
   }
 
   dpiStatus(thingId: string): Promise<any> {

@@ -7,7 +7,7 @@ import * as gpmfExtract from 'gpmf-extract';
 import * as goproTelemetry from 'gopro-telemetry';
 import * as moment from 'moment';
 import { Property } from '@datacentricdesign/types';
-
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-go-pro-thing',
@@ -19,8 +19,6 @@ export class GoProThingComponent implements OnInit {
   @Input() thingId: string;
   @Input() thingName: string;
   @Output() foundEvent = new EventEmitter<boolean>();
-
-  download$: Observable<Download>
 
   private map = {
     'ACCL': { name: 'Accelerometer', typeId: 'ACCELEROMETER' },
@@ -51,19 +49,39 @@ export class GoProThingComponent implements OnInit {
   }
 
   // render the image in our view
-  async renderVideo(file) {
-    const progress = percent => console.log(`${percent}% processed`);
-    gpmfExtract(file[0], true, progress)
+  async processVideo(files: FileList) {
+    const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
+    const elemProperty: HTMLElement = document.getElementById('upload-telemetry-property');
+    elemProperty.innerHTML = '<p>Extracting GPMF...</p>'
+    const progress = percent => {
+      elemProgress.style.width = percent + '%'
+    }
+    gpmfExtract(files[0], true, progress)
       .then(async res => {
         // Do what you want with the data
-        console.log(res)
-        console.log('Length of data received:', res.rawData.length);
-        console.log('Framerate of data received:', 1 / res.timing.frameDuration);
+        const elem: HTMLElement = document.getElementById('telemetry-info');
+        elem.innerHTML = '<p>Length of data received: ' + res.rawData.length
+          + '<br>Framerate of data received:' + (1 / res.timing.frameDuration) + '</p>';
         const input = { rawData: res.rawData, timing: res.timing };
         const options = { repeatSticky: true };
+        const elemProperty: HTMLElement = document.getElementById('upload-telemetry-property');
+        const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
+        elemProperty.innerHTML = '<p>Extracting telemetry...</p>'
         goproTelemetry(input, options)
-          .then(telemetry => {
-            this.uploadData(telemetry["1"]["streams"])
+          .then(async telemetry => {
+            const samples = telemetry["1"]["streams"]["ACCL"]["samples"];
+            const videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, 'Video', 'VIDEO');
+            videoProperty.values = [[samples[0].date.getTime(), Math.floor(samples[samples.length - 1].cts)]];
+            elemProperty.innerHTML = '<p>Uploading video...</p>'
+            const uploadObs = this.thingService.updatePropertyValues(this.thingId, videoProperty, files[0]);
+            uploadObs.subscribe(event => {
+              if (event.type === HttpEventType.UploadProgress) {
+                elemProgress.style.width = (event.loaded * 100.0 / event.total) + '%'
+              } else if (event instanceof HttpResponse) {
+                console.log('File is completely uploaded!');
+                this.uploadData(telemetry["1"]["streams"]);
+              }
+            })
           })
           .catch(error => {
             console.log(error)
@@ -75,21 +93,27 @@ export class GoProThingComponent implements OnInit {
   }
 
   async uploadData(telemetry) {
+    const elem: HTMLElement = document.getElementById('upload-telemetry-property');
     for (const key in telemetry) {
       if (telemetry.hasOwnProperty(key)) {
         if (this.map.hasOwnProperty(key)) {
+          elem.innerHTML = 'Uploading property: ' + this.map[key].name + ' (' + this.map[key].typeId + ')...';
           const prop = await this.thingService.findOrCreatePropertyByName(this.thingId, this.map[key].name, this.map[key].typeId);
-        this.parse(key, prop, telemetry[key]["samples"]);
+          this.parse(key, prop, telemetry[key]["samples"]);
         } else {
           console.warn('unknown key: ' + key)
         }
       }
     }
+    elem.innerHTML = 'Done.';
+    const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
+    elemProgress.style.width = '100%'
   }
 
   parse(key: string, property: Property, telemetrySamples: any) {
     property.values = [];
     const max_chunk = 500;
+    const elem: HTMLElement = document.getElementById('upload-telemetry-progress');
     for (let i = 0; i < telemetrySamples.length; i++) {
       const sample = telemetrySamples[i]['value'];
       const ts = moment(telemetrySamples[i]['date'], "YYYY-MM-DDTHH:mm:ss.SSSZ").valueOf();
@@ -103,18 +127,19 @@ export class GoProThingComponent implements OnInit {
       }
 
       if (i % max_chunk == 0) {
-        this.thingService.updatePropertyValues(this.thingId, property)
-          .then(res => {
-            console.log("sent up to " + i)
-          })
-          .catch(error => {
-            console.error(error)
-          })
+        this.thingService.updatePropertyValues(this.thingId, property).toPromise()
+        .then(res => {
+          console.log("sent up to " + i)
+          elem.style.width = (i * 100.0 / telemetrySamples.length) + '%'
+        })
+        .catch(error => {
+          console.error(error)
+        })
         property.values = []
       }
     }
     if (property.values.length > 0) {
-      this.thingService.updatePropertyValues(this.thingId, property).catch(error => {
+      this.thingService.updatePropertyValues(this.thingId, property).toPromise().catch(error => {
         console.log(error)
       })
     }
