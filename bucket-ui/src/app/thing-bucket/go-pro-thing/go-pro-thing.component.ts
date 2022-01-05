@@ -23,7 +23,7 @@ export class GoProThingComponent implements OnInit {
   private map = {
     'ACCL': { name: 'Accelerometer', typeId: 'ACCELEROMETER' },
     'GYRO': { name: 'Gyroscope', typeId: 'GYROSCOPE' },
-    'SHUT': { name: 'Exposure Time', typeId: 'EXPOSURE_TIME' },//Exposure time (shutter speed) in seconds 1 dim
+    'SHUT': { name: 'Exposure Time', typeId: 'EXPOSURE_TIME' }, // Exposure time (shutter speed) in seconds 1 dim
     'WBAL': { name: 'White Balance temperature', typeId: 'WHITE_BALANCE_TEMPERATURE' }, // White Balance temperature (Kelvin) 1 dim
     'WRGB': { name: 'White Balance RGB gains', typeId: 'WHITE_BALANCE_RGB_GAINS' }, // White Balance RGB gains (3 dim)
     'ISOE': { name: 'Sensor ISO', typeId: 'SENSOR_ISO' }, // 1 dim
@@ -64,22 +64,20 @@ export class GoProThingComponent implements OnInit {
           + '<br>Framerate of data received:' + (1 / res.timing.frameDuration) + '</p>';
         const input = { rawData: res.rawData, timing: res.timing };
         const options = { repeatSticky: true };
-        const elemProperty: HTMLElement = document.getElementById('upload-telemetry-property');
-        const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
-        elemProperty.innerHTML = '<p>Extracting telemetry...</p>'
+        document.getElementById('upload-telemetry-property').innerHTML = '<p>Extracting telemetry...</p>'
         goproTelemetry(input, options)
           .then(async telemetry => {
-            const samples = telemetry["1"]["streams"]["ACCL"]["samples"];
+            const samples = telemetry['1']['streams']['ACCL']['samples'];
             const videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, 'Video', 'VIDEO');
             videoProperty.values = [[samples[0].date.getTime(), Math.floor(samples[samples.length - 1].cts)]];
-            elemProperty.innerHTML = '<p>Uploading video...</p>'
+            document.getElementById('upload-telemetry-property').innerHTML = '<p>Uploading video...</p>'
             const uploadObs = this.thingService.updatePropertyValues(this.thingId, videoProperty, files[0]);
             uploadObs.subscribe(event => {
               if (event.type === HttpEventType.UploadProgress) {
-                elemProgress.style.width = (event.loaded * 100.0 / event.total) + '%'
+                document.getElementById('upload-telemetry-progress').style.width = (event.loaded * 100.0 / event.total) + '%'
               } else if (event instanceof HttpResponse) {
                 console.log('File is completely uploaded!');
-                this.uploadData(telemetry["1"]["streams"]);
+                this.uploadData(telemetry['1']['streams']);
               }
             })
           })
@@ -99,7 +97,7 @@ export class GoProThingComponent implements OnInit {
         if (this.map.hasOwnProperty(key)) {
           elem.innerHTML = 'Uploading property: ' + this.map[key].name + ' (' + this.map[key].typeId + ')...';
           const prop = await this.thingService.findOrCreatePropertyByName(this.thingId, this.map[key].name, this.map[key].typeId);
-          this.parse(key, prop, telemetry[key]["samples"]);
+          this.parse(key, prop, telemetry[key]['samples']);
         } else {
           console.warn('unknown key: ' + key)
         }
@@ -116,7 +114,7 @@ export class GoProThingComponent implements OnInit {
     const elem: HTMLElement = document.getElementById('upload-telemetry-progress');
     for (let i = 0; i < telemetrySamples.length; i++) {
       const sample = telemetrySamples[i]['value'];
-      const ts = moment(telemetrySamples[i]['date'], "YYYY-MM-DDTHH:mm:ss.SSSZ").valueOf();
+      const ts = moment(telemetrySamples[i]['date'], 'YYYY-MM-DDTHH:mm:ss.SSSZ').valueOf();
       if (['ACCL', 'GYRO'].indexOf(key) >= 0) {
         property.values.push([ts, sample[1], sample[2], sample[0]]);
       } else if (['WRGB', 'SCEN', 'HUES', 'GPS5', 'CORI', 'IORI', 'GRAV', 'FACE1'].indexOf(key) >= 0) {
@@ -126,10 +124,10 @@ export class GoProThingComponent implements OnInit {
         property.values.push([ts, sample]);
       }
 
-      if (i % max_chunk == 0) {
+      if (i % max_chunk === 0) {
         this.thingService.updatePropertyValues(this.thingId, property).toPromise()
         .then(res => {
-          console.log("sent up to " + i)
+          console.log('sent up to ' + i)
           elem.style.width = (i * 100.0 / telemetrySamples.length) + '%'
         })
         .catch(error => {

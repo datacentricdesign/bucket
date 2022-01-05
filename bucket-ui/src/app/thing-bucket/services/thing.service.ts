@@ -50,8 +50,8 @@ export class ThingService {
 
   async findOrCreatePropertyByName(thingId: string, name: string, typeId: string): Promise<Property> {
     return this.getProperties(thingId).then(properties => {
-      for (let index in properties) {
-        if (properties[index].name == name) {
+      for (const index in properties) {
+        if (properties[index].name === name) {
           return Promise.resolve(properties[index]);
         }
       }
@@ -209,11 +209,11 @@ export class ThingService {
   updatePropertyValues(thingId: string, property: Property, file?: File): Observable<any> {
     const url = this.apiURL + '/things/' + thingId + '/properties/' + property.id;
     const headers = this.getHeader()
-    let payload:any = property;
+    let payload: any = property;
     if (file !== undefined) {
       payload = new FormData()
       payload.append('property', JSON.stringify(property));
-      payload.append('video-mp4', file, file.name ? file.name : "");
+      payload.append('video-mp4', file, file.name ? file.name : '');
     }
     console.log(payload)
     return this.http.put<any>(url, payload, { headers, observe: 'events', reportProgress: true} as any) as Observable<HttpEvent<any>>;

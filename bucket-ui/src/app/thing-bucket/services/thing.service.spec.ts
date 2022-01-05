@@ -30,7 +30,7 @@ describe('ThingService', () => {
         });
 
         it('should return an Observable<Array<Video>>',
-            inject([ThingService], (thingService) => {
+            inject([ThingService], (service) => {
                 // test goes here
             }));
     });

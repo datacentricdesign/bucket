@@ -43,7 +43,7 @@ export class ThingStatsComponent implements OnInit {
 
 
 
-  async selectPeriod(periodKey:string) {
+  async selectPeriod(periodKey: string) {
     this.selectedPeriod = this.periods.get(periodKey)
     const thingsDataPoints = await this.thingService.dpCount(this.selectedPeriod.duration, this.selectedPeriod.interval)
     this.buildDataPointsChart(thingsDataPoints)
