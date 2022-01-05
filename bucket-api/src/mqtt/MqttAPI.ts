@@ -1,6 +1,5 @@
 import {
   AuthenticateError,
-  AuthErrorCode,
   Client as AedesClient,
   Server,
   Subscription,
@@ -300,9 +299,7 @@ export class MqttAPI {
     }
   }
 
-  async findOrCreateMQTTStatusProperty(
-    thingId: string
-  ): Promise<Property> {
+  async findOrCreateMQTTStatusProperty(thingId: string): Promise<Property> {
     try {
       const properties = await this.propertyService.getPropertiesByTypeId(
         thingId,

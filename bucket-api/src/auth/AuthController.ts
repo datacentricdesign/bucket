@@ -4,7 +4,6 @@ import * as ws from "ws";
 import { WebsocketRequestHandler } from "express-ws";
 import { DCDRequest } from "../config";
 import { AuthService, User } from "./AuthService";
-import { Log } from "../Logger";
 
 export class AuthController {
   private static instance: AuthController;

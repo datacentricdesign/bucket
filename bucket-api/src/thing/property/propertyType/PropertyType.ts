@@ -15,7 +15,7 @@ export class PropertyType implements IPropertyType {
   description: string;
 
   @Column({
-    default: ""
+    default: "",
   })
   icon?: string;
 

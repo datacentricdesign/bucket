@@ -38,12 +38,16 @@ export class PolicyController {
     };
   }
 
-  private async  _checkPolicy(action: string, req: DCDRequest, next: NextFunction) {
+  private async _checkPolicy(
+    action: string,
+    req: DCDRequest,
+    next: NextFunction
+  ) {
     const acpResource = buildACPResource(req);
     // For ownerships, Keto's flavor is 'regex'
     let flavor = "regex";
-    let subject = req.context.userId
-    let dcdAction = "dcd:actions:" + action
+    let subject = req.context.userId;
+    const dcdAction = "dcd:actions:" + action;
     if (req.query.sharedWith !== undefined) {
       const groupId = req.query.sharedWith as string;
       try {
@@ -65,7 +69,7 @@ export class PolicyController {
       action: dcdAction,
       subject: subject,
     };
-    
+
     this.policyService
       .check(acp, flavor)
       .then(() => next())
@@ -82,8 +86,11 @@ export class PolicyController {
 function buildACPResource(req: DCDRequest): string {
   let acpResource = "";
   // If we look for a shared property, return the propertyId as resource
-  if (req.params.propertyId !== undefined && req.query.sharedWith !== undefined) {
-    return req.params.propertyId
+  if (
+    req.params.propertyId !== undefined &&
+    req.query.sharedWith !== undefined
+  ) {
+    return req.params.propertyId;
   }
   // Else, build the resource
   if (req.params.thingId !== undefined) {
