@@ -128,7 +128,7 @@ export class WebRtcConnection extends EventEmitter {
     }
   }
 
-  async applyAnswer(answer): Promise<void> {
+  async applyAnswer(answer: RTCSessionDescription): Promise<void> {
     await this.peerConnection.setRemoteDescription(answer);
   }
 

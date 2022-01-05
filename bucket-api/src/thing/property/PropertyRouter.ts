@@ -126,12 +126,12 @@ export class PropertyRouter {
      *
      * @apiParam (Query) {String} authorization The access token.
      **/
-    // this.router.ws(
-    //   "/:propertyId/stream",
-    //   this.authController.authenticateWs(["dcd:properties"]),
-    //   this.policyController.checkPolicyWs("read"),
-    //   this.controller.streamMedia.bind(this.controller)
-    // );
+    this.router.ws(
+      "/:propertyId/stream",
+      this.authController.authenticateWs(["dcd:properties"]),
+      this.policyController.checkPolicyWs("read"),
+      this.controller.streamMedia.bind(this.controller)
+    );
 
     /**
      * @api {post} /things/:thingId/properties Create
@@ -379,8 +379,8 @@ export class PropertyRouter {
 
     if (dimension !== null) {
       if (dimension.unit === extensionName) {
-        console.log(dimension.type)
-        console.log(file.mimetype)
+        console.log(dimension.type);
+        console.log(file.mimetype);
         if (dimension.type === file.mimetype) {
           return cb(null, true);
         } else {
@@ -388,10 +388,10 @@ export class PropertyRouter {
             new DCDError(
               400,
               "Error: File in field " +
-              file.fieldname +
-              " must have mime type " +
-              file.mimetype +
-              "."
+                file.fieldname +
+                " must have mime type " +
+                file.mimetype +
+                "."
             )
           );
         }
@@ -400,10 +400,10 @@ export class PropertyRouter {
           new DCDError(
             400,
             "Error: File in field " +
-            file.fieldname +
-            " must have extension " +
-            dimension.unit +
-            "."
+              file.fieldname +
+              " must have extension " +
+              dimension.unit +
+              "."
           )
         );
       }
@@ -412,8 +412,8 @@ export class PropertyRouter {
         new DCDError(
           400,
           "Error: field " +
-          file.fieldname +
-          " is not matching any dimension ID."
+            file.fieldname +
+            " is not matching any dimension ID."
         )
       );
     }
@@ -443,19 +443,19 @@ const storage = multer.diskStorage({
       // Extract timestamp
       Log.debug(req.body);
       if (req.body.property !== undefined) {
-        const property = JSON.parse(req.body.property)
+        const property = JSON.parse(req.body.property);
         Log.debug(property);
         const timestamp = property.values[0][0];
         cb(
           null,
           thingId +
-          "-" +
-          propertyId +
-          "-" +
-          timestamp +
-          "#" +
-          file.fieldname +
-          path.extname(file.originalname).toLowerCase()
+            "-" +
+            propertyId +
+            "-" +
+            timestamp +
+            "#" +
+            file.fieldname +
+            path.extname(file.originalname).toLowerCase()
         );
       } else {
         if (file.fieldname === "csv") {
@@ -470,9 +470,8 @@ const storage = multer.diskStorage({
           );
         }
       }
-    } catch(error) {
-      cb(error, file.filename)
+    } catch (error) {
+      cb(error, file.filename);
     }
-    
   },
 });

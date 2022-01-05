@@ -8,7 +8,6 @@ import { DCDError } from "@datacentricdesign/types";
 
 import { v4 as uuidv4 } from "uuid";
 import { ValueOptions, DTOProperty } from "@datacentricdesign/types";
-import { Log } from "../../Logger";
 import { PropertyType } from "./propertyType/PropertyType";
 import { PolicyService } from "../../policy/PolicyService";
 import { InfluxDbService } from "../../influx/InfluxDbService";
@@ -111,7 +110,7 @@ export class PropertyService {
     let groups = [];
     if (audienceId === "*") {
       groups = await this.policyService.listGroupMembership(subject);
-      groups.push(actor)
+      groups.push(actor);
     } else {
       try {
         await this.policyService.checkGroupMembership(subject, audienceId);
@@ -204,7 +203,7 @@ export class PropertyService {
       );
     }
 
-    property.type.dimensions = property.type.dimensions.reverse()
+    property.type.dimensions = property.type.dimensions.reverse();
 
     return property;
   }
@@ -285,7 +284,7 @@ export class PropertyService {
         .where("property.id = :propertyId")
         .setParameters({ propertyId: propertyId })
         .getOne();
-      console.log(property.type)
+      console.log(property.type);
       this.cachedTypes[propertyId] = property.type;
     }
     return this.cachedTypes[propertyId];
