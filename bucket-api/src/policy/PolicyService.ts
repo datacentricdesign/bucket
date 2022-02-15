@@ -25,6 +25,12 @@ export interface Policy {
   resource: string;
 }
 
+export interface OryRole {
+  id: string;
+  members: string[];
+}
+
+
 /**
  * Manage access policies
  */
@@ -236,7 +242,7 @@ export class PolicyService {
       while (lastResultSize == 500) {
         const res = await fetch(url + fullList.length, options);
         if (res.ok) {
-          let result = await res.json();
+          let result = await res.json() as AccessControlPolicy[];
           if (result === null) {
             return fullList.length;
           }
@@ -282,7 +288,7 @@ export class PolicyService {
       for (let i = 0; i < totalPages; i++) {
         const res = await fetch(url + (i * 500), options);
         if (res.ok) {
-          let result = await res.json();
+          let result = await res.json() as AccessControlPolicy[];
           if (result !== null) {
             totalResults.push(...result);
           }
@@ -310,7 +316,7 @@ export class PolicyService {
         headers: this.ketoHeaders,
         method: "GET",
       });
-      const groups = await res.json();
+      const groups = await res.json() as OryRole[];
       for (let i = 0; i < groups.length; i++) {
         if (groups[i].id === groupId) {
           return Promise.resolve();
@@ -342,7 +348,7 @@ export class PolicyService {
         headers: this.ketoHeaders,
         method: "GET",
       });
-      const result_json = await res.json();
+      const result_json = await res.json() as OryRole[];
       const groups = [];
       for (let i = 0; i < result_json.length; i++) {
         groups.push(result_json[i].id);
