@@ -35,7 +35,7 @@ export class PropertyTypeRouter {
      * @apiGroup PropertyType
      * @apiDescription Get Property Types.
      *
-     * @apiVersion 0.1.
+     * @apiVersion 0.1.3
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
