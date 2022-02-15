@@ -443,20 +443,30 @@ const storage = multer.diskStorage({
       // Extract timestamp
       Log.debug(req.body);
       if (req.body.property !== undefined) {
-        const property = JSON.parse(req.body.property);
-        Log.debug(property);
-        const timestamp = property.values[0][0];
-        cb(
-          null,
-          thingId +
-            "-" +
-            propertyId +
-            "-" +
-            timestamp +
-            "#" +
-            file.fieldname +
-            path.extname(file.originalname).toLowerCase()
-        );
+        try {
+          const body = JSON.parse(req.body.property);
+          // Extract timestamp
+          const timestamp = body.values[0][0];
+          cb(
+            null,
+            thingId +
+              "-" +
+              propertyId +
+              "-" +
+              timestamp +
+              "#" +
+              file.fieldname +
+              path.extname(file.originalname).toLowerCase()
+          );
+        } catch {
+          cb(
+            new DCDError(
+              400,
+              "Could not parse JSON content."
+            ),
+            file.filename
+          );
+        }
       } else {
         if (file.fieldname === "csv") {
           cb(null, thingId + "-" + propertyId + ".csv");

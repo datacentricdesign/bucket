@@ -28,7 +28,7 @@ export class ThingController {
   /**
    * Return a status 'OK', a way to check that the API is up and running.
    */
-  public async apiHealth(req: DCDRequest, res: Response): Promise<void> {
+  public async getAPIHealth(req: DCDRequest, res: Response): Promise<void> {
     res.send({ status: "OK" });
   }
 

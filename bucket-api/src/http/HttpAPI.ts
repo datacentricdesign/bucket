@@ -71,7 +71,7 @@ export class HttpAPI {
 
     /**
      * @api {get} /properties List
-     * @apiGroup Properties
+     * @apiGroup Property
      * @apiDescription List all properties accessible for the authenticated person.
      *
      * @apiVersion 0.1.3
