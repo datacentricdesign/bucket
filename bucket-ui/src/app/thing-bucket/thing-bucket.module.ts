@@ -18,6 +18,7 @@ import { SharedPropertiesComponent } from './shared-properties/shared-properties
 import { SharedPropertiesStatsComponent } from './shared-properties-stats/shared-properties-stats.component';
 import { ThingFormComponent } from './thing-form/thing-form.component';
 import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thing.component';
+import { GoProThingComponent } from './go-pro-thing/go-pro-thing.component';
 import { SAVER, getSaver } from './services/saver.provider';
 import { SpinnerButtonComponent } from './spinner-button/spinner-button.component';
 
@@ -37,6 +38,7 @@ import { SpinnerButtonComponent } from './spinner-button/spinner-button.componen
     ThingStatsComponent,
     ThingFormComponent,
     RaspberryPiThingComponent,
+    GoProThingComponent,
     SharedPropertiesComponent,
     SharedPropertiesStatsComponent,
     SpinnerButtonComponent

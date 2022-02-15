@@ -8,6 +8,7 @@ import { Role } from "../thing/role/Role";
 import { v4 as uuidv4 } from "uuid";
 import config from "../config";
 import { Log } from "../Logger";
+import { Policy } from "./Policy";
 
 export interface AccessControlPolicy {
   subjects: string[];
@@ -19,23 +20,15 @@ export interface AccessControlPolicy {
   description?: string;
 }
 
-export interface Policy {
-  subject: string;
-  action: string;
-  resource: string;
-}
-
 export interface OryRole {
   id: string;
   members: string[];
 }
 
-
 /**
  * Manage access policies
  */
 export class PolicyService {
-
   private static instance: PolicyService;
 
   public static getInstance(): PolicyService {
@@ -143,11 +136,11 @@ export class PolicyService {
       throw new DCDError(
         4041,
         "Role not found for " +
-        subjectId +
-        ", " +
-        resourceId +
-        " and " +
-        roleName
+          subjectId +
+          ", " +
+          resourceId +
+          " and " +
+          roleName
       );
     }
   }
@@ -208,9 +201,8 @@ export class PolicyService {
   }
 
   async check(acp: Policy, flavor = "regex"): Promise<void> {
-    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/allowed";
-    console.log(url);
-    console.log(acp);
+    const url =
+      config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/allowed";
     const options = {
       headers: this.ketoHeaders,
       method: "POST",
@@ -227,17 +219,21 @@ export class PolicyService {
     }
   }
 
-  async getTotalConsents(flavor:string): Promise<number> {
+  async getTotalConsents(flavor: string): Promise<number> {
     if (this.cacheTotalConsents !== -1) {
       return this.cacheTotalConsents;
     }
-    const url = config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies?limit=500&offset=";
+    const url =
+      config.oauth2.acpURL.origin +
+      "/engines/acp/ory/" +
+      flavor +
+      "/policies?limit=500&offset=";
     const options = {
       headers: this.ketoHeaders,
       method: "GET",
     };
-    const fullList = []
-    let lastResultSize = 500
+    const fullList = [];
+    let lastResultSize = 500;
     try {
       while (lastResultSize == 500) {
         const res = await fetch(url + fullList.length, options);
@@ -247,7 +243,7 @@ export class PolicyService {
             return fullList.length;
           }
           lastResultSize = result.length;
-          fullList.push(...result as AccessControlPolicy[])
+          fullList.push(...(result as AccessControlPolicy[]));
         } else {
           return fullList.length;
         }
@@ -278,7 +274,8 @@ export class PolicyService {
         "/policies?limit=500&" +
         type +
         "=" +
-        id + "&offset=";
+        id +
+        "&offset=";
       const options = {
         headers: this.ketoHeaders,
         method: "GET",
@@ -286,7 +283,7 @@ export class PolicyService {
       const totalPages = Math.ceil(totalConsents / 500);
       const totalResults = [];
       for (let i = 0; i < totalPages; i++) {
-        const res = await fetch(url + (i * 500), options);
+        const res = await fetch(url + i * 500, options);
         if (res.ok) {
           let result = await res.json() as AccessControlPolicy[];
           if (result !== null) {
@@ -368,10 +365,10 @@ export class PolicyService {
   ): Promise<AccessControlPolicy> {
     const url =
       config.oauth2.acpURL.origin + "/engines/acp/ory/" + flavor + "/policies";
-    console.log("update policy")
+    console.log("update policy");
     console.log(policy);
     try {
-      this.cacheTotalConsents = -1
+      this.cacheTotalConsents = -1;
       const result = await fetch(url, {
         headers: this.ketoHeaders,
         method: "PUT",
@@ -389,10 +386,10 @@ export class PolicyService {
     try {
       await fetch(
         config.oauth2.acpURL.origin +
-        "/engines/acp/ory/" +
-        flavor +
-        "/policies/" +
-        policyId,
+          "/engines/acp/ory/" +
+          flavor +
+          "/policies/" +
+          policyId,
         {
           headers: this.ketoHeaders,
           method: "DELETE",

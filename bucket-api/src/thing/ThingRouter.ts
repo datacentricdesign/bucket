@@ -40,26 +40,30 @@ export class ThingRouter {
 
   setRoutes(): void {
     /**
-     * @api {get} /things/health
+     * @api {get} /things/health Health
+     * @apiName GetAPIHealth
+     * @apiVersion 0.1.4
      * @apiGroup Thing
-     * @apiDescription Get Health status of Things API
+     * @apiPermission none
      *
-     * @apiVersion 0.1.3
+     * @apiDescription Get Health status of Things API
      *
      * @apiSuccess {object} health status
      **/
-    this.router.get("/health", this.controller.apiHealth.bind(this.controller));
+    this.router.get("/health", this.controller.getAPIHealth.bind(this.controller));
 
     /**
      * @api {get} /things List
+     * @apiVersion 0.1.4
+     * @apiName GetThingsOfAPerson
      * @apiGroup Thing
-     * @apiDescription Get Things of a Person.
+     * @apiPermission dcd:things
      *
-     * @apiVersion 0.1.3
+     * @apiDescription Get Things of a Person.
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
-     * @apiSuccess {object} things The retrieved Things
+     * @apiSuccess {Thing[]} things The retrieved Things
      **/
     this.router.get(
       "/",
@@ -67,6 +71,19 @@ export class ThingRouter {
       this.controller.getThingsOfAPerson.bind(this.controller)
     );
 
+    /**
+     * @api {get} /things/count Count Data Points
+     * @apiVersion 0.1.4
+     * @apiName CountDataPoints
+     * @apiGroup Thing
+     * @apiPermission dcd:things
+     *
+     * @apiDescription Count the data points of owned Things.
+     * 
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiSuccess {Thing[]} things The retrieved Things with count for each Property.
+     **/
     this.router.get(
       "/count",
       [this.authController.authenticate(["dcd:things"])],
@@ -75,11 +92,13 @@ export class ThingRouter {
 
     /**
      * @api {get} /things/:thingId Read
+     * @apiVersion 0.1.4
+     * @apiName GetOneThingById
      * @apiGroup Thing
+     * @apiPermission dcd:things
+     *
      * @apiDescription Get one Thing.
-     *
-     * @apiVersion 0.1.3
-     *
+     * 
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to read.
@@ -97,12 +116,18 @@ export class ThingRouter {
 
     /**
      * @api {post} /things Create
+     * @apiVersion 0.1.4
+     * @apiName CreateNewThing
      * @apiGroup Thing
+     * @apiPermission dcd:things
+     *
      * @apiDescription Create a new Thing.
-     *
-     * @apiVersion 0.1.3
-     *
-     * @apiParam (Body) {Thing} thing Thing to create as JSON.
+     * 
+     * @apiParam (Body) {String} name Thing name
+     * @apiParam (Body) {String} description Thing description
+     * @apiParam (Body) {String} type Thing type
+     * @apiParam (Body) {String} [pem] Thing PEM
+     * 
      * @apiParamExample {json} thing:
      *     {
      *       "name": "My Thing",
@@ -114,9 +139,40 @@ export class ThingRouter {
      * @apiParam (Query) {Boolean} [jwt=false] Need to generate a JWT
      * @apiParam (Query) {Boolean} [thingId] Forward to update (Web forms cannot submit PUT methods)
      *
-     * @apiHeader {String} Content-type application/json
-     * @apiHeader {String} Authorization TOKEN ID
+     * @apiHeader {String} Content-Type=application/json
+     * @apiHeader {String} Authorization Bearer token obtained through the OAuth2 Authentication.
+     * 
+     * 
+     * @apiExample {bash} Curl example
+     * curl --request POST 'https://dwd.tudelft.nl/bucket/api/things'
+     *      --header 'Authorization: Bearer REPLACE-BY-TOKEN' \
+     *      --header 'Content-Type: application/json' \
+     *      --data-raw '{
+     *          "name": "Test token thing",
+     *          "type": "Test",
+     *          "description": "Test token thing"
+     *      }'
      *
+     * @apiExample {python} Python example
+     * import requests
+     * import json
+     * 
+     * url = "https://dwd.tudelft.nl/bucket/api/things"
+
+     * payload = json.dumps({
+     *   "name": "Test token thing",
+     *   "type": "Test",
+     *   "description": "Test token thing"
+     * })
+     * headers = {
+     *   'Authorization': 'Bearer REPLACE-BY-TOKEN',
+     *   'Content-Type': 'application/json'
+     * }
+     * 
+     * response = requests.request("POST", url, headers=headers, data=payload)
+     * 
+     * print(response.text)
+     * 
      * @apiSuccess {object} thing The created Thing
      **/
     this.router.post(
@@ -127,11 +183,13 @@ export class ThingRouter {
 
     /**
      * @api {patch} /things/:thingId Update
+     * @apiVersion 0.1.4
+     * @apiName EditThing
      * @apiGroup Thing
+     * @apiPermission dcd:things
+     *
      * @apiDescription Edit one Thing.
-     *
-     * @apiVersion 0.1.3
-     *
+     * 
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to update.
@@ -147,11 +205,13 @@ export class ThingRouter {
 
     /**
      * @api {patch} /things/:thingId/pem Update PEM
+     * @apiVersion 0.1.4
+     * @apiName EditThingPEM
      * @apiGroup Thing
+     * @apiPermission dcd:things
+     *
      * @apiDescription Update the PEM file containing a public key, so that the Hub can identify a Thing as data transmitter.
-     *
-     * @apiVersion 0.1.3
-     *
+     * 
      * @apiHeader {string} Authorization TOKEN ID
      *
      * @apiParam (Path) {string} thingId Id of the Thing to update.
@@ -170,10 +230,12 @@ export class ThingRouter {
 
     /**
      * @api {delete} /things/:thingId Delete
+     * @apiVersion 0.1.4
+     * @apiName DeleteOneThing
      * @apiGroup Thing
-     * @apiDescription Delete one Thing.
+     * @apiPermission dcd:things
      *
-     * @apiVersion 0.1.3
+     * @apiDescription Delete one Thing.
      *
      * @apiHeader {String} Authorization TOKEN ID
      *

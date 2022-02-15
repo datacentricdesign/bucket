@@ -241,8 +241,8 @@ export class ThingComponent implements OnInit {
 
     selectType(typeId: string) {
         let type: PropertyType
-        for (let i=0;i<this.types.length;i++) {
-            if (this.types[i].id == typeId) {
+        for (let i = 0; i < this.types.length; i++) {
+            if (this.types[i].id === typeId) {
                 type = this.types[i]
                 break;
             }

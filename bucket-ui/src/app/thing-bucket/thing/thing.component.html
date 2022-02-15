@@ -208,6 +208,14 @@
                         </div>
                     </form>
                 </div>
+                <div *ngIf="thing.type==='GO_PRO'">
+                    <div class="card-body">
+                        <app-go-pro-thing [thingName]="thing.name" [thingId]="thing.id">
+                        </app-go-pro-thing>
+                    </div>
+                    <div class="card-footer">
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -42,7 +42,7 @@ export class InfluxDbService {
    */
   public valuesToInfluxDB(property: Property): Promise<void> {
     Log.debug("Values to influx");
-    Log.debug(JSON.stringify(property))
+    Log.debug(JSON.stringify(property));
     const points = [];
     const dimensions = property.type.dimensions;
     for (const index in property.values) {
@@ -96,7 +96,7 @@ export class InfluxDbService {
         points.push(point);
       }
     }
-    Log.debug(points)
+    Log.debug(points);
     return this.influx.writePoints(points, { precision: "ms" });
   }
 

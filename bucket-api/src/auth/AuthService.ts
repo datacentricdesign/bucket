@@ -231,7 +231,7 @@ export class AuthService {
       clockTolerance: 5,
     };
 
-    Log.debug(publicKey)
+    Log.debug(publicKey);
     return new Promise((resolve, reject) => {
       jwt.verify(
         token.toString(),
@@ -240,9 +240,9 @@ export class AuthService {
         // decoded (type Token) can be used as second parameter.
         (error: Error, decoded: Token) => {
           if (error) {
-            Log.debug(error)
-            Log.debug(token.toString())
-            Log.debug(decoded)
+            Log.debug(error);
+            Log.debug(token.toString());
+            Log.debug(decoded);
             reject(new DCDError(403, error.message));
           } else {
             resolve({
@@ -253,7 +253,8 @@ export class AuthService {
               token_type: "jwt",
             });
           }
-        });
+        }
+      );
     });
   }
 

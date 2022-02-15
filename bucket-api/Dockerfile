@@ -15,6 +15,7 @@
 FROM node:current-buster
 ARG START_COMMAND
 ENV START_COMMAND ${START_COMMAND}
+
 # Create app directory
 WORKDIR /usr/app
 # Install ONLY prod dependencies

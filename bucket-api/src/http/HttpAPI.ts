@@ -10,7 +10,7 @@ import * as helmet from "helmet";
 import * as cors from "cors";
 
 import { AuthController } from "../auth/AuthController";
-import PropertyController from "../thing/property/PropertyController";
+import { PropertyController } from "../thing/property/PropertyController";
 import DPiController from "../thing/dpi/DPiController";
 import { PropertyTypeRouter } from "../thing/property/propertyType/PropertyTypeRouter";
 import { ThingRouter } from "../thing/ThingRouter";
@@ -56,7 +56,7 @@ export class HttpAPI {
      * @apiGroup DPi
      * @apiDescription Health status of the DPi Generator (available or not available)
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      **/
     this.app.get(
       config.http.baseUrl + "/things/types/dpi/health",
@@ -71,10 +71,10 @@ export class HttpAPI {
 
     /**
      * @api {get} /properties List
-     * @apiGroup Properties
+     * @apiGroup Property
      * @apiDescription List all properties accessible for the authenticated person.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *

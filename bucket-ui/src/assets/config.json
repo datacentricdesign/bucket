@@ -3,8 +3,8 @@
     "version": "0.0.1",
     "environment": "development",
     "basehref": "bucket",
-    "apiURL": "http://localhost:8081/bucket/api",
-    "grafanaURL": "http://localhost:3000/grafana",
+    "apiURL": "https://dwd.tudelft.nl/bucket/api",
+    "grafanaURL": "https://dwd.tudelft.nl/grafana",
     "authCodeFlow": {
         "issuer": "https://dwd.tudelft.nl:443/",
         "redirectUri": "https://dwd.tudelft.nl:443/bucket",

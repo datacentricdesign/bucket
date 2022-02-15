@@ -3,7 +3,7 @@ import * as expressWs from "express-ws";
 import { AuthController } from "../../auth/AuthController";
 import { PolicyController } from "../../policy/PolicyController";
 
-import PropertyController from "./PropertyController";
+import { PropertyController } from "./PropertyController";
 import { DCDError, Property } from "@datacentricdesign/types";
 import path = require("path");
 import multer = require("multer");
@@ -48,7 +48,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get Properties of a Thing.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -68,7 +68,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get one Property.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -94,7 +94,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Get the media associated to a dimension's timestamp.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -126,19 +126,19 @@ export class PropertyRouter {
      *
      * @apiParam (Query) {String} authorization The access token.
      **/
-    // this.router.ws(
-    //   "/:propertyId/stream",
-    //   this.authController.authenticateWs(["dcd:properties"]),
-    //   this.policyController.checkPolicyWs("read"),
-    //   this.controller.streamMedia.bind(this.controller)
-    // );
+    this.router.ws(
+      "/:propertyId/stream",
+      this.authController.authenticateWs(["dcd:properties"]),
+      this.policyController.checkPolicyWs("read"),
+      this.controller.streamMedia.bind(this.controller)
+    );
 
     /**
      * @api {post} /things/:thingId/properties Create
      * @apiGroup Property
      * @apiDescription Create a Property.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      * @apiParam {String} thingId Id of the Thing to which we add the Property.
      *
      * @apiParam (Body) {Property} property Property to create as JSON.
@@ -168,7 +168,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Edit one Property to change its name or description.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -196,7 +196,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Update values of a Property.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -224,7 +224,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Delete one Property.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -263,7 +263,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription List consents granted for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -284,7 +284,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Revoke a consent granted for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -306,7 +306,7 @@ export class PropertyRouter {
      * @apiGroup Property
      * @apiDescription Grant a consent for one Property. Only property owner can access this list.
      *
-     * @apiVersion 0.1.3
+     * @apiVersion 0.1.4
      *
      * @apiParam (Body) {Consent} consent Consent to grant as JSON.
      * @apiParamExample {json} consent:
@@ -379,6 +379,8 @@ export class PropertyRouter {
 
     if (dimension !== null) {
       if (dimension.unit === extensionName) {
+        console.log(dimension.type);
+        console.log(file.mimetype);
         if (dimension.type === file.mimetype) {
           return cb(null, true);
         } else {
@@ -434,47 +436,52 @@ export class PropertyRouter {
 const storage = multer.diskStorage({
   destination: config.hostDataFolder + "/files/",
   filename: function (req, file, cb) {
-    Log.debug(file);
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
-    Log.debug(req.body.property);
-    if (req.body.property !== undefined) {
-      try {
-        const body = JSON.parse(req.body.property);
-        // Extract timestamp
-        const timestamp = body.values[0][0];
-        cb(
-          null,
-          thingId +
-            "-" +
-            propertyId +
-            "-" +
-            timestamp +
-            "#" +
-            file.fieldname +
-            path.extname(file.originalname).toLowerCase()
-        );
-      } catch {
-        cb(
-          new DCDError(
-            400,
-            "Could not parse JSON content."
-          ),
-          file.filename
-        );
-      }
-    } else {
-      if (file.fieldname === "csv") {
-        cb(null, thingId + "-" + propertyId + ".csv");
+    try {
+      Log.debug(file);
+      const thingId = req.params.thingId;
+      const propertyId = req.params.propertyId;
+      // Extract timestamp
+      Log.debug(req.body);
+      if (req.body.property !== undefined) {
+        try {
+          const body = JSON.parse(req.body.property);
+          // Extract timestamp
+          const timestamp = body.values[0][0];
+          cb(
+            null,
+            thingId +
+              "-" +
+              propertyId +
+              "-" +
+              timestamp +
+              "#" +
+              file.fieldname +
+              path.extname(file.originalname).toLowerCase()
+          );
+        } catch {
+          cb(
+            new DCDError(
+              400,
+              "Could not parse JSON content."
+            ),
+            file.filename
+          );
+        }
       } else {
-        cb(
-          new DCDError(
-            400,
-            "Requests has no values nor 'csv' field containing a CSV file."
-          ),
-          file.filename
-        );
+        if (file.fieldname === "csv") {
+          cb(null, thingId + "-" + propertyId + ".csv");
+        } else {
+          cb(
+            new DCDError(
+              400,
+              "Requests has no values nor 'csv' field containing a CSV file."
+            ),
+            file.filename
+          );
+        }
       }
+    } catch (error) {
+      cb(error, file.filename);
     }
   },
 });
