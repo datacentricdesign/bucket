@@ -14,7 +14,7 @@ import { Dimension } from "./dimension/Dimension";
 import { Log } from "../../Logger";
 import config, { DCDRequest } from "../../config";
 
-import { WebRtcConnectionManager } from "./webrtc/WebRTCConnectionManager";
+// import { WebRtcConnectionManager } from "./webrtc/WebRTCConnectionManager";
 import { AccessControlPolicy, PolicyService } from "../../policy/PolicyService";
 import { ThingService } from "../ThingService";
 import { Stream } from "stream";
@@ -32,7 +32,7 @@ export class PropertyController {
   private propertyService: PropertyService;
   private thingService: ThingService;
   private policyService: PolicyService;
-  private connectionManager: WebRtcConnectionManager;
+  // private connectionManager: WebRtcConnectionManager;
 
   private static instance: PropertyController;
 
@@ -45,7 +45,7 @@ export class PropertyController {
 
   private constructor() {
     this.propertyService = PropertyService.getInstance();
-    this.connectionManager = new WebRtcConnectionManager();
+    // this.connectionManager = new WebRtcConnectionManager();
     this.thingService = ThingService.getInstance();
     this.policyService = PolicyService.getInstance();
   }
@@ -163,61 +163,61 @@ export class PropertyController {
     next: NextFunction
   ): Promise<void> {
     // Retrieve property
-    const thingId = req.params.thingId;
-    const propertyId = req.params.propertyId;
-    const property: Property = await this.propertyService.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    if (property === undefined) {
-      return next(new DCDError(404, "Property not found."));
-    }
-    ws.on("message", async (message: Buffer) => {
-      let connection = null;
-      const messageJson = JSON.parse(message.toString());
-      switch (messageJson.type) {
-        case "new":
-          // TODO get video property to record on
-          try {
-            connection = await this.connectionManager.createConnection(
-              property
-            );
-            ws.send(JSON.stringify(connection));
-          } catch (error) {
-            console.error(error);
-            ws.send(JSON.stringify(error));
-          }
-          break;
-        case "leave":
-          Log.debug("leaving: " + messageJson.id);
-          connection = this.connectionManager.getConnection(messageJson.id);
-          Log.debug(connection);
-          if (!connection) {
-            ws.send("Connection not found");
-            return;
-          }
-          connection.close();
-          ws.send(JSON.stringify(connection));
-          break;
-        case "answer":
-          Log.debug("answer type for " + messageJson.id);
-          connection = this.connectionManager.getConnection(messageJson.id);
-          if (!connection) {
-            ws.send("Connection not found");
-            return;
-          }
-          try {
-            await connection.applyAnswer(messageJson.localDescription);
-            ws.send(JSON.stringify(connection.toJSON().remoteDescription));
-          } catch (error) {
-            ws.send(JSON.stringify(error));
-          }
-          break;
-        default:
-          Log.debug(messageJson);
-          break;
-      }
-    });
+    // const thingId = req.params.thingId;
+    // const propertyId = req.params.propertyId;
+    // const property: Property = await this.propertyService.getOnePropertyById(
+    //   thingId,
+    //   propertyId
+    // );
+    // if (property === undefined) {
+    //   return next(new DCDError(404, "Property not found."));
+    // }
+    // ws.on("message", async (message: Buffer) => {
+    //   let connection = null;
+    //   const messageJson = JSON.parse(message.toString());
+    //   switch (messageJson.type) {
+    //     case "new":
+    //       // TODO get video property to record on
+    //       try {
+    //         connection = await this.connectionManager.createConnection(
+    //           property
+    //         );
+    //         ws.send(JSON.stringify(connection));
+    //       } catch (error) {
+    //         console.error(error);
+    //         ws.send(JSON.stringify(error));
+    //       }
+    //       break;
+    //     case "leave":
+    //       Log.debug("leaving: " + messageJson.id);
+    //       connection = this.connectionManager.getConnection(messageJson.id);
+    //       Log.debug(connection);
+    //       if (!connection) {
+    //         ws.send("Connection not found");
+    //         return;
+    //       }
+    //       connection.close();
+    //       ws.send(JSON.stringify(connection));
+    //       break;
+    //     case "answer":
+    //       Log.debug("answer type for " + messageJson.id);
+    //       connection = this.connectionManager.getConnection(messageJson.id);
+    //       if (!connection) {
+    //         ws.send("Connection not found");
+    //         return;
+    //       }
+    //       try {
+    //         await connection.applyAnswer(messageJson.localDescription);
+    //         ws.send(JSON.stringify(connection.toJSON().remoteDescription));
+    //       } catch (error) {
+    //         ws.send(JSON.stringify(error));
+    //       }
+    //       break;
+    //     default:
+    //       Log.debug(messageJson);
+    //       break;
+    //   }
+    // });
   }
 
   public async editProperty(
