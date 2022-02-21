@@ -388,10 +388,10 @@ export class PropertyRouter {
             new DCDError(
               400,
               "Error: File in field " +
-                file.fieldname +
-                " must have mime type " +
-                file.mimetype +
-                "."
+              file.fieldname +
+              " must have mime type " +
+              file.mimetype +
+              "."
             )
           );
         }
@@ -400,10 +400,10 @@ export class PropertyRouter {
           new DCDError(
             400,
             "Error: File in field " +
-              file.fieldname +
-              " must have extension " +
-              dimension.unit +
-              "."
+            file.fieldname +
+            " must have extension " +
+            dimension.unit +
+            "."
           )
         );
       }
@@ -412,8 +412,8 @@ export class PropertyRouter {
         new DCDError(
           400,
           "Error: field " +
-            file.fieldname +
-            " is not matching any dimension ID."
+          file.fieldname +
+          " is not matching any dimension ID."
         )
       );
     }
@@ -445,18 +445,31 @@ const storage = multer.diskStorage({
       if (req.body.property !== undefined) {
         try {
           const body = JSON.parse(req.body.property);
-          // Extract timestamp
-          const timestamp = body.values[0][0];
+          // Extract timestamp from the file name
+          const timestamp = parseInt(file.originalname.toLowerCase().split(path.extname(file.originalname).toLowerCase())[0]);
+          Log.debug(timestamp)
+          for (let i = 0; i < body.values.length; i++) {
+            // search for this timestamp in the submitted values
+            if (body.values[i][0] == timestamp) {
+              cb(
+                null,
+                thingId +
+                "-" +
+                propertyId +
+                "-" +
+                timestamp +
+                "#" +
+                file.fieldname +
+                path.extname(file.originalname).toLowerCase()
+              );
+            }
+          }
           cb(
-            null,
-            thingId +
-              "-" +
-              propertyId +
-              "-" +
-              timestamp +
-              "#" +
-              file.fieldname +
-              path.extname(file.originalname).toLowerCase()
+            new DCDError(
+              400,
+              "File ignored, no corresponding timestamp in the submitted values."
+            ),
+            file.filename
           );
         } catch {
           cb(
