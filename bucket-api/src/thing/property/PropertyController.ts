@@ -388,7 +388,7 @@ export class PropertyController {
         }
 
         Log.debug(completeValues);
-        property.values = [completeValues];
+        property.values = completeValues;
         this.saveValuesAndRespond(property, res, next);
       } else {
         Log.debug("values from csv file");
