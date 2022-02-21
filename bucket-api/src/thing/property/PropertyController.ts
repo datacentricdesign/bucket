@@ -3,6 +3,7 @@ import { validate } from "class-validator";
 
 import { Property } from "./Property";
 import { v4 as uuidv4 } from "uuid";
+import path = require("path");
 
 import * as fs from "fs";
 import * as ws from "ws";
@@ -345,37 +346,47 @@ export class PropertyController {
       if (req.body.property !== undefined) {
         const body = JSON.parse(req.body.property);
         // there are values,
-        const timestamp = body.values[0][0];
+        const completeValues = [];
+        for (let valueIndex = 0; valueIndex < body.values.length; valueIndex++) {
+          const timestamp = body.values[valueIndex][0];
 
-        // check if missing files (dimension with no value)
-        const completeValues = [timestamp];
-        let indexValues = 1;
-        for (let i = 0; i < property.type.dimensions.length; i++) {
-          // if type is a mime type (includes a slash)
-          if (property.type.dimensions[i].type.split("/").length > 1) {
-            // Then there must be a received file for this dimension
-            let fileExist = false;
-            for (let j = 0; j < req.files.length; j++) {
-              if (property.type.dimensions[i].id === req.files[j].fieldname) {
-                fileExist = true;
-                completeValues.push(req.files[j].filename);
+          // check if missing files (dimension with no value)
+          const completeValue = [timestamp];
+          let indexValues = 1;
+          for (let i = 0; i < property.type.dimensions.length; i++) {
+            // if type is a mime type (includes a slash)
+            if (property.type.dimensions[i].type.split("/").length > 1) {
+              // Then there must be a received file for this dimension
+              let fileExist = false;
+              for (let j = 0; j < req.files.length; j++) {
+                const originalname = req.files[j].originalname.toLowerCase()
+                const tsFromFile = parseInt(originalname.split(path.extname(req.files[j].originalname).toLowerCase())[0]);
+                Log.debug(timestamp);
+                Log.debug(tsFromFile);
+                if (property.type.dimensions[i].id === req.files[j].fieldname && timestamp === tsFromFile) {
+                  fileExist = true;
+                  completeValue.push(req.files[j].filename);
+                }
               }
-            }
-            if (!fileExist) {
-              return next(
-                new DCDError(
-                  400,
-                  "Dimension " +
+              if (!fileExist) {
+                return next(
+                  new DCDError(
+                    400,
+                    "Dimension " +
                     property.type.dimensions[i].id +
                     " has no file."
-                )
-              );
+                  )
+                );
+              }
+            } else {
+              completeValue.push(body.values[valueIndex][indexValues]);
+              indexValues++;
             }
-          } else {
-            completeValues.push(body.values[0][indexValues]);
-            indexValues++;
           }
+
+          completeValues.push(completeValue)
         }
+
         Log.debug(completeValues);
         property.values = [completeValues];
         this.saveValuesAndRespond(property, res, next);
