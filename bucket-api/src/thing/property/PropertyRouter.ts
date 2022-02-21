@@ -450,8 +450,8 @@ const storage = multer.diskStorage({
           Log.debug(timestamp)
           for (let i = 0; i < body.values.length; i++) {
             // search for this timestamp in the submitted values
-            if (body.values[i][0] == timestamp) {
-              cb(
+            if (body.values[i][0] === timestamp) {
+              return cb(
                 null,
                 thingId +
                 "-" +
