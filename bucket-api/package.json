@@ -38,6 +38,7 @@
     "cors": "2.8.5",
     "envalid": "6.0.2",
     "express": "4.17.1",
+    "express-rate-limit": "^6.3.0",
     "express-session": "1.17.1",
     "express-ws": "^5.0.2",
     "fluent-ffmpeg": "^2.1.2",

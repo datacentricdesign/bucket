@@ -8,6 +8,7 @@ import * as bodyParser from "body-parser";
 import * as cookieParser from "cookie-parser";
 import * as helmet from "helmet";
 import * as cors from "cors";
+import rateLimit from 'express-rate-limit';
 
 import { AuthController } from "../auth/AuthController";
 import { PropertyController } from "../thing/property/PropertyController";
@@ -41,6 +42,8 @@ export class HttpAPI {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(cookieParser());
+
+    this.setRateLimit()
 
     this.app.get(config.http.baseUrl + "/", (req: Request, res: Response) => {
       return res.status(200).send({ status: "OK" });
@@ -116,6 +119,17 @@ export class HttpAPI {
         return Promise.resolve();
       }
     });
+  }
+
+  private setRateLimit() {
+    // set up rate limiter: maximum of x requests per minute, defined by env RATE_LIMIT_PER_MINUTE (default: 100)
+    var limiter = rateLimit({
+      windowMs: 1 * 60 * 1000, // 1 minute
+      max: config.http.rateLimitPerMinute, // Limit each IP to 100 requests per `window`
+      standardHeaders: true // Return rate limit info in the `RateLimit-*` headers
+    });
+    // apply rate limiter to all requests
+    this.app.use(limiter);
   }
 
   public errorHandler(

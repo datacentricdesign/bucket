@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Added rate limte on HTTP requests to mitigate DOS
 - Support video streaming WebRTC (commented out, work in progress)
 
 ## [0.1.4] - 2022-02-15
