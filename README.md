@@ -12,7 +12,7 @@
 
 [![Gitter](https://badges.gitter.im/datacentricdesign/community.svg)](https://gitter.im/datacentricdesign/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Bucket is a cloud application that helps collect data for Data-Centric Design processes.
+Bucket is a cloud application that helps collect and use data for Data-Centric Design processes.
 
 # Key Concepts
 
