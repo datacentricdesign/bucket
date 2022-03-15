@@ -4,6 +4,7 @@ import * as supertest from "supertest"
 import config from "../../src/config";
 
 import { HttpAPI } from "../../src/http/HttpAPI";
+import { Log } from "../../src/Logger";
 
 describe("Server checks", () => {
 

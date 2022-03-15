@@ -73,31 +73,39 @@ export class ThingController {
   ): Promise<void> {
     // Get parameters from the body
     const { name, description, type, pem, dpi } = req.body;
-    const thing = new Thing();
-    thing.name = name;
-    thing.description = description;
-    thing.type = type;
 
-    // Get thing creator identity from the request context
-    thing.personId = req.context.userId;
-
-    // Validade if the parameters are ok
-    const errors = await validate(thing);
-    if (errors.length > 0) {
-      return next(new DCDError(400, errors.toString()));
+    // Generate a new ID
+    const thingToCreate = new Thing();
+    thingToCreate.id = this.thingService.generateThingID();
+    // A Thing must have a name
+    if (name === undefined || name === "") {
+      return next(new DCDError(4003, "Add field name."));
+    }
+    thingToCreate.name = name;
+    // A Thing must have a type
+    if (type === undefined || type === "") {
+      return next(new DCDError(4003, "Add field type."));
+    }
+    thingToCreate.type = type;
+    // A Thing might have a description
+    if (description === undefined) {
+      thingToCreate.description = description;
     }
 
+    // Get thing creator identity from the request context
+    thingToCreate.personId = req.context.userId;
+
     try {
-      const createdThing = await this.thingService.createNewThing(thing);
+      const createdThing = await this.thingService.createNewThing(thingToCreate);
       if (pem !== undefined && typeof pem === "string") {
         pem.trim();
         const error = checkPEM(pem);
         if (error !== undefined) return next(error);
-        await this.thingService.editThingPEM(thing.id, pem);
+        await this.thingService.editThingPEM(createdThing.id, pem);
       }
 
-      if (thing.type === "RASPBERRYPI" && dpi !== undefined) {
-        await this.dpiService.generateDPiImage(dpi, thing.id);
+      if (createdThing.type === "RASPBERRYPI" && dpi !== undefined) {
+        await this.dpiService.generateDPiImage(dpi, createdThing.id);
       }
 
       // If all ok, send 201 response

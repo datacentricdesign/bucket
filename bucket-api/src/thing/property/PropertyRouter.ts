@@ -240,6 +240,27 @@ export class PropertyRouter {
       this.controller.deleteOneProperty.bind(this.controller)
     );
 
+    /**
+     * @api {delete} /things/:thingId/properties/:propertyId/timestamps Delete
+     * @apiGroup Property
+     * @apiDescription Delete some data points of a property.
+     *
+     * @apiVersion 0.1.4
+     *
+     * @apiHeader {String} Authorization TOKEN ID
+     *
+     * @apiParam {String} thingId Id of the Thing containing the Property from where to delete data points.
+     * @apiParam {String} propertyId Id of the Property from where to delete data points.
+     **/
+    this.router.delete(
+      "/:propertyId/timestamps",
+      [
+        this.authController.authenticate(["dcd:properties"]),
+        this.policyController.checkPolicy("delete"),
+      ],
+      this.controller.deleteDataPoints.bind(this.controller)
+    );
+
     this.router.get(
       "/:propertyId/count",
       [

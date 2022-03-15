@@ -2,6 +2,7 @@ import { Bucket } from "./Bucket";
 import { Log } from "./Logger";
 
 const bucket = new Bucket();
+bucket.init();
 bucket.start();
 
 process.on("SIGTERM", () => {

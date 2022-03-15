@@ -427,6 +427,27 @@ export class PropertyController {
     }
   }
 
+  public async deleteDataPoints(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    // Get the property ID from the url
+    const thingId = req.params.thingId;
+    const propertyId = req.params.propertyId;
+    if (req.body === undefined || req.body.timestamps === undefined ) {
+      return next(new DCDError(400, "The request miss the array of timestamps to delete."))
+    }
+    // Call the Service
+    try {
+      await this.propertyService.deleteDataPoints(thingId, propertyId, req.body.timestamps);
+      // After all send a 204 (no content, but accepted) response
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async countDataPoints(
     req: Request,
     res: Response,
