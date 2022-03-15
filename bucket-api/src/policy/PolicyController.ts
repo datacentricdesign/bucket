@@ -57,7 +57,6 @@ export class PolicyController {
         subject = groupId;
         // For consents (e.g. shared entities), Keto's flavor is 'exact'
         flavor = "exact";
-        console.log("flavor exact from shared with");
       } catch (error) {
         Log.debug(error)
         next(new DCDError(403, subject + " is not member of " + groupId));
