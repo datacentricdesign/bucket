@@ -42,7 +42,7 @@ export class ThingRouter {
     /**
      * @api {get} /things/health Health
      * @apiName GetAPIHealth
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiGroup Thing
      * @apiPermission none
      *
@@ -54,7 +54,7 @@ export class ThingRouter {
 
     /**
      * @api {get} /things List
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName GetThingsOfAPerson
      * @apiGroup Thing
      * @apiPermission dcd:things
@@ -73,7 +73,7 @@ export class ThingRouter {
 
     /**
      * @api {get} /things/count Count Data Points
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName CountDataPoints
      * @apiGroup Thing
      * @apiPermission dcd:things
@@ -92,7 +92,7 @@ export class ThingRouter {
 
     /**
      * @api {get} /things/:thingId Read
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName GetOneThingById
      * @apiGroup Thing
      * @apiPermission dcd:things
@@ -116,7 +116,7 @@ export class ThingRouter {
 
     /**
      * @api {post} /things Create
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName CreateNewThing
      * @apiGroup Thing
      * @apiPermission dcd:things
@@ -183,7 +183,7 @@ export class ThingRouter {
 
     /**
      * @api {patch} /things/:thingId Update
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName EditThing
      * @apiGroup Thing
      * @apiPermission dcd:things
@@ -205,7 +205,7 @@ export class ThingRouter {
 
     /**
      * @api {patch} /things/:thingId/pem Update PEM
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName EditThingPEM
      * @apiGroup Thing
      * @apiPermission dcd:things
@@ -230,7 +230,7 @@ export class ThingRouter {
 
     /**
      * @api {delete} /things/:thingId Delete
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      * @apiName DeleteOneThing
      * @apiGroup Thing
      * @apiPermission dcd:things
