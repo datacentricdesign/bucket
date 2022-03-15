@@ -251,6 +251,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property from where to delete data points.
      * @apiParam {String} propertyId Id of the Property from where to delete data points.
+     * 
+     * @apiParam (Body) {number[]}  The array of timestamps to delete from a property
      **/
     this.router.delete(
       "/:propertyId/timestamps",
