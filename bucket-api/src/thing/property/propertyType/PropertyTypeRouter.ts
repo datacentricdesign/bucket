@@ -35,7 +35,7 @@ export class PropertyTypeRouter {
      * @apiGroup PropertyType
      * @apiDescription Get Property Types.
      *
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      *
      * @apiHeader {String} Authorization TOKEN ID
      *
@@ -52,7 +52,7 @@ export class PropertyTypeRouter {
      * @apiGroup PropertyType
      * @apiDescription Create a Property Types.
      *
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      *
      * @apiHeader {String} Authorization TOKEN ID
      **/
@@ -67,7 +67,7 @@ export class PropertyTypeRouter {
      * @apiGroup PropertyType
      * @apiDescription Delete a Property Type by id.
      *
-     * @apiVersion 0.1.4
+     * @apiVersion 0.1.5
      *
      * @apiHeader {String} Authorization TOKEN ID
      **/

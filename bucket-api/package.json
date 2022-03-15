@@ -1,6 +1,6 @@
 {
   "name": "@datacentricdesign/bucket-api",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A bucket of data, in the cloud.",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint --fix 'src/**/*.ts'",
     "dev": "NODE_ENV=dev nodemon src/index.ts",
-    "test": "NODE_ENV=test mocha --check-leaks -r ts-node/register \"src/**/*.spec.ts\""
+    "test": "NODE_ENV=test mocha --check-leaks -r ts-node/register \"src/**/*.spec.ts\"  --timeout 10000"
   },
   "repository": {
     "type": "git",

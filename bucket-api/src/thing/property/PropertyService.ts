@@ -12,6 +12,9 @@ import { PropertyType } from "./propertyType/PropertyType";
 import { PolicyService } from "../../policy/PolicyService";
 import { InfluxDbService } from "../../influx/InfluxDbService";
 import { Thing } from "../Thing";
+import { Log } from "../../Logger";
+import config from "../../config";
+import * as fs from "fs";
 
 export class PropertyService {
   private static instance: PropertyService;
@@ -70,11 +73,14 @@ export class PropertyService {
         ? property.type.description
         : dtoProperty.description;
     // Generate a new id with the property prefix
-    property.id = "dcd:properties:" + uuidv4();
+    property.id = this.generatePropertyID();
     // Try to retrieve Property from the database
     const propertyRepository = getRepository(Property);
-    await propertyRepository.save(property);
-    return property;
+    return await propertyRepository.save(property);
+  }
+
+  generatePropertyID() {
+    return "dcd:properties:" + uuidv4();
   }
 
   /**
@@ -196,8 +202,13 @@ export class PropertyService {
       .setParameters({ propertyId: propertyId, thingId: thingId })
       .getOne();
 
-    if (property !== undefined && valueOptions != undefined) {
-      return this.influxDbService.readValuesFromInfluxDB(
+    if (property === undefined) {
+      return Promise.reject(new DCDError(404, "Property not found."))
+    }
+    
+    // If the request specify options for values, we fetch those values
+    if (valueOptions !== undefined) {
+      property.values = await this.influxDbService.readValuesFromInfluxDB(
         property,
         valueOptions
       );
@@ -298,23 +309,102 @@ export class PropertyService {
   async deleteOneProperty(
     thingId: string,
     propertyId: string
-  ): Promise<DeleteResult> {
+  ): Promise<void> {
     const propertyRepository = getRepository(Property);
+    // Get all details of that property, ensuring it exists
     const property: Property = await this.getOnePropertyById(
       thingId,
       propertyId
     );
+    // If the property does not exist, we stop the process and return an error
     if (property === undefined) {
       throw new DCDError(
         404,
-        "Property to delete " +
-          propertyId +
-          " could not be not found for Thing " +
-          thingId +
-          "."
+        `Property to delete ${propertyId} could not be not found for Thing ${thingId}.`
       );
     }
-    return propertyRepository.delete(propertyId);
+    // Attempt to delete the data of the property
+    return this.influxDbService.deletePropertyData(property)
+      .then(() => {
+        // If it succeed, attempt to delete the media of the property
+        return this.deleteAllPropertyMedia(property)
+      })
+      .then(() => {
+        // If it succeed, attempt to delete the property
+        return propertyRepository.delete(propertyId);
+      })
+      .then(() => {
+        // No need to expose any SQL result, return an empty promise
+        return Promise.resolve();
+      })
+      .catch((error) => {
+        // If it fails deleting data, return an error without trying to delete the property
+        Log.debug(error);
+        return Promise.reject(new DCDError(404, 'Failed to delete property data.'));
+      })
+
+  }
+
+  async deleteDataPoints(thingId: string, propertyId: string, timestamps: number[]) {
+    // Get all details of that property, ensuring it exists
+    const property: Property = await this.getOnePropertyById(
+      thingId,
+      propertyId
+    );
+    // If the property does not exist, we stop the process and return an error
+    if (property === undefined) {
+      throw new DCDError(
+        404,
+        `Property ${propertyId} could not be not found for Thing ${thingId}.`
+      );
+    }
+    return this.influxDbService.deleteDataPoints(property, timestamps)
+      .then(() => {
+        // If it succeed, attempt to delete the media of the property
+        return this.deletePropertyMediaByTimestamp(property, timestamps)
+      })
+      .catch((error) => {
+        return Promise.reject(error);
+      })
+  }
+
+  async deleteAllPropertyMedia(property: Property) {
+    const path = config.hostDataFolder + "/files/"
+    // list all files in the directory
+    fs.readdir(path, (err, files) => {
+      if (err) {
+        return Promise.reject(err);
+      }
+      // files object contains all files names
+      files.forEach(file => {
+        if (file.startsWith(property.thing.id + "-" + property.id)) {
+          fs.unlink(path + file, (err) => {
+            if (err) {
+              return Promise.reject(err);
+            }
+          });
+        }
+      });
+    });
+  }
+
+  async deletePropertyMediaByTimestamp(property: Property, timestamps: number[]) {
+    const path = config.hostDataFolder + "/files/" + property.thing.id + "-" + property.id
+    const mediaDimensions = []
+    property.type.dimensions.forEach(dimension => {
+      if (dimension.type.includes("/")) {
+        mediaDimensions.push(dimension);
+      }
+    })
+    timestamps.forEach(timestamp => {
+      mediaDimensions.forEach(dimension => {
+        fs.unlink(`${path}-${timestamp}#${dimension.id}${dimension.unit}`, (err) => {
+          if (err) {
+            return Promise.reject(err);
+          }
+        });
+      });
+    });
   }
 
   async countDataPoints(

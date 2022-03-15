@@ -103,12 +103,12 @@ export class InfluxDbService {
   /**
    * @param {Property} property
    * @param {ValueOptions} opt
-   * @return {Promise<Property>}
+   * @return {number[]}
    */
   public readValuesFromInfluxDB(
     property: Property,
     opt: ValueOptions
-  ): Promise<Property> {
+  ): Promise<(number|string)[][]> {
     let query = `SELECT "time"`;
     for (const index in property.type.dimensions) {
       if (opt.timeInterval !== undefined) {
@@ -140,11 +140,10 @@ export class InfluxDbService {
           data.results[0].series !== undefined &&
           data.results[0].series.length > 0
         ) {
-          property.values = data.results[0].series[0].values;
+          return Promise.resolve(data.results[0].series[0].values);
         } else {
-          property.values = [];
+          return Promise.resolve([]);
         }
-        return Promise.resolve(property);
       });
   }
 
@@ -181,6 +180,44 @@ export class InfluxDbService {
       })
       .then((data) => {
         return Promise.resolve(data.results[0].series[0].values);
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
+
+  public async deleteDataPoints(
+    property: Property, timestamps: number[]
+  ): Promise<void> {
+    const queries = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      queries.push(`DELETE FROM ${property.type.id} WHERE "propertyId" = '${property.id}' AND time = '${new Date(timestamps[i]).toISOString()}'`)
+    }
+    return this.influx
+      .queryRaw(queries, {
+        precision: "ms",
+        database: config.influxdb.database,
+      })
+      .then((data) => {
+        return Promise.resolve();
+      })
+      .catch((error) => {
+        return error;
+      });
+  }
+
+  public async deletePropertyData(
+    property: Property
+  ): Promise<void> {
+    const query = `DELETE FROM ${property.type.id} WHERE "propertyId" = '${property.id}'`
+    return this.influx
+      .queryRaw(query, {
+        precision: "ms",
+        database: config.influxdb.database,
+      })
+      .then((data) => {
+        return Promise.resolve();
       })
       .catch((error) => {
         return error;

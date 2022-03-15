@@ -2,8 +2,8 @@ import { getRepository, DeleteResult, getConnection } from "typeorm";
 
 import { Thing } from "./Thing";
 import { DCDError } from "@datacentricdesign/types";
-
 import { v4 as uuidv4 } from "uuid";
+
 import { Property } from "./property/Property";
 import { AuthService } from "../auth/AuthService";
 import jwkToBuffer = require("jwk-to-pem");
@@ -33,41 +33,46 @@ export class ThingService {
   /**
    * Create a new Thing.
    *
-   * @param {string} actorId
    * @param {Thing} thing
-   * @param {boolean} jwt
    * returns Thing
    **/
   async createNewThing(thing: Thing): Promise<Thing> {
-    // Check Thing input
-    if (thing.name === undefined || thing.name === "") {
-      return Promise.reject(new DCDError(4003, "Add field name."));
-    }
-    if (thing.type === undefined || thing.type === "") {
-      return Promise.reject(new DCDError(4003, "Add field type."));
-    }
-    thing.id = "dcd:things:" + uuidv4();
+    // Save thing in the relational database
+    return this.saveNewThing(thing)
+      .then(createdThing => {
+        // create the necessary ACPs for the owner and thing itself
+        return this.createACPsForNewThing(createdThing);
+      })
+      .catch(error => {
+        return Promise.reject(error);
+      })
+  }
 
+  async saveNewThing(thing: Thing): Promise<Thing> {
     // Try to retrieve Thing from the database
     const thingRepository = getRepository(Thing);
     try {
       await thingRepository.findOneOrFail(thing.id);
       // Read positive, the Thing already exist
-      return Promise.reject({
-        code: 400,
-        message: "Thing " + thing.id + " already exist.",
-      });
+      return Promise.reject(new DCDError(400, `Thing ${thing.id} already exist.`));
     } catch (findError) {
       // Read negative, the Thing does not exist yet
       if (findError.name === "EntityNotFound") {
-        await thingRepository.save(thing);
-        await this.policyService.grant(thing.personId, thing.id, "owner");
-        await this.policyService.grant(thing.id, thing.id, "subject");
-        return thing;
+        return thingRepository.save(thing);
       }
       // unknown error to report
-      throw findError;
+      return Promise.reject(findError);
     }
+  }
+
+  async createACPsForNewThing(thing: Thing): Promise<Thing> {
+    await this.policyService.grant(thing.personId, thing.id, "owner");
+    await this.policyService.grant(thing.id, thing.id, "subject");
+    return thing;
+  }
+
+  generateThingID() {
+    return "dcd:things:" + uuidv4();
   }
 
   /**

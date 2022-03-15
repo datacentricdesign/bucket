@@ -23,7 +23,7 @@ export class Log {
   static fatal: LogFunction;
 
   static init(name: string): void {
-    if (config.env.env === "development") {
+    if (config.env.env === "development" || config.env.env === "test") {
       Log.logger = new Logger({
         name,
         type: "pretty",
