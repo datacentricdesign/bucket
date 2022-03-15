@@ -1,6 +1,6 @@
 {
     "name": "Bucket",
-    "version": "5",
+    "version": "0.1.5",
     "description": "Bucket REST API documentation",
     "title": "Bucket REST API",
     "url": "https://dwd.tudelft.nl/bucket/api",
