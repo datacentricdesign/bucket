@@ -5,6 +5,7 @@ import { WebsocketRequestHandler } from "express-ws";
 import { PolicyService } from "./PolicyService";
 import { DCDRequest } from "../config";
 import { Policy } from "./Policy";
+import { Log } from "../Logger";
 
 export class PolicyController {
   private static instance: PolicyController;
@@ -57,7 +58,8 @@ export class PolicyController {
         // For consents (e.g. shared entities), Keto's flavor is 'exact'
         flavor = "exact";
         console.log("flavor exact from shared with");
-      } catch {
+      } catch (error) {
+        Log.debug(error)
         next(new DCDError(403, subject + " is not member of " + groupId));
       }
     } else {
