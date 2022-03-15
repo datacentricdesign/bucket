@@ -241,7 +241,7 @@ export class PropertyRouter {
     );
 
     /**
-     * @api {delete} /things/:thingId/properties/:propertyId/timestamps Delete
+     * @api {delete} /things/:thingId/properties/:propertyId/timestamps Delete Timestamps
      * @apiGroup Property
      * @apiDescription Delete some data points of a property.
      *
