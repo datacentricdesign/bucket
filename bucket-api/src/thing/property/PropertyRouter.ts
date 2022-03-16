@@ -251,7 +251,7 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property from where to delete data points.
      * @apiParam {String} propertyId Id of the Property from where to delete data points.
-     * 
+     *
      * @apiParam (Body) {number[]} timestamps The array of timestamps to delete from a property
      **/
     this.router.delete(
@@ -411,10 +411,10 @@ export class PropertyRouter {
             new DCDError(
               400,
               "Error: File in field " +
-              file.fieldname +
-              " must have mime type " +
-              file.mimetype +
-              "."
+                file.fieldname +
+                " must have mime type " +
+                file.mimetype +
+                "."
             )
           );
         }
@@ -423,10 +423,10 @@ export class PropertyRouter {
           new DCDError(
             400,
             "Error: File in field " +
-            file.fieldname +
-            " must have extension " +
-            dimension.unit +
-            "."
+              file.fieldname +
+              " must have extension " +
+              dimension.unit +
+              "."
           )
         );
       }
@@ -435,8 +435,8 @@ export class PropertyRouter {
         new DCDError(
           400,
           "Error: field " +
-          file.fieldname +
-          " is not matching any dimension ID."
+            file.fieldname +
+            " is not matching any dimension ID."
         )
       );
     }
@@ -469,21 +469,24 @@ const storage = multer.diskStorage({
         try {
           const body = JSON.parse(req.body.property);
           // Extract timestamp from the file name
-          const timestamp = parseInt(file.originalname.toLowerCase().split(path.extname(file.originalname).toLowerCase())[0]);
-          Log.debug(timestamp)
+          const timestamp = parseInt(
+            file.originalname
+              .toLowerCase()
+              .split(path.extname(file.originalname).toLowerCase())[0]
+          );
           for (let i = 0; i < body.values.length; i++) {
             // search for this timestamp in the submitted values
             if (body.values[i][0] === timestamp) {
               return cb(
                 null,
                 thingId +
-                "-" +
-                propertyId +
-                "-" +
-                timestamp +
-                "#" +
-                file.fieldname +
-                path.extname(file.originalname).toLowerCase()
+                  "-" +
+                  propertyId +
+                  "-" +
+                  timestamp +
+                  "#" +
+                  file.fieldname +
+                  path.extname(file.originalname).toLowerCase()
               );
             }
           }
@@ -495,13 +498,7 @@ const storage = multer.diskStorage({
             file.filename
           );
         } catch {
-          cb(
-            new DCDError(
-              400,
-              "Could not parse JSON content."
-            ),
-            file.filename
-          );
+          cb(new DCDError(400, "Could not parse JSON content."), file.filename);
         }
       } else {
         if (file.fieldname === "csv") {

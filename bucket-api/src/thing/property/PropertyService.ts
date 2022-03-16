@@ -1,4 +1,4 @@
-import { getRepository, DeleteResult } from "typeorm";
+import { getRepository } from "typeorm";
 
 import { Property } from "./Property";
 
@@ -79,7 +79,7 @@ export class PropertyService {
     return await propertyRepository.save(property);
   }
 
-  generatePropertyID() {
+  generatePropertyID(): string {
     return "dcd:properties:" + uuidv4();
   }
 
@@ -203,9 +203,9 @@ export class PropertyService {
       .getOne();
 
     if (property === undefined) {
-      return Promise.reject(new DCDError(404, "Property not found."))
+      return Promise.reject(new DCDError(404, "Property not found."));
     }
-    
+
     // If the request specify options for values, we fetch those values
     if (valueOptions !== undefined) {
       property.values = await this.influxDbService.readValuesFromInfluxDB(
@@ -306,10 +306,7 @@ export class PropertyService {
    * @param propertyId
    * @return {Promise}
    */
-  async deleteOneProperty(
-    thingId: string,
-    propertyId: string
-  ): Promise<void> {
+  async deleteOneProperty(thingId: string, propertyId: string): Promise<void> {
     const propertyRepository = getRepository(Property);
     // Get all details of that property, ensuring it exists
     const property: Property = await this.getOnePropertyById(
@@ -324,10 +321,11 @@ export class PropertyService {
       );
     }
     // Attempt to delete the data of the property
-    return this.influxDbService.deletePropertyData(property)
+    return this.influxDbService
+      .deletePropertyData(property)
       .then(() => {
         // If it succeed, attempt to delete the media of the property
-        return this.deleteAllPropertyMedia(property)
+        return this.deleteAllPropertyMedia(property);
       })
       .then(() => {
         // If it succeed, attempt to delete the property
@@ -340,12 +338,17 @@ export class PropertyService {
       .catch((error) => {
         // If it fails deleting data, return an error without trying to delete the property
         Log.debug(error);
-        return Promise.reject(new DCDError(404, 'Failed to delete property data.'));
-      })
-
+        return Promise.reject(
+          new DCDError(404, "Failed to delete property data.")
+        );
+      });
   }
 
-  async deleteDataPoints(thingId: string, propertyId: string, timestamps: number[]) {
+  async deleteDataPoints(
+    thingId: string,
+    propertyId: string,
+    timestamps: number[]
+  ): Promise<void> {
     // Get all details of that property, ensuring it exists
     const property: Property = await this.getOnePropertyById(
       thingId,
@@ -358,25 +361,26 @@ export class PropertyService {
         `Property ${propertyId} could not be not found for Thing ${thingId}.`
       );
     }
-    return this.influxDbService.deleteDataPoints(property, timestamps)
+    return this.influxDbService
+      .deleteDataPoints(property, timestamps)
       .then(() => {
         // If it succeed, attempt to delete the media of the property
-        return this.deletePropertyMediaByTimestamp(property, timestamps)
+        return this.deletePropertyMediaByTimestamp(property, timestamps);
       })
       .catch((error) => {
         return Promise.reject(error);
-      })
+      });
   }
 
-  async deleteAllPropertyMedia(property: Property) {
-    const path = config.hostDataFolder + "/files/"
+  async deleteAllPropertyMedia(property: Property): Promise<void> {
+    const path = config.hostDataFolder + "/files/";
     // list all files in the directory
     fs.readdir(path, (err, files) => {
       if (err) {
         return Promise.reject(err);
       }
       // files object contains all files names
-      files.forEach(file => {
+      files.forEach((file) => {
         if (file.startsWith(property.thing.id + "-" + property.id)) {
           fs.unlink(path + file, (err) => {
             if (err) {
@@ -388,21 +392,28 @@ export class PropertyService {
     });
   }
 
-  async deletePropertyMediaByTimestamp(property: Property, timestamps: number[]) {
-    const path = config.hostDataFolder + "/files/" + property.thing.id + "-" + property.id
-    const mediaDimensions = []
-    property.type.dimensions.forEach(dimension => {
+  async deletePropertyMediaByTimestamp(
+    property: Property,
+    timestamps: number[]
+  ): Promise<void> {
+    const path =
+      config.hostDataFolder + "/files/" + property.thing.id + "-" + property.id;
+    const mediaDimensions = [];
+    property.type.dimensions.forEach((dimension) => {
       if (dimension.type.includes("/")) {
         mediaDimensions.push(dimension);
       }
-    })
-    timestamps.forEach(timestamp => {
-      mediaDimensions.forEach(dimension => {
-        fs.unlink(`${path}-${timestamp}#${dimension.id}${dimension.unit}`, (err) => {
-          if (err) {
-            return Promise.reject(err);
+    });
+    timestamps.forEach((timestamp) => {
+      mediaDimensions.forEach((dimension) => {
+        fs.unlink(
+          `${path}-${timestamp}#${dimension.id}${dimension.unit}`,
+          (err) => {
+            if (err) {
+              return Promise.reject(err);
+            }
           }
-        });
+        );
       });
     });
   }

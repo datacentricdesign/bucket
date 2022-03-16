@@ -108,7 +108,7 @@ export class InfluxDbService {
   public readValuesFromInfluxDB(
     property: Property,
     opt: ValueOptions
-  ): Promise<(number|string)[][]> {
+  ): Promise<(number | string)[][]> {
     let query = `SELECT "time"`;
     for (const index in property.type.dimensions) {
       if (opt.timeInterval !== undefined) {
@@ -186,20 +186,24 @@ export class InfluxDbService {
       });
   }
 
-
   public async deleteDataPoints(
-    property: Property, timestamps: number[]
+    property: Property,
+    timestamps: number[]
   ): Promise<void> {
     const queries = [];
     for (let i = 0; i < timestamps.length; i++) {
-      queries.push(`DELETE FROM ${property.type.id} WHERE "propertyId" = '${property.id}' AND time = '${new Date(timestamps[i]).toISOString()}'`)
+      queries.push(
+        `DELETE FROM ${property.type.id} WHERE "propertyId" = '${
+          property.id
+        }' AND time = '${new Date(timestamps[i]).toISOString()}'`
+      );
     }
     return this.influx
       .queryRaw(queries, {
         precision: "ms",
         database: config.influxdb.database,
       })
-      .then((data) => {
+      .then(() => {
         return Promise.resolve();
       })
       .catch((error) => {
@@ -207,16 +211,14 @@ export class InfluxDbService {
       });
   }
 
-  public async deletePropertyData(
-    property: Property
-  ): Promise<void> {
-    const query = `DELETE FROM ${property.type.id} WHERE "propertyId" = '${property.id}'`
+  public async deletePropertyData(property: Property): Promise<void> {
+    const query = `DELETE FROM ${property.type.id} WHERE "propertyId" = '${property.id}'`;
     return this.influx
       .queryRaw(query, {
         precision: "ms",
         database: config.influxdb.database,
       })
-      .then((data) => {
+      .then(() => {
         return Promise.resolve();
       })
       .catch((error) => {

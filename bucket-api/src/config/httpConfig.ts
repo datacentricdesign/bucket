@@ -12,7 +12,8 @@ export const httpConfig = {
     ":" +
     process.env.HTTP_PORT +
     process.env.HTTP_BASE_URL,
-  rateLimitPerMinute: process.env.HTTP_RATE_LIMIT_PER_MINUTE !== undefined
-    ? parseInt(process.env.HTTP_RATE_LIMIT_PER_MINUTE)
-    : 100,
+  rateLimitPerMinute:
+    process.env.HTTP_RATE_LIMIT_PER_MINUTE !== undefined
+      ? parseInt(process.env.HTTP_RATE_LIMIT_PER_MINUTE)
+      : 100,
 };

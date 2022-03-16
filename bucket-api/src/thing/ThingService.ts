@@ -39,13 +39,13 @@ export class ThingService {
   async createNewThing(thing: Thing): Promise<Thing> {
     // Save thing in the relational database
     return this.saveNewThing(thing)
-      .then(createdThing => {
+      .then((createdThing) => {
         // create the necessary ACPs for the owner and thing itself
         return this.createACPsForNewThing(createdThing);
       })
-      .catch(error => {
+      .catch((error) => {
         return Promise.reject(error);
-      })
+      });
   }
 
   async saveNewThing(thing: Thing): Promise<Thing> {
@@ -54,7 +54,9 @@ export class ThingService {
     try {
       await thingRepository.findOneOrFail(thing.id);
       // Read positive, the Thing already exist
-      return Promise.reject(new DCDError(400, `Thing ${thing.id} already exist.`));
+      return Promise.reject(
+        new DCDError(400, `Thing ${thing.id} already exist.`)
+      );
     } catch (findError) {
       // Read negative, the Thing does not exist yet
       if (findError.name === "EntityNotFound") {
@@ -71,7 +73,7 @@ export class ThingService {
     return thing;
   }
 
-  generateThingID() {
+  generateThingID(): string {
     return "dcd:things:" + uuidv4();
   }
 

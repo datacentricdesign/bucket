@@ -347,7 +347,11 @@ export class PropertyController {
         const body = JSON.parse(req.body.property);
         // there are values,
         const completeValues = [];
-        for (let valueIndex = 0; valueIndex < body.values.length; valueIndex++) {
+        for (
+          let valueIndex = 0;
+          valueIndex < body.values.length;
+          valueIndex++
+        ) {
           const timestamp = body.values[valueIndex][0];
 
           // check if missing files (dimension with no value)
@@ -359,11 +363,18 @@ export class PropertyController {
               // Then there must be a received file for this dimension
               let fileExist = false;
               for (let j = 0; j < req.files.length; j++) {
-                const originalname = req.files[j].originalname.toLowerCase()
-                const tsFromFile = parseInt(originalname.split(path.extname(req.files[j].originalname).toLowerCase())[0]);
+                const originalname = req.files[j].originalname.toLowerCase();
+                const tsFromFile = parseInt(
+                  originalname.split(
+                    path.extname(req.files[j].originalname).toLowerCase()
+                  )[0]
+                );
                 Log.debug(timestamp);
                 Log.debug(tsFromFile);
-                if (property.type.dimensions[i].id === req.files[j].fieldname && timestamp === tsFromFile) {
+                if (
+                  property.type.dimensions[i].id === req.files[j].fieldname &&
+                  timestamp === tsFromFile
+                ) {
                   fileExist = true;
                   completeValue.push(req.files[j].filename);
                 }
@@ -373,8 +384,8 @@ export class PropertyController {
                   new DCDError(
                     400,
                     "Dimension " +
-                    property.type.dimensions[i].id +
-                    " has no file."
+                      property.type.dimensions[i].id +
+                      " has no file."
                   )
                 );
               }
@@ -384,7 +395,7 @@ export class PropertyController {
             }
           }
 
-          completeValues.push(completeValue)
+          completeValues.push(completeValue);
         }
 
         Log.debug(completeValues);
@@ -446,12 +457,18 @@ export class PropertyController {
     // Get the property ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
-    if (req.body === undefined || req.body.timestamps === undefined ) {
-      return next(new DCDError(400, "The request miss the array of timestamps to delete."))
+    if (req.body === undefined || req.body.timestamps === undefined) {
+      return next(
+        new DCDError(400, "The request miss the array of timestamps to delete.")
+      );
     }
     // Call the Service
     try {
-      await this.propertyService.deleteDataPoints(thingId, propertyId, req.body.timestamps);
+      await this.propertyService.deleteDataPoints(
+        thingId,
+        propertyId,
+        req.body.timestamps
+      );
       // After all send a 204 (no content, but accepted) response
       res.status(204).send();
     } catch (error) {

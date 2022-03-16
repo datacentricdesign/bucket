@@ -46,11 +46,14 @@ export class ThingRouter {
      * @apiGroup Thing
      * @apiPermission none
      *
-     * @apiDescription Get Health status of Things API
+     * @apiDescription This APIGet Health status of Things API
      *
      * @apiSuccess {object} health status
      **/
-    this.router.get("/health", this.controller.getAPIHealth.bind(this.controller));
+    this.router.get(
+      "/health",
+      this.controller.getAPIHealth.bind(this.controller)
+    );
 
     /**
      * @api {get} /things List
@@ -79,7 +82,7 @@ export class ThingRouter {
      * @apiPermission dcd:things
      *
      * @apiDescription Count the data points of owned Things.
-     * 
+     *
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {Thing[]} things The retrieved Things with count for each Property.
@@ -98,7 +101,7 @@ export class ThingRouter {
      * @apiPermission dcd:things
      *
      * @apiDescription Get one Thing.
-     * 
+     *
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to read.
@@ -189,7 +192,7 @@ export class ThingRouter {
      * @apiPermission dcd:things
      *
      * @apiDescription Edit one Thing.
-     * 
+     *
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to update.
@@ -211,7 +214,7 @@ export class ThingRouter {
      * @apiPermission dcd:things
      *
      * @apiDescription Update the PEM file containing a public key, so that the Hub can identify a Thing as data transmitter.
-     * 
+     *
      * @apiHeader {string} Authorization TOKEN ID
      *
      * @apiParam (Path) {string} thingId Id of the Thing to update.

@@ -14,7 +14,7 @@ export class Bucket {
   connectionSQLDb: Connection;
   influxDbService: InfluxDbService;
 
-  init() {
+  init(): void {
     Log.init("Bucket");
     this.initHTTP();
     this.initMQTT();

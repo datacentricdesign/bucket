@@ -58,7 +58,7 @@ export class PolicyController {
         // For consents (e.g. shared entities), Keto's flavor is 'exact'
         flavor = "exact";
       } catch (error) {
-        Log.debug(error)
+        Log.debug(error);
         next(new DCDError(403, subject + " is not member of " + groupId));
       }
     } else {

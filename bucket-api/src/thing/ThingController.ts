@@ -96,7 +96,9 @@ export class ThingController {
     thingToCreate.personId = req.context.userId;
 
     try {
-      const createdThing = await this.thingService.createNewThing(thingToCreate);
+      const createdThing = await this.thingService.createNewThing(
+        thingToCreate
+      );
       if (pem !== undefined && typeof pem === "string") {
         pem.trim();
         const error = checkPEM(pem);
