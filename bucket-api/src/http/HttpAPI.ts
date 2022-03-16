@@ -135,8 +135,6 @@ export class HttpAPI {
 
   /**
    * @apiDefine DCDError
-   * @apiVersion 0.1.5
-   *
    * @apiErrorExample  Response (example):
    *     HTTP/1.1 403 Forbidden
    *     {
