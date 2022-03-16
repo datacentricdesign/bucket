@@ -152,7 +152,7 @@ export class HttpAPI {
       })
     );
     if (config.env.env === "development") {
-      response.status(status).send({
+      response.status(status).json({
         status,
         message,
         name: error.name,
@@ -162,7 +162,7 @@ export class HttpAPI {
         code: error.errorCode,
       });
     } else {
-      response.status(status).send({
+      response.status(status).json({
         status,
         message,
         name: error.name,
