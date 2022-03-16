@@ -132,6 +132,22 @@ export class HttpAPI {
     this.app.use(limiter);
   }
 
+
+  /**
+   * @apiDefine DCDError
+   * @apiVersion 0.1.5
+   *
+   * @apiErrorExample  Response (example):
+   *     HTTP/1.1 403 Forbidden
+   *     {
+   *          "status": 403,
+   *          "message": "Access denied - Authentication information missing, malformed or invalid",
+   *          "name": "DCD Hub Error",
+   *          "hint": "Request was not allowed",
+   *          "requirements": "You must provide a valid bearer token.",
+   *          "code": 4031
+   *      }
+   */
   public errorHandler(
     error: DCDError,
     request: Request,
