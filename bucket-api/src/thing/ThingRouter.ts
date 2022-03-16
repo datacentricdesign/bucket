@@ -67,6 +67,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {Thing[]} things The retrieved Things
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/",
@@ -86,6 +88,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {Thing[]} things The retrieved Things with count for each Property.
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/count",
@@ -107,6 +111,8 @@ export class ThingRouter {
      * @apiParam {String} thingId Id of the Thing to read.
      *
      * @apiSuccess {object} thing The retrieved Thing
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/:thingId",
@@ -139,9 +145,6 @@ export class ThingRouter {
      *       "pem": "PEM PUBLIC KEY"
      *     }
      *
-     * @apiParam (Query) {Boolean} [jwt=false] Need to generate a JWT
-     * @apiParam (Query) {Boolean} [thingId] Forward to update (Web forms cannot submit PUT methods)
-     *
      * @apiHeader {String} Content-Type=application/json
      * @apiHeader {String} Authorization Bearer token obtained through the OAuth2 Authentication.
      * 
@@ -161,7 +164,7 @@ export class ThingRouter {
      * import json
      * 
      * url = "https://dwd.tudelft.nl/bucket/api/things"
-
+     *
      * payload = json.dumps({
      *   "name": "Test token thing",
      *   "type": "Test",
@@ -177,6 +180,8 @@ export class ThingRouter {
      * print(response.text)
      * 
      * @apiSuccess {object} thing The created Thing
+     * 
+     * @apiUse DCDError
      **/
     this.router.post(
       "/",
@@ -196,6 +201,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to update.
+     * 
+     * @apiUse DCDError
      **/
     this.router.patch(
       "/:thingId",
@@ -221,6 +228,8 @@ export class ThingRouter {
      *
      * @apiParam (Body) {string} thingId Id of the Thing to update.
      * @apiParam (Body) {string} pem of the Thing to update.
+     * 
+     * @apiUse DCDError
      **/
     this.router.patch(
       "/:thingId/pem",
@@ -243,6 +252,8 @@ export class ThingRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiParam {String} thingId Id of the Thing to delete.
+     * 
+     * @apiUse DCDError
      **/
     this.router.delete(
       "/:thingId",

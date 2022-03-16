@@ -152,24 +152,28 @@ export class HttpAPI {
         code: error.errorCode,
       })
     );
-    if (config.env.env === "development") {
-      response.status(status).json({
-        status,
-        message,
-        name: error.name,
-        hint: error._hint,
-        requirements: error._requirements,
-        stack: error.stack,
-        code: error.errorCode,
-      });
-    } else {
-      response.status(status).json({
-        status,
-        message,
-        name: error.name,
-        hint: error._hint,
-        requirements: error._requirements,
-      });
+    try {
+      if (config.env.env === "development") {
+        response.status(status).json({
+          status,
+          message,
+          name: error.name,
+          hint: error._hint,
+          requirements: error._requirements,
+          stack: error.stack,
+          code: error.errorCode,
+        });
+      } else {
+        response.status(status).json({
+          status,
+          message,
+          name: error.name,
+          hint: error._hint,
+          requirements: error._requirements,
+        });
+      }
+    } catch (error) {
+      next(error);
     }
   }
 }

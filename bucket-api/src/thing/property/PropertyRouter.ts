@@ -53,6 +53,8 @@ export class PropertyRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {Property[]} properties The retrieved Properties
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/",
@@ -79,6 +81,8 @@ export class PropertyRouter {
      * @apiParam (Query) {Number} [to=1626357490387] The start time when fetching data of the property, epoch time in milliseconds
      *
      * @apiSuccess {Property} property The retrieved Property
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/:propertyId",
@@ -104,6 +108,8 @@ export class PropertyRouter {
      * @apiParam {String} timestamp Timestamp of the value.
      *
      * @apiSuccess {Property} property The retrieved Property
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/:propertyId/dimensions/:dimensionId/timestamp/:timestamp",
@@ -125,6 +131,8 @@ export class PropertyRouter {
      * @apiParam {String} propertyId Id of the Property to stream.
      *
      * @apiParam (Query) {String} authorization The access token.
+     * 
+     * @apiUse DCDError
      **/
     this.router.ws(
       "/:propertyId/stream",
@@ -153,6 +161,8 @@ export class PropertyRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {object} interaction The created Property
+     * 
+     * @apiUse DCDError
      */
     this.router.post(
       "/",
@@ -181,6 +191,8 @@ export class PropertyRouter {
      *       "name": "A new Property name",
      *       "description": "A new description of my property."
      *     }
+     * 
+     * @apiUse DCDError
      **/
     this.router.patch(
       "/:propertyId",
@@ -208,6 +220,8 @@ export class PropertyRouter {
      *     {
      *       "values": [[1591868318000,0,1,2],[1591868318200,3,1,1]],
      *     }
+     * 
+     * @apiUse DCDError
      **/
     this.router.put(
       "/:propertyId",
@@ -230,6 +244,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property to delete.
      * @apiParam {String} propertyId Id of the Property to delete.
+     * 
+     * @apiUse DCDError
      **/
     this.router.delete(
       "/:propertyId",
@@ -253,6 +269,8 @@ export class PropertyRouter {
      * @apiParam {String} propertyId Id of the Property from where to delete data points.
      *
      * @apiParam (Body) {number[]} timestamps The array of timestamps to delete from a property
+     * 
+     * @apiUse DCDError
      **/
     this.router.delete(
       "/:propertyId/timestamps",
@@ -292,6 +310,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property.
      * @apiParam {String} propertyId Id of the Property to list consents from.
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/:propertyId/consents",
@@ -314,6 +334,8 @@ export class PropertyRouter {
      * @apiParam {String} thingId Id of the Thing containing the Property.
      * @apiParam {String} propertyId Id of the Property.
      * @apiParam {String} consentId Id of the Consent to delete.
+     * 
+     * @apiUse DCDError
      **/
     this.router.delete(
       "/:propertyId/consents/:consentId",
@@ -344,6 +366,8 @@ export class PropertyRouter {
      *
      * @apiParam {String} thingId Id of the Thing containing the Property.
      * @apiParam {String} propertyId Id of the Property.
+     * 
+     * @apiUse DCDError
      **/
     this.router.post(
       "/:propertyId/consents",

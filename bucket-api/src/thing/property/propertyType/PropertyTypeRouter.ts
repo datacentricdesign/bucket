@@ -40,6 +40,8 @@ export class PropertyTypeRouter {
      * @apiHeader {String} Authorization TOKEN ID
      *
      * @apiSuccess {PropertyType[]} properties The retrieved Properties
+     * 
+     * @apiUse DCDError
      **/
     this.router.get(
       "/",
@@ -55,6 +57,8 @@ export class PropertyTypeRouter {
      * @apiVersion 0.1.5
      *
      * @apiHeader {String} Authorization TOKEN ID
+     * 
+     * @apiUse DCDError
      **/
     this.router.post(
       "/",
@@ -70,6 +74,8 @@ export class PropertyTypeRouter {
      * @apiVersion 0.1.5
      *
      * @apiHeader {String} Authorization TOKEN ID
+     * 
+     * @apiUse DCDError
      **/
     this.router.delete(
       "/:propertyTypeId",
