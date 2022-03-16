@@ -135,7 +135,8 @@ export class HttpAPI {
   public errorHandler(
     error: DCDError,
     request: Request,
-    response: Response
+    response: Response,
+    next: NextFunction
   ): void {
     Log.debug("Error on route: " + request.originalUrl);
     const status = error._statusCode || 500;
