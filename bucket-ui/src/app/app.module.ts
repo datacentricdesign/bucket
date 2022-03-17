@@ -17,6 +17,7 @@ import { HttpClientModule } from '@angular/common/http'
 
 import { FormsModule } from '@angular/forms';
 import { LandingPageComponent } from './landing-page/landing-page.component';
+import { GetStartedComponent } from './doc/get-started/get-started.component';
 import { OAuthModule } from 'angular-oauth2-oidc'
 import { BrowserModule } from '@angular/platform-browser'
 import { SharedModule } from './shared/shared.module';
@@ -53,7 +54,8 @@ export function init_app(appService: AppService) {
   declarations: [
     AppComponent,
     ThingBucketComponent,
-    LandingPageComponent
+    LandingPageComponent,
+    GetStartedComponent
   ],
   providers: [{
     provide: APP_INITIALIZER,

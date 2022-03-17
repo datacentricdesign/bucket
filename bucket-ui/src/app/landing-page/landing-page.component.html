@@ -1,117 +1,70 @@
 <div class="wrapper">
-    <div class="main-panel" style="width: 100%;">
-        <div class="content" style="min-height:calc(100vh - 165px);">
-            <img src="assets/img/bucket-logo.svg" style="max-width: 150px;">
-            <h1>
-                Collect data for your design<br>
-                with Bucket
-            </h1>
-            <p>
-                Bucket is a cloud application which help you collect data for your Data-Centric Design process.
-            </p>
-
-            <div style="padding: 50px 0px" *ngIf="userProfile === undefined; else elseBlock">
-                <button (click)="loginCode()"  class="btn btn-info">Sign In / Sign Up</button>
+    <div class="sidebar" data-color="white" data-active-color="danger">
+        <!-- <app-sidebar-cmp></app-sidebar-cmp> -->
+        <div class="sidebar-wrapper">
+            <div class="logo">
+                <a href="./" class="simple-text logo-mini">
+                <div class="logo-image-small">
+                    <img src="./assets/img/bucket-logo.svg">
+                </div>
+                </a>
+                <a href="./" class="simple-text logo-normal">
+                Bucket
+                </a>
             </div>
-
-            <ng-template #elseBlock>
-                <p>Welcome back {{userProfile.name}}, have a look at <a href="things/dashboard">your bucket of things</a>!</p>
-            </ng-template>
-            
+            <ul class="nav">
+                <li *ngFor="let menuItem of menuItems" routerLinkActive="active" class="{{menuItem.class}}">
+                <a [routerLink]="[menuItem.path]">
+                    <i class="nc-icon {{menuItem.icon}} {{menuItem.type}}"></i>
+                    <p>{{menuItem.title}}</p>
+                </a>
+                </li>
+            </ul>
+            </div>
+    </div>
+    <div class="main-panel">
+        <div class="content" style="min-height:calc(100vh - 165px);">
             <div class="row">
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="card card-stats">
+                <div class="col-lg-9 col-md-9 col-sm-12">
+                    <img src="assets/img/bucket-logo.svg" style="max-width: 150px;">
+                    <h1>
+                        Collect data for your design<br>
+                        with Bucket
+                    </h1>
+                    <p>
+                        Bucket is a cloud application which help you collect data for your Data-Centric Design process.
+                    </p>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12">
+                    <div class="card">
+                        <div class="card-header ">
+                            <h5 class="card-title">Access you Bucket</h5>
+                            <!-- <p class="card-category">Data distribution per property type (All time)</p> -->
+                        </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-5 col-md-4">
-
-                                </div>
-                                <div class="col-7 col-md-8">
-                                    <div class="numbers">
-                                        ioSense
-                                    </div>
-                                </div>
+                            <div style="padding: 50px 0px" *ngIf="userProfile === undefined; else elseBlock">
+                                <button (click)="loginCode()"  class="btn btn-info">Sign In / Sign Up</button>
                             </div>
+                
+                            <ng-template #elseBlock>
+                                <p>Welcome back {{userProfile.name}}, have a look at <a href="things/dashboard">your bucket of things</a>!</p>
+                            </ng-template>
                         </div>
                         <div class="card-footer ">
                             <hr>
                             <div class="stats">
-                                Check out our Android/iOS application to stream smartphone data to your Bucket.
+                                Terms Privacy
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-5 col-md-4">
-
-                                </div>
-                                <div class="col-7 col-md-8">
-                                    <div class="numbers">
-                                        Raspberry Pi
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer ">
-                            <hr>
-                            <div class="stats">
-                                Quick start with Raspberry Pi
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-5 col-md-4">
-
-                                </div>
-                                <div class="col-7 col-md-8">
-                                    <div class="numbers">
-                                        Python
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer ">
-                            <hr>
-                            <div class="stats">
-                                Check out how to get started with Python
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="card card-stats">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-5 col-md-4">
-
-                                </div>
-                                <div class="col-7 col-md-8">
-                                    <div class="numbers">
-                                        Arduino
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer ">
-                            <hr>
-                            <div class="stats">
-                                Check out how to get started with Arduino
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+            
+            <div class="content">
+                <router-outlet></router-outlet>
             </div>
 
         </div>
         <app-footer-cmp></app-footer-cmp>
     </div>
+</div>
