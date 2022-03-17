@@ -13,6 +13,13 @@ export const AppRoutes: Routes = [
     pathMatch: 'full'
   },
   {
+    path: 'things',
+    loadChildren: () =>
+      import('./thing-bucket/thing-bucket.module').then(
+        mod => mod.ThingBucketModule
+      )
+  },
+  {
     path: 'about',
     component: LandingPageComponent,
     children: [
