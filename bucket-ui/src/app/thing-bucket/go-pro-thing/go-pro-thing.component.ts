@@ -108,7 +108,7 @@ export class GoProThingComponent implements OnInit {
     elemProgress.style.width = '100%'
   }
 
-  parse(key: string, property: Property, telemetrySamples: any) {
+  async parse(key: string, property: Property, telemetrySamples: any) {
     property.values = [];
     const max_chunk = 500;
     const elem: HTMLElement = document.getElementById('upload-telemetry-progress');
@@ -125,9 +125,11 @@ export class GoProThingComponent implements OnInit {
       }
 
       if (i % max_chunk === 0) {
-        this.thingService.updatePropertyValues(this.thingId, property).toPromise()
-        .then(res => {
+        await this.thingService.updatePropertyValues(this.thingId, property).toPromise()
+        .then(async res => {
           console.log('sent up to ' + i)
+          // Slow down this process to avoid burning the rate limit on the server
+          await delay(500);
           elem.style.width = (i * 100.0 / telemetrySamples.length) + '%'
         })
         .catch(error => {
@@ -142,4 +144,10 @@ export class GoProThingComponent implements OnInit {
       })
     }
   }
+}
+
+function delay(milliseconds){
+  return new Promise(resolve => {
+      setTimeout(resolve, milliseconds);
+  });
 }
