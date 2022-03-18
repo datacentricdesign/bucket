@@ -469,7 +469,7 @@ export class PropertyRouter {
 
   upload = multer({
     storage: storage,
-    limits: { fileSize: 1000000000 },
+    limits: { fileSize: 5000000000 },
     fileFilter: (
       request: Request,
       file: Express.Multer.File,
