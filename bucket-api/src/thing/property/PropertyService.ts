@@ -309,17 +309,17 @@ export class PropertyService {
   async deleteOneProperty(thingId: string, propertyId: string): Promise<void> {
     const propertyRepository = getRepository(Property);
     // Get all details of that property, ensuring it exists
-    const property: Property = await this.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    // If the property does not exist, we stop the process and return an error
-    if (property === undefined) {
-      throw new DCDError(
+    let property: Property
+    try {
+      property = await this.getOnePropertyById(thingId, propertyId);
+    } catch {
+      // If the property does not exist, we stop the process and return an error
+      return Promise.reject(new DCDError(
         404,
         `Property to delete ${propertyId} could not be not found for Thing ${thingId}.`
-      );
+      ));
     }
+
     // Attempt to delete the data of the property
     return this.influxDbService
       .deletePropertyData(property)
@@ -350,17 +350,17 @@ export class PropertyService {
     timestamps: number[]
   ): Promise<void> {
     // Get all details of that property, ensuring it exists
-    const property: Property = await this.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    // If the property does not exist, we stop the process and return an error
-    if (property === undefined) {
-      throw new DCDError(
+    let property: Property;
+    try {
+      property = await this.getOnePropertyById(thingId, propertyId);
+    } catch {
+      // If the property does not exist, we stop the process and return an error
+      return Promise.reject(new DCDError(
         404,
         `Property ${propertyId} could not be not found for Thing ${thingId}.`
-      );
+      ));
     }
+
     return this.influxDbService
       .deleteDataPoints(property, timestamps)
       .then(() => {
@@ -427,7 +427,13 @@ export class PropertyService {
   ): Promise<(number | string)[][]> {
     let measurement = typeId;
     if (measurement === undefined) {
-      const property = await this.getOnePropertyById(thingId, propertyId);
+      let property: Property
+      try {
+        property = await this.getOnePropertyById(thingId, propertyId);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+
       measurement = property.type.id;
     }
     return this.influxDbService.counDataPoints(
@@ -442,7 +448,10 @@ export class PropertyService {
     thingId: string,
     propertyId: string
   ): Promise<(number | string)[][]> {
-    const property = await this.getOnePropertyById(thingId, propertyId);
-    return this.influxDbService.lastDataPoints(property);
+    return this.getOnePropertyById(thingId, propertyId)
+      .then((property) => {
+        return this.influxDbService.lastDataPoints(property);
+      })
+
   }
 }

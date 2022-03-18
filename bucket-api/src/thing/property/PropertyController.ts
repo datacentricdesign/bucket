@@ -102,12 +102,19 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     const options = PropertyController.parseValueOptions(req);
 
+    let property: Property
     // Get the Property from the Service
-    const property: Property = await this.propertyService.getOnePropertyById(
-      thingId,
-      propertyId,
-      options
-    );
+    try {
+      property = await this.propertyService.getOnePropertyById(
+        thingId,
+        propertyId,
+        options
+      );
+    } catch {
+      // Double-check the property is actually part of this thing
+      // If not found, send a 404 response
+      return next(new DCDError(404, "Property not found in the thing."));
+    }
 
     if (req.accepts("application/json")) {
       res.send(property);
@@ -115,13 +122,7 @@ export class PropertyController {
       res.set({ "Content-Type": "text/csv" });
       res.send(PropertyController.toCSV(property));
     } else {
-      // Double-check the property is actually part of this thing
-      if (property === undefined) {
-        // If not found, send a 404 response
-        next(new DCDError(404, "Property not found in the thing."));
-      } else {
-        res.send(property);
-      }
+      res.send(property);
     }
   }
 
@@ -231,13 +232,15 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     // Get values from the body
     const { name, description } = req.body;
-    const property: Property = await this.propertyService.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    if (property === undefined) {
+    let property: Property
+    try {
+      property = await this.propertyService.getOnePropertyById(
+        thingId,
+        propertyId
+      );
+    } catch (error) {
       // If not found, send a 404 response
-      return next(new DCDError(404, "Property not found"));
+      return next(error);
     }
 
     // Validate the new name/description on model
@@ -268,13 +271,16 @@ export class PropertyController {
     const propertyId = req.params.propertyId;
     const timestamp = Number.parseInt(req.params.timestamp);
     const dimension = req.params.dimensionId;
-    const property: Property = await this.propertyService.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    if (property === undefined) {
-      return next(new DCDError(404, "Property not found."));
+    let property: Property
+    try {
+      property = await this.propertyService.getOnePropertyById(
+        thingId,
+        propertyId
+      );
+    } catch (error) {
+      return next(error)
     }
+
     let extension = null;
     for (let i = 0; i < property.type.dimensions.length; i++) {
       if (property.type.dimensions[i].id === dimension) {
@@ -318,19 +324,17 @@ export class PropertyController {
     // Get the ID from the url
     const thingId = req.params.thingId;
     const propertyId = req.params.propertyId;
-
     const contentType = req.headers["content-type"];
-
-    const property: Property = await this.propertyService.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    Log.debug(property);
-
-    // Double-check the property is actually part of this thing
-    if (property === undefined) {
+    let property: Property
+    try {
+      property = await this.propertyService.getOnePropertyById(
+        thingId,
+        propertyId
+      );
+    } catch (error) {
+      // Double-check the property is actually part of this thing
       // If not found, send a 404 response
-      return next(new DCDError(404, "Property not found in the thing."));
+      return next(error);
     }
 
     Log.debug(contentType);
@@ -384,8 +388,8 @@ export class PropertyController {
                   new DCDError(
                     400,
                     "Dimension " +
-                      property.type.dimensions[i].id +
-                      " has no file."
+                    property.type.dimensions[i].id +
+                    " has no file."
                   )
                 );
               }

@@ -406,16 +406,17 @@ export class PropertyRouter {
     }
 
     // get property details with
-    const property: Property = await this.propertyService.getOnePropertyById(
-      thingId,
-      propertyId
-    );
-    // Double-check the property is actually part of this thing
-    if (property === undefined) {
+    let property: Property
+    try {
+      property = await this.propertyService.getOnePropertyById(
+        thingId,
+        propertyId
+      );
+    } catch {
+      // Double-check the property is actually part of this thing
       // If not found, send a 404 response
       return cb(new DCDError(404, "Property not found in the thing."));
     }
-
     let dimension = null;
     for (let i = 0; i < property.type.dimensions.length; i++) {
       if (property.type.dimensions[i].id === file.fieldname) {
@@ -435,10 +436,10 @@ export class PropertyRouter {
             new DCDError(
               400,
               "Error: File in field " +
-                file.fieldname +
-                " must have mime type " +
-                file.mimetype +
-                "."
+              file.fieldname +
+              " must have mime type " +
+              file.mimetype +
+              "."
             )
           );
         }
@@ -447,10 +448,10 @@ export class PropertyRouter {
           new DCDError(
             400,
             "Error: File in field " +
-              file.fieldname +
-              " must have extension " +
-              dimension.unit +
-              "."
+            file.fieldname +
+            " must have extension " +
+            dimension.unit +
+            "."
           )
         );
       }
@@ -459,8 +460,8 @@ export class PropertyRouter {
         new DCDError(
           400,
           "Error: field " +
-            file.fieldname +
-            " is not matching any dimension ID."
+          file.fieldname +
+          " is not matching any dimension ID."
         )
       );
     }
@@ -504,13 +505,13 @@ const storage = multer.diskStorage({
               return cb(
                 null,
                 thingId +
-                  "-" +
-                  propertyId +
-                  "-" +
-                  timestamp +
-                  "#" +
-                  file.fieldname +
-                  path.extname(file.originalname).toLowerCase()
+                "-" +
+                propertyId +
+                "-" +
+                timestamp +
+                "#" +
+                file.fieldname +
+                path.extname(file.originalname).toLowerCase()
               );
             }
           }
