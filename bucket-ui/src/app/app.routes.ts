@@ -4,14 +4,16 @@ import { TutorialsComponent } from './doc/tutorials/tutorials.component';
 import { ReferencesComponent } from './doc/references/references.component';
 import { ExplanationsComponent } from './doc/explanations/explanations.component';
 import { HowToComponent } from './doc/how-to/how-to.component';
+import { TermsComponent } from './doc/terms/terms.component';
+import { PrivacyComponent } from './doc/privacy/privacy.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 
 export const AppRoutes: Routes = [
-  {
-    path: '',
-    redirectTo: 'about',
-    pathMatch: 'full'
-  },
+  // {
+  //   path: '',
+  //   redirectTo: 'about',
+  //   pathMatch: 'full'
+  // },
   {
     path: 'things',
     loadChildren: () =>
@@ -20,7 +22,7 @@ export const AppRoutes: Routes = [
       )
   },
   {
-    path: 'about',
+    path: '',
     component: LandingPageComponent,
     children: [
       {
@@ -42,11 +44,19 @@ export const AppRoutes: Routes = [
       {
         path: 'explanations',
         component: ExplanationsComponent
+      },
+      {
+        path: 'privacy',
+        component: PrivacyComponent
+      },
+      {
+        path: 'terms',
+        component: TermsComponent
       }
     ]
   },
   {
     path: '**',
-    redirectTo: 'about'
+    redirectTo: ''
   }
 ];

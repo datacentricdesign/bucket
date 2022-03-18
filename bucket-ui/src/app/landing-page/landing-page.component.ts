@@ -10,11 +10,11 @@ export interface RouteInfo {
   class: string;
 }
 
-const getStartedRoute = { path: '/about/get-started', title: 'Get Started', icon: 'nc-user-run', class: '' }
-const tutorialsRoute = { path: '/about/tutorials', title: 'Tutorials', icon: 'nc-spaceship', class: '' }
-const howToRoute = { path: '/about/how-to', title: 'How-To Guides', icon: 'nc-bullet-list-67', class: '' }
-const technicalRefRoute = { path: '/about/references', title: 'Technical References', icon: 'nc-book-bookmark', class: '' }
-const explanationRoute = { path: '/about/explanations', title: 'Background Info', icon: 'nc-single-copy-04', class: '' }
+const getStartedRoute = { path: '/get-started', title: 'Get Started', icon: 'nc-user-run', class: '' }
+const tutorialsRoute = { path: '/tutorials', title: 'Tutorials', icon: 'nc-spaceship', class: '' }
+const howToRoute = { path: '/how-to', title: 'How-To Guides', icon: 'nc-bullet-list-67', class: '' }
+const technicalRefRoute = { path: '/references', title: 'Technical References', icon: 'nc-book-bookmark', class: '' }
+const explanationRoute = { path: '/explanations', title: 'Background Info', icon: 'nc-single-copy-04', class: '' }
 
 export const ROUTES: RouteInfo[] = [getStartedRoute, tutorialsRoute, howToRoute, technicalRefRoute, explanationRoute];
 
@@ -61,6 +61,10 @@ export class LandingPageComponent implements OnInit {
   logout() {
     // this.oauthService.logOut();
     this.oauthService.revokeTokenAndLogout();
+  }
+
+  goToMyBucket() {
+    window.location.href = './things/dashboard'
   }
 
   loadUserProfile(): void {
