@@ -15,5 +15,5 @@ export const httpConfig = {
   rateLimitPerMinute:
     process.env.HTTP_RATE_LIMIT_PER_MINUTE !== undefined
       ? parseInt(process.env.HTTP_RATE_LIMIT_PER_MINUTE)
-      : 100,
+      : 1000,
 };
