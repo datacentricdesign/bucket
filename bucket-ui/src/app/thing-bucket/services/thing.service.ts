@@ -213,7 +213,8 @@ export class ThingService {
     if (file !== undefined) {
       payload = new FormData()
       payload.append('property', JSON.stringify(property));
-      payload.append('video-mp4', file, file.name ? file.name : '');
+      // payload.append('video-mp4', file, file.name ? file.name : '');
+      payload.append('video-mp4', file, property.values[0][0] + '.mp4');
     }
     console.log(payload)
     return this.http.put<any>(url, payload, { headers, observe: 'events', reportProgress: true} as any) as Observable<HttpEvent<any>>;
