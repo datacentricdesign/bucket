@@ -1,6 +1,26 @@
-
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12">
-   <h1>How-To Guides</h1>
+    <h1>How-To Guides</h1>
+
+    <a id="keys">
+      <h2>Generate Public/Private keys</h2>
+    </a>
+
+    <p>
+      On Mac, this tool is already installed. On Windows, you can download and install <a href="https://slproweb.com/products/Win32OpenSSL.html">openSSL</a>. In the terminal, type in the following command to generate a private key. The private key is saved saved in file 'private.pem'. You should keep this file secret on your computer and never share it.
+    </p>
+
+    <code>
+      openssl genrsa -out private.pem 4096
+    </code>
+
+    <p>
+      Then, extract the attached public key with the following command. The public key is saved in the file 'public.pem'
+    </p>
+
+    <code>
+      openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+    </code>
+
   </div>
 </div>
