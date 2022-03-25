@@ -164,7 +164,7 @@
                         <input type="text" class="form-control" id="name" name="name" [(ngModel)]="updateThing.name"
                             #name="ngModel">
                         <app-spinner-button #nameEditBt [disabled]="updateThing.name===''" type="success"
-                            content="Rename" (spinnerBtClick)="editName(name.value)">
+                            content="Rename" (spinnerBtClick)="editName()">
                         </app-spinner-button>
                     </div>
 
@@ -173,7 +173,7 @@
                         <input type="text" class="form-control" id="description" name="description"
                             [(ngModel)]="updateThing.description" #description="ngModel">
                         <app-spinner-button #descEditBt [disabled]="updateThing.description===''" type="success"
-                            content="Update the description" (spinnerBtClick)="editDescription(description.value)">
+                            content="Update the description" (spinnerBtClick)="editDescription()">
                         </app-spinner-button>
                     </div>
 
