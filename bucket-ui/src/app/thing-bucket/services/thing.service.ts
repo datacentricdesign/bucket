@@ -402,10 +402,10 @@ export function downloadTakeout(
           }
 
           // fix to improve!
-          // const elem: HTMLElement = document.getElementById('download-dpi-image-progress')
-          // if (elem) {
-          //   elem.style.width = progress + '%'
-          // }
+          const elem: HTMLElement = document.getElementById('nav-progress')
+          if (elem) {
+            elem.style.width = progress + '%'
+          }
 
           return {
             // progress: event.total
@@ -422,19 +422,11 @@ export function downloadTakeout(
           if (saver && event.body) {
             saver(event.body)
           }
-
-          // const bt: HTMLButtonElement = document.getElementById('downloadImage') as HTMLButtonElement
-          // if (bt) {
-          //   bt.disabled = false
-          // }
-          // const btSpinner: HTMLElement = document.getElementById('spinnerDownloadImage')
-          // if (btSpinner) {
-          //   btSpinner.style.display = 'none'
-          // }
-          // const bar: HTMLElement = document.getElementById('download-dpi-image-progress-bar')
-          // if (bar) {
-          //   bar.style.display = 'none'
-          // }
+          
+          const bar: HTMLElement = document.getElementById('nav-progress-bar')
+          if (bar) {
+            bar.style.display = 'none'
+          }
 
           return {
             progress: 100,

@@ -3,7 +3,8 @@ import { ROUTES } from '../sidebar/sidebar.component';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { ThingService } from 'app/thing-bucket/services/thing.service';
+import { Download, ThingService } from 'app/thing-bucket/services/thing.service';
+import { Observable } from 'rxjs';
 
 
 interface UserProfile {
@@ -24,6 +25,10 @@ export class NavbarComponent implements OnInit {
   private toggleButton;
   private sidebarVisible: boolean;
   public userProfile: UserProfile;
+
+  private download$: Observable<Download>;
+  private takeoutInProgress: boolean = false;
+
 
   public isCollapsed = true;
   @ViewChild('app-navbar-cmp', { static: false }) button;
@@ -122,6 +127,17 @@ export class NavbarComponent implements OnInit {
   }
 
   takeout() {
-    this.thingService.takeout();
+    console.log('takeout')
+    if (!this.takeoutInProgress) {
+      this.takeoutInProgress = true;
+      this.download$ = this.thingService.takeout();
+      this.download$.subscribe((value: Download) => {
+        this.takeoutInProgress = false;
+      }, (error: Error) => {
+        this.takeoutInProgress = false;
+      })
+    } else {
+      console.log('ignoring takeout, already ongoing')
+    }
   }
 }
