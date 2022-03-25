@@ -266,7 +266,7 @@ export class ThingRouter {
 
 
     this.router.get(
-      "/things/takeout",
+      "/takeout",
       [
         this.authController.authenticate(["dcd:things"]),
         this.policyController.checkPolicy("read"),

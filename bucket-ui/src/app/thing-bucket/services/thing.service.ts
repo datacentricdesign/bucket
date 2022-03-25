@@ -262,11 +262,9 @@ export class ThingService {
   takeout(): Observable<Download> {
     const url = this.apiURL + '/things/takeout'
     const headers = this.getHeader()
-    const params = new HttpParams().set('download', 'true')
     const fileName = 'takeout.zip'
     return this.http.get(url, {
       headers,
-      params,
       reportProgress: true,
       observe: 'events',
       responseType: 'blob'
