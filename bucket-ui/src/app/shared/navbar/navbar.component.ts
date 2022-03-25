@@ -130,16 +130,26 @@ export class NavbarComponent implements OnInit {
   takeout() {
     console.log('takeout')
     const spinner: HTMLElement = document.getElementById('nav-spinner')
+    const progress: HTMLElement = document.getElementById('nav-progress')
     spinner.style.display = "block";
+    progress.style.display = "block";
     if (!this.takeoutInProgress) {
       this.takeoutInProgress = true;
       this.download$ = this.thingService.takeout();
       this.download$.subscribe((value: Download) => {
-        this.takeoutInProgress = false;
-        spinner.style.display = "none";
-        this.thingService.toast('Takeout ready.', 'success', 'nc-single-copy-04')
+        if (value.state === 'PENDING') {
+
+        } else if (value.state === 'DONE') {
+          progress.style.display = "none";
+          spinner.style.display = "none";
+          this.takeoutInProgress = false;
+          this.thingService.toast('Takeout ready.', 'success', 'nc-single-copy-04')
+        } else if (value.state === 'IN_PROGRESS') {
+          progress.style.width = progress + '%'
+        }
       }, (error: Error) => {
         this.takeoutInProgress = false;
+        progress.style.display = "none";
         spinner.style.display = "none";
         this.thingService.toast('Takeout failed.', 'danger', 'nc-single-copy-04')
       })

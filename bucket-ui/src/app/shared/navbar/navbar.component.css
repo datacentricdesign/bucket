@@ -1,6 +1,7 @@
 
 .progress {
     height: 5px;
+    width: 300px;
 }
 
 .progress-bar-info {
@@ -19,7 +20,7 @@
 }
 
 .spinner>div {
-    background-color: #fff;
+    background-color: #000;
     height: 100%;
     width: 4px;
     margin: 0px 1px;

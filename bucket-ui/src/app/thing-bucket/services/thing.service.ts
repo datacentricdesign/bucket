@@ -399,12 +399,6 @@ export function downloadTakeout(
             progress = 100
           }
 
-          // fix to improve!
-          const elem: HTMLElement = document.getElementById('nav-progress')
-          if (elem) {
-            elem.style.width = progress + '%'
-          }
-
           return {
             // progress: event.total
             //   ? Math.round((100 * event.loaded) / event.total)
