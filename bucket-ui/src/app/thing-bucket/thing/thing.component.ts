@@ -258,8 +258,7 @@ export class ThingComponent implements OnInit {
 
          details += `<table class="table">
             <thead class=" text-primary">
-                <th> Dimension ID </th>
-                <th> Name </th>
+                <th> Dimension</th>
                 <th> Unit </th>
                 <th> Type </th>
                 <th> Description </th>
@@ -271,8 +270,7 @@ export class ThingComponent implements OnInit {
             details += '<li>' + type.dimensions[dim].name
             details += `<tbody>
                             <tr>
-                                <td>${type.dimensions[dim].id}</td>
-                                <td>${type.dimensions[dim].name}</td>
+                                <td>${type.dimensions[dim].name}<p class="category">${type.dimensions[dim].id}</p></td>
                                 <td>${type.dimensions[dim].unit}</td>
                                 <td>${type.dimensions[dim].type}</td>
                                 <td>${type.dimensions[dim].description}</td>
