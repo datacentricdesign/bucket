@@ -93,7 +93,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="col-lg-3 col-md-3 col-sm-12">
                                 <div class="form-group" *ngIf="types$ | async as types else loadingTypes">
                                     <label for="type">Type</label>
                                     <select class="form-control" id="type" (change)="selectType($event.target.value);"
@@ -102,7 +102,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="col-lg-9 col-md-9 col-sm-12">
                                 <div id="typeDetails"></div>
                             </div>
                         </div>

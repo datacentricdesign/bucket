@@ -267,7 +267,6 @@ export class ThingComponent implements OnInit {
             
         
         for (const dim of Object.keys(type.dimensions)) {
-            details += '<li>' + type.dimensions[dim].name
             details += `<tbody>
                             <tr>
                                 <td>${type.dimensions[dim].name}<p class="category">${type.dimensions[dim].id}</p></td>
