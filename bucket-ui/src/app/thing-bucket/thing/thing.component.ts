@@ -250,21 +250,37 @@ export class ThingComponent implements OnInit {
         this.model.typeId = type.id
         this.model.name = type.name
         this.model.description = type.description
-        let details = type.description + '<ul>'
+        let details = `<h6 class="title">${type.name}</h6>`
+        details += `<p class="category">${type.id}</p>`
+        details += `<p><b>Description<b>: ${type.description}</p>`
+        
+         '<p>Dimensions</p><ul>'
+
+         details += `<table class="table">
+            <thead class=" text-primary">
+                <th> Dimension ID </th>
+                <th> Name </th>
+                <th> Unit </th>
+                <th> Type </th>
+                <th> Description </th>
+                <th> Labels </th>
+            </thead>`
+            
+        
         for (const dim of Object.keys(type.dimensions)) {
             details += '<li>' + type.dimensions[dim].name
-            if (type.dimensions[dim].unit !== '') {
-                details += ' (' + type.dimensions[dim].unit + ')'
-            }
-            if (type.dimensions[dim].description !== '') {
-                details += ': ' + type.dimensions[dim].description
-            }
-            if (type.dimensions[dim].labels !== undefined && type.dimensions[dim].labels.length > 0) {
-                details += '<br>Labels: [' + type.dimensions[dim].labels.join('] , [') + ']';
-            }
-            details += '</li>'
+            details += `<tbody>
+                            <tr>
+                                <td>${type.dimensions[dim].id}</td>
+                                <td>${type.dimensions[dim].name}</td>
+                                <td>${type.dimensions[dim].unit}</td>
+                                <td>${type.dimensions[dim].type}</td>
+                                <td>${type.dimensions[dim].description}</td>
+                                <td>${type.dimensions[dim].labels.join(',')}</td>
+                            </tr>
+                        </tbody>`
         }
-        details += '</ul>'
+        details += `</table>`
         document.getElementById('typeDetails').innerHTML = details
     }
 
