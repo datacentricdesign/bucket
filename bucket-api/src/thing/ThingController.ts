@@ -216,6 +216,28 @@ export class ThingController {
       next(error);
     }
   }
+
+  public async generateTakeOut(
+    req: DCDRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const result = await this.thingService.generateTakeOut(req.context.userId);
+      await new Promise<void>((resolve, reject) => {
+        result.pipe(res);
+        result.on("error", (error) => {
+          reject(error);
+        });
+        res.on("finish", function () {
+          resolve();
+        });
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
 function checkPEM(pem: string): DCDError {

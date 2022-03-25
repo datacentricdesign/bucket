@@ -1,4 +1,7 @@
 import { getRepository, DeleteResult, getConnection } from "typeorm";
+import fs = require('fs')
+import JSZip = require("jszip");
+import config from '../config'
 
 import { Thing } from "./Thing";
 import { DCDError } from "@datacentricdesign/types";
@@ -9,6 +12,8 @@ import { AuthService } from "../auth/AuthService";
 import jwkToBuffer = require("jwk-to-pem");
 import { PropertyService } from "./property/PropertyService";
 import { PolicyService } from "../policy/PolicyService";
+import { PropertyController } from "./property/PropertyController";
+import { Log } from "../Logger";
 
 export class ThingService {
   private static instance: ThingService;
@@ -170,4 +175,65 @@ export class ThingService {
     }
     return things;
   }
+
+  /**
+   * Gather all data belonging to a person (Things, properties and their data)
+   * and return a zip file including all data structured per Things and Property.
+   * @param personId ID of the Person requesting the takeout
+   */
+  async generateTakeOut(personId: string): Promise<NodeJS.ReadableStream> {
+    // get the list of all Things own by a person
+    const things = await this.getThingsOfAPerson(personId);
+    // time frame of data from 0 to now (i.e. all)
+    const valueOptions = {
+      from: 0,
+      to: Date.now(),
+      timeInterval: undefined,
+      fctInterval: undefined,
+      fill: undefined,
+    };
+    try {
+      // Create the Zip folder for person takeout
+      const zip = new JSZip();
+      // TODO get person info from OpenID and create file with person info
+      zip.file(personId + ".json", JSON.stringify({id: personId}));
+      // for all things
+      for (let i = 0; i < things.length; i++) {
+        const thing = things[i];
+        // create folder for thing
+        zip.folder(thing.id)
+        // create file with thing info
+        zip.file(thing.id + '/' + thing.id + ".json", JSON.stringify(thing));
+        // for all properties
+        for (let j = 0; j < thing.properties.length; j++) {
+          const property: Property = thing.properties[j];
+          // create folder for property
+          const propFolder = thing.id + '/' + property.id
+          zip.folder(propFolder)
+          // create csv for property
+          const propertyWithData = await this.propertyService.getOnePropertyById(thing.id, property.id, valueOptions);
+          // save as csv
+          zip.file(propFolder + '/' + property.id + '.csv', PropertyController.toCSV(propertyWithData));
+
+          // copy media files
+          const path = config.hostDataFolder + "/files/";
+          // list all files in the directory
+          const files = fs.readdirSync(path)
+          // files object contains all files names
+          files.forEach((file) => {
+            if (file.startsWith(property.thing.id + "-" + property.id)) {
+              // read a file as a stream and add it to a zip
+              var stream = fs.createReadStream(path + file);
+              zip.file(propFolder + "/" + file, stream);
+            }
+          });
+        }
+      }
+      return zip.generateNodeStream();
+    } catch (error) {
+      Log.error(error);
+    }
+
+  }
+
 }

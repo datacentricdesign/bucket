@@ -3,6 +3,7 @@ import { ROUTES } from '../sidebar/sidebar.component';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { ThingService } from 'app/thing-bucket/services/thing.service';
 
 
 interface UserProfile {
@@ -31,7 +32,8 @@ export class NavbarComponent implements OnInit {
     private renderer: Renderer2,
     private element: ElementRef,
     private router: Router,
-    private oauthService: OAuthService) {
+    private oauthService: OAuthService,
+    private thingService: ThingService) {
     this.location = location;
     this.nativeElement = element.nativeElement;
     this.sidebarVisible = false;
@@ -117,5 +119,9 @@ export class NavbarComponent implements OnInit {
   editProfile() {
     const win = window.open('https://dwd.tudelft.nl/profile', '_blank');
     win.focus();
+  }
+
+  takeout() {
+    this.thingService.takeout();
   }
 }
