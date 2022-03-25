@@ -221,7 +221,7 @@ export class ThingService {
           const files = fs.readdirSync(path)
           // files object contains all files names
           files.forEach((file) => {
-            if (file.startsWith(property.thing.id + "-" + property.id)) {
+            if (file.startsWith(thing.id + "-" + property.id)) {
               // read a file as a stream and add it to a zip
               var stream = fs.createReadStream(path + file);
               zip.file(propFolder + "/" + file, stream);
