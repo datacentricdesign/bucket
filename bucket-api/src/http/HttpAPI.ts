@@ -17,6 +17,7 @@ import { PropertyTypeRouter } from "../thing/property/propertyType/PropertyTypeR
 import { ThingRouter } from "../thing/ThingRouter";
 import { Log } from "../Logger";
 import { DCDError } from "@datacentricdesign/types";
+import { ThingController } from "../thing/ThingController";
 
 export class HttpAPI {
   app: express.Application;
@@ -25,11 +26,13 @@ export class HttpAPI {
   thingRouter: ThingRouter;
   propertyTypeRouter: PropertyTypeRouter;
 
+  thingController: ThingController;
   propertyController: PropertyController;
   authController: AuthController;
   dpiController: DPiController;
 
   constructor() {
+    this.thingController = ThingController.getInstance();
     this.propertyController = PropertyController.getInstance();
     this.authController = AuthController.getInstance();
 
@@ -85,8 +88,19 @@ export class HttpAPI {
      **/
     this.app.get(
       config.http.baseUrl + "/properties",
-      [this.authController.authenticate(["dcd:properties", "dcd:consents"])],
+      [
+        this.authController.authenticate(["dcd:properties", "dcd:consents"])
+      ],
       this.propertyController.getProperties.bind(this.propertyController)
+    );
+
+
+    this.app.get(
+      config.http.baseUrl + "/takeout",
+      [
+        this.authController.authenticate(["dcd:things"])
+      ],
+      this.thingController.generateTakeOut.bind(this.thingController)
     );
 
     this.app.use(

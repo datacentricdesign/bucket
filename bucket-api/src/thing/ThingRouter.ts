@@ -264,16 +264,6 @@ export class ThingRouter {
       this.controller.deleteOneThing.bind(this.controller)
     );
 
-
-    this.router.get(
-      "/takeout",
-      [
-        this.authController.authenticate(["dcd:things"]),
-        this.policyController.checkPolicy("read"),
-      ],
-      this.controller.generateTakeOut.bind(this.controller)
-    );
-
     // If there is a config for DPi, it means we should be able to use it!
     if (config.env.dpiUrl !== undefined && config.env.dpiUrl !== "") {
       this.dpiRouter = new DPiRouter(this.app);
