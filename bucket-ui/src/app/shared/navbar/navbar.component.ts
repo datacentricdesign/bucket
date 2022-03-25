@@ -15,7 +15,8 @@ interface UserProfile {
 @Component({
   moduleId: module.id,
   selector: 'app-navbar-cmp',
-  templateUrl: 'navbar.component.html'
+  templateUrl: 'navbar.component.html',
+  styleUrls: ['./navbar.component.css']
 })
 
 export class NavbarComponent implements OnInit {
@@ -128,13 +129,19 @@ export class NavbarComponent implements OnInit {
 
   takeout() {
     console.log('takeout')
+    const spinner: HTMLElement = document.getElementById('nav-spinner')
+    spinner.style.display = "block";
     if (!this.takeoutInProgress) {
       this.takeoutInProgress = true;
       this.download$ = this.thingService.takeout();
       this.download$.subscribe((value: Download) => {
         this.takeoutInProgress = false;
+        spinner.style.display = "none";
+        this.thingService.toast('Takeout ready.', 'success', 'nc-single-copy-04')
       }, (error: Error) => {
         this.takeoutInProgress = false;
+        spinner.style.display = "none";
+        this.thingService.toast('Takeout failed.', 'danger', 'nc-single-copy-04')
       })
     } else {
       console.log('ignoring takeout, already ongoing')
