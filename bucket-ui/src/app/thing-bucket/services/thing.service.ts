@@ -260,7 +260,7 @@ export class ThingService {
   }
 
   takeout(): Observable<Download> {
-    const url = this.apiURL + '/things/takeout'
+    const url = this.apiURL + '/takeout'
     const headers = this.getHeader()
     const fileName = 'takeout.zip'
     return this.http.get(url, {

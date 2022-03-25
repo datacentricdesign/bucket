@@ -201,19 +201,21 @@ export class ThingService {
       for (let i = 0; i < things.length; i++) {
         const thing = things[i];
         // create folder for thing
+        const thingId = thing.id.replace("dcd:things:","")
         zip.folder(thing.id)
         // create file with thing info
-        zip.file(thing.id + '/' + thing.id + ".json", JSON.stringify(thing));
+        zip.file(thingId + '/' + thingId + ".json", JSON.stringify(thing));
         // for all properties
         for (let j = 0; j < thing.properties.length; j++) {
           const property: Property = thing.properties[j];
+          const propertyId = property.id.replace("dcd:things:","")
           // create folder for property
-          const propFolder = thing.id + '/' + property.id
+          const propFolder = thingId + '/' + propertyId
           zip.folder(propFolder)
           // create csv for property
           const propertyWithData = await this.propertyService.getOnePropertyById(thing.id, property.id, valueOptions);
           // save as csv
-          zip.file(propFolder + '/' + property.id + '.csv', PropertyController.toCSV(propertyWithData));
+          zip.file(propFolder + '/' + propertyId + '.csv', PropertyController.toCSV(propertyWithData));
 
           // copy media files
           const path = config.hostDataFolder + "/files/";
