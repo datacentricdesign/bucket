@@ -23,6 +23,7 @@ export class GoProThingComponent implements OnInit {
   private map = {
     'ACCL': { name: 'Accelerometer', typeId: 'ACCELEROMETER' },
     'GYRO': { name: 'Gyroscope', typeId: 'GYROSCOPE' },
+    'MAGN': { name: 'Magnetometer', typeId: 'MAGNETIC_FIELD' },
     'SHUT': { name: 'Exposure Time', typeId: 'EXPOSURE_TIME' }, // Exposure time (shutter speed) in seconds 1 dim
     'WBAL': { name: 'White Balance temperature', typeId: 'WHITE_BALANCE_TEMPERATURE' }, // White Balance temperature (Kelvin) 1 dim
     'WRGB': { name: 'White Balance RGB gains', typeId: 'WHITE_BALANCE_RGB_GAINS' }, // White Balance RGB gains (3 dim)
@@ -115,7 +116,7 @@ export class GoProThingComponent implements OnInit {
     for (let i = 0; i < telemetrySamples.length; i++) {
       const sample = telemetrySamples[i]['value'];
       const ts = moment(telemetrySamples[i]['date'], 'YYYY-MM-DDTHH:mm:ss.SSSZ').valueOf();
-      if (['ACCL', 'GYRO'].indexOf(key) >= 0) {
+      if (['ACCL', 'GYRO', 'MAGN'].indexOf(key) >= 0) {
         property.values.push([ts, sample[1], sample[2], sample[0]]);
       } else if (['WRGB', 'SCEN', 'HUES', 'GPS5', 'CORI', 'IORI', 'GRAV', 'FACE1'].indexOf(key) >= 0) {
         sample.unshift(ts)
