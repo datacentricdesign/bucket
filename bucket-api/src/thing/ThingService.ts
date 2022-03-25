@@ -226,7 +226,8 @@ export class ThingService {
             if (file.startsWith(thing.id + "-" + property.id)) {
               // read a file as a stream and add it to a zip
               var stream = fs.createReadStream(path + file);
-              zip.file(propFolder + "/" + file, stream);
+              const destName = file.split("dcd:properties:")[1]
+              zip.file(propFolder + "/" + destName, stream);
             }
           });
         }
