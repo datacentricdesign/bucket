@@ -196,19 +196,19 @@ export class ThingService {
       // Create the Zip folder for person takeout
       const zip = new JSZip();
       // TODO get person info from OpenID and create file with person info
-      zip.file(personId + ".json", JSON.stringify({id: personId}));
+      zip.file(personId.replace("dcd:persons:","") + ".json", JSON.stringify({id: personId}));
       // for all things
       for (let i = 0; i < things.length; i++) {
         const thing = things[i];
         // create folder for thing
         const thingId = thing.id.replace("dcd:things:","")
-        zip.folder(thing.id)
+        zip.folder(thingId)
         // create file with thing info
         zip.file(thingId + '/' + thingId + ".json", JSON.stringify(thing));
         // for all properties
         for (let j = 0; j < thing.properties.length; j++) {
           const property: Property = thing.properties[j];
-          const propertyId = property.id.replace("dcd:things:","")
+          const propertyId = property.id.replace("dcd:properties:","")
           // create folder for property
           const propFolder = thingId + '/' + propertyId
           zip.folder(propFolder)
