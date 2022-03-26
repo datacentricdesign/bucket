@@ -1,4 +1,4 @@
-import config from "../config";
+import config, { DCDRequest } from "../config";
 
 import * as express from "express";
 import { Request, Response, NextFunction } from "express";
@@ -45,6 +45,28 @@ export class HttpAPI {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(cookieParser());
+
+    /**
+     * Log request at the start and at the end.
+     */
+    this.app.use(function (
+      req: DCDRequest,
+      res: Response,
+      next: NextFunction
+    ): void {
+      function afterResponse() {
+        res.removeListener('finish', afterResponse);
+        res.removeListener('close', afterResponse);
+
+        Log.info({method: req.method, request: req.originalUrl, message: "Completed handling request", status: res.statusCode, text_status: res.statusMessage});
+      }
+
+      res.on('finish', afterResponse);
+      res.on('close', afterResponse);
+
+      Log.info({method: req.method, request: req.originalUrl, message: "Started handling request"});
+      next();
+    });
 
     this.setRateLimit();
 
