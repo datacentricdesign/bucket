@@ -60,7 +60,7 @@ export class Log {
       return Log.logger.trace(...Log.convertArgObjectToString(args));
     };
     Log.info = (...args: unknown[]): ILogObject => {
-      return Log.logger.info(...Log.convertArgObjectToString(args));
+      return Log.logger.info(args);
     };
     Log.warn = (...args: unknown[]): ILogObject => {
       return Log.logger.warn(...Log.convertArgObjectToString(args));
