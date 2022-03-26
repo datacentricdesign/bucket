@@ -58,13 +58,13 @@ export class HttpAPI {
         res.removeListener('finish', afterResponse);
         res.removeListener('close', afterResponse);
 
-        Log.info("HTTP Request", {method: req.method, request: req.originalUrl, message: "Completed handling request", status: res.statusCode, text_status: res.statusMessage});
+        Log.info("HTTP Response", {method: req.method, request: req.originalUrl, message: "Completed handling request", status: res.statusCode, text_status: res.statusMessage});
       }
 
       res.on('finish', afterResponse);
       res.on('close', afterResponse);
 
-      Log.info("HTTP Response", {method: req.method, request: req.originalUrl, message: "Started handling request"});
+      Log.info("HTTP Request", {method: req.method, request: req.originalUrl, message: "Started handling request"});
       next();
     });
 
