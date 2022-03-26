@@ -294,12 +294,10 @@ export class AuthService {
   }
 
   getBearer(): string {
-    Log.debug(this.token.token.token)
     return "bearer " + qs.escape(this.token.token.token.access_token);
   }
 
   async getPersonInfo(): Promise<OIDC> {
-    await this.requestNewToken();
     return this.authorisedRequest("GET", config.oauth2.oAuth2ProfileURL);
   }
 
@@ -342,7 +340,6 @@ export class AuthService {
         options.headers["Content-Length"] = bodyStr.length;
         options.body = bodyStr;
       }
-      Log.debug(options)
       const result = await fetch(url, options);
       if (result.ok) {
         return result.json();

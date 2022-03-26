@@ -196,7 +196,7 @@ export class ThingService {
       // Create the Zip folder for person takeout
       const zip = new JSZip();
       // TODO get person info from OpenID and create file with person info
-      zip.file(personId.replace("dcd:persons:","") + ".json", JSON.stringify(await this.authService.getPersonInfo()));
+      zip.file(personId.replace("dcd:persons:","") + ".json", JSON.stringify({id: personId}));
       // for all things
       for (let i = 0; i < things.length; i++) {
         const thing = things[i];
