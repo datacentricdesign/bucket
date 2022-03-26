@@ -121,7 +121,8 @@ export class Log {
       `${config.hostDataFolder}/logs/${moment(new Date()).format(
         "YYYY-MM-DD_HH"
       )}.log`,
-      `${Log.safeStringify(logObject)}\n`
+      `${logObject}\n`
+      // `${Log.safeStringify(logObject)}\n`
     );
   }
 }
