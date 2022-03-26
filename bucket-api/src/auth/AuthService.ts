@@ -6,7 +6,7 @@ import fetch from "node-fetch";
 import { RequestInit } from "node-fetch";
 import * as qs from "querystring";
 import * as SimpleOauth from "simple-oauth2";
-import { DCDError } from "@datacentricdesign/types";
+import { DCDError, DTOPerson, Person } from "@datacentricdesign/types";
 import config from "../config";
 import { URL } from "url";
 import { Log } from "../Logger";
@@ -48,6 +48,19 @@ interface IntrospectionResult {
   sub: string;
   token_type: string;
   username: string;
+}
+
+interface OIDC {
+  email?: string,
+  email_verified?: boolean,
+  family_n?: string,
+  given_name?: string,
+  id?: string,
+  name?: string,
+  profile?: string,
+  sid?: string,
+  sub?: string,
+  username?: string
 }
 
 /**
@@ -282,6 +295,10 @@ export class AuthService {
 
   getBearer(): string {
     return "bearer " + qs.escape(this.token.token.access_token);
+  }
+
+  async getPersonInfo(): Promise<OIDC> {
+    return this.authorisedRequest("GET", config.oauth2.oAuth2ProfileURL);
   }
 
   /**

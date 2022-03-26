@@ -252,7 +252,7 @@ export class ThingComponent implements OnInit {
         this.model.description = type.description
         let details = `<h6 class="title">${type.name}</h6>`
         details += `<p class="category">${type.id}</p>`
-        details += `<p><b>Description</b>: ${type.description}</p>`
+        details += `<p>${type.description}</p>`
         
          '<p>Dimensions</p><ul>'
 
