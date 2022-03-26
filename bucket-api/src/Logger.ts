@@ -60,7 +60,7 @@ export class Log {
       return Log.logger.trace(...Log.convertArgObjectToString(args));
     };
     Log.info = (...args: unknown[]): ILogObject => {
-      return Log.logger.info(args);
+      return Log.logger.info(...Log.convertArgObjectToString(args));
     };
     Log.warn = (...args: unknown[]): ILogObject => {
       return Log.logger.warn(...Log.convertArgObjectToString(args));
@@ -121,8 +121,7 @@ export class Log {
       `${config.hostDataFolder}/logs/${moment(new Date()).format(
         "YYYY-MM-DD_HH"
       )}.log`,
-      `${logObject}\n`
-      // `${Log.safeStringify(logObject)}\n`
+      `${Log.safeStringify(logObject)}\n`
     );
   }
 }
