@@ -26,7 +26,7 @@ export class Log {
     if (config.env.env === "development" || config.env.env === "test") {
       Log.logger = new Logger({
         name,
-        type: "pretty",
+        type: "json",
         ignoreStackLevels: 4,
       });
     } else {
