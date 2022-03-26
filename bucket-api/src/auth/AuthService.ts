@@ -298,6 +298,7 @@ export class AuthService {
   }
 
   async getPersonInfo(): Promise<OIDC> {
+    await this.requestNewToken();
     return this.authorisedRequest("GET", config.oauth2.oAuth2ProfileURL);
   }
 
