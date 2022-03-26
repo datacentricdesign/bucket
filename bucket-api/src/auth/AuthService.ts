@@ -298,7 +298,7 @@ export class AuthService {
   }
 
   async getPersonInfo(): Promise<OIDC> {
-    return this.authorisedRequest("GET", config.oauth2.oAuth2ProfileURL);
+    return this.authorisedRequest("GET", "http://ory-hydra:4444/userinfo");
   }
 
   /**
