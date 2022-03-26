@@ -294,7 +294,7 @@ export class AuthService {
   }
 
   getBearer(): string {
-    Log.debug(this.token.token)
+    Log.debug(this.token.token.token)
     return "bearer " + qs.escape(this.token.token.access_token);
   }
 
