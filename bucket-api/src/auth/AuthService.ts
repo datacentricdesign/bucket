@@ -298,7 +298,7 @@ export class AuthService {
   }
 
   async getPersonInfo(): Promise<OIDC> {
-    return this.authorisedRequest("GET", "http://ory-hydra:4444/userinfo");
+    return this.authorisedRequest("GET", config.oauth2.oAuth2ProfileURL);
   }
 
   /**
@@ -340,6 +340,7 @@ export class AuthService {
         options.headers["Content-Length"] = bodyStr.length;
         options.body = bodyStr;
       }
+      Log.debug(options)
       const result = await fetch(url, options);
       if (result.ok) {
         return result.json();
