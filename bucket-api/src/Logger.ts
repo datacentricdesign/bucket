@@ -96,7 +96,7 @@ export class Log {
   }
 
   // safely handles circular references
-  static safeStringify(obj: unknown, indent = 2): string {
+  static safeStringify(obj: unknown): string {
     let cache = [];
     const retVal = JSON.stringify(
       obj,
@@ -109,8 +109,7 @@ export class Log {
           return value; // Store value in our collection
         }
         return value;
-      },
-      indent
+      }
     );
     cache = null;
     return retVal;
