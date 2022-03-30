@@ -202,7 +202,7 @@ export class ThingService {
     const url = this.apiURL + '/things/' + thingId + '/properties/' + propertyId + '?hasLabel=' + (hasLabel ? 'true' : 'false');
     const headers = this.getHeader()
     const formData: FormData = new FormData();
-    formData.append('fileKey', fileToUpload, fileToUpload.name);
+    formData.append('csv', fileToUpload, fileToUpload.name);
     return this.http.put<any>(url, formData, { headers: headers }).toPromise()
   }
 
