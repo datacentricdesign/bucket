@@ -69,7 +69,12 @@ export class GoProThingComponent implements OnInit {
         goproTelemetry(input, options)
           .then(async telemetry => {
             const samples = telemetry['1']['streams']['ACCL']['samples'];
-            const videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, 'Video', 'VIDEO');
+            let videoProperty;
+            if (files[0].name.endsWith('.360')) {
+              videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, 'MP4 Video', 'VIDEO');
+            } else {
+              videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, '360 Video', '360_VIDEO');
+            }
             videoProperty.values = [[samples[0].date.getTime(), Math.floor(samples[samples.length - 1].cts)]];
             document.getElementById('upload-telemetry-property').innerHTML = '<p>Uploading video...</p>'
             const uploadObs = this.thingService.updatePropertyValues(this.thingId, videoProperty, files[0]);
