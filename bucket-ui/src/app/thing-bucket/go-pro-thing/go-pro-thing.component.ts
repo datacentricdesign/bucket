@@ -71,7 +71,7 @@ export class GoProThingComponent implements OnInit {
             const samples = telemetry['1']['streams']['ACCL']['samples'];
             let videoProperty;
             if (files[0].name.endsWith('.360')) {
-              videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, '360 Video', '360_VIDEO');
+              videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, '360 Video', 'VIDEO_360');
             } else {
               videoProperty = await this.thingService.findOrCreatePropertyByName(this.thingId, 'MP4 Video', 'VIDEO');
             }

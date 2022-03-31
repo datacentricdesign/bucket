@@ -153,7 +153,7 @@ export class InfluxDbService {
     propertyId: string,
     timeInterval: string = undefined
   ): Promise<(number | string)[][]> {
-    let query = `SELECT COUNT(*) FROM '${measurement}' WHERE time > ${from} AND "propertyId" = '${propertyId}'`;
+    let query = `SELECT COUNT(*) FROM ${measurement} WHERE time > ${from} AND "propertyId" = '${propertyId}'`;
     if (timeInterval !== undefined) query += ` GROUP BY time(${timeInterval})`;
     return this.influx
       .queryRaw(query, {
