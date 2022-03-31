@@ -165,7 +165,7 @@ export class InfluxDbService {
         return Promise.resolve(data.results[0].series[0].values);
       })
       .catch((error) => {
-        return error;
+        return Promise.reject(error);
       });
   }
 
@@ -182,7 +182,7 @@ export class InfluxDbService {
         return Promise.resolve(data.results[0].series[0].values);
       })
       .catch((error) => {
-        return error;
+        return Promise.reject(error);
       });
   }
 
@@ -207,7 +207,7 @@ export class InfluxDbService {
         return Promise.resolve();
       })
       .catch((error) => {
-        return error;
+        return Promise.reject(error);
       });
   }
 
@@ -222,7 +222,7 @@ export class InfluxDbService {
         return Promise.resolve();
       })
       .catch((error) => {
-        return error;
+        return Promise.reject(error);
       });
   }
 }
