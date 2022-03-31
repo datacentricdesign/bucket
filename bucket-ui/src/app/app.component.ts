@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
       .pipe(filter(e => e.type === 'token_received'))
       .subscribe(_ => {
         this.oauthService.loadUserProfile();
-        window.location.href = './things/dashboard'
+        window.location.href = './things'
       });
 
     // Display all events

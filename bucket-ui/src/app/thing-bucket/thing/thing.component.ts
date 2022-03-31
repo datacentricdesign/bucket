@@ -221,7 +221,7 @@ export class ThingComponent implements OnInit {
     delete() {
         this.thingService.delete(this.id)
             .then(() => {
-                window.location.href = './things/dashboard?success=Deleted+Thing.';
+                window.location.href = './things?success=Deleted+Thing.';
             })
             .catch((error) => {
                 this.thingService.toast(error)

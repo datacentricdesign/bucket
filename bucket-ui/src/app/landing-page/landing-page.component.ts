@@ -64,7 +64,7 @@ export class LandingPageComponent implements OnInit {
   }
 
   goToMyBucket() {
-    window.location.href = './things/dashboard'
+    window.location.href = './things'
   }
 
   loadUserProfile(): void {
