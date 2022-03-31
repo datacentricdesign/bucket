@@ -16,12 +16,11 @@ import { ThingBucketComponent } from './thing-bucket/thing-bucket.component'
 import { HttpClientModule } from '@angular/common/http'
 
 import { FormsModule } from '@angular/forms';
-import { LandingPageComponent } from './landing-page/landing-page.component';
-import { GetStartedComponent } from './doc/get-started/get-started.component';
 import { OAuthModule } from 'angular-oauth2-oidc'
 import { BrowserModule } from '@angular/platform-browser'
 import { SharedModule } from './shared/shared.module';
 import { AppService } from './app.service';
+import { PublicDocComponent } from './public-doc/public-doc.component'
 
 export function init_app(appService: AppService) {
   return () => appService.load();
@@ -54,8 +53,7 @@ export function init_app(appService: AppService) {
   declarations: [
     AppComponent,
     ThingBucketComponent,
-    LandingPageComponent,
-    GetStartedComponent
+    PublicDocComponent
   ],
   providers: [{
     provide: APP_INITIALIZER,

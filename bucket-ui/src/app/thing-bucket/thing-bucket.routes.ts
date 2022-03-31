@@ -10,6 +10,7 @@ import { SharedPropertiesComponent } from './shared-properties/shared-properties
 export const ThingBucketRoutes: Routes = [
     {
         path: '',
+        component: ThingBucketComponent,
         canActivate: [AuthGuard],
         children: [
           {
