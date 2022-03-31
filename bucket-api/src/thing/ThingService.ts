@@ -173,6 +173,7 @@ export class ThingService {
           );
           property.values = result;
         } catch (error) {
+          property.values = [];
           Log.error(error);
         }
       }

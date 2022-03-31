@@ -177,6 +177,7 @@ export class PropertyService {
             timeInterval
           );
         } catch(error) {
+          properties[i].values = [];
           Log.error(error);
         }
       }
