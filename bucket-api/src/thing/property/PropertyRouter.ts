@@ -438,8 +438,8 @@ export class PropertyRouter {
               "Error: File in field " +
               file.fieldname +
               " must have mime type " +
-              file.mimetype +
-              "."
+              dimension.type +
+              ". File received with MIME type " + file.mimetype
             )
           );
         }
