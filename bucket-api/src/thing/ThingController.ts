@@ -6,6 +6,7 @@ import { ThingService } from "./ThingService";
 import { DCDError } from "@datacentricdesign/types";
 import { DCDRequest } from "../config";
 import { DPiService } from "./dpi/DPiService";
+import { Log } from "../Logger";
 
 export class ThingController {
   private static instance: ThingController;
@@ -212,7 +213,7 @@ export class ThingController {
         timeInterval
       );
       console.log("\n\n\n\n\n")
-      console.log(JSON.stringify(result))
+      console.log(Log.safeStringify(result))
       console.log("\n\n\n\n\n")
       res.status(200).send(result);
     } catch (error) {
