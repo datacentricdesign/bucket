@@ -1,80 +1,46 @@
-<div class="wrapper">
-    <div class="sidebar" data-color="white" data-active-color="danger">
-        <div class="sidebar-wrapper">
-            <div class="logo">
-                <a href="./" class="simple-text logo-mini">
-                <div class="logo-image-small">
-                    <img src="./assets/img/bucket-logo.svg">
-                </div>
-                </a>
-                <a href="./" class="simple-text logo-normal">
-                Bucket
-                </a>
+<div class="row">
+    <div class="col-lg-9 col-md-9 col-sm-12">
+        <img src="assets/img/bucket-logo.svg" style="max-width: 150px;">
+        <h1>
+            Collect data for your design<br>
+            with Bucket
+        </h1>
+        <p>
+            Bucket is a cloud application which help you collect data for your Data-Centric Design process.
+        </p>
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-12">
+        <div class="card">
+            <div class="card-header ">
+                <h5 class="card-title">Access your Bucket</h5>
             </div>
-            <ul class="nav">
-                <li *ngFor="let menuItem of menuItems" routerLinkActive="active" class="{{menuItem.class}}">
-                <a [routerLink]="[menuItem.path]">
-                    <i class="nc-icon {{menuItem.icon}} {{menuItem.type}}"></i>
-                    <p>{{menuItem.title}}</p>
-                </a>
-                </li>
-            </ul>
+            <div class="card-body">
+                <div style="padding: 50px 0px" *ngIf="userProfile === undefined; else elseBlock">
+                    <button (click)="loginCode()" class="btn btn-info">Sign In / Sign Up</button>
+                </div>
+
+                <ng-template #elseBlock>
+                    <p>Welcome back {{userProfile.name}}, have a look at <a href="things">your bucket of things</a>!</p>
+                    <button (click)="goToMyBucket()" class="btn btn-success">
+                        My Bucket
+                    </button>
+                    <button (click)="logout()" class="btn btn-info">
+                        Sign out
+                    </button>
+                </ng-template>
+            </div>
+            <div class="card-footer">
+                <hr>
+                <div class="stats">
+                    <a href="./terms">Terms</a> - <a href="./privacy">Privacy</a>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="main-panel">
-        <div class="content" style="min-height:calc(100vh - 165px);">
-            <div class="row">
-                <div class="col-lg-9 col-md-9 col-sm-12">
-                    <img src="assets/img/bucket-logo.svg" style="max-width: 150px;">
-                    <h1>
-                        Collect data for your design<br>
-                        with Bucket
-                    </h1>
-                    <p>
-                        Bucket is a cloud application which help you collect data for your Data-Centric Design process.
-                    </p>
-                </div>
-                <div class="col-lg-3 col-md-3 col-sm-12">
-                    <div class="card">
-                        <div class="card-header ">
-                            <h5 class="card-title">Access your Bucket</h5>
-                        </div>
-                        <div class="card-body">
-                            <div style="padding: 50px 0px" *ngIf="userProfile === undefined; else elseBlock">
-                                <button (click)="loginCode()"  class="btn btn-info">Sign In / Sign Up</button>
-                            </div>
-                
-                            <ng-template #elseBlock>
-                                <p>Welcome back {{userProfile.name}}, have a look at <a href="things">your bucket of things</a>!</p>
-                                <button (click)="goToMyBucket()"  class="btn btn-success">
-                                    My Bucket
-                                </button>
-                                <button (click)="logout()"  class="btn btn-info">
-                                    Sign out
-                                </button>
-                            </ng-template>
-                        </div>
-                        <div class="card-footer">
-                            <hr>
-                            <div class="stats">
-                                <a href="./terms">Terms</a> - <a href="./privacy">Privacy</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
 
-            <div>
-                <a href="https://datadonation.ide.tudelft.nl" target="_blank">
-                    <img src="https://datadonation.ide.tudelft.nl/static/images/DDDLogo.svg" style="width:200px" />
-                </a>
-            </div>
-            
-            <div class="content">
-                <router-outlet></router-outlet>
-            </div>
-
-        </div>
-        <app-footer-cmp></app-footer-cmp>
-    </div>
+<div>
+    <a href="https://datadonation.ide.tudelft.nl" target="_blank">
+        <img src="https://datadonation.ide.tudelft.nl/static/images/DDDLogo.svg" style="width:200px" />
+    </a>
 </div>

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -9,9 +10,9 @@ import { ActivatedRoute } from '@angular/router';
 
 export class PrivacyComponent implements OnInit {
 
-    constructor(private route: ActivatedRoute) { }
+    constructor(private route: ActivatedRoute, private titleService: Title) { }
 
     ngOnInit() {
-        
+        this.titleService.setTitle("Privacy - Bucket");
     }
 }

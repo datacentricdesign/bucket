@@ -7,6 +7,7 @@ import { HowToComponent } from './doc/how-to/how-to.component';
 import { TermsComponent } from './doc/terms/terms.component';
 import { PrivacyComponent } from './doc/privacy/privacy.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
+import { AppComponent } from './app.component';
 
 export const AppRoutes: Routes = [
   // {
@@ -23,8 +24,11 @@ export const AppRoutes: Routes = [
   },
   {
     path: '',
-    component: LandingPageComponent,
     children: [
+      {
+        path: '',
+        component: LandingPageComponent
+      },
       {
         path: 'get-started',
         component: GetStartedComponent
