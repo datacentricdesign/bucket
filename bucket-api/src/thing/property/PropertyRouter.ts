@@ -393,7 +393,7 @@ export class PropertyRouter {
 
     if (file.fieldname === "csv") {
       Log.debug(extensionName);
-      if (extensionName === ".csv" && file.mimetype === "text/csv") {
+      if (extensionName === ".csv" && ['text/comma-separated-values', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.ms-excel', 'application/vnd.msexcel'].includes("text/csv")) {
         return cb(null, true);
       } else {
         return cb(
