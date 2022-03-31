@@ -61,6 +61,11 @@ export class PropertyTypeController {
   ): Promise<void> {
     const { id, name, description, dimensions } = req.body;
     const propertyType = new PropertyType();
+    // PropertyType IDs end up as measurement in Influx, they should not start with a digit
+    const regexp = new RegExp('^[1-9]*$');
+    if (typeof(id) !== 'string' || !regexp.test(id)) {
+      return next(new DCDError(400, "Property Type IDs cannot start with a number."))
+    }
     propertyType.id = id;
     propertyType.name = name;
     propertyType.description = description;
