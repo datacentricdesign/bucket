@@ -211,7 +211,7 @@ export class ThingController {
         from,
         timeInterval
       );
-      console.log(result)
+      console.log(JSON.stringify(result))
       res.status(200).send(result);
     } catch (error) {
       next(error);
