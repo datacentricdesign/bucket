@@ -168,13 +168,17 @@ export class PropertyService {
     for (let i = 0; i < properties.length; i++) {
       properties[i].sharedWith = resourcesOrigin[properties[i].id];
       if (from !== undefined && timeInterval !== undefined) {
-        properties[i].values = await this.countDataPoints(
-          properties[i].thing.id,
-          properties[i].id,
-          properties[i].type.id,
-          from,
-          timeInterval
-        );
+        try {
+          properties[i].values = await this.countDataPoints(
+            properties[i].thing.id,
+            properties[i].id,
+            properties[i].type.id,
+            from,
+            timeInterval
+          );
+        } catch(error) {
+          Log.error(error);
+        }
       }
     }
 
