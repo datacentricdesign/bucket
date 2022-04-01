@@ -6,6 +6,7 @@
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 [![MS Teams](https://img.shields.io/badge/Microsoft_Teams-6264A7?style=for-the-badge&logo=microsoft-teams&logoColor=white)](https://teams.microsoft.com/l/team/19%3a8e9bf40774c04e958683f95bcd96db78%40thread.tacv2/conversations?groupId=701b1040-05ca-4d33-8be5-488999981fe8&tenantId=096e524d-6929-4030-8cd3-8ab42de0887b)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/datacentricdesign/bucket)
 
 **[Bucket](https://dwd.tudelft.nl/bucket)** is a cloud application that supports design researchers and practitioners to collect and explore behavioural data with active participation from all stakeholders.
 
