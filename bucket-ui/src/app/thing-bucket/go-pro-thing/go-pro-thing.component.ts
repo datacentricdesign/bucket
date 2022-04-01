@@ -99,26 +99,24 @@ export class GoProThingComponent implements OnInit {
 
   async uploadData(telemetry) {
     const elem: HTMLElement = document.getElementById('upload-telemetry-property');
-    const promises = [];
-    for (const key in telemetry) {
-      if (telemetry.hasOwnProperty(key)) {
-        if (this.map.hasOwnProperty(key)) {
-          elem.innerHTML = 'Uploading property: ' + this.map[key].name + ' (' + this.map[key].typeId + ')...';
-          const prop = await this.thingService.findOrCreatePropertyByName(this.thingId, this.map[key].name, this.map[key].typeId);
-          promises.push(this.parse(key, prop, telemetry[key]['samples']));
-        } else {
-          console.warn('unknown key: ' + key)
+    try {
+      for (const key in telemetry) {
+        if (telemetry.hasOwnProperty(key)) {
+          if (this.map.hasOwnProperty(key)) {
+            elem.innerHTML = 'Uploading property: ' + this.map[key].name + ' (' + this.map[key].typeId + ')...';
+            const prop = await this.thingService.findOrCreatePropertyByName(this.thingId, this.map[key].name, this.map[key].typeId);
+            await this.parse(key, prop, telemetry[key]['samples']);
+          } else {
+            console.warn('unknown key: ' + key)
+          }
         }
       }
-    }
-
-    Promise.all(promises).then( () => {
-      elem.innerHTML += 'Done. Refresh the page to see the new properties.';
-    }).catch( (error) => {
-      elem.innerHTML += error;
-    }).finally( () => {
+      elem.innerHTML = 'Done. Refresh the page to see the new properties.';
+    } catch(error) {
+      elem.innerHTML = error;
+    } finally {
       document.getElementById('upload-telemetry-progress-bar').style.display = "none";
-    })
+    }
   }
 
   async parse(key: string, property: Property, telemetrySamples: any): Promise<void> {
@@ -139,34 +137,34 @@ export class GoProThingComponent implements OnInit {
 
       if (i % max_chunk === 0) {
         await this.thingService.updatePropertyValues(this.thingId, property).toPromise()
-        .then(async res => {
-          console.log('sent up to ' + i)
-          // Slow down this process to avoid burning the rate limit on the server
-          await delay(500);
-          elem.style.width = (i * 100.0 / telemetrySamples.length) + '%'
-        })
-        .catch(error => {
-          console.error(error)
-        })
+          .then(async res => {
+            console.log('sent up to ' + i)
+            // Slow down this process to avoid burning the rate limit on the server
+            await delay(500);
+            elem.style.width = (i * 100.0 / telemetrySamples.length) + '%'
+          })
+          .catch(error => {
+            console.error(error)
+          })
         property.values = []
       }
     }
     if (property.values.length > 0) {
       return this.thingService.updatePropertyValues(this.thingId, property).toPromise()
-      .then( () => {
-        return Promise.resolve()
-      })
-      .catch(error => {
-        return Promise.reject(error)
-      })
+        .then(() => {
+          return Promise.resolve()
+        })
+        .catch(error => {
+          return Promise.reject(error)
+        })
     } else {
       return Promise.resolve();
     }
   }
 }
 
-function delay(milliseconds){
+function delay(milliseconds) {
   return new Promise(resolve => {
-      setTimeout(resolve, milliseconds);
+    setTimeout(resolve, milliseconds);
   });
 }
