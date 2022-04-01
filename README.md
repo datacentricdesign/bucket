@@ -1,4 +1,4 @@
-#![Bucket](https://raw.githubusercontent.com/datacentricdesign/bucket/develop/bucket-ui/src/assets/img/bucket-logo.svg) Bucket. Behavioural Data in Participatory Design
+# ![Bucket](https://raw.githubusercontent.com/datacentricdesign/bucket/develop/bucket-ui/src/assets/img/bucket-logo.svg) Bucket. Behavioural Data in Participatory Design
 
 ![version](https://img.shields.io/badge/version-0.1.3-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
