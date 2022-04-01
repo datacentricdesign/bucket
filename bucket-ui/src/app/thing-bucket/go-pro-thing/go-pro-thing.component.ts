@@ -51,7 +51,6 @@ export class GoProThingComponent implements OnInit {
 
   // render the image in our view
   async processVideo(files: FileList) {
-    document.getElementById('upload-telemetry-progress-bar').style.display = "block";
     const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
     const elemProperty: HTMLElement = document.getElementById('upload-telemetry-property');
     elemProperty.innerHTML = '<p>Extracting GPMF...</p>'
@@ -115,7 +114,7 @@ export class GoProThingComponent implements OnInit {
     } catch(error) {
       elem.innerHTML = error;
     } finally {
-      document.getElementById('upload-telemetry-progress-bar').style.display = "none";
+      
     }
   }
 
