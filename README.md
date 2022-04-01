@@ -18,3 +18,9 @@ Data is strongly typed to facilitate transfer and automate processing. But you c
 Data is locked by default in its Things, only accessible by its owner. You grant and revoke access to your data at your convenience.
 
 Bucket is a cloud application that helps collect and use data for Data-Centric Design processes.
+
+## Projects
+
+<a href="https://datadonation.ide.tudelft.nl" target="_blank">
+    <img src="https://datadonation.ide.tudelft.nl/static/images/DDDLogo.svg" style="width:200px" />
+</a>
