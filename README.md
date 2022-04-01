@@ -22,5 +22,5 @@ Bucket is a cloud application that helps collect and use data for Data-Centric D
 ## Projects
 
 <a href="https://datadonation.ide.tudelft.nl" target="_blank">
-    <img src="https://datadonation.ide.tudelft.nl/static/images/DDDLogo.svg" style="width:200px" />
+    <img src="https://datadonation.ide.tudelft.nl/static/images/DDDLogo.svg" width="200" />
 </a>
