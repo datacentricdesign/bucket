@@ -25,6 +25,12 @@
               "src/assets/scss/paper-dashboard.scss",
               "node_modules/ngx-toastr/toastr.css"
             ],
+            "allowedCommonJsDependencies": [
+              "chart.js",
+              "gopro-telemetry",
+              "gpmf-extract",
+              "file-saver"
+            ],
             "scripts": []
           },
           "configurations": {

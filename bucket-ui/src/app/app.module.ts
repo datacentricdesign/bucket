@@ -20,7 +20,8 @@ import { OAuthModule } from 'angular-oauth2-oidc'
 import { BrowserModule } from '@angular/platform-browser'
 import { SharedModule } from './shared/shared.module';
 import { AppService } from './app.service';
-import { PublicDocComponent } from './public-doc/public-doc.component'
+import { PublicDocComponent } from './public-doc/public-doc.component';
+import { MarkdownPipe } from './markdown.pipe'
 
 export function init_app(appService: AppService) {
   return () => appService.load();
@@ -42,6 +43,7 @@ export function init_app(appService: AppService) {
     FixedPluginModule,
     HttpClientModule,
     FormsModule,
+    // MarkdownPipe,
     SharedModule.forRoot(),
     OAuthModule.forRoot({
       resourceServer: {
@@ -53,7 +55,8 @@ export function init_app(appService: AppService) {
   declarations: [
     AppComponent,
     ThingBucketComponent,
-    PublicDocComponent
+    PublicDocComponent,
+    // MarkdownPipe
   ],
   providers: [{
     provide: APP_INITIALIZER,

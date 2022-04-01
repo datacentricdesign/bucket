@@ -1,5 +1,5 @@
 # stage1 as builder
-FROM node:10-alpine as builder
+FROM node:fermium-alpine as builder
 ARG BASE_HREF
 ARG DEPLOY_URL
 ARG CONFIGURATION

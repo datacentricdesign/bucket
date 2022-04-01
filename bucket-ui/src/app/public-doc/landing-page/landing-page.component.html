@@ -1,13 +1,8 @@
 <div class="row">
     <div class="col-lg-9 col-md-9 col-sm-12">
-        <img src="assets/img/bucket-logo.svg" style="max-width: 150px;">
-        <h1>
-            Collect data for your design<br>
-            with Bucket
-        </h1>
-        <p>
-            Bucket is a cloud application which help you collect data for your Data-Centric Design process.
-        </p>
+
+        <p [innerHTML]="text | markdown"></p>
+
     </div>
     <div class="col-lg-3 col-md-3 col-sm-12">
         <div class="card">
@@ -36,11 +31,26 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div>
-    <a href="https://datadonation.ide.tudelft.nl" target="_blank">
-        <img src="https://datadonation.ide.tudelft.nl/static/images/DDDLogo.svg" style="width:200px" />
-    </a>
+        <div class="card">
+            <div class="card-header ">
+                <h5 class="card-title">Join the Community</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    <button (click)="goToGitHub()" class="btn btn-warning">
+                        GitHub
+                    </button>
+                    <button (click)="goToMSTeams()" class="btn btn-warning">
+                        MS Teams
+                    </button>
+                </p>
+
+
+            </div>
+            <div class="card-footer">
+
+            </div>
+        </div>
+    </div>
 </div>

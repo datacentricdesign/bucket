@@ -13,6 +13,7 @@ import { PrivacyComponent } from './privacy/privacy.component';
 import { ReferencesComponent } from './references/references.component';
 import { TermsComponent } from './terms/terms.component';
 import { TutorialsComponent } from './tutorials/tutorials.component';
+import { MarkdownPipe } from 'app/markdown.pipe';
 
 @NgModule({
   imports: [
@@ -30,7 +31,8 @@ import { TutorialsComponent } from './tutorials/tutorials.component';
     PrivacyComponent,
     ReferencesComponent,
     TermsComponent,
-    TutorialsComponent
+    TutorialsComponent,
+    MarkdownPipe
   ],
   providers: [
     

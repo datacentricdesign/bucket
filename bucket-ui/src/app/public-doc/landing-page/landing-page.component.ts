@@ -11,6 +11,8 @@ import { AppService } from 'app/app.service';
 })
 export class LandingPageComponent implements OnInit {
 
+  public text: string;
+
   loginFailed = false;
   userProfile: object;
   login: false;
@@ -21,8 +23,9 @@ export class LandingPageComponent implements OnInit {
     private appService: AppService
   ) {}
 
-  ngOnInit(): void {
-
+  async ngOnInit(): Promise<void> {
+    const response = await fetch('https://raw.githubusercontent.com/datacentricdesign/bucket/master/README.md');
+    this.text = await response.text();
     this.route.params.subscribe(p => {
       this.login = p['login'];
     });
@@ -48,6 +51,13 @@ export class LandingPageComponent implements OnInit {
 
   goToMyBucket() {
     window.location.href = './things'
+  }
+
+  goToGitHub() {
+    window.location.href = 'https://github.com/datacentricdesign/bucket'
+  }
+  goToMSTeams() {
+    window.location.href = 'https://teams.microsoft.com/l/team/19%3a8e9bf40774c04e958683f95bcd96db78%40thread.tacv2/conversations?groupId=701b1040-05ca-4d33-8be5-488999981fe8&tenantId=096e524d-6929-4030-8cd3-8ab42de0887b'
   }
 
   loadUserProfile(): void {
