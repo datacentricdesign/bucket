@@ -151,6 +151,7 @@ export class GoProThingComponent implements OnInit {
     if (property.values.length > 0) {
       return this.thingService.updatePropertyValues(this.thingId, property).toPromise()
         .then(() => {
+          elem.style.width = '100%'
           return Promise.resolve()
         })
         .catch(error => {
