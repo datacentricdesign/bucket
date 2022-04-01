@@ -51,6 +51,7 @@ export class GoProThingComponent implements OnInit {
 
   // render the image in our view
   async processVideo(files: FileList) {
+    document.getElementById('upload-telemetry-progress-bar').style.display = "block";
     const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
     const elemProperty: HTMLElement = document.getElementById('upload-telemetry-property');
     elemProperty.innerHTML = '<p>Extracting GPMF...</p>'
@@ -98,23 +99,29 @@ export class GoProThingComponent implements OnInit {
 
   async uploadData(telemetry) {
     const elem: HTMLElement = document.getElementById('upload-telemetry-property');
+    const promises = [];
     for (const key in telemetry) {
       if (telemetry.hasOwnProperty(key)) {
         if (this.map.hasOwnProperty(key)) {
           elem.innerHTML = 'Uploading property: ' + this.map[key].name + ' (' + this.map[key].typeId + ')...';
           const prop = await this.thingService.findOrCreatePropertyByName(this.thingId, this.map[key].name, this.map[key].typeId);
-          this.parse(key, prop, telemetry[key]['samples']);
+          promises.push(this.parse(key, prop, telemetry[key]['samples']));
         } else {
           console.warn('unknown key: ' + key)
         }
       }
     }
-    elem.innerHTML = 'Done.';
-    const elemProgress: HTMLElement = document.getElementById('upload-telemetry-progress');
-    elemProgress.style.width = '100%'
+
+    Promise.all(promises).then( () => {
+      elem.innerHTML += 'Done. Refresh the page to see the new properties.';
+    }).catch( (error) => {
+      elem.innerHTML += error;
+    }).finally( () => {
+      document.getElementById('upload-telemetry-progress-bar').style.display = "none";
+    })
   }
 
-  async parse(key: string, property: Property, telemetrySamples: any) {
+  async parse(key: string, property: Property, telemetrySamples: any): Promise<void> {
     property.values = [];
     const max_chunk = 500;
     const elem: HTMLElement = document.getElementById('upload-telemetry-progress');
@@ -145,9 +152,15 @@ export class GoProThingComponent implements OnInit {
       }
     }
     if (property.values.length > 0) {
-      this.thingService.updatePropertyValues(this.thingId, property).toPromise().catch(error => {
-        console.log(error)
+      return this.thingService.updatePropertyValues(this.thingId, property).toPromise()
+      .then( () => {
+        return Promise.resolve()
       })
+      .catch(error => {
+        return Promise.reject(error)
+      })
+    } else {
+      return Promise.resolve();
     }
   }
 }
