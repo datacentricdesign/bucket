@@ -7,7 +7,7 @@
     "grafanaURL": "https://dwd.tudelft.nl/grafana",
     "authCodeFlow": {
         "issuer": "https://dwd.tudelft.nl:443/",
-        "redirectUri": "https://dwd.tudelft.nl:443/bucket/things",
+        "redirectUri": "https://dwd.tudelft.nl:443/bucket",
         "clientId": "clients:bucket-ui",
         "responseType": "code",
         "scope": "openid offline profile email dcd:public dcd:things dcd:properties dcd:types dcd:consents",
