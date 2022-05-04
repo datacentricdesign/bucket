@@ -1,0 +1,193 @@
+<h1>Property Types</h1>
+
+<p>
+    Here you can see all existing data type and create new ones as needed.
+</p>
+
+<form (ngSubmit)="onSubmit()" #typeForm="ngForm">
+    <div class="card card-stats">
+        <div class="card-header">
+            <h2>Create a new Property Type</h2>
+            <p class="card-category">
+                A Property Type represents the structure of a property.
+            </p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="id">ID</label>
+                        <input type="text" class="form-control" id="id"
+                            required
+                            pattern="^[A-Z][A-Z0-9_]*$"
+                            [(ngModel)]="model.id" name="id"
+                            #id="ngModel">
+                        <div *ngIf="id.touched && id.invalid" class="alert alert-danger">
+                            <div *ngIf="id.errors.required">
+                                ID is required
+                            </div>
+                            <div *ngIf="id.errors.pattern">
+                                The property type id can only includes uppercase letters, digits and underscores. It must start with a letter.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" required [(ngModel)]="model.name" name="name"
+                            #name="ngModel">
+                        <div [hidden]="name.valid || name.pristine" class="alert alert-danger">Name is required</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Description</label>
+                        <input type="text" class="form-control" id="description" required
+                            [(ngModel)]="model.description" name="description" #description="ngModel">
+                        <div [hidden]="description.valid || description.pristine" class="alert alert-danger">
+                            Description is required</div>
+                    </div>
+
+                    <h3>Dimensions</h3>
+
+                    <div *ngIf="model.dimensions.length>0 else noDimension">
+                        <table *ngFor="let dimension of model.dimensions; let iDimension = index">
+                            <tr style="border-bottom: 1px solid #000;">
+                                <td>
+                                    ID: {{dimension.id}}<br>
+                                    Name: {{dimension.name}}<br>
+                                    Description: {{dimension.description}}<br>
+                                    Unit: {{dimension.unit}}<br>
+                                    Data Type: {{dimension.type}}<br>
+                                    Labels: {{dimension.labels}}
+                                </td>
+                                <td>
+                                    <button id="removeDimension(iDimension)" class="btn btn-danger btn-round"
+                                        (click)="removeDimension(iDimension)">
+                                        <i class="nc-icon nc-simple-remove"></i> Remove Dimension
+                                    </button>
+                                </td>
+                                <hr>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <ng-template #noDimension>
+                        <p class="card-category">
+                            There is no dimensions yet. Add at least one dimension by filling in the form on the right.
+                        </p>
+
+                        <p class="card-category">
+                            A Dimension characterises a data point, including a name, a type (primitive such as
+                            string, boolean and number or MIME such as audio/mp3) and a unit (e.g. Km/h or .mp3).
+                        </p>
+                    </ng-template>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <h3>Add a Dimension</h3>
+
+                    <form (ngSubmit)="addDimension()" #dimensionForm="ngForm">
+                        <div class="form-group">
+                            <label for="id">ID</label>
+                            <input type="text" class="form-control" id="id"
+                                required
+                                pattern="^[a-z][a-z0-9\-]*$"
+                                [(ngModel)]="modelDimension.id"
+                                name="id" #dimId="ngModel">
+                            <div *ngIf="dimId.touched && dimId.invalid" class="alert alert-danger">
+                                <div *ngIf="dimId.errors.required">
+                                    The dimension ID is required.
+                                </div>
+                                <div *ngIf="dimId.errors.pattern">
+                                    The dimension id can only includes lowercase letters, digits and dashes. It must start with a letter.
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="dimension-name">Name</label>
+                            <input type="text" class="form-control" id="dimension-name" required [(ngModel)]="modelDimension.name"
+                                name="name" #dimName="ngModel">
+                            <div [hidden]="dimName.valid || dimName.pristine" class="alert alert-danger">Name is required</div>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="dimension-description">Description</label>
+                            <input type="text" class="form-control" id="dimension-description" required
+                                [(ngModel)]="modelDimension.description" name="description" #dimDescription="ngModel">
+                            <div [hidden]="dimDescription.valid || dimDescription.pristine" class="alert alert-danger">
+                                Description is required</div>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="id">Unit</label>
+                            <input type="text" class="form-control" id="unit" [(ngModel)]="modelDimension.unit"
+                                name="unit" #unit="ngModel">
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="type">Data Type</label>
+                            <select class="form-control" id="type" required [(ngModel)]="modelDimension.type" name="type">
+                                <option *ngFor="let type of dimensionTypes" [value]="type">{{type}}</option>
+                            </select>
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="id">Labels</label>
+                            <input type="text" class="form-control" id="labels" [(ngModel)]="modelDimension.labels"
+                                name="labels" #unit="ngModel">
+                        </div>
+                        <button id="addDimension" type="submit" class="btn btn-info btn-round" [disabled]="!dimensionForm.form.valid">
+                            <i class="nc-icon nc-simple-add"></i> Add Dimension
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer ">
+            <hr>
+            <button id="createPropertyType" type="submit" class="btn btn-info" [disabled]="!typeForm.form.valid||model.dimensions.length===0">
+                Create Property Type
+            </button>
+        </div>
+    </div>
+</form>
+
+<h2>Available Property Types</h2>
+
+<div *ngIf="types$ | async as type else noData" class="table-responsive">
+    <table class="table">
+        <thead class=" text-primary">
+            <th>
+                Type
+            </th>
+            <th>
+                Dimensions
+            </th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let type of types; let iType = index">
+                <td style="vertical-align: top;">
+                    <h6 class="title">{{type.name}}</h6>
+                    <p class="category">{{type.id}}</p>
+                    <p>{{type.description}}</p>
+                </td>
+                <td>
+                    <ul>
+                        <li *ngFor="let dimension of type.dimensions; let iDimension = index">
+                            <p>
+                                <span class="title">{{dimension.name}}</span> ({{dimension.id}}):
+                                {{dimension.description}}<br>
+                                unit: {{dimension.unit}}, data type: {{dimension.type}}<br>
+                                labels: {{dimension.labels.join(',')}}
+                            </p>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<ng-template #noData>Loading Property Types...</ng-template>

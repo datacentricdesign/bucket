@@ -177,25 +177,32 @@ export class ThingService {
     return this.http.get(url, { headers }).toPromise()
   }
 
-  async getPropertyTypes(): Promise<PropertyType[]> {
-    if (this.propertyTypes) {
-      return Promise.resolve(this.propertyTypes)
-    }
+  getPropertyTypes(): Observable<PropertyType[]> {
+    return new Observable<PropertyType[]>((observer) => {
+      if (this.propertyTypes) {
+        observer.next(this.propertyTypes)
+      } else {
+        const url = this.apiURL + '/types';
+        const headers = this.getHeader()
 
-    const url = this.apiURL + '/types';
+        this.http.get<PropertyType[]>(url, { headers })
+          .subscribe(
+            propertyTypes => {
+              this.propertyTypes = propertyTypes.sort((first, second) => 0 - (first.name > second.name ? -1 : 1));
+              observer.next(this.propertyTypes)
+            },
+            err => {
+              observer.error(err);
+            }
+          );
+      }
+    })
+  }
+
+  createPropertyType(type: PropertyType) {
+    const url = this.apiURL + '/types'
     const headers = this.getHeader()
-
-    await this.http
-      .get<PropertyType[]>(url, { headers })
-      .subscribe(
-        propertyTypes => {
-          this.propertyTypes = propertyTypes;
-        },
-        err => {
-          console.warn('status', err.status);
-        }
-      );
-    return Promise.resolve(this.propertyTypes)
+    return this.http.post<Thing>(url, type, { headers }).toPromise()
   }
 
   csvFileUpload(thingId: string, propertyId: string, fileToUpload: File, hasLabel: boolean): Promise<any> {
@@ -418,7 +425,7 @@ export function downloadTakeout(
           if (saver && event.body) {
             saver(event.body)
           }
-          
+
           const bar: HTMLElement = document.getElementById('nav-progress-bar')
           if (bar) {
             bar.style.display = 'none'
