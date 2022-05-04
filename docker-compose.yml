@@ -71,8 +71,6 @@ services:
     build:
       context: ./bucket-ui
       args:
-        - BASE_HREF=$BUCKET_UI_BASE_HREF
-        - DEPLOY_URL=$BUCKET_UI_DEPLOY_URL
         - CONFIGURATION=$BUCKET_UI_CONFIGURATION
     container_name: bucket-ui
     environment:

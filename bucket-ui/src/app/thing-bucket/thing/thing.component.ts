@@ -109,9 +109,9 @@ export class ThingComponent implements OnInit {
                     return throwError('Thing not found!');
                 })
             )
-            this.types$ = this.http.get<PropertyType[]>(this.apiURL + '/types', { headers }).pipe(
+            this.types$ = this.types$ = this.thingService.getPropertyTypes().pipe(
                 map((data: PropertyType[]) => {
-                    this.types = data.sort((first, second) => 0 - (first.name > second.name ? -1 : 1));
+                    this.types = data
                     return this.types;
                 }), catchError(error => {
                     return throwError('Types not found!');
@@ -253,10 +253,10 @@ export class ThingComponent implements OnInit {
         let details = `<h6 class="title">${type.name}</h6>`
         details += `<p class="category">${type.id}</p>`
         details += `<p>${type.description}</p>`
-        
-         '<p>Dimensions</p><ul>'
 
-         details += `<table class="table">
+        '<p>Dimensions</p><ul>'
+
+        details += `<table class="table">
             <thead class=" text-primary">
                 <th> Dimension</th>
                 <th> Unit </th>
@@ -264,8 +264,8 @@ export class ThingComponent implements OnInit {
                 <th> Description </th>
                 <th> Labels </th>
             </thead>`
-            
-        
+
+
         for (const dim of Object.keys(type.dimensions)) {
             details += `<tbody>
                             <tr>

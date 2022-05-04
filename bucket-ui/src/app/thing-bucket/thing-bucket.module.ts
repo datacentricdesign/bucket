@@ -21,6 +21,7 @@ import { RaspberryPiThingComponent } from './raspberry-pi-thing/raspberry-pi-thi
 import { GoProThingComponent } from './go-pro-thing/go-pro-thing.component';
 import { SAVER, getSaver } from './services/saver.provider';
 import { SpinnerButtonComponent } from './spinner-button/spinner-button.component';
+import { PropertyTypesComponent } from './property-types/property-types.component';
 
 @NgModule({
   imports: [
@@ -41,7 +42,8 @@ import { SpinnerButtonComponent } from './spinner-button/spinner-button.componen
     GoProThingComponent,
     SharedPropertiesComponent,
     SharedPropertiesStatsComponent,
-    SpinnerButtonComponent
+    SpinnerButtonComponent,
+    PropertyTypesComponent
   ],
   providers: [
     ThingService,

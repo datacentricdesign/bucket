@@ -6,7 +6,7 @@
 
 <app-shared-properties-stats [properties]="properties" (changePeriodEvent)="changePeriodHandler($event)"></app-shared-properties-stats>
 
-<div class="table-responsive">
+<div class="table-responsive" *ngIf="properties!==undefined&&properties.length>0 else noData">
     <table class="table">
         <thead class=" text-primary">
             <th>
@@ -37,3 +37,5 @@
         </tbody>
     </table>
 </div>
+
+<ng-template #noData>No shared property found.</ng-template>

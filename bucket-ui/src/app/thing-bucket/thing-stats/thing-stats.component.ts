@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import Chart from 'chart.js';
+import { Chart, PieController, ArcElement, CategoryScale, LinearScale, BarController, BarElement, Tooltip } from 'chart.js';
 import { ThingService } from 'app/thing-bucket/services/thing.service';
 
 import * as moment from 'moment'
 import { colors, Period, periods } from './chart-elements';
+
+Chart.register(PieController, ArcElement, CategoryScale, LinearScale, BarController, BarElement, Tooltip)
 
 @Component({
   selector: 'app-thing-stats',
@@ -89,8 +91,6 @@ export class ThingStatsComponent implements OnInit {
         labels: labels,
         datasets: [{
           label: 'Types',
-          pointRadius: 0,
-          pointHoverRadius: 0,
           backgroundColor: selectedColors,
           borderWidth: 0,
           data: data
@@ -98,46 +98,13 @@ export class ThingStatsComponent implements OnInit {
       },
 
       options: {
-
-        legend: {
-          display: false
-        },
-
-        pieceLabel: {
-          render: 'percentage',
-          fontColor: ['white'],
-          precision: 2
-        },
-
-        tooltips: {
-          enabled: true
-        },
-
-        scales: {
-          yAxes: [{
-
-            ticks: {
-              display: false
-            },
-            gridLines: {
-              drawBorder: false,
-              zeroLineColor: 'transparent',
-              color: 'rgba(255,255,255,0.05)'
-            }
-
-          }],
-
-          xAxes: [{
-            barPercentage: 1.6,
-            gridLines: {
-              drawBorder: false,
-              color: 'rgba(255,255,255,0.1)',
-              zeroLineColor: 'transparent'
-            },
-            ticks: {
-              display: false,
-            }
-          }]
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: true
+          },
         },
       }
     });
@@ -192,31 +159,31 @@ export class ThingStatsComponent implements OnInit {
       datasets: datasets
     };
 
-    const chartOptions = {
-      legend: {
-        display: false,
-        position: 'top'
-      },
-      scales: {
-        xAxes: [{
-          stacked: true,
-        }],
-        yAxes: [{
-          stacked: true
-        }]
-      }
-    };
-
-    const dpCanvas = document.getElementById('dpChart')
+    const dpCanvas = document.getElementById('dpChart') as HTMLCanvasElement;
     dpCanvas.innerHTML = ''
     if (this.dpChart !== undefined) {
       this.dpChart.destroy()
     }
     this.dpChart = new Chart(dpCanvas, {
       type: 'bar',
-      hover: false,
       data: dpCount,
-      options: chartOptions
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+            position: 'top'
+          }
+        },
+
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            stacked: true
+          }
+        }
+      }
     });
 
     document.getElementById('dpChartLegend').innerHTML = legend
@@ -260,43 +227,27 @@ export class ThingStatsComponent implements OnInit {
         ]
       },
       options: {
-        legend: {
-          display: false
-        },
-
-        tooltips: {
-          enabled: false
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false
+          }
         },
 
         scales: {
-          yAxes: [{
-
+          y: {
             ticks: {
-              fontColor: '#9f9f9f',
-              beginAtZero: false,
               maxTicksLimit: 5
-            },
-            gridLines: {
-              drawBorder: false,
-              zeroLineColor: '#ccc',
-              color: 'rgba(255,255,255,0.05)'
             }
+          },
 
-          }],
-
-          xAxes: [{
-            barPercentage: 1.6,
-            gridLines: {
-              drawBorder: false,
-              color: 'rgba(255,255,255,0.1)',
-              zeroLineColor: 'transparent',
-              display: false,
-            },
+          x: {
             ticks: {
-              padding: 20,
-              fontColor: '#9f9f9f'
+              padding: 20
             }
-          }]
+          }
         },
       }
     });

@@ -1,4 +1,4 @@
-<div id="stats-panel">
+<div id="stats-panel" *ngIf="getProperties()!==undefined&&getProperties().length>0">
     <div class="row">
         <div class="col-md-12">
             <div class="card card-chart">
@@ -14,10 +14,10 @@
                 </div>
                 <div class="card-body" style="vertical-align: middle;margin-bottom:0px;padding-bottom:0px">
                     <div style="width:20%;display: inline-block;padding-bottom: 40px;">
-                        <canvas id="chartTypes" width="100%"></canvas>
+                        <canvas id="types-pie-chart" width="100%"></canvas>
                     </div>
                     <div style="width:80%;display: inline-block;">
-                        <canvas id="dpChart"></canvas>
+                        <canvas id="datapoint-bar-chart"></canvas>
                     </div>
                 </div>
                 <div class="card-footer" style="margin-top:0px;padding-top:0px">
@@ -27,5 +27,4 @@
             </div>
         </div>
     </div>
-  
 </div>

@@ -1,10 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import Chart from 'chart.js';
+import { ArcElement, BarController, BarElement, CategoryScale, Chart, LinearScale, PieController, Tooltip } from 'chart.js';
 import { ThingService } from 'app/thing-bucket/services/thing.service';
 
 import * as moment from 'moment'
 import { Property } from '@datacentricdesign/types';
 import { colors, Period, periods } from '../thing-stats/chart-elements';
+
+
+Chart.register(PieController, ArcElement, CategoryScale, LinearScale, BarController, BarElement, Tooltip)
 
 @Component({
   selector: 'app-shared-properties-stats',
@@ -16,7 +19,9 @@ export class SharedPropertiesStatsComponent implements OnInit {
 
   @Input() set properties(value: Property[]) {
     this._properties = value;
-    this.buildCharts(this._properties)
+    if (this._properties.length > 0) {
+      this.buildCharts(this._properties)
+    }
   }
 
   @Output() changePeriodEvent = new EventEmitter<Period>();
@@ -35,6 +40,10 @@ export class SharedPropertiesStatsComponent implements OnInit {
     this.periods = periods
     this.selectedPeriod = this.periods.get('1-past-day')
     this.changePeriodEvent.emit(this.selectedPeriod)
+  }
+
+  public getProperties() {
+    return this._properties;
   }
 
   async ngOnInit(): Promise<void> {
@@ -107,7 +116,7 @@ export class SharedPropertiesStatsComponent implements OnInit {
   }
 
   buildPieChart(types) {
-    this.canvasPie = document.getElementById('chartTypes');
+    this.canvasPie = document.getElementById('types-pie-chart');
     const data = []
     const labels = []
     const selectedColors = []
@@ -127,8 +136,6 @@ export class SharedPropertiesStatsComponent implements OnInit {
         labels: labels,
         datasets: [{
           label: 'Types',
-          pointRadius: 0,
-          pointHoverRadius: 0,
           backgroundColor: selectedColors,
           borderWidth: 0,
           data: data
@@ -136,46 +143,13 @@ export class SharedPropertiesStatsComponent implements OnInit {
       },
 
       options: {
-
-        legend: {
-          display: false
-        },
-
-        pieceLabel: {
-          render: 'percentage',
-          fontColor: ['white'],
-          precision: 2
-        },
-
-        tooltips: {
-          enabled: true
-        },
-
-        scales: {
-          yAxes: [{
-
-            ticks: {
-              display: false
-            },
-            gridLines: {
-              drawBorder: false,
-              zeroLineColor: 'transparent',
-              color: 'rgba(255,255,255,0.05)'
-            }
-
-          }],
-
-          xAxes: [{
-            barPercentage: 1.6,
-            gridLines: {
-              drawBorder: false,
-              color: 'rgba(255,255,255,0.1)',
-              zeroLineColor: 'transparent'
-            },
-            ticks: {
-              display: false,
-            }
-          }]
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: true
+          }
         },
       }
     });
@@ -202,31 +176,30 @@ export class SharedPropertiesStatsComponent implements OnInit {
       datasets: datasets
     };
 
-    const chartOptions = {
-      aspectRatio: 4,
-      legend: {
-        display: false
-      },
-      scales: {
-        xAxes: [{
-          stacked: true,
-        }],
-        yAxes: [{
-          stacked: true
-        }]
-      }
-    };
-
-    const dpCanvas = document.getElementById('dpChart')
+    const dpCanvas = document.getElementById('datapoint-bar-chart') as HTMLCanvasElement;
     dpCanvas.innerHTML = ''
     if (this.dpChart !== undefined) {
       this.dpChart.destroy()
     }
     this.dpChart = new Chart(dpCanvas, {
       type: 'bar',
-      hover: false,
       data: dpCount,
-      options: chartOptions
+      options: {
+        aspectRatio: 4,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            stacked: true
+          }
+        }
+      }
     });
   }
 

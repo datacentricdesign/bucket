@@ -16,8 +16,9 @@ export interface RouteInfo {
 
 const dashboardRoute = { path: '/things', title: 'Dashboard', icon: 'nc-layout-11', class: '' }
 const sharedPropertiesRoute = { path: '/things/shared-properties', title: 'Shared Properties', icon: 'nc-share-66', class: '' }
+const propertyTypeRoute = { path: '/things/types', title: 'Property Types', icon: 'nc-share-66', class: '' }
 
-export const ROUTES: RouteInfo[] = [dashboardRoute, sharedPropertiesRoute];
+export const ROUTES: RouteInfo[] = [dashboardRoute, sharedPropertiesRoute, propertyTypeRoute];
 
 @Component({
     moduleId: module.id,

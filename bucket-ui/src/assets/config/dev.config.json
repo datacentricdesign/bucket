@@ -1,0 +1,20 @@
+{
+  "name": "Bucket",
+  "version": "0.1.5",
+  "environment": "development",
+  "basehref": "bucket",
+  "apiURL": "https://dwd.tudelft.nl/bucket/api",
+  "authCodeFlow": {
+    "issuer": "https://dwd.tudelft.nl:443/",
+    "redirectUri": "http://localhost:4200/bucket",
+    "postLogoutRedirectUri": "http://localhost:4200/bucket",
+    "clientId": "clients:bucket-ui",
+    "responseType": "code",
+    "scope": "openid offline profile email dcd:public dcd:things dcd:properties dcd:types dcd:consents",
+    "useSilentRefresh": false,
+    "showDebugInformation": true,
+    "sessionChecksEnabled": false,
+    "timeoutFactor": 0.01,
+    "clearHashAfterLogin": false
+  }
+}

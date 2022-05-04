@@ -1,7 +1,5 @@
 # stage1 as builder
-FROM node:fermium-alpine as builder
-ARG BASE_HREF
-ARG DEPLOY_URL
+FROM node:lts-alpine as builder
 ARG CONFIGURATION
 
 # copy the package.json to install dependencies
@@ -15,7 +13,7 @@ WORKDIR /bucket-ui
 COPY . .
 
 # Build the project and copy the files
-RUN npm run build -- --base-href="${BASE_HREF}" --deploy-url="${DEPLOY_URL}" --configuration="${CONFIGURATION}"
+RUN npm run build -- --configuration ${CONFIGURATION}
 
 FROM nginx:1.19
 

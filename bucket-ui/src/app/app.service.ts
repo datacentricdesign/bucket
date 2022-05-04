@@ -9,8 +9,6 @@ export class AppService {
 
   constructor(private http: HttpClient) { }
 
-
-  configUrl = `assets/config.json`;
   private configSettings: any = null;
 
   get settings() {
@@ -19,7 +17,11 @@ export class AppService {
 
   public load(): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.http.get(this.configUrl).subscribe((response: any) => {
+      let configUrl = `assets/config/dev.config.json`
+      if (environment.production) {
+        configUrl =  `assets/config/prod.config.json`
+      }
+      this.http.get(configUrl).subscribe((response: any) => {
         this.configSettings = response;
         resolve(true);
       });

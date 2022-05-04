@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import Chart from 'chart.js';
 import { ThingService } from '../services/thing.service';
 
 @Component({

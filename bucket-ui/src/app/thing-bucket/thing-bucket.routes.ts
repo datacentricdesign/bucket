@@ -6,6 +6,7 @@ import { AuthGuard } from '../shared/auth/auth.guard';
 import { ThingBucketComponent } from './thing-bucket.component';
 import { PropertyComponent } from './property/property.component';
 import { SharedPropertiesComponent } from './shared-properties/shared-properties.component';
+import { PropertyTypesComponent } from './property-types/property-types.component';
 
 export const ThingBucketRoutes: Routes = [
     {
@@ -20,6 +21,10 @@ export const ThingBucketRoutes: Routes = [
           {
             path: 'shared-properties',
             component: SharedPropertiesComponent
+          },
+          {
+            path: 'types',
+            component: PropertyTypesComponent
           },
           {
             path: ':id',
