@@ -290,29 +290,52 @@ export class PropertyController {
     if (extension === null) {
       return next(new DCDError(404, "Dimension not found: " + dimension));
     }
-    const path =
-      config.hostDataFolder +
-      "/files/" +
-      thingId +
-      "-" +
-      propertyId +
-      "-" +
-      timestamp +
-      "#" +
-      dimension +
-      extension;
-    res.download(path, function (error) {
-      if (error) {
-        Log.error(
-          "Failed to serve property media " + path + " Error: " + error
-        );
-        return next(
-          new DCDError(404, "Media not found for this timestamp: " + timestamp)
-        );
-      } else {
-        Log.info("Served property media " + path);
-      }
-    });
+    const path = `${config.hostDataFolder}/files/${thingId}-${propertyId}-${timestamp}#${dimension}${extension}`;
+
+    if (req.headers.range) {
+      this.servePropertyMediaValueInChunks(req.headers.range, path, res)
+    } else {
+      res.download(path, function (error) {
+        if (error) {
+          Log.error(
+            "Failed to serve property media " + path + " Error: " + error
+          );
+          return next(
+            new DCDError(404, "Media not found for this timestamp: " + timestamp)
+          );
+        } else {
+          Log.info("Served property media " + path);
+        }
+      });
+    }
+  }
+
+  public servePropertyMediaValueInChunks(range: string, videoPath: string, res: Response) {
+    // get video stats
+    const videoSize = fs.statSync(videoPath).size;
+
+    // Parse Range, Example: "bytes=32324-"
+    const CHUNK_SIZE = 10 ** 6; // 1MB
+    const start = Number(range.replace(/\D/g, ""));
+    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+
+    // Create headers
+    const contentLength = end - start + 1;
+    const headers = {
+      "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": contentLength,
+      "Content-Type": "video/mp4",
+    };
+
+    // HTTP Status 206 for Partial Content
+    res.writeHead(206, headers);
+
+    // create video read stream for this particular chunk
+    const videoStream = fs.createReadStream(videoPath, { start, end });
+
+    // Stream the video chunk to the client
+    videoStream.pipe(res);
   }
 
   public async updatePropertyValues(
