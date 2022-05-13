@@ -6,13 +6,14 @@ import { OAuthService } from 'angular-oauth2-oidc';
 
 let httpClientSpy: { get: jasmine.Spy };
 let thingService: ThingService
+let oauthService: OAuthService;
 
 describe('ThingService', () => {
 
     beforeEach(() => {
         httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
-        oauthService = new OAuthService()
-        thingService = new ThingService(httpClientSpy, appService)
+        // oauthService = new OAuthService()
+        // thingService = new ThingService(oauthService, httpClientSpy, appService)
         // TestBed.configureTestingModule({
         //     imports: [HttpClient],
         //     providers: [
