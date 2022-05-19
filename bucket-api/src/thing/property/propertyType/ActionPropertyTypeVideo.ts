@@ -7,6 +7,7 @@ import { ActionPropertyType } from "./ActionPropertyType";
 import config from "../../../config";
 import { Thing } from "../../Thing";
 import { Log } from "../../../Logger";
+import * as fs from 'fs'
 
 export class ActionPropertyTypeVideo implements ActionPropertyType {
 
@@ -83,7 +84,7 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
             console.log(percent);
         }
         const cancellationToken = { cancelled: false };
-        return gpmfExtract(path, { browserMode: false, progress, cancellationToken });
+        return gpmfExtract(fs.readFileSync(path), { browserMode: false, progress, cancellationToken });
     }
 
     async extractTelemetry(gpmf) {
