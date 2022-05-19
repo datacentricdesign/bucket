@@ -28,8 +28,6 @@
             ],
             "allowedCommonJsDependencies": [
               "chart.js",
-              "gopro-telemetry",
-              "gpmf-extract",
               "file-saver"
             ],
             "scripts": []
