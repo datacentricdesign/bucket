@@ -85,7 +85,7 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
             Log.debug("File Renamed!");
             // create new datapoint with timestamp and duration
             const copiedProperty = Object.assign({}, property)
-            copiedProperty.values = [[newTimestamp, duration]]
+            copiedProperty.values = [[newTimestamp, duration, `${property.thing.id}-${property.id}-${newTimestamp}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`]]
             await this.propertyService.updatePropertyValues(copiedProperty)
             // delete old datapoint
             await this.propertyService.deleteDataPoints(property.thing.id, property.id, [oldTimestamp]);
