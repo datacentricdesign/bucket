@@ -16,6 +16,8 @@ import { Log } from "../../Logger";
 import config from "../../config";
 import * as fs from "fs";
 
+import { ActionPropertyTypeVideo } from "./propertyType/ActionPropertyTypeVideo";
+
 export class PropertyService {
   private static instance: PropertyService;
 
@@ -287,7 +289,17 @@ export class PropertyService {
     if (property.type === undefined) {
       property.type = await this.getPropertyType(property.id);
     }
+    this.onPropertyValuesUpdate(property);
     return this.influxDbService.valuesToInfluxDB(property);
+  }
+
+  async onPropertyValuesUpdate(property: Property) {
+    switch (property.type.id) {
+      case 'VIDEO':
+        const ptVideo = new ActionPropertyTypeVideo(this)
+        ptVideo.onValuesUpdated(property)
+      default: return;
+    }
   }
 
   async getPropertyType(propertyId: string): Promise<PropertyType> {

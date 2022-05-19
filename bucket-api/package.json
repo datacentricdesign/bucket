@@ -43,6 +43,8 @@
     "express-ws": "^5.0.2",
     "fluent-ffmpeg": "^2.1.2",
     "fluent-ffmpeg-multistream": "^1.0.0",
+    "gopro-telemetry": "^1.1.37",
+    "gpmf-extract": "^0.2.5",
     "helmet": "3.23.3",
     "influx": "5.6.2",
     "jsonwebtoken": "8.5.1",
