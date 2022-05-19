@@ -48,23 +48,48 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
     async onValuesUpdated(property: Property): Promise<void> {
         try {
             for (let i = 0; i < property.values.length; i++) {
-                const path = `${config.hostDataFolder}/files/${property.thing.id}-${property.id}-${property.values[i][0]}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`;
+                const timestamp = property.values[i][0] as number;
+                const path = `${config.hostDataFolder}/files/${property.thing.id}-${property.id}-${timestamp}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`;
                 Log.debug(path);
                 const gpmf = await this.extractGPMF(path)
                 const telemetry = await this.extractTelemetry(gpmf);
                 Log.debug('extracted telemetry' + telemetry['1']['streams'].length);
+                let actualTimestamp = 0;
+                let actualDuration = 0;
                 for (const key in telemetry['1']['streams']) {
                     if (telemetry['1']['streams'].hasOwnProperty(key)) {
                         const prop = await this.findOrCreateProperty(property.thing, key)
-                        await this.pushTelemetryToProperty(key, prop, telemetry['1']['streams'][key]['samples']);
+                        const samples = telemetry['1']['streams'][key]['samples']
+                        await this.pushTelemetryToProperty(key, prop, samples);
+                        if (actualTimestamp === 0) {
+                            actualTimestamp = samples[0].date.getTime()
+                            actualDuration = Math.floor(samples[samples.length - 1].cts)
+                        }
                     }
                 }
-
+                if (timestamp !== actualTimestamp) {
+                    this.updateVideoTimestamp(property, timestamp, actualTimestamp, actualDuration)
+                }
             }
         } catch (error) {
             return Promise.reject(error)
         }
         return Promise.resolve()
+    }
+
+    async updateVideoTimestamp(property: Property, oldTimestamp: number, newTimestamp: number, duration: number) {
+        const oldPath = `${config.hostDataFolder}/files/${property.thing.id}-${property.id}-${oldTimestamp}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`;
+        const newPath = `${config.hostDataFolder}/files/${property.thing.id}-${property.id}-${newTimestamp}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`;
+        // rename file with new timestamp
+        fs.rename(oldPath, newPath, async () => {
+            Log.debug("File Renamed!");
+            // create new datapoint with timestamp and duration
+            const copiedProperty = Object.assign({}, property)
+            copiedProperty.values = [[newTimestamp, duration]]
+            await this.propertyService.updatePropertyValues(copiedProperty)
+            // delete old datapoint
+            await this.propertyService.deleteDataPoints(property.thing.id, property.id, [oldTimestamp]);
+          });
     }
 
     async findOrCreateProperty(thing: Thing, key: string): Promise<Property> {
