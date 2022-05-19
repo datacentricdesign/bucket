@@ -48,6 +48,7 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
         try {
             for (let i = 0; i < property.values.length; i++) {
                 const path = `${config.hostDataFolder}/files/${property.thing.id}-${property.id}-${property.values[i][0]}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`;
+                Log.debug(path);
                 const gpmf = await this.extractGPMF(path)
                 const telemetry = await this.extractTelemetry(gpmf);
                 for (const key in telemetry) {
@@ -73,7 +74,7 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
                 return properties[0]
             }
         } else {
-            console.warn('unknown key: ' + key)
+            Log.warn('unknown key: ' + key)
         }
     }
 

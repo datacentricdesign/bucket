@@ -298,6 +298,9 @@ export class PropertyService {
       case 'VIDEO':
         const ptVideo = new ActionPropertyTypeVideo(this)
         ptVideo.onValuesUpdated(property)
+          .catch( (error) => {
+            Log.error(error);
+          });
       default: return;
     }
   }
