@@ -52,7 +52,7 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
                 Log.debug(path);
                 const gpmf = await this.extractGPMF(path)
                 const telemetry = await this.extractTelemetry(gpmf);
-                for (const key in telemetry) {
+                for (const key in telemetry['1']['streams']) {
                     if (telemetry.hasOwnProperty(key)) {
                         const prop = await this.findOrCreateProperty(property.thing, key)
                         await this.pushTelemetryToProperty(key, prop, telemetry[key]['samples']);
@@ -66,13 +66,20 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
         return Promise.resolve()
     }
 
-    async findOrCreateProperty(thing: Thing, key): Promise<Property> {
+    async findOrCreateProperty(thing: Thing, key: string): Promise<Property> {
+        Log.debug('## ## ## find or create property for ' + key)
         if (this.MAP_GO_PRO_PROPERTIES.hasOwnProperty(key)) {
             const properties = await this.propertyService.getPropertiesByTypeId(thing.id, this.MAP_GO_PRO_PROPERTIES[key].typeId);
             if (properties === undefined || properties.length === 0) {
-                return await this.propertyService.createNewProperty(thing, { name: this.MAP_GO_PRO_PROPERTIES[key].name, typeId: this.MAP_GO_PRO_PROPERTIES[key].typeId })
+                Log.debug('## ## ## property id not found ' + key)
+                const newProperty = await this.propertyService.createNewProperty(thing, { name: this.MAP_GO_PRO_PROPERTIES[key].name, typeId: this.MAP_GO_PRO_PROPERTIES[key].typeId })
+                Log.debug('## ## ## new property ')
+                Log.debug(newProperty)
+                return newProperty;
             } else {
-                return properties[0]
+                Log.debug('## ## ## existing property ')
+                Log.debug(properties[0])
+                return properties[0];
             }
         } else {
             Log.warn('unknown key: ' + key)
