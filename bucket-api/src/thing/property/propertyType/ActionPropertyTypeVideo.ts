@@ -51,12 +51,12 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
                 const path = `${config.hostDataFolder}/files/${property.thing.id}-${property.id}-${property.values[i][0]}#${property.type.dimensions[1].id}${property.type.dimensions[1].unit}`;
                 Log.debug(path);
                 const gpmf = await this.extractGPMF(path)
-                const telemetry = await this.extractTelemetry(gpmf)['1']['streams'];
-                Log.debug('extracted telemetry' + telemetry.length);
-                for (const key in telemetry) {
-                    if (telemetry.hasOwnProperty(key)) {
+                const telemetry = await this.extractTelemetry(gpmf);
+                Log.debug('extracted telemetry' + telemetry['1']['streams'].length);
+                for (const key in telemetry['1']['streams']) {
+                    if (telemetry['1']['streams'].hasOwnProperty(key)) {
                         const prop = await this.findOrCreateProperty(property.thing, key)
-                        await this.pushTelemetryToProperty(key, prop, telemetry[key]['samples']);
+                        await this.pushTelemetryToProperty(key, prop, telemetry['1']['streams'][key]['samples']);
                     }
                 }
 
