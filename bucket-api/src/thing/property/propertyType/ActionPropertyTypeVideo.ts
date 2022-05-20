@@ -93,18 +93,12 @@ export class ActionPropertyTypeVideo implements ActionPropertyType {
     }
 
     async findOrCreateProperty(thing: Thing, key: string): Promise<Property> {
-        Log.debug('## ## ## find or create property for ' + key)
         if (this.MAP_GO_PRO_PROPERTIES.hasOwnProperty(key)) {
             const properties = await this.propertyService.getPropertiesByTypeId(thing.id, this.MAP_GO_PRO_PROPERTIES[key].typeId);
             if (properties === undefined || properties.length === 0) {
-                Log.debug('## ## ## property id not found ' + key)
                 const newProperty = await this.propertyService.createNewProperty(thing, { name: this.MAP_GO_PRO_PROPERTIES[key].name, typeId: this.MAP_GO_PRO_PROPERTIES[key].typeId })
-                Log.debug('## ## ## new property ')
-                Log.debug(newProperty)
                 return newProperty;
             } else {
-                Log.debug('## ## ## existing property ')
-                Log.debug(properties[0])
                 return properties[0];
             }
         } else {
