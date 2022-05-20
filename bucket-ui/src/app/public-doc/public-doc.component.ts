@@ -13,8 +13,10 @@ const tutorialsRoute = { path: '/tutorials', title: 'Tutorials', icon: 'nc-space
 const howToRoute = { path: '/how-to', title: 'How-To Guides', icon: 'nc-bullet-list-67', class: '' }
 const technicalRefRoute = { path: '/references', title: 'Technical References', icon: 'nc-book-bookmark', class: '' }
 const explanationRoute = { path: '/explanations', title: 'Background Info', icon: 'nc-single-copy-04', class: '' }
+const privacyRoute = { path: '/privacy', title: 'Privacy Policy', icon: 'nc-paper', class: '' }
+const termsRoute = { path: '/terms', title: 'Terms and Conditions', icon: 'nc-paper', class: '' }
 
-export const ROUTES: RouteInfo[] = [getStartedRoute, tutorialsRoute, howToRoute, technicalRefRoute, explanationRoute];
+export const ROUTES: RouteInfo[] = [getStartedRoute, tutorialsRoute, howToRoute, technicalRefRoute, explanationRoute, privacyRoute, termsRoute];
 
 @Component({
   selector: 'app-public-doc',
