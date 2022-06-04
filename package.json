@@ -1,5 +1,5 @@
 {
-  "name": "@datacentricdesign/bucket-api",
+  "name": "@datacentricdesign/bucket",
   "version": "0.1.5",
   "description": "A bucket of data, in the cloud.",
   "main": "index.js",

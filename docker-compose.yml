@@ -3,7 +3,7 @@ version: '3'
 services:
   bucket-api:
     build:
-      context: ./bucket-api
+      context: .
       args:
         - START_COMMAND=$BUCKET_API_START_COMMAND
     container_name: bucket-api
@@ -62,22 +62,9 @@ services:
     volumes:
       - ./certs:/etc/certs
       - $HOST_DATA_FOLDER:$HOST_DATA_FOLDER
-    ports:
-    #   - $HTTP_PORT:$HTTP_PORT
-      - $MQTT_PORT:$MQTT_PORT
-    restart: on-failure
-
-  bucket-ui:
-    build:
-      context: ./bucket-ui
-      args:
-        - CONFIGURATION=$BUCKET_UI_CONFIGURATION
-    container_name: bucket-ui
-    environment:
-     - NGINX_HOST=$BUCKET_UI_HOST
-     - NGINX_PORT=$BUCKET_UI_PORT
     # ports:
-    #  - $BUCKET_UI_PORT:$BUCKET_UI_PORT
+    #   - $HTTP_PORT:$HTTP_PORT
+      # - $MQTT_PORT:$MQTT_PORT
     restart: on-failure
 
   bucket-postgres:
@@ -99,9 +86,9 @@ services:
     container_name: bucket-influxdb
     volumes:
       - $HOST_DATA_FOLDER/bucket-influxdb:/var/lib/influxdb
-    ports:
-      - 8086:8086
-      - 8083:8083
+    # ports:
+    #   - 8086:8086
+    #   - 8083:8083
     environment:
       - INFLUXDB_DB=$BUCKET_INFLUXDB_DB
       - INFLUXDB_ADMIN_ENABLED=true
