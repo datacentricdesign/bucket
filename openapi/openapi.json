@@ -1,0 +1,887 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Bucket",
+    "description": "Data-Centric Design cloud API.",
+    "termsOfService": "https://dcdlab.org/terms",
+    "contact": {
+      "name": "API Support",
+      "url": "https://dcdlab.org",
+      "email": "lab@datacentricdesign.org"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://mit-license.org/"
+    },
+    "version": "0.1.5"
+  },
+  "servers": [
+    {
+      "url": "https://api.dcdlab.org/v0",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/things": {
+      "summary": "",
+      "description": "",
+      "get": {
+        "tags": ["Thing"],
+        "summary": "List",
+        "description": "Get Things of a Person.",
+        "operationId": "getThingsOfAPerson",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThingArray"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "tags": ["Thing"],
+        "summary": "Create",
+        "description": "Create a new Thing.",
+        "operationId": "createNewThing",
+        "parameters": [],
+        "requestBody": {
+          "description": "Information about a new Thing",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewThing"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thing"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Thing"],
+        "summary": "Read",
+        "description": "Get one Thing.",
+        "operationId": "getOneThingById",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thing"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "patch": {
+        "tags": ["Thing"],
+        "summary": "Update",
+        "description": "Edit one Thing.",
+        "operationId": "editThing",
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "tags": ["Thing"],
+        "summary": "Delete",
+        "description": "Delete one Thing.",
+        "operationId": "deleteOneThing",
+        "responses": {
+          "204": {
+            "description": "Delete"
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/pem": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "patch": {
+        "tags": ["Thing"],
+        "summary": "Update PEM",
+        "description": "Update the PEM file containing a public key, so that the Hub can identify a Thing as data transmitter.",
+        "operationId": "editThingPEM",
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/count": {
+      "summary": "",
+      "description": "",
+      "get": {
+        "tags": ["Thing"],
+        "summary": "Count Data Points",
+        "description": "Count the data points of owned Things.",
+        "operationId": "countDataPoints",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThingArray"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/health": {
+      "summary": "",
+      "description": "",
+      "get": {
+        "tags": ["Thing"],
+        "summary": "Things API Health",
+        "description": "Get Health status of Things API",
+        "operationId": "getAPIHealth",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/things/{thingId}/properties": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Property"],
+        "summary": "List",
+        "description": "Get Properties of a Thing.",
+        "operationId": "getProperties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyArray"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "tags": ["Property"],
+        "summary": "Create",
+        "description": "Create a Property.",
+        "operationId": "createNewProperty",
+        "parameters": [],
+        "requestBody": {
+          "description": "Information about a new Property",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProperty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/properties": {
+      "summary": "",
+      "description": "",
+      "get": {
+        "tags": ["Property"],
+        "summary": "List",
+        "description": "List all properties accessible for the authenticated person.",
+        "operationId": "getAllProperties",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyArray"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/properties/{propertyId}": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "propertyId",
+        "in": "path",
+        "description": "ID of Property to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Property"],
+        "summary": "Read",
+        "description": "Get one Property.",
+        "operationId": "getOnePropertyById",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "put": {
+        "tags": ["Property"],
+        "summary": "Update values",
+        "description": "Update values of a Property.",
+        "operationId": "updatePropertyValues",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "security": []
+      },
+      "patch": {
+        "tags": ["Property"],
+        "summary": "Update",
+        "description": "Edit one Property to change its name or description.",
+        "operationId": "editProperty",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "tags": ["Property"],
+        "summary": "Delete",
+        "description": "Delete one Property.",
+        "operationId": "deleteOneProperty",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/properties/{propertyId}/timestamps": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "propertyId",
+        "in": "path",
+        "description": "ID of Property to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "delete": {
+        "tags": ["Property"],
+        "summary": "Delete Timestamps",
+        "description": "Delete some data points of a property.",
+        "operationId": "deleteDataPoints",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/properties/{propertyId}/count": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "propertyId",
+        "in": "path",
+        "description": "ID of Property to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Property"],
+        "summary": "Count",
+        "description": "Count the data points of the property.",
+        "operationId": "countPropertyDataPoints",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/properties/{propertyId}/last": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "propertyId",
+        "in": "path",
+        "description": "ID of Property to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Property"],
+        "summary": "Last values",
+        "description": "Get the last values of the property.",
+        "operationId": "lastDataPoints",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Property"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/properties/{propertyId}/dimensions/{dimensionId}/timestamp/{timestamp}": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "propertyId",
+        "in": "path",
+        "description": "ID of Property to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "dimensionId",
+        "in": "path",
+        "description": "ID of Dimension to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "timestamp",
+        "in": "path",
+        "description": "Timestamp of the relevant values",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Property"],
+        "summary": "Download media value",
+        "description": "Get the media associated to a dimension's timestamp.",
+        "operationId": "getPropertyMediaValue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    },
+    "/things/{thingId}/properties/{propertyId}/consents": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "thingId",
+        "in": "path",
+        "description": "ID of Thing to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      {
+        "name": "propertyId",
+        "in": "path",
+        "description": "ID of Property to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "get": {
+        "tags": ["Consent"],
+        "summary": "List consents",
+        "description": "List consents granted for one Property. Only property owner can access this list.",
+        "operationId": "listConsents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentArray"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "tags": ["Consent"],
+        "summary": "Grant a consent",
+        "description": "Grant a consent for one Property. Only property owner can access this list.",
+        "operationId": "grantConsent",
+        "parameters": [],
+        "requestBody": {
+          "description": "Information about a new Consent",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewConsent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Granted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Consent"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "tags": ["Consent"],
+        "summary": "Revoke a consent",
+        "description": "Revoke a consent granted for one Property. Only property owner can access this list.",
+        "operationId": "revokeConsent",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Revoked"
+          }
+        },
+        "security": []
+      }
+    },
+    "/types": {
+      "summary": "",
+      "description": "",
+      "get": {
+        "tags": ["Property Types"],
+        "summary": "List",
+        "description": "Get Property Types.",
+        "operationId": "getPropertyTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyTypeArray"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "tags": ["Property Types"],
+        "summary": "Create",
+        "description": "Create a Property Type.",
+        "operationId": "createOnePropertyType",
+        "parameters": [],
+        "requestBody": {
+          "description": "Information about a new Property Type",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropertyType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Granted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyType"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/types/{typeId}": {
+      "summary": "",
+      "description": "",
+      "parameters": [{
+        "name": "typeId",
+        "in": "path",
+        "description": "ID of Type to use",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }],
+      "delete": {
+        "tags": ["Property Types"],
+        "summary": "Delete",
+        "description": "Delete a Property Type.",
+        "operationId": "deleteOnePropertyTypeById",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "security": []
+      }
+    },
+    "/takeout": {
+      "summary": "",
+      "description": "",
+      "get": {
+        "tags": [],
+        "summary": "Generate Takeout",
+        "description": "Generate a takeout of all own things with properties and associated data (timeseries as csv and media as files).",
+        "operationId": "generateTakeOut",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NewThing": {
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "pem": {
+            "type": "string"
+          }
+        }
+      },
+      "Thing": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "pem": {
+            "type": "string"
+          },
+          "personId": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Property"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "ThingArray": {
+        "required": [
+          "things"
+        ],
+        "properties": {
+          "things": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Thing"
+            }
+          }
+        }
+      },
+      "NewProperty": {
+        "required": [
+          "typeId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "typeId": {
+            "type": "string"
+          }
+        }
+      },
+      "Property": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/PropertyType"
+          }
+        }
+      },
+      "PropertyArray": {
+        "required": [
+          "properties"
+        ],
+        "properties": {
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Property"
+            }
+          }
+        }
+      },
+      "PropertyType": {
+
+      },
+      "PropertyTypeArray": {
+        "required": [
+          "consents"
+        ],
+        "properties": {
+          "propertyTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PropertyType"
+            }
+          }
+        }
+      },
+      "Dimension": {
+        
+      },
+      "Consent": {
+
+      },
+      "NewConsent": {
+
+      },
+      "ConsentArray": {
+        "required": [
+          "consents"
+        ],
+        "properties": {
+          "consents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Consent"
+            }
+          }
+        }
+      }
+    }
+  }
+}
