@@ -26,7 +26,9 @@
       "summary": "",
       "description": "",
       "get": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "List",
         "description": "Get Things of a Person.",
         "operationId": "getThingsOfAPerson",
@@ -46,7 +48,9 @@
         "security": []
       },
       "post": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Create",
         "description": "Create a new Thing.",
         "operationId": "createNewThing",
@@ -79,17 +83,21 @@
     "/things/{thingId}": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use.",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use.",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      }],
+      ],
       "get": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Read",
         "description": "Get one Thing.",
         "operationId": "getOneThingById",
@@ -108,7 +116,9 @@
         "security": []
       },
       "patch": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Update",
         "description": "Edit one Thing.",
         "operationId": "editThing",
@@ -120,7 +130,9 @@
         "security": []
       },
       "delete": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Delete",
         "description": "Delete one Thing.",
         "operationId": "deleteOneThing",
@@ -135,17 +147,21 @@
     "/things/{thingId}/pem": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use.",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use.",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      }],
+      ],
       "patch": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Update PEM",
         "description": "Update the PEM file containing a public key, so that the Hub can identify a Thing as data transmitter.",
         "operationId": "editThingPEM",
@@ -161,7 +177,9 @@
       "summary": "",
       "description": "",
       "get": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Count Data Points",
         "description": "Count the data points of owned Things.",
         "operationId": "countDataPoints",
@@ -184,7 +202,9 @@
       "summary": "",
       "description": "",
       "get": {
-        "tags": ["Thing"],
+        "tags": [
+          "Thing"
+        ],
         "summary": "Things API Health",
         "description": "Get Health status of Things API",
         "operationId": "getAPIHealth",
@@ -198,17 +218,21 @@
     "/things/{thingId}/properties": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use.",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use.",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      }],
+      ],
       "get": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "List",
         "description": "Get Properties of a Thing.",
         "operationId": "getProperties",
@@ -228,7 +252,9 @@
         "security": []
       },
       "post": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Create",
         "description": "Create a Property.",
         "operationId": "createNewProperty",
@@ -262,7 +288,9 @@
       "summary": "",
       "description": "",
       "get": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "List",
         "description": "List all properties accessible for the authenticated person.",
         "operationId": "getAllProperties",
@@ -285,26 +313,30 @@
     "/things/{thingId}/properties/{propertyId}": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "propertyId",
+          "in": "path",
+          "description": "ID of Property to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      },
-      {
-        "name": "propertyId",
-        "in": "path",
-        "description": "ID of Property to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      }],
+      ],
       "get": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Read",
         "description": "Get one Property.",
         "operationId": "getOnePropertyById",
@@ -324,7 +356,9 @@
         "security": []
       },
       "put": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Update values",
         "description": "Update values of a Property.",
         "operationId": "updatePropertyValues",
@@ -337,7 +371,9 @@
         "security": []
       },
       "patch": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Update",
         "description": "Edit one Property to change its name or description.",
         "operationId": "editProperty",
@@ -350,7 +386,9 @@
         "security": []
       },
       "delete": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Delete",
         "description": "Delete one Property.",
         "operationId": "deleteOneProperty",
@@ -366,26 +404,30 @@
     "/things/{thingId}/properties/{propertyId}/timestamps": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "propertyId",
+          "in": "path",
+          "description": "ID of Property to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      },
-      {
-        "name": "propertyId",
-        "in": "path",
-        "description": "ID of Property to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      }],
+      ],
       "delete": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Delete Timestamps",
         "description": "Delete some data points of a property.",
         "operationId": "deleteDataPoints",
@@ -401,26 +443,30 @@
     "/things/{thingId}/properties/{propertyId}/count": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "propertyId",
+          "in": "path",
+          "description": "ID of Property to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      },
-      {
-        "name": "propertyId",
-        "in": "path",
-        "description": "ID of Property to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      }],
+      ],
       "get": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Count",
         "description": "Count the data points of the property.",
         "operationId": "countPropertyDataPoints",
@@ -443,26 +489,30 @@
     "/things/{thingId}/properties/{propertyId}/last": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "propertyId",
+          "in": "path",
+          "description": "ID of Property to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      },
-      {
-        "name": "propertyId",
-        "in": "path",
-        "description": "ID of Property to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      }],
+      ],
       "get": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Last values",
         "description": "Get the last values of the property.",
         "operationId": "lastDataPoints",
@@ -485,44 +535,48 @@
     "/things/{thingId}/properties/{propertyId}/dimensions/{dimensionId}/timestamp/{timestamp}": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "propertyId",
+          "in": "path",
+          "description": "ID of Property to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "dimensionId",
+          "in": "path",
+          "description": "ID of Dimension to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "timestamp",
+          "in": "path",
+          "description": "Timestamp of the relevant values",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      },
-      {
-        "name": "propertyId",
-        "in": "path",
-        "description": "ID of Property to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      },
-      {
-        "name": "dimensionId",
-        "in": "path",
-        "description": "ID of Dimension to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      },
-      {
-        "name": "timestamp",
-        "in": "path",
-        "description": "Timestamp of the relevant values",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      }],
+      ],
       "get": {
-        "tags": ["Property"],
+        "tags": [
+          "Property"
+        ],
         "summary": "Download media value",
         "description": "Get the media associated to a dimension's timestamp.",
         "operationId": "getPropertyMediaValue",
@@ -538,26 +592,30 @@
     "/things/{thingId}/properties/{propertyId}/consents": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "thingId",
-        "in": "path",
-        "description": "ID of Thing to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "thingId",
+          "in": "path",
+          "description": "ID of Thing to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "propertyId",
+          "in": "path",
+          "description": "ID of Property to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      },
-      {
-        "name": "propertyId",
-        "in": "path",
-        "description": "ID of Property to use",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      }],
+      ],
       "get": {
-        "tags": ["Consent"],
+        "tags": [
+          "Consent"
+        ],
         "summary": "List consents",
         "description": "List consents granted for one Property. Only property owner can access this list.",
         "operationId": "listConsents",
@@ -577,7 +635,9 @@
         "security": []
       },
       "post": {
-        "tags": ["Consent"],
+        "tags": [
+          "Consent"
+        ],
         "summary": "Grant a consent",
         "description": "Grant a consent for one Property. Only property owner can access this list.",
         "operationId": "grantConsent",
@@ -607,7 +667,9 @@
         "security": []
       },
       "delete": {
-        "tags": ["Consent"],
+        "tags": [
+          "Consent"
+        ],
         "summary": "Revoke a consent",
         "description": "Revoke a consent granted for one Property. Only property owner can access this list.",
         "operationId": "revokeConsent",
@@ -624,7 +686,9 @@
       "summary": "",
       "description": "",
       "get": {
-        "tags": ["Property Types"],
+        "tags": [
+          "Property Types"
+        ],
         "summary": "List",
         "description": "Get Property Types.",
         "operationId": "getPropertyTypes",
@@ -644,7 +708,9 @@
         "security": []
       },
       "post": {
-        "tags": ["Property Types"],
+        "tags": [
+          "Property Types"
+        ],
         "summary": "Create",
         "description": "Create a Property Type.",
         "operationId": "createOnePropertyType",
@@ -677,17 +743,21 @@
     "/types/{typeId}": {
       "summary": "",
       "description": "",
-      "parameters": [{
-        "name": "typeId",
-        "in": "path",
-        "description": "ID of Type to use",
-        "required": true,
-        "schema": {
-          "type": "string"
+      "parameters": [
+        {
+          "name": "typeId",
+          "in": "path",
+          "description": "ID of Type to use",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
         }
-      }],
+      ],
       "delete": {
-        "tags": ["Property Types"],
+        "tags": [
+          "Property Types"
+        ],
         "summary": "Delete",
         "description": "Delete a Property Type.",
         "operationId": "deleteOnePropertyTypeById",
@@ -845,7 +915,32 @@
         }
       },
       "PropertyType": {
-
+        "required": [
+          "id",
+          "name",
+          "description",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            }
+          }
+        }
       },
       "PropertyTypeArray": {
         "required": [
@@ -861,13 +956,97 @@
         }
       },
       "Dimension": {
-        
+        "required": [
+          "id",
+          "name",
+          "description",
+          "unit",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items":{
+              "type": "string"
+            }
+          }
+        }
       },
       "Consent": {
-
+        "required": [
+          "id",
+          "subjects",
+          "actions",
+          "resources",
+          "effect"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "subjects": {
+            "type": "array",
+            "items":{
+              "type": "string"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items":{
+              "type": "string"
+            }
+          },
+          "resources": {
+            "type": "array",
+            "items":{
+              "type": "string"
+            }
+          },
+          "effect": {
+            "type": "string"
+          },
+          "conditions": {
+            "type": "object"
+          }
+        } 
       },
       "NewConsent": {
-
+        "required": [
+          "subjects",
+          "actions"
+        ],
+        "properties": {
+          "subejcts": {
+            "type": "array",
+            "items":{
+              "type": "string"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items":{
+              "type": "string"
+            }
+          }
+        }
       },
       "ConsentArray": {
         "required": [
