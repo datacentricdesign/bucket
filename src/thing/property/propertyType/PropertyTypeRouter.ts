@@ -67,7 +67,7 @@ export class PropertyTypeRouter {
     );
 
     /**
-     * @api {post} /types Delete
+     * @api {delete} /types Delete
      * @apiGroup PropertyType
      * @apiDescription Delete a Property Type by id.
      *
